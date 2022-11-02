@@ -1,0 +1,26 @@
+{
+  "name": "devnet_cli_tool",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/entropyxyz/devnet_cli_tool.git"
+  },
+  "keywords": [],
+  "author": "Jesse Abramowitz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/entropyxyz/devnet_cli_tool/issues"
+  },
+  "homepage": "https://github.com/entropyxyz/devnet_cli_tool#readme",
+  "dependencies": {
+    "inquirer": "8.0.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.2"
+  }
+}
