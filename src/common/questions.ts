@@ -1,5 +1,5 @@
 import inquirer from "inquirer";
-
+import { getWallet } from "./entropy";
 const question = [
   {
     type: "input",
@@ -15,5 +15,6 @@ export const handleMnemonic = async () => {
   }
 
   const { mnemonic } = await inquirer.prompt(question);
-  return mnemonic;
+
+  return await getWallet(mnemonic);
 };

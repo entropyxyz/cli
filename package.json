@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/entropyxyz/devnet_cli_tool#readme",
   "dependencies": {
+    "@polkadot/api": "^9.6.2",
     "dotenv": "^16.0.3",
     "inquirer": "8.0.0"
   },

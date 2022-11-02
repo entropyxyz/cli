@@ -1,6 +1,6 @@
-import {handleMnemonic} from "../../common/questions"
+import { handleMnemonic } from "../../common/questions";
 
 export const register = async () => {
-	const mnemonic = await handleMnemonic()
-	console.log({mnemonic})
-}
+  const wallet = await handleMnemonic();
+  console.log({ wallet });
+};
