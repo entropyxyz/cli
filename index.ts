@@ -1,4 +1,7 @@
-import inquirer, { ListQuestion } from 'inquirer';
+import * as dotenv from "dotenv";
+dotenv.config();
+import inquirer, { ListQuestion } from "inquirer";
+import * as flows from "./src/flows";
 
 const choices = ["Register", "Sign"];
 
@@ -14,7 +17,7 @@ const main = async () => {
   const { action } = await inquirer.prompt(intro);
   switch (action) {
     case "Register":
-      console.log("register");
+      await flows.register();
       break;
     case "Sign":
       console.log("sign");
@@ -24,4 +27,4 @@ const main = async () => {
   }
 };
 
-main()
+main();
