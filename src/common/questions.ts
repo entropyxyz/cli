@@ -1,11 +1,11 @@
 import inquirer from "inquirer";
 
-const questionMnemonic = [
+const questionSeed = [
   {
     type: "input",
-    name: "mnemonic",
-    message: "input mnemonic",
-    default: "//Alice",
+    name: "seed",
+    message: "input seed",
+    default: "0x29b55504652cedded9ce0ee1f5a25b328ae6c6e97827f84eee6315d0f44816d8",
   },
 ];
 
@@ -27,14 +27,14 @@ const questionChainEndpoint = [
   },
 ];
 
-export const handleMnemonic = async () => {
-  if (process.env.MNEMONIC) {
-    return process.env.MNEMONIC;
+export const handleSeed = async () => {
+  if (process.env.SEED) {
+    return process.env.SEED;
   }
 
-  const { mnemonic } = await inquirer.prompt(questionMnemonic);
+  const { seed } = await inquirer.prompt(questionSeed);
 
-  return mnemonic;
+  return seed;
 };
 
 export const handleThresholdEndpoints = async () => {
