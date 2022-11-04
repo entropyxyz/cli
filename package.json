@@ -25,6 +25,7 @@
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
     "inquirer": "8.0.0",
+    "ts-node": "^10.9.1",
     "x25519": "^0.1.0"
   },
   "devDependencies": {
