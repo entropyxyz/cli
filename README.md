@@ -16,6 +16,13 @@ SEED=""
 
 This will bring up a list of options 
 
+The proper flow from start it to 
+1) create and entropy account 
+2) add the created seed to the .env 
+3) fund the account
+4) register
+5) sign
+
 #### Register
 
 
