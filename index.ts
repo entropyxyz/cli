@@ -20,7 +20,7 @@ const main = async () => {
       await flows.register();
       break;
     case "Sign":
-      console.log("sign");
+      await flows.sign();
       break;
     default:
       throw new Error("invalid choice");

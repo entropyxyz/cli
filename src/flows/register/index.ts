@@ -15,8 +15,8 @@ import { mnemonicToLegacySeed } from "@polkadot/util-crypto";
 const axios = require("axios").default;
 
 export const register = async () => {
-  const mnemonic = await handleSeed();
-  const { wallet, pair } = await getWallet(mnemonic);
+  const seed = await handleSeed();
+  const { wallet, pair } = await getWallet(seed);
   const thresholdEndpoints = await handleThresholdEndpoints();
   const chainEndpoint = await handleChainEndpoint();
 
@@ -46,7 +46,7 @@ export const register = async () => {
   );
 
   const tx = api.tx.relayer.register();
-  const txResult = await sendAndWait(tx, api, wallet);
+  await sendAndWait(tx, api, wallet);
   const result = await api.query.relayer.registering(wallet.address);
   console.log({ result: result.toHuman() });
 
@@ -67,5 +67,5 @@ const sendKey = async (url: string, emsg: any) => {
       "Content-Type": "application/json",
     },
   });
-  console.log({ post_request: postRequest });
+  console.log({ post_request: postRequest.status });
 };
