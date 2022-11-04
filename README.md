@@ -20,3 +20,7 @@ This will bring up a list of options
 
 
 #### Sign
+
+#### Create Entropy account 
+
+#### Entropy Faucet

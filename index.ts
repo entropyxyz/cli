@@ -3,7 +3,7 @@ dotenv.config();
 import inquirer, { ListQuestion } from "inquirer";
 import * as flows from "./src/flows";
 
-const choices = ["Register", "Sign"];
+const choices = ["Register", "Sign", "Entropy Faucet"];
 
 const intro: ListQuestion = {
   type: "list",
@@ -21,6 +21,9 @@ const main = async () => {
       break;
     case "Sign":
       await flows.sign();
+      break;
+    case "Entropy Faucet":
+      await flows.entropyFaucet();
       break;
     default:
       throw new Error("invalid choice");
