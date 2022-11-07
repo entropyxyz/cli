@@ -1,8 +1,9 @@
 import { BigNumber, ethers } from "ethers";
 
-export const getTx = async (provider: any) => {
+export const getTx = async (provider: any, name: string) => {
+  const address = require(`./tofn/${name}/address.json`);
   // need to get address from stored tofn keys
-  const entropyAddress = "0x84abf76158Dfb35F52B754707Ebe026ebA4b11A4";
+  const entropyAddress = address.address;
   const nonce = await provider.getTransactionCount(entropyAddress);
   const feeData = await provider.getFeeData();
 
@@ -11,7 +12,7 @@ export const getTx = async (provider: any) => {
     value: BigNumber.from("1"),
     chainId: provider.network.chainId,
     nonce,
-	data: ethers.utils.hexlify(ethers.utils.toUtf8Bytes("Created On Entropy")),
+    data: ethers.utils.hexlify(ethers.utils.toUtf8Bytes("Created On Entropy")),
     type: 2,
   };
 
@@ -23,9 +24,9 @@ export const getTx = async (provider: any) => {
     tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas;
   }
 
-  const gasLimit = await provider.estimateGas(tx)
+  const gasLimit = await provider.estimateGas(tx);
 
-  tx.gasLimit = gasLimit
+  tx.gasLimit = gasLimit;
 
   return tx;
 };

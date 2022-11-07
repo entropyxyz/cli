@@ -10,6 +10,7 @@
 ENDPOINTS_THRESHOLD=[""]
 ENDPOINT_CHAIN=""
 SEED=""
+NAME=""
 ```
 
 * ```npm run start```
