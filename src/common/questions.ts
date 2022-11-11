@@ -69,9 +69,9 @@ export const handleChainEndpoint = async () => {
 
 export const handleKeyPath = async () => {
   if (process.env.NAME) {
-    return process.env.NAME;
+    return process.env.NAME.toLowerCase();
   }
 
   const { name } = await inquirer.prompt(questionName);
-  return name;
+  return name.toLowerCase();
 };
