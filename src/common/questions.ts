@@ -5,7 +5,8 @@ const questionSeed = [
     type: "input",
     name: "seed",
     message: "input seed",
-    default: "0x29b55504652cedded9ce0ee1f5a25b328ae6c6e97827f84eee6315d0f44816d8",
+    default:
+      "0x29b55504652cedded9ce0ee1f5a25b328ae6c6e97827f84eee6315d0f44816d8",
   },
 ];
 
@@ -23,7 +24,16 @@ const questionChainEndpoint = [
     type: "input",
     name: "chainEndpoints",
     message: "input mnemonic",
-    default: 'ws://127.0.0.1:9944',
+    default: "ws://127.0.0.1:9944",
+  },
+];
+
+const questionName = [
+  {
+    type: "input",
+    name: "name",
+    message: "input name",
+    default: "default",
   },
 ];
 
@@ -54,5 +64,14 @@ export const handleChainEndpoint = async () => {
   }
 
   const { chainEndpoint } = await inquirer.prompt(questionChainEndpoint);
-  return chainEndpoint
+  return chainEndpoint;
+};
+
+export const handleKeyPath = async () => {
+  if (process.env.NAME) {
+    return process.env.NAME;
+  }
+
+  const { name } = await inquirer.prompt(questionName);
+  return name;
 };

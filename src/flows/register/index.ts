@@ -2,6 +2,7 @@ import {
   handleSeed,
   handleThresholdEndpoints,
   handleChainEndpoint,
+  handleKeyPath,
 } from "../../common/questions";
 import {
   getWallet,
@@ -10,8 +11,8 @@ import {
   sendAndWait,
 } from "../../common/entropy";
 import { readKey } from "../../common/utils";
-import { encrypt_and_sign, to_hex } from "x25519";
-import { mnemonicToLegacySeed } from "@polkadot/util-crypto";
+import { encrypt_and_sign } from "x25519";
+
 const axios = require("axios").default;
 
 export const register = async () => {
@@ -19,10 +20,9 @@ export const register = async () => {
   const { wallet, pair } = await getWallet(seed);
   const thresholdEndpoints = await handleThresholdEndpoints();
   const chainEndpoint = await handleChainEndpoint();
-
-  const threshold_key = readKey("tofn/1-of-2/0");
-  const threshold_key_bob = readKey("tofn/1-of-2/1");
-
+  const name = await handleKeyPath();
+  const threshold_key = readKey(`tofn/${name}/0`);
+  const threshold_key_bob = readKey(`tofn/${name}/1`);
   const api = await getApi(chainEndpoint);
 
   const server_dh_key = await getServerDHKey(
@@ -56,12 +56,10 @@ export const register = async () => {
   const isRegistered = await api.query.relayer.registered(wallet.address);
   console.log({ isRegistered: isRegistered.toHuman() });
 
-
   process.exit();
 };
 
 const sendKey = async (url: string, emsg: any) => {
-   console.log({url})
   const postRequest = await axios.post(`${url}/user/new`, emsg, {
     headers: {
       "Content-Type": "application/json",
