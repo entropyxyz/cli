@@ -7,7 +7,6 @@
 * you can add a .env file or input the info when prompted by the cli 
 
 ```
-ENDPOINTS_THRESHOLD=[""]
 ENDPOINT_CHAIN=""
 SEED=""
 NAME=""
@@ -32,3 +31,5 @@ The proper flow from start it to
 #### Create Entropy account 
 
 #### Entropy Faucet
+
+#### Give Zaps

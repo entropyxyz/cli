@@ -47,17 +47,6 @@ export const handleSeed = async () => {
   return seed;
 };
 
-export const handleThresholdEndpoints = async () => {
-  if (process.env.ENDPOINTS_THRESHOLD) {
-    return JSON.parse(process.env.ENDPOINTS_THRESHOLD);
-  }
-
-  const { thresholdEndpoints } = await inquirer.prompt(
-    questionThresholdEndpoints
-  );
-  return JSON.parse(thresholdEndpoints);
-};
-
 export const handleChainEndpoint = async () => {
   if (process.env.ENDPOINT_CHAIN) {
     return process.env.ENDPOINT_CHAIN;
