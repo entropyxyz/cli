@@ -1,8 +1,8 @@
 import { BigNumber, ethers } from "ethers";
 
 export const getTx = async (provider: any, name: string) => {
-  const address = require(`./tofn/${name.toLowerCase()}/address.json`);
-  // need to get address from stored tofn keys
+  const address = require(`./keyshares/${name.toLowerCase()}/address.json`);
+  // need to get address from stored keys
   const entropyAddress = address.address;
   const nonce = await provider.getTransactionCount(entropyAddress);
   const feeData = await provider.getFeeData();
