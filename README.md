@@ -1,34 +1,38 @@
-# Devenet CLI-TOOL 
+# Dev net CLI-TOOL
 
-### Running 
+## Getting Started
 
-* ``` npm install```
+### Install
 
-* you can add a .env file or input the info when prompted by the cli 
+- ` npm install`
 
-```
+- you can add a `.env` file or input env values when prompted by the cli
+
+```bash
 ENDPOINT_CHAIN=""
 SEED=""
 NAME=""
 ```
 
-* ```npm run start```
+### Run Cli
 
-This will bring up a list of options 
+- `npm run start`
 
-The proper flow from start it to 
-1) create and entropy account 
-2) add the created seed to the .env 
-3) fund the account
-4) register
-5) sign
+This will bring up a list of options
+
+The proper flow from start it to
+
+1. create and entropy account
+2. add the created seed to the `.env`
+3. fund the account
+4. register
+5. sign
 
 #### Register
 
-
 #### Sign
 
-#### Create Entropy account 
+#### Create Entropy account
 
 #### Entropy Faucet
 
