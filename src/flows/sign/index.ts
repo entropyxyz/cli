@@ -18,7 +18,7 @@ export const sign = async () => {
   try {
     const tx_send = await provider.sendTransaction(signed_tx);
     console.log("transaction sent successfully", { tx_send });
-  } catch (e: any) {
+  } catch (e) {
     console.log({ failedTransaction: e.transaction, e });
   }
   // send signed tx tp chain

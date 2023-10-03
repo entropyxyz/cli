@@ -1,6 +1,19 @@
 import { BigNumber, ethers } from "ethers";
+type Network = {
+  chainId: number;
+}
+type Provider = {
+  getTransactionCount: (address: string) => Promise<number>;
+  estimateGas: (tx: ethers.utils.UnsignedTransaction) => Promise<number>;
+  getFeeData: () => Promise<{
+    maxFeePerGas?: BigNumber;
+    maxPriorityFeePerGas?: BigNumber;
+  }>
+  network: Network
+}
 
-export const getTx = async (provider: any, name: string) => {
+export const getTx = async (provider: Provider, name: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const address = require(`./tofn/${name.toLowerCase()}/address.json`);
   // need to get address from stored tofn keys
   const entropyAddress = address.address;

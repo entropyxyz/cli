@@ -10,6 +10,7 @@ const questionSeed = [
   },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const questionThresholdEndpoints = [
   {
     type: "input",
