@@ -18,13 +18,13 @@ const question = [
 ];
 
 export const giveZaps = async () => {
-  const seed = await handleSeed();
-  const { amount, account } = await inquirer.prompt(question);
+  // const seed = await handleSeed();
+  // const { amount, account } = await inquirer.prompt(question);
 
-  const entropy: Entropy = await Entropy.setup(seed);
-  const tx = await entropy.substrate.api.tx.freeTx.giveZaps(account, amount);
-  const sudoCall = entropy.substrate.api.tx.sudo.sudo(tx);
-  await entropy.substrate.sendAndWait(sudoCall, false);
-  console.log(`${account} given ${amount} zaps`);
+  // const entropy: Entropy = await Entropy.setup(seed);
+  // const tx = await entropy.substrate.api.tx.freeTx.giveZaps(account, amount);
+  // const sudoCall = entropy.substrate.api.tx.sudo.sudo(tx);
+  // await entropy.substrate.sendAndWait(sudoCall, false);
+  // console.log(`${account} given ${amount} zaps`);
   process.exit();
 };
