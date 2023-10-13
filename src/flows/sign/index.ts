@@ -1,11 +1,12 @@
 import { ethers } from "ethers";
-import { handleSeed, handleKeyPath } from "../../common/questions";
+import { handleSeed, handleChainEndpoint } from "../../common/questions";
 import { getTx } from "../../../tx";
 import Entropy from "@entropyxyz/entropy-js";
 
 export const sign = async () => {
   const seed = await handleSeed();
-  const entropy = new Entropy({ seed });
+  const endpoint = await handleChainEndpoint()
+  const entropy = new Entropy({ seed, endpoint });
   await entropy.ready
   let address = entropy.keys?.wallet.address
   console.log({ address });
