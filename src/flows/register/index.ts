@@ -1,9 +1,10 @@
-import { handleSeed } from "../../common/questions";
+import { handleChainEndpoint, handleSeed } from "../../common/questions";
 import Entropy from "@entropyxyz/entropy-js";
 
 export const register = async () => {
   const seed = await handleSeed();
-  const entropy = new Entropy({ seed });
+  const endpoint = await handleChainEndpoint()
+  const entropy = new Entropy({ seed, endpoint });
   await entropy.ready
   let address = entropy.keys?.wallet.address
   if (address == undefined) {

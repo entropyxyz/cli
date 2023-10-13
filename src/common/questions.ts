@@ -23,7 +23,7 @@ const questionChainEndpoint = [
   {
     type: "input",
     name: "chainEndpoints",
-    message: "input mnemonic",
+    message: "input endpoint",
     default: "ws://127.0.0.1:9944",
   },
 ];

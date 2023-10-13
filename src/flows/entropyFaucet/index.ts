@@ -2,6 +2,7 @@ import { handleSeed } from "../../common/questions";
 import Entropy from "@entropyxyz/entropy-js";
 
 export const entropyFaucet = async () => {
+  throw new Error("TODO")
   // const seed = await handleSeed();
   // const entropy = await Entropy.setup(seed);
   // const entropySudo = await Entropy.setup(
