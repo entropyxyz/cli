@@ -1,5 +1,4 @@
-import { handleSeed, handleKeyPath } from "../../common/questions";
-import { readKey } from "../../common/utils";
+import { handleSeed } from "../../common/questions";
 import Entropy from "@entropyxyz/entropy-js";
 
 export const register = async () => {

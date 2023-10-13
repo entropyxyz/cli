@@ -18,6 +18,7 @@ const question = [
 ];
 
 export const giveZaps = async () => {
+  throw new Error("TODO")
   // const seed = await handleSeed();
   // const { amount, account } = await inquirer.prompt(question);
 
