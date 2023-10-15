@@ -5,6 +5,7 @@ import * as flows from "./src/flows";
 const choices = [
   "Transfer",
   "Register",
+  "Set a Program",
   "Sign",
   "Entropy Faucet",
   "New Entropy Wallet",
@@ -21,7 +22,7 @@ const intro: ListQuestion = {
 
 
 
-const main = async () => {
+export const main = async () => {
   console.log(ascii)
 
   const { action } = await inquirer.prompt(intro);
@@ -32,6 +33,9 @@ const main = async () => {
     case "Register":
       await flows.register();
       break;
+    case "Set Program":
+        await flows.setProgram();
+        break;
     case "Sign":
       await flows.sign();
       break;

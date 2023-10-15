@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { handleChainEndpoint, handleFundingSeed, handleUserSeed } from "./questions";
 import Entropy from "@entropyxyz/entropy-js";
+import inquirer from "inquirer";
 
 
 export const readKey = (path: string) =>  {
@@ -18,4 +19,17 @@ export const readKey = (path: string) =>  {
 	await userEntropy.ready;
 	return userEntropy.keys?.wallet.address;
   };
+
+ export const returnToMain = async() =>  {
+    const response = await inquirer.prompt([
+        {
+            type: "confirm",
+            name: "returnToMain",
+            message: "Return to main menu?",
+            default: true,
+        },
+    ]);
+
+    return response.returnToMain;
+};
   

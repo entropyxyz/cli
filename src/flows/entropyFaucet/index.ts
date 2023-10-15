@@ -2,6 +2,8 @@ import { recoverAddress } from "ethers/lib/utils";
 import { handleChainEndpoint, handleFundingSeed, handleUserSeed } from "../../common/questions";
 import { getUserAddress } from "../../common/utils";
 import Entropy from "@entropyxyz/entropy-js";
+import { main } from "../../..";
+import { returnToMain } from "../../common/utils";
 
 export const entropyFaucet = async (recipientAddress: string | null | undefined = null) => {
   const endpoint = await handleChainEndpoint();
@@ -38,4 +40,11 @@ export const entropyFaucet = async (recipientAddress: string | null | undefined 
       process.exit();
     }
   });
-};
+  if (await returnToMain()) {
+    main();
+} else {
+    console.log("Goodbye!");
+    process.exit();
+}
+}
+

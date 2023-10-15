@@ -1,31 +1,60 @@
-import { handleUserSeed } from "../../common/questions";
 import Entropy from "@entropyxyz/entropy-js";
 import inquirer from "inquirer";
-
-const question = [
-  {
-    type: "input",
-    name: "amount",
-    message: "input amount of free zaps to give",
-    default: "1",
-  },
-  {
-    type: "input",
-    name: "account",
-    message: "input account to give free zaps to",
-    default: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
-  },
-];
+import { main } from "../../..";
+import { readFileSync } from "fs";
+import { hexToU8a } from '@polkadot/util';
+import { returnToMain } from "../../common/utils";
+import { handleUserSeed, handleFundingSeed, handleChainEndpoint } from "../../common/questions";
+import { getUserAddress } from "../../common/utils";
 
 export const giveZaps = async () => {
-  throw new Error("TODO")
-  // const seed = await handleSeed();
-  // const { amount, account } = await inquirer.prompt(question);
+  const seed = await handleUserSeed();
+  const endpoint = await handleChainEndpoint();
+  const entropy = new Entropy({ seed, endpoint });
+  const userAddress = await getUserAddress()
+  const address = entropy.keys?.wallet.address;
 
-  // const entropy: Entropy = await Entropy.setup(seed);
-  // const tx = await entropy.substrate.api.tx.freeTx.giveZaps(account, amount);
-  // const sudoCall = entropy.substrate.api.tx.sudo.sudo(tx);
-  // await entropy.substrate.sendAndWait(sudoCall, false);
-  // console.log(`${account} given ${amount} zaps`);
-  process.exit();
+  await entropy.ready;
+
+  if (!entropy.keys) {
+    throw new Error("Keys are undefined");
+  }
+
+  const actionChoice = await inquirer.prompt([
+    {
+      type: "list",
+      name: "action",
+      message: "Do you want to set or get the program?",
+      choices: ["Set", "Get"],
+    },
+  ]);
+
+  if (actionChoice.action === "Set") {
+    const answers = await inquirer.prompt([
+      {
+        type: "input",
+        name: "programPath",
+        message: "Please provide the path to your program file:",
+        validate: input => {
+          if (input) return true;
+          else return "A valid path to a program file is required!";
+        },
+      },
+    ]);
+
+    try {
+      const userProgram: any = readFileSync(answers.programPath);
+      await entropy.programs.set(userProgram);
+      console.log("Program set successfully.");
+    } catch (error: any) {
+      console.error("Error:", error.message);
+    }
+
+  } else if (actionChoice.action === "Get") {
+ 
+      console.log(userAddress)
+      const fetchedProgram: ArrayBuffer = await entropy.programs.get(userAddress);
+      console.log("Retrieved program:", fetchedProgram);
+    
+  }
 };
