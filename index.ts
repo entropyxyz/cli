@@ -3,13 +3,15 @@ import { ascii } from "./src/common/ascii";
 import * as flows from "./src/flows";
 
 const choices = [
-  "Transfer",
+  "Entropy Faucet",
+  "Balance",
   "Register",
   "Programs",
   "Sign",
-  "Entropy Faucet",
-  "New Entropy Wallet",
+  "Transfer",
   "Give Zaps",
+  "New Entropy Wallet",
+  "Exit"
 ];
 
 const intro: ListQuestion = {
@@ -26,9 +28,14 @@ export const main = async () => {
 
   const { action } = await inquirer.prompt(intro);
   switch (action) {
-    case "Transfer":
-      await flows.entropyTransfer();
+
+    case "Entropy Faucet":
+      await flows.entropyFaucet();
       return;
+
+    case "Balance":
+        await flows.balance();
+        return;
       
     case "Register":
       await flows.register();
@@ -42,18 +49,20 @@ export const main = async () => {
       await flows.sign();
       return;
       
-    case "Entropy Faucet":
-      await flows.entropyFaucet();
-      return;
-      
-    case "New Entropy Wallet":
-      await flows.newWallet();
-      return;
+    case "Transfer":
+        await flows.entropyTransfer();
+        return;
       
     case "Give Zaps":
       await flows.giveZaps();
     return;
 
+    case "New Entropy Wallet":
+      await flows.newWallet();
+      return;
+
+    case "Exit":
+      process.exit()
     default:
       console.warn(`Received an unexpected action: "${action}"`);
       return;

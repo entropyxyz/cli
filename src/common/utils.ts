@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { handleChainEndpoint, handleFundingSeed, handleUserSeed } from "./questions";
 import Entropy from "@entropyxyz/entropy-js";
+import { decodeAddress, encodeAddress } from '@polkadot/keyring'
+import { hexToU8a, isHex } from '@polkadot/util'
 import inquirer from "inquirer";
 
 
@@ -32,4 +34,14 @@ export const readKey = (path: string) =>  {
 
     return response.returnToMain;
 };
-  
+
+
+export function isValidSubstrateAddress (address: any) {
+  try {
+    encodeAddress(isHex(address) ? hexToU8a(address) : decodeAddress(address))
+
+    return true
+  } catch (error) {
+    return false
+  }
+}

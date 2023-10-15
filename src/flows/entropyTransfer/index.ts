@@ -1,43 +1,47 @@
-import {
-  handleUserSeed,
-  handleChainEndpoint,
-  handleFundingSeed,
-} from "../../common/questions";
+import { handleChainEndpoint, handleUserSeed } from "../../common/questions";
 import Entropy from "@entropyxyz/entropy-js";
-import { getUserAddress } from "../../common/utils";
-import { main } from "../../../index";
+import inquirer from "inquirer";
+import { main } from "../../../index";  
 import { returnToMain } from "../../common/utils";
 
+const question = [
+  {
+    type: "input",
+    name: "amount",
+    message: "Input amount to transfer:",
+    default: "1",
+  },
+  {
+    type: "input",
+    name: "recipientAddress",
+    message: "Input recipient's address:",
+    default: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+  },
+];
 
 export const entropyTransfer = async () => {
-  const recipientAddress = await getUserAddress();
-  const seed = await handleFundingSeed();
+  const seed = await handleUserSeed();
   const endpoint = await handleChainEndpoint();
-  const entropy = new Entropy({ seed, endpoint });
-
+  const entropy: Entropy = new Entropy({ seed, endpoint });
   await entropy.ready;
+
+  const { amount, recipientAddress } = await inquirer.prompt(question);
 
   if (!entropy.keys) {
     throw new Error("Keys are undefined");
   }
 
-  const address = entropy.keys.wallet.address;
-  console.log("ADDRESS", address);
-  const amount = "10000000000000000";
   const tx = entropy.substrate.tx.balances.transfer(recipientAddress, amount);
-
-  const unsubscribe = await tx.signAndSend(
-    entropy.keys.wallet,
-    async ({ status }) => {  
-      if (status.isInBlock || status.isFinalized) {
-        console.log(address, "funded");
   
-        if (await returnToMain()) {
-          main();
+  await tx.signAndSend(entropy.keys.wallet, async ({ status }) => {
+    if (status.isInBlock || status.isFinalized) {
+      console.log(`Sent ${amount} to ${recipientAddress}`);
+      
+      if (await returnToMain()) {
+        main();
       } else {
-          process.exit();
-      }
+        process.exit();
       }
     }
-  );
-  }  
+  });
+};

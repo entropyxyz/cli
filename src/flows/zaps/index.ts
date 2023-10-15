@@ -1,7 +1,7 @@
 import { handleChainEndpoint, handleUserSeed } from "../../common/questions";
 import Entropy from "@entropyxyz/entropy-js";
 import inquirer from "inquirer";
-import { main } from "../../../index";  // If you wish to return to the main menu
+import { main } from "../../../index";  
 import { returnToMain } from "../../common/utils";
 
 const question = [
@@ -34,7 +34,7 @@ export const giveZaps = async () => {
   }
 
   const tx = entropy.substrate.tx.freeTx.giveZaps(account, amount);
-  const unsubscribe = await tx.signAndSend(
+  await tx.signAndSend(
     entropy.keys.wallet,
     async ({ status }) => {
       if (status.isInBlock || status.isFinalized) {

@@ -1,49 +1,41 @@
-import { recoverAddress } from "ethers/lib/utils";
-import { handleChainEndpoint, handleFundingSeed, handleUserSeed } from "../../common/questions";
-import { getUserAddress } from "../../common/utils";
+import {
+  handleUserSeed,
+  handleChainEndpoint,
+  handleFundingSeed,
+} from "../../common/questions";
 import Entropy from "@entropyxyz/entropy-js";
-import { main } from "../../..";
+import { getUserAddress } from "../../common/utils";
+import { main } from "../../../index";
 import { returnToMain } from "../../common/utils";
 
-export const entropyFaucet = async (recipientAddress: string | null | undefined = null) => {
+
+export const entropyFaucet = async () => {
+  const recipientAddress = await getUserAddress();
+  const AliceSeed = "0xe5be9a5092b81bca64be81d212e7f2f9eba183bb7a90954f7b76361f6edb5c0a"
   const endpoint = await handleChainEndpoint();
+  const entropy = new Entropy({ seed: AliceSeed, endpoint });
 
-  if (!recipientAddress) {
-    recipientAddress = await getUserAddress();
-    if (!recipientAddress) {
-      throw new Error("Failed to retrieve the recipient address.");
-    }
-  }
-
-  const seed = await handleFundingSeed();
-  const entropy = new Entropy({seed, endpoint});
   await entropy.ready;
 
-  console.log("FUNDINGADDRESS:", entropy.keys?.wallet.address)
-  console.log("RECIPIENT ADDRESS", recipientAddress)
-
   if (!entropy.keys) {
-    throw new Error("No keys found in the entropy object.");
+    throw new Error("Keys are undefined");
   }
 
-  const funderAddress = entropy.keys.wallet.address;
-  if (!funderAddress) {
-    throw new Error("Unable to extract address from funding seed.");
-  }
+  const amount = "10000000000000000";
+  const tx = entropy.substrate.tx.balances.transfer(recipientAddress, amount);
 
-  const amountToFund = "100000000"; 
-  const tx = entropy.substrate.tx.balances.forceSetBalance(recipientAddress, amountToFund);
-
-  await tx.signAndSend(entropy.keys.wallet, ({ status }) => { 
-    if (status.isInBlock || status.isFinalized) {
-      console.log(recipientAddress, "funded");
-      process.exit();
+  await tx.signAndSend(
+    entropy.keys.wallet,
+    async ({ status }) => {  
+      if (status.isInBlock || status.isFinalized) {
+        console.log(recipientAddress, "funded");
+  
+        if (await returnToMain()) {
+          main();
+      } else {
+          process.exit();
+      }
+      }
     }
-  });
-  if (await returnToMain()) {
-    main();
-} else {
-    process.exit();
-}
-}
-
+  );
+  }  
