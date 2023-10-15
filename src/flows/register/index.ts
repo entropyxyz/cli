@@ -21,7 +21,10 @@ export const register = async () => {
 
 
     const isRegistered = await entropy.registrationManager.checkRegistrationStatus(address);
-  
+    const registeredQuery = await entropy.isRegistered(address);
+
+    
+    console.log("is registered", JSON.stringify(registeredQuery))
     console.log('Registration status:', isRegistered);
 
 

@@ -9,12 +9,13 @@ import Entropy from "@entropyxyz/entropy-js";
 import { getUserAddress } from "../../common/utils";
 import { hexToU8a } from '@polkadot/util';
 import { main } from "../../../index";
+import { buf2hex } from "../../common/utils";
 
 export const setProgram = async () => {
   const seed = await handleUserSeed();
   const endpoint = await handleChainEndpoint();
   const entropy = new Entropy({ seed, endpoint });
-  const userAddress = await getUserAddress()
+  const userAddress = await getUserAddress();
   const address = entropy.keys?.wallet.address;
 
   await entropy.ready;
@@ -51,18 +52,28 @@ export const setProgram = async () => {
         await entropy.programs.set(userProgram);
         console.log("Program set successfully.");
       } catch (error: any) {
-        console.error("Error:", error.message);
+        console.error("Error setting program:", error.message);
       }
       break;
       
     case "Get":
       console.log(userAddress);
-      const fetchedProgram: ArrayBuffer = await entropy.programs.get(userAddress);
-      console.log("Retrieved program:", fetchedProgram);
+      const fetchedProgram: ArrayBuffer = await entropy.programs.get(entropy.keys?.wallet.address);
+      const processedProgram = preprocessAfterGet(fetchedProgram);
+      const processedProgramHex = buf2hex(processedProgram);
+      console.log('Retrieved program (hex):', processedProgramHex);
       break;
       
     case "Exit to Main Menu": 
       main();
       break;
   }
+};
+
+const preprocessAfterGet = (fetchedProgram: ArrayBuffer): ArrayBuffer => {
+  const uint8View = new Uint8Array(fetchedProgram);
+
+  const slicedView = uint8View.slice(1);
+
+  return slicedView.buffer;
 };
