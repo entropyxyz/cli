@@ -1,60 +1,51 @@
+import { handleChainEndpoint, handleUserSeed } from "../../common/questions";
 import Entropy from "@entropyxyz/entropy-js";
 import inquirer from "inquirer";
-import { main } from "../../..";
-import { readFileSync } from "fs";
-import { hexToU8a } from '@polkadot/util';
+import { main } from "../../../index";  // If you wish to return to the main menu
 import { returnToMain } from "../../common/utils";
-import { handleUserSeed, handleFundingSeed, handleChainEndpoint } from "../../common/questions";
-import { getUserAddress } from "../../common/utils";
+
+const question = [
+  {
+    type: "input",
+    name: "amount",
+    message: "input amount of free zaps to give",
+    default: "1",
+  },
+  {
+    type: "input",
+    name: "account",
+    message: "input account to give free zaps to",
+    default: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+  },
+];
 
 export const giveZaps = async () => {
   const seed = await handleUserSeed();
   const endpoint = await handleChainEndpoint();
-  const entropy = new Entropy({ seed, endpoint });
-  const userAddress = await getUserAddress()
-  const address = entropy.keys?.wallet.address;
-
+  const entropy: Entropy = new Entropy({ seed, endpoint });
   await entropy.ready;
+
+  const { amount, account } = await inquirer.prompt(question);
+
+
 
   if (!entropy.keys) {
     throw new Error("Keys are undefined");
   }
 
-  const actionChoice = await inquirer.prompt([
-    {
-      type: "list",
-      name: "action",
-      message: "Do you want to set or get the program?",
-      choices: ["Set", "Get"],
-    },
-  ]);
-
-  if (actionChoice.action === "Set") {
-    const answers = await inquirer.prompt([
-      {
-        type: "input",
-        name: "programPath",
-        message: "Please provide the path to your program file:",
-        validate: input => {
-          if (input) return true;
-          else return "A valid path to a program file is required!";
-        },
-      },
-    ]);
-
-    try {
-      const userProgram: any = readFileSync(answers.programPath);
-      await entropy.programs.set(userProgram);
-      console.log("Program set successfully.");
-    } catch (error: any) {
-      console.error("Error:", error.message);
+  const tx = entropy.substrate.tx.freeTx.giveZaps(account, amount);
+  const unsubscribe = await tx.signAndSend(
+    entropy.keys.wallet,
+    async ({ status }) => {
+      if (status.isInBlock || status.isFinalized) {
+        console.log(`${account} given ${amount} zaps`);
+        
+        if (await returnToMain()) {
+          main();
+        } else {
+          process.exit();
+        }
+      }
     }
-
-  } else if (actionChoice.action === "Get") {
- 
-      console.log(userAddress)
-      const fetchedProgram: ArrayBuffer = await entropy.programs.get(userAddress);
-      console.log("Retrieved program:", fetchedProgram);
-    
-  }
+  );
 };

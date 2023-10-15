@@ -15,7 +15,6 @@ export const newWallet = async () => {
   if (await returnToMain()) {
     main();
 } else {
-    console.log("Goodbye!");
     process.exit();
 }
 };

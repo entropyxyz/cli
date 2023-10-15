@@ -4,14 +4,17 @@ import {
   handleChainEndpoint,
   handleFundingSeed,
 } from "../../common/questions";
+import { readFileSync } from "fs";
 import Entropy from "@entropyxyz/entropy-js";
 import { getUserAddress } from "../../common/utils";
 import { hexToU8a } from '@polkadot/util';
+import { main } from "../../../index";
 
 export const setProgram = async () => {
   const seed = await handleUserSeed();
   const endpoint = await handleChainEndpoint();
   const entropy = new Entropy({ seed, endpoint });
+  const userAddress = await getUserAddress()
   const address = entropy.keys?.wallet.address;
 
   await entropy.ready;
@@ -25,35 +28,41 @@ export const setProgram = async () => {
       type: "list",
       name: "action",
       message: "Do you want to set or get the program?",
-      choices: ["Set", "Get"],
+      choices: ["Set", "Get", "Exit to Main Menu"], 
     },
   ]);
 
-  if (actionChoice.action === "Set") {
-    const answers = await inquirer.prompt([
-      {
-        type: "input",
-        name: "bytecode",
-        message: "Please paste your bytecode:",
-        validate: input => {
-          if (input && input.startsWith("0x")) return true;
-          else return "A valid bytecode in hex format (starting with 0x) is required!";
+  switch (actionChoice.action) {
+    case "Set":
+      const answers = await inquirer.prompt([
+        {
+          type: "input",
+          name: "programPath",
+          message: "Please provide the path to your program file:",
+          validate: input => {
+            if (input) return true;
+            else return "A valid path to a program file is required!";
+          },
         },
-      },
-    ]);
+      ]);
 
-    const userProgram: Uint8Array = hexToU8a(answers.bytecode);
-    console.log("address", address);
-    await entropy.programs.set(userProgram.buffer);
-    console.log("Program set successfully.");
-  } else if (actionChoice.action === "Get") {
-    try {
-      const fetchedProgram: ArrayBuffer = await entropy.programs.get(address);
+      try {
+        const userProgram: any = readFileSync(answers.programPath);
+        await entropy.programs.set(userProgram);
+        console.log("Program set successfully.");
+      } catch (error: any) {
+        console.error("Error:", error.message);
+      }
+      break;
+      
+    case "Get":
+      console.log(userAddress);
+      const fetchedProgram: ArrayBuffer = await entropy.programs.get(userAddress);
       console.log("Retrieved program:", fetchedProgram);
-    } catch (error: any) {
-      console.error("Error:", error.message);
-    }
+      break;
+      
+    case "Exit to Main Menu": 
+      main();
+      break;
   }
 };
-
-

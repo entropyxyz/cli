@@ -43,7 +43,6 @@ export const entropyFaucet = async (recipientAddress: string | null | undefined 
   if (await returnToMain()) {
     main();
 } else {
-    console.log("Goodbye!");
     process.exit();
 }
 }

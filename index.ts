@@ -5,7 +5,7 @@ import * as flows from "./src/flows";
 const choices = [
   "Transfer",
   "Register",
-  "Set a Program",
+  "Programs",
   "Sign",
   "Entropy Faucet",
   "New Entropy Wallet",
@@ -20,36 +20,43 @@ const intro: ListQuestion = {
   choices: choices,
 };
 
-
-
 export const main = async () => {
-  console.log(ascii)
+  console.log(ascii);
+
 
   const { action } = await inquirer.prompt(intro);
   switch (action) {
     case "Transfer":
       await flows.entropyTransfer();
-      break;
+      return;
+      
     case "Register":
       await flows.register();
-      break;
-    case "Set Program":
-        await flows.setProgram();
-        break;
+      return;
+      
+    case "Programs":
+      await flows.setProgram();
+      return;
+      
     case "Sign":
       await flows.sign();
-      break;
+      return;
+      
     case "Entropy Faucet":
       await flows.entropyFaucet();
-      break;
+      return;
+      
     case "New Entropy Wallet":
       await flows.newWallet();
-      break;
+      return;
+      
     case "Give Zaps":
       await flows.giveZaps();
-      break;
+    return;
+
     default:
-      throw new Error("invalid choice");
+      console.warn(`Received an unexpected action: "${action}"`);
+      return;
   }
 };
 
