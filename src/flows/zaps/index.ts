@@ -1,4 +1,4 @@
-import { handleSeed } from "../../common/questions";
+import { handleUserSeed } from "../../common/questions";
 import Entropy from "@entropyxyz/entropy-js";
 import inquirer from "inquirer";
 

@@ -1,22 +1,41 @@
-import { handleSeed } from "../../common/questions";
+import { recoverAddress } from "ethers/lib/utils";
+import { handleChainEndpoint, handleFundingSeed, handleUserSeed } from "../../common/questions";
+import { getUserAddress } from "../../common/utils";
 import Entropy from "@entropyxyz/entropy-js";
 
-export const entropyFaucet = async () => {
-  throw new Error("TODO")
-  // const seed = await handleSeed();
-  // const entropy = await Entropy.setup(seed);
-  // const entropySudo = await Entropy.setup(
-  //   "0xe5be9a5092b81bca64be81d212e7f2f9eba183bb7a90954f7b76361f6edb5c0a"
-  // ); // Alice key
-  // const address = entropy.substrate.signer.wallet.address;
-  // const tx = await entropySudo.substrate.api.tx.sudo.sudo(
-  //   entropySudo.substrate.api.tx.balances.setBalance(
-  //     address,
-  //     "10000000000000000",
-  //     "0"
-  //   )
-  // );
-  // await entropySudo.substrate.sendAndWait(tx, false);
-  // console.log(address, "funded");
-  process.exit();
+export const entropyFaucet = async (recipientAddress: string | null | undefined = null) => {
+  const endpoint = await handleChainEndpoint();
+
+  if (!recipientAddress) {
+    recipientAddress = await getUserAddress();
+    if (!recipientAddress) {
+      throw new Error("Failed to retrieve the recipient address.");
+    }
+  }
+
+  const seed = await handleFundingSeed();
+  const entropy = new Entropy({seed, endpoint});
+  await entropy.ready;
+
+  console.log("FUNDINGADDRESS:", entropy.keys?.wallet.address)
+  console.log("RECIPIENT ADDRESS", recipientAddress)
+
+  if (!entropy.keys) {
+    throw new Error("No keys found in the entropy object.");
+  }
+
+  const funderAddress = entropy.keys.wallet.address;
+  if (!funderAddress) {
+    throw new Error("Unable to extract address from funding seed.");
+  }
+
+  const amountToFund = "100000000"; 
+  const tx = entropy.substrate.tx.balances.forceSetBalance(recipientAddress, amountToFund);
+
+  await tx.signAndSend(entropy.keys.wallet, ({ status }) => { 
+    if (status.isInBlock || status.isFinalized) {
+      console.log(recipientAddress, "funded");
+      process.exit();
+    }
+  });
 };

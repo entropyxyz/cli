@@ -1,4 +1,6 @@
 import inquirer from "inquirer";
+require('dotenv').config();
+
 
 const questionSeed = [
   {
@@ -37,7 +39,7 @@ const questionName = [
   },
 ];
 
-export const handleSeed = async () => {
+export const handleUserSeed = async () => {
   if (process.env.SEED) {
     return process.env.SEED;
   }
@@ -46,6 +48,17 @@ export const handleSeed = async () => {
 
   return seed;
 };
+
+export const handleFundingSeed = async () => {
+  if (process.env.FUNDING_SEED) {
+    return process.env.FUNDING_SEED;
+  }
+
+  const { seed } = await inquirer.prompt(questionSeed);
+
+  return seed;
+};
+
 
 export const handleChainEndpoint = async () => {
   if (process.env.ENDPOINT_CHAIN) {

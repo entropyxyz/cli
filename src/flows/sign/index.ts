@@ -1,10 +1,10 @@
-import { ethers } from "ethers";
-import { handleSeed, handleChainEndpoint } from "../../common/questions";
+import {  ethers } from "ethers";
+import { handleUserSeed, handleChainEndpoint } from "../../common/questions";
 import { getTx } from "../../../tx";
 import Entropy from "@entropyxyz/entropy-js";
 
 export const sign = async () => {
-  const seed = await handleSeed();
+  const seed = await handleUserSeed();
   const endpoint = await handleChainEndpoint()
   const entropy = new Entropy({ seed, endpoint });
   await entropy.ready
@@ -17,7 +17,7 @@ export const sign = async () => {
   const serializedTx = ethers.utils.serializeTransaction(
     tx
   )
-  const signature: any = await entropy.sign({
+  const signature = await entropy.sign({
     sigRequestHash: serializedTx,
   })
   console.log({ signature })

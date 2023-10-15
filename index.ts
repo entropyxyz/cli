@@ -1,9 +1,9 @@
-import * as dotenv from "dotenv";
-dotenv.config();
 import inquirer, { ListQuestion } from "inquirer";
+import { ascii } from "./src/common/ascii";
 import * as flows from "./src/flows";
 
 const choices = [
+  "Transfer",
   "Register",
   "Sign",
   "Entropy Faucet",
@@ -19,9 +19,16 @@ const intro: ListQuestion = {
   choices: choices,
 };
 
+
+
 const main = async () => {
+  console.log(ascii)
+
   const { action } = await inquirer.prompt(intro);
   switch (action) {
+    case "Transfer":
+      await flows.entropyTransfer();
+      break;
     case "Register":
       await flows.register();
       break;
