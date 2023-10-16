@@ -5,15 +5,16 @@ import {
 } from "../../common/questions";
 import Entropy from "@entropyxyz/entropy-js";
 import { getUserAddress } from "../../common/utils";
-import { main } from "../../../index";
+import { Controller } from "../../../controller";
 import { returnToMain } from "../../common/utils";
+import { initializeEntropy } from "../../common/initializeEntropy";
 
 
-export const entropyFaucet = async () => {
+export const entropyFaucet = async (controller: Controller) => {
   const recipientAddress = await getUserAddress();
   const AliceSeed = "0xe5be9a5092b81bca64be81d212e7f2f9eba183bb7a90954f7b76361f6edb5c0a"
   const endpoint = await handleChainEndpoint();
-  const entropy = new Entropy({ seed: AliceSeed, endpoint });
+  const entropy = await initializeEntropy(AliceSeed, endpoint);
 
   await entropy.ready;
 
@@ -31,10 +32,10 @@ export const entropyFaucet = async () => {
         console.log(recipientAddress, "funded");
   
         if (await returnToMain()) {
-          main();
-      } else {
-          process.exit();
-      }
+          controller.emit('returnToMain');
+        } else {
+          controller.emit('exit');
+        }
       }
     }
   );

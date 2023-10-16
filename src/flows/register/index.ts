@@ -1,54 +1,57 @@
 import { handleChainEndpoint, handleUserSeed } from "../../common/questions";
 import Entropy from "@entropyxyz/entropy-js";
-import { main } from "../../..";
+import { Controller } from "../../../controller";
 import { getUserAddress, returnToMain } from "../../common/utils";
+import { initializeEntropy } from "../../common/initializeEntropy";
 
-export const register = async () => {
+export const register = async (controller: Controller) => {
   try {
     const seed = await handleUserSeed();
     const endpoint = await handleChainEndpoint();
-    const entropy = new Entropy({ seed, endpoint });
+    
+    const entropy = await initializeEntropy(seed, endpoint);
 
     if (entropy.ready instanceof Promise) {
       await entropy.ready;
     }
 
-    let address = await getUserAddress();
-    if (address === undefined) {
-      throw new Error("address issue");
+    const address = await getUserAddress();
+    if (!address) {
+      throw new Error("Address issue");
     }
+
     console.log('Checking registration status for address:', address); 
 
-
     const isRegistered = await entropy.registrationManager.checkRegistrationStatus(address);
-    const registeredQuery = await entropy.isRegistered(address);
 
-    
-    console.log("is registered", JSON.stringify(registeredQuery))
-    console.log('Registration status:', isRegistered);
+    if (isRegistered) {
+      console.log('Address is already registered:', address);
 
+      if (await returnToMain()) {
+        controller.emit('returnToMain');
+        return; 
+      }
+    } else {
+      console.log('Attempting to register the address:', address); 
+      await entropy.register({
+        address,
+        keyVisibility: 'Permissioned',
+        freeTx: false,
+      });
+      console.log("Your address", address, "has been successfully registered.");
 
-    if (isRegistered === true) {
-      console.log('Checking registration status for address:', address);
-      console.log('Registration status:', isRegistered);      
-      return;  
+      if (await returnToMain()) {
+        controller.emit('returnToMain');
+        return; 
+      }
     }
-    console.log('Attempting to register the address:', address); 
-    await entropy.register({
-      address,
-      keyVisibility: 'Permissioned',
-      freeTx: false,
-    });
-    console.log("Your address", address, "has been successfully registered.");
-    
-
   } catch (error) {
     console.error("Error:", error);
-  }
 
-  if (await returnToMain()) {
-    main();
-} else {
-    process.exit();
-}
+    if (await returnToMain()) {
+      controller.emit('returnToMain');
+      return; 
+    }
+  }
+  controller.emit('exit');
 };

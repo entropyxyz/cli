@@ -1,8 +1,9 @@
 import { handleChainEndpoint, handleUserSeed } from "../../common/questions";
 import Entropy from "@entropyxyz/entropy-js";
 import inquirer from "inquirer";
-import { main } from "../../../index";  
+import { Controller } from "../../../controller";
 import { returnToMain } from "../../common/utils";
+import { initializeEntropy } from "../../common/initializeEntropy";
 
 const question = [
   {
@@ -19,11 +20,11 @@ const question = [
   },
 ];
 
-export const entropyTransfer = async () => {
+export const entropyTransfer = async (controller: Controller) => {
   const seed = await handleUserSeed();
   const endpoint = await handleChainEndpoint();
-  const entropy: Entropy = new Entropy({ seed, endpoint });
-  await entropy.ready;
+  
+  const entropy = await initializeEntropy(seed, endpoint);
 
   const { amount, recipientAddress } = await inquirer.prompt(question);
 
@@ -38,9 +39,9 @@ export const entropyTransfer = async () => {
       console.log(`Sent ${amount} to ${recipientAddress}`);
       
       if (await returnToMain()) {
-        main();
+        controller.emit('returnToMain');
       } else {
-        process.exit();
+        controller.emit('exit');
       }
     }
   });

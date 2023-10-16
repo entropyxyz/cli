@@ -1,9 +1,9 @@
 import { randomAsHex } from "@polkadot/util-crypto";
 import Entropy from "@entropyxyz/entropy-js";
-import { main } from "../../..";
+import { Controller } from "../../../controller";
 import { returnToMain } from "../../common/utils";
 
-export const newWallet = async () => {
+export const newWallet = async (controller: Controller) => {
   const seed: any = randomAsHex(32);
   const entropy = new Entropy({ seed });
   await entropy.ready
@@ -13,8 +13,8 @@ export const newWallet = async () => {
     seed,
   });
   if (await returnToMain()) {
-    main();
-} else {
-    process.exit();
-}
+    controller.emit('returnToMain');
+  } else {
+    controller.emit('exit');
+  }
 };

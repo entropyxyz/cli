@@ -1,8 +1,9 @@
 import { handleChainEndpoint, handleUserSeed } from "../../common/questions";
 import Entropy from "@entropyxyz/entropy-js";
 import inquirer from "inquirer";
-import { main } from "../../../index";  
+import { Controller } from "../../../controller";
 import { returnToMain } from "../../common/utils";
+import { initializeEntropy } from "../../common/initializeEntropy";
 
 const question = [
   {
@@ -19,11 +20,10 @@ const question = [
   },
 ];
 
-export const giveZaps = async () => {
+export const giveZaps = async (controller: Controller) => {
   const seed = await handleUserSeed();
   const endpoint = await handleChainEndpoint();
-  const entropy: Entropy = new Entropy({ seed, endpoint });
-  await entropy.ready;
+  const entropy = await initializeEntropy(seed, endpoint);
 
   const { amount, account } = await inquirer.prompt(question);
 
@@ -41,9 +41,9 @@ export const giveZaps = async () => {
         console.log(`${account} given ${amount} zaps`);
         
         if (await returnToMain()) {
-          main();
+          controller.emit('returnToMain');
         } else {
-          process.exit();
+          controller.emit('exit');
         }
       }
     }

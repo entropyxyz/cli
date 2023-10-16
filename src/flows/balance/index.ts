@@ -1,16 +1,16 @@
 import Entropy from "@entropyxyz/entropy-js";
 import inquirer from "inquirer";
 import { handleChainEndpoint, handleUserSeed } from "../../common/questions";
-import { main } from "../../../index";  
+import { Controller } from "../../../controller";
 import { getUserAddress, returnToMain } from "../../common/utils";
+import { initializeEntropy } from "../../common/initializeEntropy";
 
 const hexToBigInt = (hexString: string) => BigInt(hexString);
 
-export const balance = async () => {
+export const balance = async (controller: Controller) => {
   const seed = await handleUserSeed();
   const endpoint = await handleChainEndpoint();
-  const entropy: Entropy = new Entropy({ seed, endpoint });
-  await entropy.ready;
+  const entropy = await initializeEntropy(seed, endpoint);
 
   const balanceChoice = await inquirer.prompt([
     {
@@ -43,8 +43,8 @@ export const balance = async () => {
   console.log(`Address ${accountToCheck} has free balance: ${freeBalance.toString()} units`);
 
   if (await returnToMain()) {
-    main();
+    controller.emit('returnToMain');
   } else {
-    process.exit();
+    controller.emit('exit');
   }
 };
