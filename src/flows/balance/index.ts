@@ -8,43 +8,47 @@ import { initializeEntropy } from "../../common/initializeEntropy";
 const hexToBigInt = (hexString: string) => BigInt(hexString);
 
 export const balance = async (controller: Controller) => {
-  const seed = await handleUserSeed();
-  const endpoint = await handleChainEndpoint();
-  const entropy = await initializeEntropy(seed, endpoint);
+  try {
+    const seed = await handleUserSeed();
+    const endpoint = await handleChainEndpoint();
+    const entropy = await initializeEntropy(seed, endpoint);
 
-  const balanceChoice = await inquirer.prompt([
-    {
-      type: "list",
-      name: "action",
-      message: "Choose an action:",
-      choices: ["Check my balance", "Query an address balance"],
-    },
-  ]);
+    const balanceChoice = await inquirer.prompt([
+      {
+        type: "list",
+        name: "action",
+        message: "Choose an action:",
+        choices: ["Check my balance", "Query an address balance"],
+      },
+    ]);
 
-  let accountToCheck;
-  if (balanceChoice.action === "Check my balance") {
-    accountToCheck = entropy.keys?.wallet.address;
-    if (!accountToCheck) {
-      throw new Error("User address not found");
+    let accountToCheck;
+    if (balanceChoice.action === "Check my balance") {
+      accountToCheck = entropy.keys?.wallet.address;
+      if (!accountToCheck) {
+        throw new Error("User address not found");
+      }
+    } else {
+      const question = {
+        type: "input",
+        name: "account",
+        message: "Input account to check balance for:",
+        default: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+      };
+      const { account: inputAccount } = await inquirer.prompt([question]);
+      accountToCheck = inputAccount;
     }
-  } else {
-    const question = {
-      type: "input",
-      name: "account",
-      message: "Input account to check balance for:",
-      default: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
-    };
-    const { account: inputAccount } = await inquirer.prompt([question]);
-    accountToCheck = inputAccount;
-  }
 
-  const accountInfo = (await entropy.substrate.query.system.account(accountToCheck)) as any;
-  const freeBalance = hexToBigInt(accountInfo.data.free);
-  console.log(`Address ${accountToCheck} has free balance: ${freeBalance.toString()} units`);
-
-  if (await returnToMain()) {
-    controller.emit('returnToMain');
-  } else {
-    controller.emit('exit');
+    const accountInfo = (await entropy.substrate.query.system.account(accountToCheck)) as any;
+    const freeBalance = hexToBigInt(accountInfo.data.free);
+    console.log(`Address ${accountToCheck} has free balance: ${freeBalance.toString()} units`);
+  } catch (error: any) {
+    console.error("Error in balance:", error.message);
+  } finally {
+    if (await returnToMain()) {
+      controller.emit('returnToMain');
+    } else {
+      controller.emit('exit');
+    }
   }
 };

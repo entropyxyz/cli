@@ -21,28 +21,32 @@ const question = [
 ];
 
 export const entropyTransfer = async (controller: Controller) => {
-  const seed = await handleUserSeed();
-  const endpoint = await handleChainEndpoint();
-  
-  const entropy = await initializeEntropy(seed, endpoint);
+  try {
+    const seed = await handleUserSeed();
+    const endpoint = await handleChainEndpoint();
+    
+    const entropy = await initializeEntropy(seed, endpoint);
 
-  const { amount, recipientAddress } = await inquirer.prompt(question);
+    const { amount, recipientAddress } = await inquirer.prompt(question);
 
-  if (!entropy.keys) {
-    throw new Error("Keys are undefined");
-  }
-
-  const tx = entropy.substrate.tx.balances.transfer(recipientAddress, amount);
-  
-  await tx.signAndSend(entropy.keys.wallet, async ({ status }) => {
-    if (status.isInBlock || status.isFinalized) {
-      console.log(`Sent ${amount} to ${recipientAddress}`);
-      
-      if (await returnToMain()) {
-        controller.emit('returnToMain');
-      } else {
-        controller.emit('exit');
-      }
+    if (!entropy.keys) {
+      throw new Error("Keys are undefined");
     }
-  });
+
+    const tx = entropy.substrate.tx.balances.transfer(recipientAddress, amount);
+    
+    await tx.signAndSend(entropy.keys.wallet, async ({ status }) => {
+      if (status.isInBlock || status.isFinalized) {
+        console.log(`Sent ${amount} to ${recipientAddress}`);
+      }
+    });
+  } catch (error: any) {
+    console.error("Error in entropyTransfer:", error.message);
+  } finally {
+    if (await returnToMain()) {
+      controller.emit('returnToMain');
+    } else {
+      controller.emit('exit');
+    }
+  }
 };

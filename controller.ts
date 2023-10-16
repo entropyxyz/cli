@@ -5,6 +5,8 @@ import { ascii } from "./src/common/ascii";
 
 export class Controller extends EventEmitter {
   private static instance: Controller;
+  private restartMain: boolean = false;
+  private currentFlow: Promise<void> | null = null;
 
   private constructor() {
     super();
@@ -17,13 +19,16 @@ export class Controller extends EventEmitter {
     }
     return Controller.instance;
   }
-
   runFlow(flowFunction: (controller: Controller) => Promise<void>) {
+    this.removeAllListeners();
     flowFunction(this);
+    this.initListeners();
   }
 
   initListeners() {
-    this.on('returnToMain', this.main.bind(this));
+    this.on('returnToMain', () => {
+        this.restartMain = true;
+    });
     this.on('balance', () => this.runFlow(flows.balance));
     this.on('entropyFaucet', () => this.runFlow(flows.entropyFaucet));
     this.on('register', () => this.runFlow(flows.register));
@@ -34,82 +39,77 @@ export class Controller extends EventEmitter {
     this.on('newWallet', () => this.runFlow(flows.newWallet));
   }
 
-  async main() {
-    let exit = false;
+async main() {
+  console.log(ascii);
 
-    while (!exit) {
-      console.log(ascii);
+  const choices = [
+    "Entropy Faucet",
+    "Balance",
+    "Register",
+    "Programs",
+    "Sign",
+    "Transfer",
+    "Give Zaps",
+    "New Entropy Wallet",
+    "Exit"
+  ];
 
-      const choices = [
-        "Entropy Faucet",
-        "Balance",
-        "Register",
-        "Programs",
-        "Sign",
-        "Transfer",
-        "Give Zaps",
-        "New Entropy Wallet",
-        "Exit"
-      ];
+  const intro: ListQuestion = {
+    type: "list",
+    name: "action",
+    message: "Select Action",
+    pageSize: choices.length,
+    choices: choices,
+  };
 
-      const intro: ListQuestion = {
-        type: "list",
-        name: "action",
-        message: "Select Action",
-        pageSize: choices.length,
-        choices: choices,
-      };
+  const { action } = await inquirer.prompt(intro);
 
-      const { action } = await inquirer.prompt(intro);
+  switch (action) {
+    case "Entropy Faucet":
+      this.emit('entropyFaucet');
+      break;
 
-      switch (action) {
-        case "Entropy Faucet":
-          this.emit('entropyFaucet');
-          break;
+    case "Balance":
+      this.emit('balance');
+      break;
 
-        case "Balance":
-          this.emit('balance');
-          break;
+    case "Register":
+      this.emit('register');
+      break;
 
-        case "Register":
-          this.emit('register');
-          break;
+    case "Programs":
+      this.emit('setProgram');
+      break;
 
-        case "Programs":
-          this.emit('setProgram');
-          break;
+    case "Sign":
+      this.emit('sign');
+      break;
 
-        case "Sign":
-          this.emit('sign');
-          break;
+    case "Transfer":
+      this.emit('entropyTransfer');
+      break;
 
-        case "Transfer":
-          this.emit('entropyTransfer');
-          break;
+    case "Give Zaps":
+      this.emit('giveZaps');
+      break;
 
-        case "Give Zaps":
-          this.emit('giveZaps');
-          break;
+    case "New Entropy Wallet":
+      this.emit('newWallet');
+      break;
 
-        case "New Entropy Wallet":
-          this.emit('newWallet');
-          break;
+    case "Exit":
+      process.exit();
+      break;
 
-        case "Exit":
-          exit = true;
-          break;
-
-        default:
-          console.warn(`Received an unexpected action: "${action}"`);
-          break;
-      }
-    }
-    process.exit();
-  }
-
-  start() {
-    this.removeAllListeners();
-    this.initListeners();
-    this.main();
-  }
-}
+    default:
+      console.warn(`Received an unexpected action: "${action}"`);
+      this.emit('returnToMain');
+      break;
+  } }
+  async start() {
+    do {
+      await this.main();
+    } while (this.restartMain);
+  
+    this.restartMain = false;
+  } }
