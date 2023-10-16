@@ -1,4 +1,3 @@
-import Entropy from "@entropyxyz/entropy-js";
 import inquirer from "inquirer";
 import { handleChainEndpoint, handleUserSeed } from "../../common/questions";
 import { Controller } from "../../../controller";
