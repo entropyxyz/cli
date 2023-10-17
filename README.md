@@ -2,34 +2,25 @@
 
 ### Running 
 
-* ``` npm install```
+* ``` yarn ```
 
-* you can add a .env file or input the info when prompted by the cli 
+* you can add am .env file or input the info when prompted by the cli 
 
 ```
 ENDPOINT_CHAIN=""
 SEED=""
 NAME=""
 ```
+* to start the CLI run: 
+* ```yarn entropy```
 
-* ```npm run start```
+The CLI currently has the following options:
+1. Entropy Faucet
+2. Balance
+3. Register
+4. Programs
+5. Sign
+7. Transfer
+8. Give Zaps
+9. New Entropy Wallet
 
-This will bring up a list of options 
-
-The proper flow from start it to 
-1) create and entropy account 
-2) add the created seed to the .env 
-3) fund the account
-4) register
-5) sign
-
-#### Register
-
-
-#### Sign
-
-#### Create Entropy account 
-
-#### Entropy Faucet
-
-#### Give Zaps
