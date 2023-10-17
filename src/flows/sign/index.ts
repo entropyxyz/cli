@@ -1,7 +1,6 @@
 import {  ethers } from "ethers";
 import { handleUserSeed, handleChainEndpoint } from "../../common/questions";
 import { getTx } from "../../../tx";
-import Entropy from "@entropyxyz/entropy-js";
 import { Controller } from "../../../controller";
 import { returnToMain } from "../../common/utils";
 import { initializeEntropy } from "../../common/initializeEntropy";
@@ -26,6 +25,7 @@ export const sign = async (controller: Controller) => {
   })
   console.log({ signature })
   if (await returnToMain()) {
+    console.clear();
     controller.emit('returnToMain');
   } else {
     controller.emit('exit');

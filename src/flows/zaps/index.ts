@@ -1,5 +1,4 @@
 import { handleChainEndpoint, handleUserSeed } from "../../common/questions";
-import Entropy from "@entropyxyz/entropy-js";
 import inquirer from "inquirer";
 import { Controller } from "../../../controller";
 import { returnToMain } from "../../common/utils";
@@ -41,6 +40,7 @@ export const giveZaps = async (controller: Controller) => {
         console.log(`${account} given ${amount} zaps`);
         
         if (await returnToMain()) {
+          console.clear();
           controller.emit('returnToMain');
         } else {
           controller.emit('exit');

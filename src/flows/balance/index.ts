@@ -1,7 +1,7 @@
 import inquirer from "inquirer";
 import { handleChainEndpoint, handleUserSeed } from "../../common/questions";
 import { Controller } from "../../../controller";
-import { getUserAddress, returnToMain } from "../../common/utils";
+import { returnToMain } from "../../common/utils";
 import { initializeEntropy } from "../../common/initializeEntropy";
 
 const hexToBigInt = (hexString: string) => BigInt(hexString);
@@ -45,6 +45,7 @@ export const balance = async (controller: Controller) => {
     console.error("Error in balance:", error.message);
   } finally {
     if (await returnToMain()) {
+      console.clear();
       controller.emit('returnToMain');
     } else {
       controller.emit('exit');

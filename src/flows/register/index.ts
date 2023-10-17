@@ -1,5 +1,4 @@
 import { handleChainEndpoint, handleUserSeed } from "../../common/questions";
-import Entropy from "@entropyxyz/entropy-js";
 import { Controller } from "../../../controller";
 import { getUserAddress, returnToMain } from "../../common/utils";
 import { initializeEntropy } from "../../common/initializeEntropy";
@@ -28,6 +27,7 @@ export const register = async (controller: Controller) => {
       console.log('Address is already registered:', address);
 
       if (await returnToMain()) {
+        console.clear()
         controller.emit('returnToMain');
         return; 
       }
@@ -41,6 +41,7 @@ export const register = async (controller: Controller) => {
       console.log("Your address", address, "has been successfully registered.");
 
       if (await returnToMain()) {
+        console.clear()
         controller.emit('returnToMain');
         return; 
       }
@@ -49,6 +50,7 @@ export const register = async (controller: Controller) => {
     console.error("Error:", error);
 
     if (await returnToMain()) {
+      console.clear();
       controller.emit('returnToMain');
       return; 
     }

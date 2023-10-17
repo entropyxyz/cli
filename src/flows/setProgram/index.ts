@@ -2,12 +2,9 @@ import inquirer from "inquirer";
 import {
   handleUserSeed,
   handleChainEndpoint,
-  handleFundingSeed,
 } from "../../common/questions";
 import { readFileSync } from "fs";
-import Entropy from "@entropyxyz/entropy-js";
 import { getUserAddress } from "../../common/utils";
-import { hexToU8a } from '@polkadot/util';
 import { Controller } from "../../../controller";
 import { buf2hex } from "../../common/utils";
 import { initializeEntropy } from "../../common/initializeEntropy";
@@ -68,6 +65,7 @@ const preprocessAfterGet = (fetchedProgram: ArrayBuffer): ArrayBuffer => {
           break;
   
         case "Exit to Main Menu":
+          console.clear()
           controller.emit('returnToMain');
           break;
       }
@@ -75,6 +73,7 @@ const preprocessAfterGet = (fetchedProgram: ArrayBuffer): ArrayBuffer => {
       console.error("Error in setProgram:", error.message);
     } finally {
       if (await returnToMain()) {
+        console.clear();
         controller.emit('returnToMain');
       }
     }

@@ -1,9 +1,6 @@
 import {
-  handleUserSeed,
   handleChainEndpoint,
-  handleFundingSeed,
 } from "../../common/questions";
-import Entropy from "@entropyxyz/entropy-js";
 import { getUserAddress } from "../../common/utils";
 import { Controller } from "../../../controller";
 import { returnToMain } from "../../common/utils";
@@ -37,6 +34,7 @@ export const entropyFaucet = async (controller: Controller) => {
     console.error("Error in entropyFaucet:", error.message);
   } finally {
     if (await returnToMain()) {
+      console.clear();
       controller.emit('returnToMain');
     } else {
       controller.emit('exit');

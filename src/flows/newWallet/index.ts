@@ -22,6 +22,7 @@ export const newWallet = async (controller: Controller) => {
     console.error("Error in creating new wallet:", error.message);
   } finally {
     if (await returnToMain()) {
+      console.clear();
       controller.emit('returnToMain');
     } else {
       controller.emit('exit');

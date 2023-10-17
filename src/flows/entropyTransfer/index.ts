@@ -1,5 +1,4 @@
 import { handleChainEndpoint, handleUserSeed } from "../../common/questions";
-import Entropy from "@entropyxyz/entropy-js";
 import inquirer from "inquirer";
 import { Controller } from "../../../controller";
 import { returnToMain } from "../../common/utils";
@@ -44,6 +43,7 @@ export const entropyTransfer = async (controller: Controller) => {
     console.error("Error in entropyTransfer:", error.message);
   } finally {
     if (await returnToMain()) {
+      console.clear();
       controller.emit('returnToMain');
     } else {
       controller.emit('exit');
