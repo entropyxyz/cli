@@ -1,8 +1,8 @@
-# Devenet CLI-TOOL 
+# Devenet CLI-TOOL based on core v.0.0.7 and entropy-js v0.1.1
 
 ### Running 
 
-* ``` yarn ```
+* ```yarn```
 
 * you can add am .env file or input the info when prompted by the cli 
 
