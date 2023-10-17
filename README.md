@@ -4,13 +4,14 @@
 
 * ```yarn```
 
-* you can add am .env file or input the info when prompted by the cli 
+* you can add am .env file or input the info when prompted by the cli. 
 
 ```
 ENDPOINT_CHAIN=""
 SEED=""
 NAME=""
 ```
+* before you start the cli ensure that you're running two chains and two validators. local and remote devnet spinup option coming soon. 
 * to start the CLI run: 
 * ```yarn entropy```
 
