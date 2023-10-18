@@ -1,6 +1,8 @@
-import { handleSeed } from "../../common/questions";
-import Entropy from "@entropyxyz/entropy-js";
+import { handleChainEndpoint, handleUserSeed } from "../../common/questions";
 import inquirer from "inquirer";
+import { Controller } from "../../../controller";
+import { returnToMain } from "../../common/utils";
+import { initializeEntropy } from "../../common/initializeEntropy";
 
 const question = [
   {
@@ -17,15 +19,34 @@ const question = [
   },
 ];
 
-export const giveZaps = async () => {
-  throw new Error("TODO")
-  // const seed = await handleSeed();
-  // const { amount, account } = await inquirer.prompt(question);
+export const giveZaps = async (controller: Controller) => {
+  const seed = await handleUserSeed();
+  const endpoint = await handleChainEndpoint();
+  const entropy = await initializeEntropy(seed, endpoint);
 
-  // const entropy: Entropy = await Entropy.setup(seed);
-  // const tx = await entropy.substrate.api.tx.freeTx.giveZaps(account, amount);
-  // const sudoCall = entropy.substrate.api.tx.sudo.sudo(tx);
-  // await entropy.substrate.sendAndWait(sudoCall, false);
-  // console.log(`${account} given ${amount} zaps`);
-  process.exit();
+  const { amount, account } = await inquirer.prompt(question);
+
+
+
+  if (!entropy.keys) {
+    throw new Error("Keys are undefined");
+  }
+
+  const tx = entropy.substrate.tx.freeTx.giveZaps(account, amount);
+  await tx.signAndSend(
+    entropy.keys.wallet,
+    async ({ status }) => {
+      if (status.isInBlock || status.isFinalized) {
+        console.log(`${account} given ${amount} zaps`);
+        
+        if (await returnToMain()) {
+          console.clear();
+          controller.emit('returnToMain');
+        } else {
+          controller.emit('exit');
+        }
+      }
+    }
+  );
 };
+

@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "entropy": "yarn run start",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node index.ts"
   },

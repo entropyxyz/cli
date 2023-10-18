@@ -27,7 +27,7 @@ export const getTx = async () => {
   // const gasLimit = await provider.estimateGas(tx);
 
   // tx.gasLimit = gasLimit;
-  const tx = {
+  const tx: ethers.utils.UnsignedTransaction = {
     to: "0x772b9a9e8aa1c9db861c6611a82d251db4fac990",
     value: BigNumber.from('1'),
     chainId: 1,
