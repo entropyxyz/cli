@@ -1,39 +1,43 @@
-import { readFileSync } from "node:fs";
-import { handleChainEndpoint, handleFundingSeed, handleUserSeed } from "./questions";
-import Entropy from "@entropyxyz/entropy-js";
+import { readFileSync } from "node:fs"
+import { handleChainEndpoint, handleFundingSeed, handleUserSeed } from "./questions"
+import Entropy from "@entropyxyz/entropy-js"
 import { decodeAddress, encodeAddress } from '@polkadot/keyring'
 import { hexToU8a, isHex } from '@polkadot/util'
-import inquirer from "inquirer";
+import inquirer from "inquirer"
 
 
 export const readKey = (path: string) =>  {
-	const buffer = readFileSync(path);
-	const result = new Uint8Array(buffer.byteLength);
-	buffer.copy(result);
-	buffer.fill(0);
-	return result;
+	const buffer = readFileSync(path)
+	const result = new Uint8Array(buffer.byteLength)
+	buffer.copy(result)
+	buffer.fill(0)
+	return result
   }
 
   export const getUserAddress = async () => {
-	const userSeed = await handleUserSeed();
-	const endpoint = await handleChainEndpoint();
-	const userEntropy = new Entropy({seed: userSeed, endpoint});
-	await userEntropy.ready;
-	return userEntropy.keys?.wallet.address;
-  };
+	const userSeed = await handleUserSeed()
+	const endpoint = await handleChainEndpoint()
+	const userEntropy = new Entropy({seed: userSeed, endpoint})
+	await userEntropy.ready
+	return userEntropy.keys?.wallet.address
+  }
 
- export const returnToMain = async() =>  {
+
+  export const returnToMain = async () => {
     const response = await inquirer.prompt([
         {
-            type: "confirm",
-            name: "returnToMain",
-            message: "Return to main menu?",
-            default: true,
+            type: "list",
+            name: "nextAction",
+            message: "What would you like to do next?",
+            choices: [
+                { name: "Return to main menu", value: "returnToMain" },
+                { name: "Exit", value: "exit" },
+                          ],
         },
-    ]);
+    ])
 
-    return response.returnToMain;
-};
+    return response.nextAction
+}
 
 export function buf2hex (buffer: ArrayBuffer): string {
   return [...new Uint8Array(buffer)]

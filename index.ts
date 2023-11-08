@@ -1,4 +1,3 @@
-import { Controller } from "./controller";
+import { start } from "./controller"
 
-const controller = Controller.getInstance();
-controller.start();
+start()
