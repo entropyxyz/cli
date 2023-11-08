@@ -13,7 +13,7 @@
     "url": "git+https://github.com/entropyxyz/devnet_cli_tool.git"
   },
   "keywords": [],
-  "author": "Jesse Abramowitz",
+  "author": "Jesse Abramowitz, Luis Reyes", 
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/entropyxyz/devnet_cli_tool/issues"
@@ -21,6 +21,7 @@
   "homepage": "https://github.com/entropyxyz/devnet_cli_tool#readme",
   "dependencies": {
     "@entropyxyz/entropy-js": "^0.1.1",
+    "@polkadot/api": "^10.10.1",
     "@polkadot/util-crypto": "^12.5.1",
     "axios": "^0.27.2",
     "dotenv": "^16.0.3",

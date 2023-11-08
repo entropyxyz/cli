@@ -1,92 +1,69 @@
-import { EventEmitter } from 'events';
 import * as flows from "./src/flows";
 import inquirer, { ListQuestion } from "inquirer";
 import { ascii } from "./src/common/ascii";
+import { returnToMain } from "./src/common/utils";  
 
-export class Controller extends EventEmitter {
-    private static instance: Controller;
-    private restartMain: boolean = false;
-    private currentFlow: Promise<void> | null = null;
-    private resolveCurrentFlow: (() => void) | null = null;
+let restartMain = false;
 
-    private constructor() {
-        super();
-        this.initListeners();
+const runFlow = async (flowFunction: () => Promise<string>) => {
+    const nextAction = await flowFunction();
+    return nextAction;
+};
+
+const main = async () => {
+    console.clear();
+    console.log(ascii);
+    const choices = [
+        "Start Entropy", "Entropy Faucet", "Balance", "Register", "Programs", 
+        "Sign", "Transfer", "Give Zaps", "New Entropy Wallet", "Exit"
+    ];
+    const intro: ListQuestion = {
+        type: "list",
+        name: "action",
+        message: "Select Action",
+        pageSize: choices.length,
+        choices: choices,
+    };
+    const { action } = await inquirer.prompt(intro);
+    let nextAction = '';
+
+    switch (action) {
+        case "Start Entropy": nextAction = await runFlow(flows.startEntropy); break
+        case "Entropy Faucet": nextAction = await runFlow(flows.entropyFaucet); break;
+        case "Balance": nextAction = await runFlow(flows.balance); break;
+        case "Register": nextAction = await runFlow(flows.register); break;
+        // case "Programs": nextAction = await runFlow(flows.setProgram); break;
+        case "Sign": nextAction = await runFlow(flows.sign); break;
+        case "Transfer": nextAction = await runFlow(flows.entropyTransfer); break;
+        case "Give Zaps": nextAction = await runFlow(flows.giveZaps); break;
+        case "New Entropy Wallet": nextAction = await runFlow(flows.newWallet); break;
+        case "Exit": process.exit(); break;
+        default:
+            console.warn(`Received an unexpected action: "${action}"`);
+            nextAction = 'returnToMain';
+            break;
     }
 
-    static getInstance(): Controller {
-        if (!Controller.instance) {
-            Controller.instance = new Controller();
-        }
-        return Controller.instance;
+    switch (nextAction) {
+        case 'returnToMain':
+            restartMain = true;
+            break;
+        case 'exit':
+            process.exit();
+            break;
+        default:
+            console.warn(`Received an unexpected next action: "${nextAction}"`);
+            restartMain = true;
+            break;
     }
+};
 
-    runFlow(flowFunction: (controller: Controller) => Promise<void>) {
-        this.removeAllListeners();
-        this.currentFlow = new Promise((resolve) => {
-            this.resolveCurrentFlow = resolve;
-        });
-        flowFunction(this).then(() => {
-            if (this.resolveCurrentFlow) {
-                this.resolveCurrentFlow();
-                this.resolveCurrentFlow = null;
-            }
-        });
-        this.initListeners();
-    }
+const start = async () => {
+    do {
+        await main();
+    } while (restartMain);
+    restartMain = false;
+};
 
-    initListeners() {
-        this.on('returnToMain', () => {
-            this.restartMain = true;
-        });
-        this.on('balance', () => this.runFlow(flows.balance));
-        this.on('entropyFaucet', () => this.runFlow(flows.entropyFaucet));
-        this.on('register', () => this.runFlow(flows.register));
-        this.on('setProgram', () => this.runFlow(flows.setProgram));
-        this.on('sign', () => this.runFlow(flows.sign));
-        this.on('entropyTransfer', () => this.runFlow(flows.entropyTransfer));
-        this.on('giveZaps', () => this.runFlow(flows.giveZaps));
-        this.on('newWallet', () => this.runFlow(flows.newWallet));
-    }
 
-    async main() {
-        console.clear();
-        console.log(ascii);
-        const choices = [
-            "Entropy Faucet", "Balance", "Register", "Programs", 
-            "Sign", "Transfer", "Give Zaps", "New Entropy Wallet", "Exit"
-        ];
-        const intro: ListQuestion = {
-            type: "list",
-            name: "action",
-            message: "Select Action",
-            pageSize: choices.length,
-            choices: choices,
-        };
-        const { action } = await inquirer.prompt(intro);
-
-        switch (action) {
-            case "Entropy Faucet": this.emit('entropyFaucet'); break;
-            case "Balance": this.emit('balance'); break;
-            case "Register": this.emit('register'); break;
-            case "Programs": this.emit('setProgram'); break;
-            case "Sign": this.emit('sign'); break;
-            case "Transfer": this.emit('entropyTransfer'); break;
-            case "Give Zaps": this.emit('giveZaps'); break;
-            case "New Entropy Wallet": this.emit('newWallet'); break;
-            case "Exit": process.exit(); break;
-            default:
-                console.warn(`Received an unexpected action: "${action}"`);
-                this.emit('returnToMain');
-                break;
-        }
-    }
-
-    async start() {
-        do {
-            await this.main();
-            if (this.currentFlow) await this.currentFlow;
-        } while (this.restartMain);
-        this.restartMain = false;
-    }
-}
+export { start };
