@@ -25,12 +25,12 @@ export const register = async (): Promise<string> => {
     console.log('Address is already registered:', address)
   } else {
     console.log('Attempting to register the address:', address)
-    await entropy.register({
-      address,
-      keyVisibility: 'Permissioned',
-      freeTx: false,
-    })
-    console.log(`Your address ${address} has been successfully registered.`)
+    // await entropy.register({
+    //   address,
+    //   keyVisibility: 'Permissioned',
+    //   freeTx: false,
+    // })
+    // console.log(`Your address ${address} has been successfully registered.`)
   }
   const { continueToMain } = await inquirer.prompt([
     {
