@@ -1,9 +1,8 @@
 import { handleChainEndpoint, handleUserSeed } from "../../common/questions"
 import inquirer from "inquirer"
 import { returnToMain } from "../../common/utils"
-import { SubmittableResult } from '@polkadot/api'
-import { initializeEntropy } from "../../common/initializeEntropy"
-
+import Entropy, {EntropyAccount} from "@entropyxyz/entropy-js"
+import { getWallet } from "@entropyxyz/entropy-js/src/keys"
 const question = [
   {
     type: "input",
@@ -30,11 +29,18 @@ export const giveZaps = async (): Promise<string> => {
   try {
     const seed = await handleUserSeed()
     const endpoint = await handleChainEndpoint()
-    const entropy = await initializeEntropy(seed, endpoint)
+    const signer = await getWallet(seed)
 
+    const entropyAccount: EntropyAccount = {
+      sigRequestKey: signer,
+      programModKey: signer
+    }
+  
+    const entropy = new Entropy({ account: entropyAccount })
+  
     const { amount, account } = await inquirer.prompt(question)
 
-    if (!entropy.keys) {
+    if (!entropy.account?.sigRequestKey?.pair) {
       throw new Error("Keys are undefined")
     }
 
@@ -52,7 +58,7 @@ export const giveZaps = async (): Promise<string> => {
     }
 
     const tx = entropy.substrate.tx.freeTx.giveZaps(account, amount)
-    const unsub = await tx.signAndSend(entropy.keys.wallet, ({ status }) => {
+    const unsub = await tx.signAndSend(entropy.account.sigRequestKey.wallet, ({ status }) => {
       if (status.isInBlock || status.isFinalized) {
         console.log(`Transaction with ${amount} zaps to ${account} is in block or finalized.`)
         unsub()

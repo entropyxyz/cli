@@ -10,7 +10,6 @@ const runFlow = async (flowFunction: () => Promise<string>) => {
 }
 
 const main = async () => {
-    console.clear()
     console.log(ascii)
     const choices = [
         "Start Entropy", "Entropy Faucet", "Balance", "Register", "Programs", 

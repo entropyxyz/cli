@@ -2,6 +2,9 @@ import { handleChainEndpoint, handleUserSeed } from "../../common/questions"
 import inquirer from "inquirer"
 import { returnToMain } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
+import { getWallet } from "@entropyxyz/entropy-js/src/keys"
+import { EntropyAccount } from "@entropyxyz/entropy-js"
+import Entropy from "@entropyxyz/entropy-js"
 
 const transferQuestions = [
   {
@@ -17,18 +20,30 @@ const transferQuestions = [
     default: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
   },
 ]
-
 export const entropyTransfer = async (): Promise<string> => {
   try {
     const seed = await handleUserSeed()
-    const endpoint = await handleChainEndpoint()
-    const entropy = await initializeEntropy(seed, endpoint)
+
+    const signer = await getWallet(seed)
+
+    if (!signer) {
+      throw new Error("Failed to generate key pair from seed")
+    }
+
+    let entropyAccount: EntropyAccount = {
+      sigRequestKey: signer,
+      programModKey: signer
+    }
+
+    const entropy = new Entropy({ account: entropyAccount })
+    await entropy.ready
+    console.log("entropy is ready")
+
+    if (!entropy || !entropy.account || !entropy.account.sigRequestKey?.wallet) {
+      throw new Error("Entropy or wallet keys are not initialized")
+    }
 
     const { amount, recipientAddress } = await inquirer.prompt(transferQuestions)
-
-    if (!entropy.keys) {
-      throw new Error("Keys are undefined")
-    }
 
     const confirm = await inquirer.prompt([{
       type: 'confirm',
@@ -43,25 +58,21 @@ export const entropyTransfer = async (): Promise<string> => {
       return "Transfer cancelled."
     }
 
-
-    if (!entropy.keys) {
-      throw new Error("Entropy keys are not initialized")
-    }
-
-    const keys = entropy.keys
-    if (!keys || !keys.wallet) {
-      throw new Error("Wallet keys are undefined")
-    }
-
     console.log("Initiating transfer...")
-    const tx = entropy.substrate.tx.balances.transfer(recipientAddress, amount)
+
+    const wallet = entropy.account?.sigRequestKey?.wallet
+    if (!wallet) {
+      throw new Error("Wallet keys are not initialized or undefined")
+    }
     
+    const tx = entropy.substrate.tx.balances.transfer(recipientAddress, amount)
+
     const TIMEOUT_DURATION = 60000 
 
     const transferResult = await new Promise<string>((resolve, reject) => {
       let unsubscribe: () => void
 
-      tx.signAndSend(keys.wallet, ({ status, events, dispatchError }) => {
+      tx.signAndSend(wallet, ({ status, events, dispatchError }) => {
         if (dispatchError) {
           if (dispatchError.isModule) {
             const decoded = entropy.substrate.registry.findMetaError(dispatchError.asModule) as any
@@ -84,7 +95,9 @@ export const entropyTransfer = async (): Promise<string> => {
       }).catch(reject)
 
       setTimeout(() => {
-        unsubscribe()
+        if (unsubscribe) {
+          unsubscribe()
+        }
         reject(new Error("Transaction timeout reached"))
       }, TIMEOUT_DURATION)
     })
@@ -97,6 +110,7 @@ export const entropyTransfer = async (): Promise<string> => {
     return `Error: ${error instanceof Error ? error.message : 'Transfer failed due to an unexpected error'}`
   }
 }
+
 
 async function promptReturnToMain() {
   const { continueToMain } = await inquirer.prompt([{

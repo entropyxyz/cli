@@ -1,3 +1,3 @@
-import { start } from "./controller"
+import { start } from './controller'
 
 start()

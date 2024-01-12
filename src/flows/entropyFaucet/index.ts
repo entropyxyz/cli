@@ -1,42 +1,60 @@
 import inquirer from "inquirer"
 import { handleChainEndpoint } from "../../common/questions"
+import  Entropy, { EntropyAccount } from "@entropyxyz/entropy-js"
 import { getUserAddress } from "../../common/utils"
-import { initializeEntropy } from "../../common/initializeEntropy"
+import { getWallet } from "@entropyxyz/entropy-js/src/keys"
 
 export const entropyFaucet = async (): Promise<string> => {
+  console.log("Starting Entropy Faucet...")
+
   try {
     const recipientAddress = await getUserAddress()
+    console.log(`Recipient address: ${recipientAddress}`)
+
     const AliceSeed = "0xe5be9a5092b81bca64be81d212e7f2f9eba183bb7a90954f7b76361f6edb5c0a"
-    const endpoint = await handleChainEndpoint()
-    const entropy = await initializeEntropy(AliceSeed, endpoint)
+    const signer = await getWallet(AliceSeed)
 
-    await entropy.ready
-
-    if (!entropy.keys) {
-      throw new Error("Keys are undefined")
+    if (!signer) {
+      throw new Error("Failed to generate key pair from seed")
     }
 
+    let entropyAccount: EntropyAccount = {
+      sigRequestKey: signer,
+      programModKey: signer
+    }
+
+    const entropy = new Entropy({ account: entropyAccount })
+    await entropy.ready
+    console.log("entropy is ready")
+
     const amount = "10000000000000000"
+    console.log(`Preparing to send ${amount} to ${recipientAddress}...`)
+
+    if (!entropy || !entropy.account?.sigRequestKey?.wallet) {
+      throw new Error("Entropy is not initialized or keys are undefined")
+    }
+
+    let transactionCompleted = false
     const tx = entropy.substrate.tx.balances.transfer(recipientAddress, amount)
-
-    console.log('Sending funds...')
-    const unsub = await tx.signAndSend(entropy.keys.wallet, ({ status, events, dispatchError }) => {
-      if (dispatchError) {
-        if (dispatchError.isModule) {
-          const decoded = entropy.substrate.registry.findMetaError(dispatchError.asModule) as any
-
-          const { documentation, name, section } = decoded
-
-          console.error(`${section}.${name}: ${documentation.join(' ')}`)
-        } else {
-          console.error(dispatchError.toString())
+    tx.signAndSend(entropy.account.sigRequestKey.wallet, ({ status, dispatchError }) => {
+      if (dispatchError || status.isInBlock || status.isFinalized) {
+        transactionCompleted = true
+        if (dispatchError) {
+          console.error('Dispatch error:', dispatchError)
         }
-      } else if (status.isInBlock) {
-        console.log(`Transaction included at block ${status.asInBlock}`)
-        console.log(`Successfully sent ${amount} to ${recipientAddress}`) 
-      }        
-      unsub()
+        if (status.isInBlock) {
+          console.log(`Transaction included at block ${status.asInBlock}`)
+          console.log(`Successfully sent ${amount} to ${recipientAddress}`)
+        }
+      }
     })
+
+    // Wait for the transaction to complete or fail
+    while (!transactionCompleted) {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
+
+    console.log('Transaction should be completed.')
 
     await inquirer.prompt([
       {

@@ -4,14 +4,21 @@ import { handleUserSeed, handleChainEndpoint } from "../../common/questions"
 import { getTx } from "../../../tx"
 import { returnToMain } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
+import Entropy, {EntropyAccount} from "@entropyxyz/entropy-js"
+import { getWallet } from "@entropyxyz/entropy-js/src/keys"
 
 export const sign = async (): Promise<string> => {
   try {
     const seed = await handleUserSeed()
-    const endpoint = await handleChainEndpoint()
+    const signer = await getWallet(seed)
 
-    const entropy = await initializeEntropy(seed, endpoint)
-    let address = entropy.keys?.wallet.address
+    const entropyAccount: EntropyAccount = {
+      sigRequestKey: signer,
+      programModKey: signer
+    }
+  
+    const entropy = new Entropy({ account: entropyAccount })
+      let address = entropy.account?.sigRequestKey?.wallet.address
 
     console.log({ address })
     if (address === undefined) {
@@ -26,9 +33,8 @@ export const sign = async (): Promise<string> => {
     const serializedTx = ethers.utils.serializeTransaction(tx)
     const signatureObject = await entropy.sign({
       sigRequestHash: serializedTx,
-    }) as { r: string; s: string; v: number }
-
-    if (signatureObject.r && signatureObject.s && (signatureObject.v || signatureObject.v === 0)) {
+    })
+    if (signatureObject) {
       const signature = ethers.utils.joinSignature(signatureObject)
       await promptReturnToMain()
       return signature

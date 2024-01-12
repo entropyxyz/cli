@@ -8,6 +8,8 @@ import { getUserAddress } from "../../common/utils"
 import { buf2hex } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { returnToMain } from "../../common/utils"
+import { getWallet } from "@entropyxyz/entropy-js/src/keys"
+import Entropy, { EntropyAccount} from "@entropyxyz/entropy-js"
 
 const preprocessAfterGet = (fetchedProgram: ArrayBuffer): ArrayBuffer => {
   const uint8View = new Uint8Array(fetchedProgram)
@@ -19,9 +21,16 @@ export const setProgram = async (): Promise<string> => {
   const seed = await handleUserSeed()
   const endpoint = await handleChainEndpoint()
   const userAddress = await getUserAddress()
-  const entropy = await initializeEntropy(seed, endpoint)
+  const signer = await getWallet(seed)
 
-  if (!entropy.keys) {
+  const entropyAccount: EntropyAccount = {
+    sigRequestKey: signer,
+    programModKey: signer
+  }
+
+  const entropy = new Entropy({ account: entropyAccount })
+
+  if (!entropy.account?.sigRequestKey?.pair) {
     throw new Error("Keys are undefined") 
   }
 
@@ -35,7 +44,6 @@ export const setProgram = async (): Promise<string> => {
   ])
 
   if (actionChoice.action === "Exit to Main Menu") {
-    console.clear()
     returnToMain()
     return 'returnToMain' 
   }
@@ -64,7 +72,7 @@ export const setProgram = async (): Promise<string> => {
   } else if (actionChoice.action === "Get") {
     try {
       console.log(userAddress)
-      const fetchedProgram = await entropy.programs.get(entropy.keys.wallet.address)
+      const fetchedProgram = await entropy.programs.get(entropy.account.sigRequestKey.wallet.address)
       const processedProgram = preprocessAfterGet(fetchedProgram)
       const processedProgramHex = buf2hex(processedProgram)
       console.log('Retrieved program (hex):', processedProgramHex)

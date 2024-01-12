@@ -9,7 +9,7 @@ export const balance = async (): Promise<string> => {
   try {
     const seed = await handleUserSeed()
     const endpoint = await handleChainEndpoint()
-    const entropy = await initializeEntropy(seed, endpoint)
+    const entropy = await initializeEntropy(seed)
 
     const balanceChoice = await inquirer.prompt([
       {
@@ -23,7 +23,7 @@ export const balance = async (): Promise<string> => {
     let accountToCheck
 
     if (balanceChoice.action === "Check my balance") {
-      accountToCheck = entropy.keys?.wallet.address
+      accountToCheck = entropy.account?.sigRequestKey?.wallet.address
       if (!accountToCheck) {
         throw new Error("User address not found")
       }

@@ -1,9 +1,16 @@
 import { readFileSync } from "node:fs"
 import { handleChainEndpoint, handleFundingSeed, handleUserSeed } from "./questions"
 import Entropy from "@entropyxyz/entropy-js"
-import { decodeAddress, encodeAddress } from '@polkadot/keyring'
+import { decodeAddress, encodeAddress, Keyring } from '@polkadot/keyring'
 import { hexToU8a, isHex } from '@polkadot/util'
+import {cryptoWaitReady, sr25519PairFromSeed} from '@polkadot/util-crypto'
 import inquirer from "inquirer"
+import { Signer} from "./types"
+import { KeyringPair } from '@polkadot/keyring/types';
+import { Keypair } from '@polkadot/util-crypto/types';
+
+
+
 
 
 export const readKey = (path: string) =>  {
@@ -17,9 +24,10 @@ export const readKey = (path: string) =>  {
   export const getUserAddress = async () => {
 	const userSeed = await handleUserSeed()
 	const endpoint = await handleChainEndpoint()
-	const userEntropy = new Entropy({seed: userSeed, endpoint})
+	const userEntropy = new Entropy(userSeed)
+  const address = userEntropy.account?.sigRequestKey?.wallet.address
 	await userEntropy.ready
-	return userEntropy.keys?.wallet.address
+	return address
   }
 
 

@@ -1,12 +1,27 @@
-import Entropy from "@entropyxyz/entropy-js"
+import Entropy, { EntropyAccount } from "@entropyxyz/entropy-js"
+import { getWallet } from "@entropyxyz/entropy-js/src/keys"
 
-export const initializeEntropy = async (seed: string, endpoint: string): Promise<Entropy> => {
-  const entropy = new Entropy({ seed, endpoint })
-  await entropy.ready
+export async function initializeEntropy(account?: EntropyAccount, seed?: string): Promise<Entropy> {
+  let entropyAccount: EntropyAccount
 
-  if (!entropy.keys) {
-    throw new Error("Keys are undefined")
+  const userSessionSeed = seed ?? process.env.SEED
+  if (userSessionSeed) {
+    const signer = await getWallet(userSessionSeed)
+    if (!signer) {
+      throw new Error("Failed to create signer from seed.")
+    }
+
+    entropyAccount = {
+      sigRequestKey: signer,
+      programModKey: signer
+    }
+  } else if (account) {
+    entropyAccount = account
+  } else {
+    throw new Error("No seed or account provided for initializing Entropy.")
   }
 
+  const entropy = new Entropy({ account: entropyAccount })
+  await entropy.ready
   return entropy
 }
