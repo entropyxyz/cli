@@ -3,6 +3,8 @@ import inquirer from "inquirer";
 import { Controller } from "../../../controller";
 import { returnToMain } from "../../common/utils";
 import { initializeEntropy } from "../../common/initializeEntropy";
+import { getWallet } from "@entropyxyz/sdk/dist/keys";
+
 
 const question = [
   {
@@ -21,22 +23,24 @@ const question = [
 
 export const entropyTransfer = async (controller: Controller) => {
   try {
-    const seed = await handleUserSeed();
-    const endpoint = await handleChainEndpoint();
+    const seed = await handleUserSeed()
+    const endpoint = await handleChainEndpoint()
+
     
-    const entropy = await initializeEntropy(seed, endpoint);
+    const entropy = await initializeEntropy(seed, endpoint)
 
-    const { amount, recipientAddress } = await inquirer.prompt(question);
+    const { amount, recipientAddress } = await inquirer.prompt(question)
 
-    if (!entropy.keys) {
-      throw new Error("Keys are undefined");
+    if (!entropy.account?.sigRequestKey?.pair) {
+      throw new Error("Signer keypair is undefined or not properly initialized.")
     }
 
-    const tx = entropy.substrate.tx.balances.transfer(recipientAddress, amount);
+    const tx = await entropy.substrate.tx.balances.transferAllowDeath(recipientAddress, amount)
     
-    await tx.signAndSend(entropy.keys.wallet, async ({ status }) => {
+    const txHash: any = await tx.signAndSend(entropy.account.sigRequestKey.wallet, async ({ status }) => {
       if (status.isInBlock || status.isFinalized) {
         console.log(`Sent ${amount} to ${recipientAddress}`);
+        return txHash
       }
     });
   } catch (error: any) {
