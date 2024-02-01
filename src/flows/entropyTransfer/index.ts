@@ -34,15 +34,21 @@ export const entropyTransfer = async (controller: Controller) => {
     if (!entropy.account?.sigRequestKey?.pair) {
       throw new Error("Signer keypair is undefined or not properly initialized.")
     }
+    const tx = await entropy.substrate.tx.balances.transferAllowDeath(recipientAddress, amount).paymentInfo(entropy.account.sigRequestKey.wallet.address)
+    const tx43 = await entropy.substrate.tx.balances.transferAllowDeath(recipientAddress, amount)
 
-    const tx = await entropy.substrate.tx.balances.transferAllowDeath(recipientAddress, amount)
-    
-    const txHash: any = await tx.signAndSend(entropy.account.sigRequestKey.wallet, async ({ status }) => {
-      if (status.isInBlock || status.isFinalized) {
-        console.log(`Sent ${amount} to ${recipientAddress}`);
-        return txHash
+    console.log(`
+  class=${tx.class.toString()},
+  weight=${tx.weight.toString()},
+  partialFee=${tx.partialFee.toHuman()}
+`);
+
+    console.log(entropy.account.sigRequestKey.wallet)
+     await tx43.signAndSend(entropy.account.sigRequestKey.wallet, ({ status }) => {
+      if (status.isFinalized) {
+        console.log(`Transaction successful: Sent ${amount} to ${recipientAddress}`);
       }
-    });
+    })
   } catch (error: any) {
     console.error("Error in entropyTransfer:", error.message);
   } finally {

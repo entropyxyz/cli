@@ -13,7 +13,6 @@ export const initializeEntropy = async (seed: string, endpoint: string): Promise
     programModKey: signer,
     programDeployKey: signer,
   }
-
   
   entropy = new Entropy({ account: entropyAccount, endpoint})
   await entropy.ready;

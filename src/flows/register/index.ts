@@ -11,8 +11,13 @@ export const register = async (controller: Controller) => {
     
     const entropy = await initializeEntropy(seed, endpoint)
 
+ 
+
+    console.log({entropy})
+
     if (entropy.ready instanceof Promise) {
       await entropy.ready
+      console.log(entropy.account)
     }
 
     const address = await getUserAddress()
@@ -33,19 +38,29 @@ export const register = async (controller: Controller) => {
         return 
       }
     } else {
+
+
       const dummyProgram: any = readFileSync(
         '/Users/lreyes/Desktop/Github/Entropy/SDK/tests/testing-utils/template_barebones.wasm'
       )
   
       console.log('program deploy')
-  
-      const pointer = await entropy.programs.dev.deploy(dummyProgram)
+
+      const programFor = '5D4UnQZ67EFSfBXPnyyVbyBLVwvX4bMeULrRv6ade3YVEiAe'
+
+      const programAll = entropy.programs.get(programFor)
+
+      console.log({programAll})
+      // const pointer = await entropy.programs.dev.deploy(dummyProgram)
+      // const programGetPost = await entropy.programs.get(address)
+
+      // console.log({programGetPost})
 
       console.log('Attempting to register the address:', address) 
       await entropy.register({
         programModAccount: address,
         keyVisibility: 'Permissioned',
-        initialPrograms: [{ programPointer: pointer, programConfig: '0x' }],
+        initialPrograms: [{ programPointer: '', programConfig: '0x' }],
         freeTx: false,
       })
       console.log("Your address", address, "has been successfully registered.")

@@ -23,7 +23,7 @@ export const entropyFaucet = async (controller: Controller) => {
     const tx = entropy.substrate.tx.balances.transferAllowDeath(recipientAddress, amount)
 
     await tx.signAndSend(
-      entropy.account.sigRequestKey.wallet.address,
+      entropy.account.sigRequestKey.wallet,
       async ({ status }) => {  
         if (status.isInBlock || status.isFinalized) {
           console.log(recipientAddress, "funded")
