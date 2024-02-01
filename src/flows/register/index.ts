@@ -3,6 +3,8 @@ import { readFileSync } from 'fs'
 import { Controller } from "../../../controller"
 import { getUserAddress, returnToMain } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
+import * as util from '@polkadot/util'
+
 
 export const register = async (controller: Controller) => {
   try {
@@ -10,8 +12,6 @@ export const register = async (controller: Controller) => {
     const endpoint = await handleChainEndpoint()
     
     const entropy = await initializeEntropy(seed, endpoint)
-
- 
 
     console.log({entropy})
 
@@ -38,19 +38,38 @@ export const register = async (controller: Controller) => {
         return 
       }
     } else {
-
-
-      const dummyProgram: any = readFileSync(
-        '/Users/lreyes/Desktop/Github/Entropy/SDK/tests/testing-utils/template_barebones.wasm'
+      const basicTxProgram: any = readFileSync(
+        '/Users/lreyes/Desktop/Github/Entropy/SDK/tests/testing-utils/template_basic_transaction.wasm'
       )
   
-      console.log('program deploy')
-
-      const programFor = '5D4UnQZ67EFSfBXPnyyVbyBLVwvX4bMeULrRv6ade3YVEiAe'
-
-      const programAll = entropy.programs.get(programFor)
-
-      console.log({programAll})
+    
+      // const pointer = await entropy.programs.dev.deploy(basicTxProgram)
+      const pointer = '0x7572505786b022118475733546a273d772b3857de537a0981c3e4a805678e3a0'
+      console.log("pointer", pointer)
+  const config = `
+      {
+          "allowlisted_addresses": [
+              "772b9a9e8aa1c9db861c6611a82d251db4fac990"
+          ]
+      }
+  `
+  // convert to bytes 
+  
+  const encoder = new TextEncoder()
+  const byteArray = encoder.encode(config)
+  
+  // convert u8a to hex
+  const programConfig = util.u8aToHex(new Uint8Array(byteArray))
+  
+  
+  
+      const programData = {
+        programPointer: pointer,
+        programConfig: programConfig,
+      }
+  
+  
+      console.log({programData})
       // const pointer = await entropy.programs.dev.deploy(dummyProgram)
       // const programGetPost = await entropy.programs.get(address)
 
@@ -60,10 +79,15 @@ export const register = async (controller: Controller) => {
       await entropy.register({
         programModAccount: address,
         keyVisibility: 'Permissioned',
-        initialPrograms: [{ programPointer: '', programConfig: '0x' }],
+        initialPrograms: [programData],
         freeTx: false,
       })
+
       console.log("Your address", address, "has been successfully registered.")
+
+      const removed= await entropy.programs.dev.remove(pointer)
+      console.log("removed", removed)
+
 
       if (await returnToMain()) {
         console.clear()

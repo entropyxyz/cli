@@ -5,5 +5,6 @@ export { register } from "./register"
 // export { DevProgram } from "./DevProgram"
 // export { sign } from "./sign";
 export { entropyTransfer } from "./entropyTransfer";
+// export { ethTransaction } from "./ethTransaction";
 // export { giveZaps } from "./zaps";
 export { newWallet } from "./newWallet";
