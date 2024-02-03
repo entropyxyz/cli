@@ -43,8 +43,8 @@ export const register = async (controller: Controller) => {
       )
   
     
-      // const pointer = await entropy.programs.dev.deploy(basicTxProgram)
-      const pointer = '0x7572505786b022118475733546a273d772b3857de537a0981c3e4a805678e3a0'
+      const pointer = await entropy.programs.dev.deploy(basicTxProgram)
+      // const pointer = '0x7572505786b022118475733546a273d772b3857de537a0981c3e4a805678e3a0'
       console.log("pointer", pointer)
   const config = `
       {

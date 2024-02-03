@@ -44,7 +44,7 @@ export class Controller extends EventEmitter {
         this.on('register', () => this.runFlow(flows.register))
         // this.on('UserPrograms', () => this.runFlow(flows.UserPrograms))
         // this.on('DevPrograms', () => this.runFlow(flows.DevPrograms))
-        // this.on('sign', () => this.runFlow(flows.sign))
+        this.on('sign', () => this.runFlow(flows.sign))
         this.on('entropyTransfer', () => this.runFlow(flows.entropyTransfer))
         // this.on('giveZaps', () => this.runFlow(flows.giveZaps))
         this.on('newWallet', () => this.runFlow(flows.newWallet))
