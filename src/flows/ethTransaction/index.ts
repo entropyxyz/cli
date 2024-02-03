@@ -1,54 +1,60 @@
 import inquirer from "inquirer"
-import { handleChainEndpoint, handleUserSeed } from "../../common/questions"
+import { ethers } from "ethers"
 import { Controller } from "../../../controller"
 import { returnToMain } from "../../common/utils"
-import { initializeEntropy } from "../../common/initializeEntropy"
 
-const hexToBigInt = (hexString: string) => BigInt(hexString)
-
-export const balance = async (controller: Controller) => {
+export const ethTransaction = async (controller: Controller) => {
   try {
-    const seed = await handleUserSeed()
-    const endpoint = await handleChainEndpoint()
-    const entropy = await initializeEntropy(seed, endpoint)
 
-    const balanceChoice = await inquirer.prompt([
+    const txDetails = await inquirer.prompt([
       {
-        type: "list",
-        name: "action",
-        message: "Choose an action:",
-        choices: ["Check my balance", "Query an address balance"],
+        type: 'input',
+        name: 'to',
+        message: 'Recipient address (0x...):',
+        validate: input => ethers.utils.isAddress(input) ? true : "Please enter a valid Ethereum address.",
+      },
+      {
+        type: 'input',
+        name: 'value',
+        message: 'Amount to send (in Ether):',
+        validate: input => !isNaN(parseFloat(input)) ? true : "Please enter a valid amount.",
+      },
+      {
+        type: 'input',
+        name: 'chainId',
+        message: 'Chain ID:',
+        default: 1, // Default to Ethereum mainnet adjust as necessary
+        validate: input => !isNaN(parseInt(input, 10)) ? true : "Please enter a valid chain ID.",
+      },
+      {
+        type: 'input',
+        name: 'nonce',
+        message: 'Transaction nonce:',
+        validate: input => !isNaN(parseInt(input, 10)) ? true : "Please enter a valid nonce.",
+      },
+      {
+        type: 'input',
+        name: 'data',
+        message: 'Data to send (optional):',
+        default: '',
       },
     ])
 
-    let accountToCheck
-    if (balanceChoice.action === "Check my balance") {
-      accountToCheck = entropy.account?.sigRequestKey?.wallet.address
-      if (!accountToCheck) {
-        throw new Error("User address not found")
-      }
-    } else {
-      const question = {
-        type: "input",
-        name: "account",
-        message: "Input account to check balance for:",
-        default: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
-      }
-      const { account: inputAccount } = await inquirer.prompt([question])
-      accountToCheck = inputAccount
+    const basicTx = {
+      to: txDetails.to,
+      value: ethers.utils.parseEther(txDetails.value.toString()).toString(),
+      chainId: parseInt(txDetails.chainId, 10),
+      nonce: parseInt(txDetails.nonce, 10),
+      data: txDetails.data ? txDetails.data : '0x',
     }
+    console.log("Formatted Ethereum Transaction:", JSON.stringify(basicTx, null, 2))
 
-    const accountInfo = (await entropy.substrate.query.system.account(accountToCheck)) as any
-    const freeBalance = hexToBigInt(accountInfo.data.free)
-    console.log(`Address ${accountToCheck} has free balance: ${freeBalance.toString()} bits`)
-  } catch (error: any) {
-    console.error("Error in balance:", error.message)
+  } catch (error) {
+    console.error("Error constructing Ethereum transaction:", error)
   } finally {
     if (await returnToMain()) {
       console.clear()
       controller.emit('returnToMain')
-    } else {
-      controller.emit('exit')
     }
   }
 }

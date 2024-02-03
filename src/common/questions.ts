@@ -1,5 +1,5 @@
-import inquirer from "inquirer";
-require('dotenv').config();
+import inquirer from "inquirer"
+require('dotenv').config()
 
 
 const questionSeed = [
@@ -10,7 +10,7 @@ const questionSeed = [
     default:
       "0x29b55504652cedded9ce0ee1f5a25b328ae6c6e97827f84eee6315d0f44816d8",
   },
-];
+]
 
 const questionThresholdEndpoints = [
   {
@@ -19,7 +19,7 @@ const questionThresholdEndpoints = [
     message: "input threshold endpoints",
     default: '["http://127.0.0.1:3001", "http://127.0.0.1:3002"]',
   },
-];
+]
 
 const questionChainEndpoint = [
   {
@@ -28,7 +28,7 @@ const questionChainEndpoint = [
     message: "input endpoint",
     default: "ws://127.0.0.1:9944",
   },
-];
+]
 
 const questionName = [
   {
@@ -37,43 +37,43 @@ const questionName = [
     message: "input name",
     default: "default",
   },
-];
+]
 
 export const handleUserSeed = async () => {
   if (process.env.SEED) {
-    return process.env.SEED;
+    return process.env.SEED
   }
 
-  const { seed } = await inquirer.prompt(questionSeed);
+  const { seed } = await inquirer.prompt(questionSeed)
 
-  return seed;
-};
+  return seed
+}
 
 export const handleFundingSeed = async () => {
   if (process.env.FUNDING_SEED) {
-    return process.env.FUNDING_SEED;
+    return process.env.FUNDING_SEED
   }
 
-  const { seed } = await inquirer.prompt(questionSeed);
+  const { seed } = await inquirer.prompt(questionSeed)
 
-  return seed;
-};
+  return seed
+}
 
 
 export const handleChainEndpoint = async () => {
   if (process.env.ENDPOINT_CHAIN) {
-    return process.env.ENDPOINT_CHAIN;
+    return process.env.ENDPOINT_CHAIN
   }
 
-  const { chainEndpoint } = await inquirer.prompt(questionChainEndpoint);
-  return chainEndpoint;
-};
+  const { chainEndpoint } = await inquirer.prompt(questionChainEndpoint)
+  return chainEndpoint
+}
 
 export const handleKeyPath = async () => {
   if (process.env.NAME) {
-    return process.env.NAME.toLowerCase();
+    return process.env.NAME.toLowerCase()
   }
 
-  const { name } = await inquirer.prompt(questionName);
-  return name.toLowerCase();
-};
+  const { name } = await inquirer.prompt(questionName)
+  return name.toLowerCase()
+}
