@@ -49,7 +49,7 @@ export const register = async (controller: Controller) => {
   const config = `
       {
           "allowlisted_addresses": [
-              "772b9a9e8aa1c9db861c6611a82d251db4fac990"
+              "0x772b9a9e8aa1c9db861c6611a82d251db4fac990"
           ]
       }
   `

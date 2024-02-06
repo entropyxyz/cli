@@ -6,6 +6,11 @@ import { hexToU8a, isHex } from '@polkadot/util'
 import inquirer from "inquirer"
 import { getWallet } from '@entropyxyz/sdk/dist/keys'
 import { EntropyAccount } from "@entropyxyz/sdk"
+import { createWalletClient, http, type Hex} from 'viem'
+import { privateKeyToAccount } from "viem/accounts"
+
+
+import { sepolia } from 'viem/chains'
 
 
 export const readKey = (path: string) =>  {
@@ -69,3 +74,17 @@ export function isValidSubstrateAddress (address: any) {
     return false
   }
 }
+
+
+
+const account = privateKeyToAccount('0xf0a4721335728fe6678853711941f90d4d272c64068222ae900f655a3993b4b8')
+
+
+export const ethClient = createWalletClient({
+account, 
+chain: sepolia,
+transport:http(process.env.ETH_RPC_URL)
+})
+
+console.log({ethClient})
+
