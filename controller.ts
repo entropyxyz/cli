@@ -39,37 +39,41 @@ export class Controller extends EventEmitter {
         this.on('returnToMain', () => {
             this.restartMain = true;
         });
-        this.on('balance', () => this.runFlow(flows.balance));
-        this.on('entropyFaucet', () => this.runFlow(flows.entropyFaucet));
-        this.on('register', () => this.runFlow(flows.register));
-        this.on('setProgram', () => this.runFlow(flows.setProgram));
-        this.on('sign', () => this.runFlow(flows.sign));
-        this.on('entropyTransfer', () => this.runFlow(flows.entropyTransfer));
-        this.on('giveZaps', () => this.runFlow(flows.giveZaps));
-        this.on('newWallet', () => this.runFlow(flows.newWallet));
+        this.on('balance', () => this.runFlow(flows.balance))
+        this.on('entropyFaucet', () => this.runFlow(flows.entropyFaucet))
+        this.on('UserPrograms', () => this.runFlow(flows.userPrograms))
+        this.on('DevPrograms', () => this.runFlow(flows.devPrograms))
+        this.on('register', () => this.runFlow(flows.register))
+        this.on('constructEthereumTx', () => this.runFlow(flows.ethTransaction))
+        this.on('sign', () => this.runFlow(flows.sign))
+        this.on('entropyTransfer', () => this.runFlow(flows.entropyTransfer))
+        this.on('giveZaps', () => this.runFlow(flows.giveZaps))
+        this.on('newWallet', () => this.runFlow(flows.newWallet))
     }
 
     async main() {
         console.clear();
         console.log(ascii);
         const choices = [
-            "Entropy Faucet", "Balance", "Register", "Programs", 
+            "Entropy Faucet", "Balance", "Deploy Program", "User Programs", "Register","Construct an Ethereum Tx", 
             "Sign", "Transfer", "Give Zaps", "New Entropy Wallet", "Exit"
-        ];
+        ]
         const intro: ListQuestion = {
             type: "list",
             name: "action",
             message: "Select Action",
             pageSize: choices.length,
             choices: choices,
-        };
-        const { action } = await inquirer.prompt(intro);
+        }
+        const { action } = await inquirer.prompt(intro)
 
         switch (action) {
             case "Entropy Faucet": this.emit('entropyFaucet'); break;
             case "Balance": this.emit('balance'); break;
+            case "Deploy Program": this.emit('DevPrograms'); break; 
+            case "User Programs": this.emit('UserPrograms'); break; 
             case "Register": this.emit('register'); break;
-            case "Programs": this.emit('setProgram'); break;
+            case "Construct an Ethereum Tx": this.emit('constructEthereumTx'); break; 
             case "Sign": this.emit('sign'); break;
             case "Transfer": this.emit('entropyTransfer'); break;
             case "Give Zaps": this.emit('giveZaps'); break;

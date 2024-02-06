@@ -1,8 +1,10 @@
-import { handleChainEndpoint, handleUserSeed } from "../../common/questions";
-import inquirer from "inquirer";
-import { Controller } from "../../../controller";
-import { returnToMain } from "../../common/utils";
-import { initializeEntropy } from "../../common/initializeEntropy";
+import { handleChainEndpoint, handleUserSeed } from "../../common/questions"
+import inquirer from "inquirer"
+import { Controller } from "../../../controller"
+import { returnToMain } from "../../common/utils"
+import { initializeEntropy } from "../../common/initializeEntropy"
+import { getWallet } from "@entropyxyz/sdk/dist/keys"
+
 
 const question = [
   {
@@ -17,36 +19,40 @@ const question = [
     message: "Input recipient's address:",
     default: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
   },
-];
+]
 
 export const entropyTransfer = async (controller: Controller) => {
   try {
-    const seed = await handleUserSeed();
-    const endpoint = await handleChainEndpoint();
+    const seed = await handleUserSeed()
+    const endpoint = await handleChainEndpoint()
+
     
-    const entropy = await initializeEntropy(seed, endpoint);
+    const entropy = await initializeEntropy(seed, endpoint)
 
-    const { amount, recipientAddress } = await inquirer.prompt(question);
+    await entropy.ready
 
-    if (!entropy.keys) {
-      throw new Error("Keys are undefined");
+    const { amount, recipientAddress } = await inquirer.prompt(question)
+
+    if (!entropy.account?.sigRequestKey?.pair) {
+      throw new Error("Signer keypair is undefined or not properly initialized.")
     }
+    const tx = await entropy.substrate.tx.balances.transferAllowDeath(recipientAddress, amount)
 
-    const tx = entropy.substrate.tx.balances.transfer(recipientAddress, amount);
-    
-    await tx.signAndSend(entropy.keys.wallet, async ({ status }) => {
-      if (status.isInBlock || status.isFinalized) {
-        console.log(`Sent ${amount} to ${recipientAddress}`);
+
+    console.log(entropy.account.sigRequestKey.wallet)
+     await tx.signAndSend(entropy.account.sigRequestKey.wallet, ({ status }) => {
+      if (status.isFinalized) {
+        console.log(`Transaction successful: Sent ${amount} to ${recipientAddress}`)
       }
-    });
+    })
   } catch (error: any) {
-    console.error("Error in entropyTransfer:", error.message);
+    console.error("Error in entropyTransfer:", error.message)
   } finally {
     if (await returnToMain()) {
-      console.clear();
-      controller.emit('returnToMain');
+      console.clear()
+      controller.emit('returnToMain')
     } else {
-      controller.emit('exit');
+      controller.emit('exit')
     }
   }
-};
+}
