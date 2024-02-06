@@ -77,8 +77,11 @@ export function isValidSubstrateAddress (address: any) {
 
 
 
-const account = privateKeyToAccount('0xf0a4721335728fe6678853711941f90d4d272c64068222ae900f655a3993b4b8')
+const privateKey =process.env.ETH_PK
 
+const account = privateKeyToAccount(
+  privateKey as Hex
+)
 
 export const ethClient = createWalletClient({
 account, 

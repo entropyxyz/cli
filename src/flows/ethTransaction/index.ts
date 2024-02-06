@@ -68,7 +68,7 @@ export const ethTransaction = async (controller: Controller) => {
     //   data: '0x' + Buffer.from('Created On Entropy').toString('hex'),
     // }
 
-    const privateKey =    process.env.ETH_PK
+    const privateKey =process.env.ETH_PK
 
   const account = privateKeyToAccount(
     privateKey as Hex
