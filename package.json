@@ -6,6 +6,8 @@
   "scripts": {
     "entropy": "yarn run start",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "lint": "eslint . --ext .ts",
     "start": "ts-node index.ts"
   },
   "repository": {
@@ -31,6 +33,9 @@
     "x25519": "^0.1.0"
   },
   "devDependencies": {
-    "@types/inquirer": "^9.0.2"
+    "@types/inquirer": "^9.0.2",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0"
   }
 }
