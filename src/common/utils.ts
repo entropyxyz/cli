@@ -12,55 +12,46 @@ import { privateKeyToAccount } from "viem/accounts"
 
 import { sepolia } from 'viem/chains'
 
+export function getActiveOptions (options) {
+  return options.reduce((setOptions, option) => {
+    if (process.argv.includes(option.long) || process.argv.includes(option.short)) {
+      setOptions[option.key] = true
+    }
+    return setOptions
+  }, {})
+}
 
-export const readKey = (path: string) =>  {
-	const buffer = readFileSync(path)
-	const result = new Uint8Array(buffer.byteLength)
-	buffer.copy(result)
-	buffer.fill(0)
-	return result
-  }
 
 // Streamlined user address initialization with async/await and error handling
 export const getUserAddress = async () => {
-  try {
-    const userSeed = await handleUserSeed()
-    const endpoint = await handleChainEndpoint()
+  const userSeed = await handleUserSeed()
+  const endpoint = await handleChainEndpoint()
 
-    const signer = await getWallet(userSeed)
+  const signer = await getWallet(userSeed)
 
-    const entropyAccount: EntropyAccount = {
-      sigRequestKey: signer,
-      programModKey: signer,
-      programDeployKey: signer,
-    }
-
-    const userEntropy = new Entropy({ account: entropyAccount, endpoint })
-    await userEntropy.ready
-    return userEntropy.account?.sigRequestKey?.wallet.address
-  } catch (error) {
-    console.error("Error initializing user address:", error)
-    return null
+  const entropyAccount = {
+    sigRequestKey: signer,
+    programModKey: signer,
+    programDeployKey: signer,
   }
+  return entropyAccount?.sigRequestKey?.wallet?.address
 }
 
- export const returnToMain = async() =>  {
-    const response = await inquirer.prompt([
-        {
-            type: "confirm",
-            name: "returnToMain",
-            message: "Return to main menu?",
-            default: true,
-        },
-    ])
+export const returnToMain = async () =>  {
+  const response = await inquirer.prompt([
+    {
+      type: "confirm",
+      name: "returnToMain",
+      message: "Return to main menu?",
+      default: true,
+    },
+  ])
 
-    return response.returnToMain
+  return response.returnToMain
 }
 
 export function buf2hex (buffer: ArrayBuffer): string {
-  return [...new Uint8Array(buffer)]
-    .map((x) => x.toString(16).padStart(2, '0'))
-    .join('')
+  return Buffer.from(buffer).toString('hex')
 }
 
 
@@ -77,17 +68,17 @@ export function isValidSubstrateAddress (address: any) {
 
 
 
-const privateKey =process.env.ETH_PK
+// const privateKey =process.env.ETH_PK
 
-const account = privateKeyToAccount(
-  privateKey as Hex
-)
+// const account = privateKeyToAccount(
+//   privateKey as Hex
+// )
 
-export const ethClient = createWalletClient({
-account, 
-chain: sepolia,
-transport:http(process.env.ETH_RPC_URL)
-})
+// export const ethClient = createWalletClient({
+//   account,
+//   chain: sepolia,
+//   transport:http(process.env.ETH_RPC_URL)
+// })
 
-console.log({ethClient})
+// console.log({ethClient})
 

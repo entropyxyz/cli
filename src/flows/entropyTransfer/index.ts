@@ -3,7 +3,6 @@ import inquirer from "inquirer"
 import { Controller } from "../../../controller"
 import { returnToMain } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { getWallet } from "@entropyxyz/sdk/dist/keys"
 
 
 const question = [
@@ -40,7 +39,7 @@ export const entropyTransfer = async (controller: Controller) => {
 
 
     console.log(entropy.account.sigRequestKey.wallet)
-     await tx.signAndSend(entropy.account.sigRequestKey.wallet, ({ status }) => {
+    await tx.signAndSend(entropy.account.sigRequestKey.wallet, ({ status }) => {
       if (status.isFinalized) {
         console.log(`Transaction successful: Sent ${amount} to ${recipientAddress}`)
       }

@@ -1,15 +1,13 @@
 import inquirer from "inquirer"
 import { ethers } from "ethers"
 import { Controller } from "../../../controller"
-import { ethClient, returnToMain } from "../../common/utils"
+import { returnToMain } from "../../common/utils"
 import { privateKeyToAccount } from "viem/accounts"
-import { createClient, type Hex } from "viem"
+import { type Hex } from "viem"
 import { handleChainEndpoint, handleUserSeed } from "../../common/questions"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { createWalletClient, http } from "viem"
 import { sepolia } from "viem/chains"
-import { createPublicClient } from "viem"
-const dotenv = require("dotenv")
 import { prepareTransactionRequest, signTransaction, sendRawTransaction, waitForTransactionReceipt} from "viem/actions"
 
 
@@ -20,7 +18,7 @@ export const ethTransaction = async (controller: Controller) => {
 
   const entropy = await initializeEntropy(seed, endpoint)
 
-  let address = entropy.account?.sigRequestKey?.wallet.address
+  const address = entropy.account?.sigRequestKey?.wallet.address
   console.log({ address })
   if (address == undefined) {
     throw new Error("address issue")
@@ -70,28 +68,23 @@ export const ethTransaction = async (controller: Controller) => {
 
     const privateKey =process.env.ETH_PK
 
-  const account = privateKeyToAccount(
+    const account = privateKeyToAccount(
     privateKey as Hex
-  )
+    )
 
-  const publicClient = createPublicClient({
-    chain: sepolia,
-    transport: http(process.env.ETH_RPC_URL),
-  })
-
-  const client = createWalletClient({
-    account,
-    chain: sepolia,
-    transport: http(process.env.ETH_RPC_URL),
-  })
+    const client = createWalletClient({
+      account,
+      chain: sepolia,
+      transport: http(process.env.ETH_RPC_URL),
+    })
 
 
-  const basicTx = await prepareTransactionRequest( client, {
-    account,
-    to: txDetails.to as Hex, 
-    value: BigInt(txDetails.value),
-    data: '0x' + Buffer.from('hi').toString('hex') as Hex,
-  })
+    const basicTx = await prepareTransactionRequest( client, {
+      account,
+      to: txDetails.to as Hex,
+      value: BigInt(txDetails.value),
+      data: '0x' + Buffer.from('hi').toString('hex') as Hex,
+    })
 
     console.log({basicTx})
 
@@ -107,12 +100,12 @@ export const ethTransaction = async (controller: Controller) => {
 
     if (entropySig) {
 
-    const ethHash = await sendRawTransaction(client, { serializedTransaction: sigRequestHash }) 
-    console.log({ethHash})
+      const ethHash = await sendRawTransaction(client, { serializedTransaction: sigRequestHash })
+      console.log({ethHash})
 
     
-    const receipt = await waitForTransactionReceipt(client, {hash: ethHash})
-    console.log({ receipt })
+      const receipt = await waitForTransactionReceipt(client, {hash: ethHash})
+      console.log({ receipt })
 
     }
 

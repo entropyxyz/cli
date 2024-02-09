@@ -28,58 +28,60 @@ export const devPrograms = async (controller: Controller) => {
     ])
 
     switch (actionChoice.action) {
-      case "Deploy":
-        const answers = await inquirer.prompt([
+    case "Deploy": {
+      const answers = await inquirer.prompt([
+        {
+          type: "input",
+          name: "programPath",
+          message: "Please provide the path to your program file:",
+          validate: input => {
+            if (input) return true
+            else return "A valid path to a program file is required!"
+          },
+        },
+        {
+          type: "confirm",
+          name: "hasConfig",
+          message: "Does your program have a configuration?",
+          default: false,
+        },
+      ])
+
+      const userProgram: any = readFileSync(answers.programPath)
+      let programConfig = ''
+
+      if (answers.hasConfig) {
+        const configAnswers = await inquirer.prompt([
           {
             type: "input",
-            name: "programPath",
-            message: "Please provide the path to your program file:",
-            validate: input => {
-              if (input) return true
-              else return "A valid path to a program file is required!"
-            },
-          },
-          {
-            type: "confirm",
-            name: "hasConfig",
-            message: "Does your program have a configuration?",
-            default: false,
+            name: "config",
+            message: "Please provide your program configuration as a JSON string:",
           },
         ])
 
-        const userProgram: any = readFileSync(answers.programPath)
-        let programConfig = ''
+        // Convert JSON string to bytes and then to hex
+        const encoder = new TextEncoder()
+        const byteArray = encoder.encode(configAnswers.config)
+        programConfig = util.u8aToHex(new Uint8Array(byteArray))
+      }
 
-        if (answers.hasConfig) {
-          const configAnswers = await inquirer.prompt([
-            {
-              type: "input",
-              name: "config",
-              message: "Please provide your program configuration as a JSON string:",
-            },
-          ])
+      const pointer = await entropy.programs.dev.deploy(userProgram, programConfig)
+      console.log("Program deployed successfully with pointer:", pointer)
+      break
+    }
+    case "Get Program Pointers": {
+      console.log(userAddress)
+      if (!userAddress) return
+      const fetchedProgram = await entropy.programs.get(userAddress)
+      console.log('Retrieved program pointers:', fetchedProgram)
+      break
+    }
 
-          // Convert JSON string to bytes and then to hex
-          const encoder = new TextEncoder()
-          const byteArray = encoder.encode(configAnswers.config)
-          programConfig = util.u8aToHex(new Uint8Array(byteArray))
-        }
-
-        const pointer = await entropy.programs.dev.deploy(userProgram, programConfig)
-        console.log("Program deployed successfully with pointer:", pointer)
-        break
-
-      case "Get Program Pointers":
-        console.log(userAddress)
-        if (!userAddress) return
-        const fetchedProgram = await entropy.programs.get(userAddress)
-        console.log('Retrieved program pointers:', fetchedProgram)
-        break
-
-      case "Exit to Main Menu":
-        console.clear()
-        controller.emit('returnToMain')
-        break
+    case "Exit to Main Menu": {
+      console.clear()
+      controller.emit('returnToMain')
+      break
+    }
     }
   } catch (error) {
     console.error("Error in setProgram:", error)

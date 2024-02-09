@@ -1,5 +1,5 @@
 export { entropyFaucet } from "./entropyFaucet"
-export { balance } from "./Balance"
+export { checkBalance } from "./Balance"
 export { register } from "./register"
 export { userPrograms } from "./UserPrograms"
 export { devPrograms } from "./DeployPrograms"

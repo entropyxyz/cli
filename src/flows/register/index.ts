@@ -46,20 +46,20 @@ export const register = async (controller: Controller) => {
       const pointer = await entropy.programs.dev.deploy(basicTxProgram)
       // const pointer = '0x7572505786b022118475733546a273d772b3857de537a0981c3e4a805678e3a0'
       console.log("pointer", pointer)
-  const config = `
+      const config = `
       {
           "allowlisted_addresses": [
               "0x772b9a9e8aa1c9db861c6611a82d251db4fac990"
           ]
       }
   `
-  // convert to bytes 
+      // convert to bytes 
   
-  const encoder = new TextEncoder()
-  const byteArray = encoder.encode(config)
+      const encoder = new TextEncoder()
+      const byteArray = encoder.encode(config)
   
-  // convert u8a to hex
-  const programConfig = util.u8aToHex(new Uint8Array(byteArray))
+      // convert u8a to hex
+      const programConfig = util.u8aToHex(new Uint8Array(byteArray))
   
   
   

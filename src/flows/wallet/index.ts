@@ -1,15 +1,15 @@
 import inquirer from 'inquirer'
 import { randomAsHex } from "@polkadot/util-crypto";
-import { Controller } from "../../../controller";
 import { getWallet } from "@entropyxyz/sdk/dist/keys";
 import Entropy, { EntropyAccount } from "@entropyxyz/sdk";
 import { handleChainEndpoint } from "../../common/questions";
 
-const createQuestions = [
+const questions = [
   {
     type: 'confirm',
     name: 'import',
-    message: 'Would you like to import a key'
+    message: 'Would you like to import a key',
+    default: false,
   },
   {
     type: 'input',
@@ -23,6 +23,8 @@ const createQuestions = [
 
 
 export const newWallet = async () => {
+
+
 
   try {
     const seed: any = randomAsHex(32)
@@ -42,16 +44,16 @@ export const newWallet = async () => {
       programModKey: signer,
       programDeployKey: signer,
     }
-  
-    
+
+
     const entropy = new Entropy({ account: entropyAccount, endpoint})
     await entropy.ready;
-  
-    
+
+
     if (!entropy.account?.sigRequestKey?.wallet.address) {
       throw new Error("Keys are undefined");
     }
-    
+
     const address = entropy.account?.sigRequestKey.wallet.address;
     console.log("Take the seed and add it to the .env", {
       wallet: address,
