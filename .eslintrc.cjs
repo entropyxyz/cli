@@ -10,7 +10,8 @@ module.exports = {
     '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/no-unused-vars': 'error',
     '@typescript-eslint/ban-ts-comment': 1,
-    ' @typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+
   },
   ignorePatterns: ['node_modules/', 'dist/', 'examples/', '.yarnrc.yml'],
 }
