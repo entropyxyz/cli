@@ -1,9 +1,6 @@
 import inquirer from 'inquirer'
 import { randomAsHex } from '@polkadot/util-crypto'
-import { Controller } from '../../../controller'
 import { getWallet } from '@entropyxyz/sdk/dist/keys'
-import Entropy, { EntropyAccount } from '@entropyxyz/sdk'
-import { handleChainEndpoint } from '../../common/questions'
 import { importQuestions } from './import-key'
 import * as passwordFlow from '../password'
 const questions = [
@@ -28,30 +25,19 @@ const questions = [
   ...passwordFlow.questions,
 ]
 
-
-
-
-
 export async function newKey ({ accounts }) {
-
+  accounts = Array.isArray(accounts) ? accounts : []
   const { secret, secretType, name, path, password, importKey } = await inquirer.prompt(questions)
-  const names = accounts.map((account) => account.name)
 
-  const sameNames = names.reduce((agg, accountName) => {
-    if (
-      // check if same name exists
-      accountName === name ||
-      // check if multiple indexed names exist
-      accountName.startsWith(name) &&
-      // make sure if it doese start with that same that the next is the number
-      // example: My Name 1 -> true My Name awesome -> false
-      accountName.split(' ').length + 1 === name.split(' ').length &&
-      /^\d+$/.test(accountName.split(' ')[(accountName.split(' ').length - 1)])
-    ) {
-      agg.push(accountName)
-    }
-    return agg
-  }, [])
+  const sameName = accounts.map((account) => account.name)
+
+  let newName = name
+  let index = 1
+
+  while (sameName.includes(newName)) {
+    newName = `${name} ${index}`
+    index++
+  }
 
   const seed = importKey ? secret : randomAsHex(32)
   const signer = await getWallet(seed)
@@ -63,13 +49,16 @@ export async function newKey ({ accounts }) {
     path,
   }
 
+  const encryptedData = password ? passwordFlow.encrypt(data, password) : data
+
   const newKey = {
-    name: `${name}${ sameNames.length ? ` ${sameNames.length + 1}` : ''}`,
+    name: newName,
     address,
-    data: password ? passwordFlow.encrypt(data, password) : data,
+    data: encryptedData,
   }
 
-  console.log(`New account: \n{\n\tname: ${newKey.name} \n\taddress: ${newKey.address} \n\ttype: ${newKey.type}\n}`)
+  console.log(`New account:\n{\n\tname: ${newKey.name}\n\taddress: ${newKey.address}\n\ttype: ${data.type}\n}`)
+
   accounts.push(newKey)
   return accounts
 }
