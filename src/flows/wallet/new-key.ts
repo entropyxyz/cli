@@ -1,10 +1,11 @@
 import inquirer from 'inquirer'
-import { randomAsHex } from "@polkadot/util-crypto";
-import { Controller } from "../../../controller";
-import { getWallet } from "@entropyxyz/sdk/dist/keys";
-import Entropy, { EntropyAccount } from "@entropyxyz/sdk";
-import { handleChainEndpoint } from "../../common/questions";
-
+import { randomAsHex } from '@polkadot/util-crypto'
+import { Controller } from '../../../controller'
+import { getWallet } from '@entropyxyz/sdk/dist/keys'
+import Entropy, { EntropyAccount } from '@entropyxyz/sdk'
+import { handleChainEndpoint } from '../../common/questions'
+import { importQuestions } from './import-key'
+import * as passwordFlow from '../password'
 const questions = [
   {
     type: 'confirm',
@@ -12,20 +13,28 @@ const questions = [
     message: 'Would you like to import a key',
     default: false,
   },
+  ...importQuestions,
   {
     type: 'input',
     name: 'name',
     default: 'My Key'
   },
+  {
+    type: 'confirm',
+    name: 'newPassword',
+    message: 'Would you like to password protect this key?',
+    default: true,
+  },
+  ...passwordFlow.questions,
 ]
 
 
 
 
 
-export const newKey = async ({ accounts }) => {
+export async function newKey ({ accounts }) {
 
-  const { secret, name, path } = await inquirer.prompt(questions)
+  const { secret, secretType, name, path, password, importKey } = await inquirer.prompt(questions)
   const names = accounts.map((account) => account.name)
 
   const sameNames = names.reduce((agg, accountName) => {
@@ -39,58 +48,28 @@ export const newKey = async ({ accounts }) => {
       accountName.split(' ').length + 1 === name.split(' ').length &&
       /^\d+$/.test(accountName.split(' ')[(accountName.split(' ').length - 1)])
     ) {
-      agg.push(sameNames)
+      agg.push(accountName)
     }
     return agg
   }, [])
 
+  const seed = importKey ? secret : randomAsHex(32)
+  const signer = await getWallet(seed)
+  const address = signer.wallet.address
+
+  const data = {
+    type: secretType || 'seed',
+    seed,
+    path,
+  }
+
   const newKey = {
     name: `${name}${ sameNames.length ? ` ${sameNames.length + 1}` : ''}`,
-    seed:
+    address,
+    data: password ? passwordFlow.encrypt(data, password) : data,
   }
 
-
-  try {
-    const seed: any = randomAsHex(32)
-    const signer = await getWallet(seed)
-
-
-
-
-
-
-
-    const endpoint = await handleChainEndpoint()
-
-
-    const entropyAccount: EntropyAccount = {
-      sigRequestKey: signer,
-      programModKey: signer,
-      programDeployKey: signer,
-    }
-
-
-    const entropy = new Entropy({ account: entropyAccount, endpoint})
-    await entropy.ready;
-
-
-    if (!entropy.account?.sigRequestKey?.wallet.address) {
-      throw new Error("Keys are undefined");
-    }
-
-    const address = entropy.account?.sigRequestKey.wallet.address;
-    console.log("Take the seed and add it to the .env", {
-      wallet: address,
-      seed,
-    });
-  } catch (error: any) {
-    console.error("Error in creating new wallet:", error.message);
-  } finally {
-    if (await returnToMain()) {
-      console.clear();
-      controller.emit('returnToMain');
-    } else {
-      controller.emit('exit');
-    }
-  }
-};
+  console.log(`New account: \n{\n\tname: ${newKey.name} \n\taddress: ${newKey.address} \n\ttype: ${newKey.type}\n}`)
+  accounts.push(newKey)
+  return accounts
+}

@@ -20,7 +20,7 @@ export const options = [
     long: '--endpoint',
     short: '-e',
     key: 'ENDPOINT',
-    define: 'Runs entropy with the given endpoint and ignores network endpoints in config`entropy --endpoint=ws://127.0.0.1:9944` can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`',
+    define: 'Runs entropy with the given endpoint and ignores network endpoints in config`entropy --endpoint ws://127.0.0.1:9944` can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`',
   },
 ]
 
@@ -40,7 +40,7 @@ const choices = {
   'Sign': async () => {},
   'Transfer': async () => {},
   'Give Zaps': async () => {},
-  'Create/Import New Key': async () => {},
+  'Wallet': flows.wallet,
 }
 
 if (setOptions.DEV_MODE) Object.assign(choices, devChoices)
@@ -57,25 +57,30 @@ const intro = {
   choices: Object.keys(choices),
 }
 
-main()
 const returnToMainMenu = {
   type: 'confirm',
   name: 'returnToMain',
   message: 'Return to main menu?'
 }
 
+main()
+
 
 export async function main () {
+  const storedConfig = await config.get()
   const answers = await inquirer.prompt([intro])
-  const { choice } = answers
   const user = await config.get()
   console.log('user',user)
   if (!user.accounts.length) {
 
   }
-  if (choice === 'Exit') return console.log('Have a nice day')
-    console.log('choice', answers, Object.keys(choices))
-  await flows[choice]
+
+  if (answers.choice === 'Exit') return console.log('Have a nice day')
+  console.log(answers)
+  const newConfigUpdates = await choices[answers.choice](storedConfig)
+
+  if (newConfigUpdates) config.set({ ...storedConfig, ...newConfigUpdates })
+
   const { returnToMain } = await inquirer.prompt([returnToMainMenu])
   if (returnToMain) main()
   console.log('Have a nice day')

@@ -1,6 +1,6 @@
 import { mnemonicValidate, mnemonicToMiniSecret } from '@polkadot/util-crypto'
 
-const questions = [
+export const importQuestions = [
   {
     type: 'list',
     name: 'secretType',
@@ -11,10 +11,11 @@ const questions = [
   {
     type: 'input',
     name: 'secret',
-    message: ({ secretType }) => { return`${secretType}` },
+    message: ({ secretType }) => `${secretType}:`,
     validate: (secret, {secretType}) => {
+      console.log('\nsecret:', secret, typeof secret)
       if (secretType === 'mnemonic') return mnemonicValidate(secret) ? true : 'not a valid mnemonic'
-      if (secret.length === 66 && secret.startsWinth('0x')) return true
+      if (secret.length === 66 && secret.startsWith('0x')) return true
       if (secret.length === 64) return true
       return 'not a valid seed'
     },
@@ -22,6 +23,7 @@ const questions = [
       if (secretType === 'mnemonic') {
         return mnemonicToMiniSecret(secret)
       }
+      return secret
     },
     when: ({ importKey }) => importKey
   },
@@ -33,7 +35,3 @@ const questions = [
     when: ({ importKey }) => importKey
   },
 ]
-
-export async function importKey () {
-
-}

@@ -6,7 +6,7 @@ export function migrate (data= {}) {
         ...data,
         accounts: [],
         endpoints: {
-          dev: '  ',
+          dev: 'ws://127.0.0.1:9944',
           'test-net': 'ws://54.91.12.50:9944'
         },
         'migration-version': version,
