@@ -1,5 +1,6 @@
 import inquirer from "inquirer"
 import { initializeEntropy } from "../../common/initializeEntropy"
+import { accountChoices } from "../../common/utils"
 import { readFileSync } from "fs"
 import * as util from "@polkadot/util"
 
@@ -103,11 +104,11 @@ async function getProgramPointers (entropy, account) {
   }
 }
 
-function accountChoices (accounts) {
-  return accounts
-    .map((account) => ({
-      name: `${account.name} (${account.address})`,
-      value: account,
-    }))
-    .concat([{ name: "Other", value: null }])
-}
+// function accountChoices (accounts) {
+//   return accounts
+//     .map((account) => ({
+//       name: `${account.name} (${account.address})`,
+//       value: account,
+//     }))
+//     .concat([{ name: "Other", value: null }])
+// }

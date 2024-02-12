@@ -1,4 +1,5 @@
 import inquirer from "inquirer"
+import { accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 const hexToBigInt = (hexString: string) => BigInt(hexString)
@@ -60,9 +61,9 @@ export async function checkBalance ({ accounts, endpoint }) {
 // }
 
 
-function accountChoices (accounts) {
-  return accounts.map(account => ({
-    name: `${account.name} (${account.address})`, 
-    value: account 
-  })).concat([{ name: 'Other', value: null }])
-}
+// function accountChoices (accounts) {
+//   return accounts.map(account => ({
+//     name: `${account.name} (${account.address})`, 
+//     value: account 
+//   })).concat([{ name: 'Other', value: null }])
+// }

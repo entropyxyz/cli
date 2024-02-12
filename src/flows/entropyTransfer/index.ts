@@ -1,9 +1,6 @@
-import { handleChainEndpoint, handleUserSeed } from "../../common/questions"
 import inquirer from "inquirer"
-import { Controller } from "../../../controller"
-import { returnToMain } from "../../common/utils"
+import { accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
-
 
 const question = [
   {
@@ -20,38 +17,39 @@ const question = [
   },
 ]
 
-export const entropyTransfer = async (controller: Controller) => {
-  try {
-    const seed = await handleUserSeed()
-    const endpoint = await handleChainEndpoint()
-
-    
-    const entropy = await initializeEntropy(seed, endpoint)
-
-    await entropy.ready
-
-    const { amount, recipientAddress } = await inquirer.prompt(question)
-
-    if (!entropy.account?.sigRequestKey?.pair) {
-      throw new Error("Signer keypair is undefined or not properly initialized.")
-    }
-    const tx = await entropy.substrate.tx.balances.transferAllowDeath(recipientAddress, amount)
-
-
-    console.log(entropy.account.sigRequestKey.wallet)
-    await tx.signAndSend(entropy.account.sigRequestKey.wallet, ({ status }) => {
-      if (status.isFinalized) {
-        console.log(`Transaction successful: Sent ${amount} to ${recipientAddress}`)
-      }
-    })
-  } catch (error: any) {
-    console.error("Error in entropyTransfer:", error.message)
-  } finally {
-    if (await returnToMain()) {
-      console.clear()
-      controller.emit('returnToMain')
-    } else {
-      controller.emit('exit')
-    }
+export async function entropyTransfer ({ accounts, endpoint }) {
+  const accountQuestion = {
+    type: "list",
+    name: "selectedAccount",
+    message: "Choose account:",
+    choices: accountChoices(accounts),
   }
+  const answers = await inquirer.prompt ([accountQuestion])
+  const selectedAccount = answers.selectedAccount
+ 
+  const accountData = selectedAccount.data
+  console.log("Selected account data:", accountData.seed)
+
+  const entropy = await initializeEntropy (accounts.data.seed, endpoint)
+
+  await entropy.ready
+
+  const { amount, recipientAddress } = await inquirer.prompt(question)
+
+  if (!entropy.account?.sigRequestKey?.pair) {
+    throw new Error("Signer keypair is undefined or not properly initialized.")
+  }
+  const tx = await entropy.substrate.tx.balances.transferAllowDeath(
+    recipientAddress,
+    amount
+  )
+
+  console.log (entropy.account.sigRequestKey.wallet)
+  await tx.signAndSend (entropy.account.sigRequestKey.wallet, ({ status }) => {
+    if (status.isFinalized) {
+      console.log(
+        `Transaction successful: Sent ${amount} to ${recipientAddress}`
+      )
+    }
+  })
 }
