@@ -2,12 +2,13 @@ import Entropy from "@entropyxyz/sdk"
 import { getWallet } from '@entropyxyz/sdk/dist/keys'
 import { EntropyAccount } from "@entropyxyz/sdk"
 
-export const initializeEntropy = async (seed: string, endpoint: string): Promise<Entropy> => {
-  if (!seed) {
+export const initializeEntropy = async ({ data }, endpoint: string): Promise<Entropy> => {
+  if (!data.seed) {
     const entropy = new Entropy({ endpoint })
     await entropy.ready
     return entropy
   }
+  const { seed } = data
   const signer = await getWallet(seed)
 
   const entropyAccount: EntropyAccount = {
