@@ -5,7 +5,8 @@ import { initializeEntropy } from "../../common/initializeEntropy"
 const hexToBigInt = (hexString: string) => BigInt(hexString)
 
 
-export async function checkBalance ({ accounts, endpoint }) {
+export async function checkBalance ({ accounts, endpoints }, options) {
+  const endpoint = endpoints[options.ENDPOINT]
   const accountQuestion = {
     type: "list",
     name: "selectedAccount",
@@ -22,17 +23,15 @@ export async function checkBalance ({ accounts, endpoint }) {
 
   const answers = await inquirer.prompt([accountQuestion, otherQuestion])
   const selectedAccount = answers.selectedAccount
-  let accountData
-
-
+  console.log('selectedAccount:', selectedAccount)
   if (!selectedAccount) {
     // handle other case 
+    console.log('whoops')
     return
   } else {
-    accountData = selectedAccount.data
-    console.log("Selected account data:", accountData.seed)
-
-    const entropy = await initializeEntropy(accountData.seed, endpoint)
+    console.log('before entropy creation', endpoint)
+    const entropy = await initializeEntropy('', endpoint)
+    console.log('entropy:', entropy)
     const accountInfo = (await entropy.substrate.query.system.account(selectedAccount.address)) as any
     const freeBalance = hexToBigInt(accountInfo.data.free)
     console.log(`Address ${selectedAccount.address} has a balance of: ${freeBalance.toString()} bits`)

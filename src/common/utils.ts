@@ -3,6 +3,7 @@ import { hexToU8a, isHex } from "@polkadot/util"
 
 export function getActiveOptions (options) {
   return options.reduce((setOptions, option) => {
+    if (option.default) setOptions[option.key] = option.default
     if (
       process.argv.includes(option.long) ||
       process.argv.includes(option.short)
