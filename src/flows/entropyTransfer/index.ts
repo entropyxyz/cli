@@ -17,7 +17,9 @@ const question = [
   },
 ]
 
-export async function entropyTransfer ({ accounts, endpoint }) {
+export async function entropyTransfer ({ accounts, endpoints }, options) {
+  const endpoint = endpoints[options.ENDPOINT]
+
   const accountQuestion = {
     type: "list",
     name: "selectedAccount",
@@ -27,12 +29,10 @@ export async function entropyTransfer ({ accounts, endpoint }) {
   const answers = await inquirer.prompt ([accountQuestion])
   const selectedAccount = answers.selectedAccount
  
-  const accountData = selectedAccount.data
-  console.log("Selected account data:", accountData.seed)
-
-  const entropy = await initializeEntropy (accounts.data.seed, endpoint)
-
-  await entropy.ready
+  const entropy = await initializeEntropy(
+    { data: selectedAccount.data },
+    endpoint
+  )
 
   const { amount, recipientAddress } = await inquirer.prompt(question)
 

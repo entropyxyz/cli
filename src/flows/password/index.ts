@@ -1,10 +1,5 @@
 import * as crypto from 'crypto'
 
-// type: 'password',
-// name: 'password',
-// message: 'Enter password to decrypt data:',
-// mask: '*',
-
 export const questions = [
   {
     type: 'password:',

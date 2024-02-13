@@ -26,6 +26,7 @@ export async function ethTransaction ({ accounts, endpoints }, options) {
   if (address == undefined) {
     throw new Error("address issue")
   }
+  // for formatting transactions// 
   // const txDetails = await inquirer.prompt([
   //   {
   //     type: "input",
@@ -59,15 +60,12 @@ export async function ethTransaction ({ accounts, endpoints }, options) {
   // },
   // ])
 
-  // const simBasicTx = {
-  //   to: "0x772b9a9e8aa1c9db861c6611a82d251db4fac990",
-  //   value: 1,
-  //   chainId: 11155111,
-  //   nonce: 1,
-  //   gasLimit: '0x5328',
-  //   data: "0x" + Buffer.from("Created On Entropy").toString("hex"),
-  //   maxPriorityFeePerGas: '0x3b9aca00', 
-  //   maxFeePerGas: '', 
+  // const custonBasicTx = {
+  // to: txDetails.to,
+  // value: ethers.utils.parseEther(txDetails.value).toHexString(),
+  // chainId: txDetails.chainId,
+  // nonce: 1,
+  // data: "0x" + Buffer.from(`${txDetails.data}`).toString("hex"),
   // }
 
 
@@ -79,6 +77,7 @@ export async function ethTransaction ({ accounts, endpoints }, options) {
     nonce: 1,
     data: '0x43726561746564204f6e20456e74726f7079'
   }
+  
   console.log({ basicTx })
 
   const entropySig = await entropy.signTransaction({txParams: basicTx, type: 'eth' }) as string

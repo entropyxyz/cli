@@ -63,7 +63,7 @@ export async function sign ({ accounts, endpoints }, options) {
 
   const basicTx = {
     to: txDetails.to,
-    value: txDetails.value,
+    value: ethers.utils.parseEther(txDetails.value).toHexString(),
     chainId: txDetails.chainId,
     nonce: 1,
     data: "0x" + Buffer.from(`${txDetails.data}`).toString("hex"),

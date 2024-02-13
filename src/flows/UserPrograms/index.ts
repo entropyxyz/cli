@@ -3,7 +3,9 @@ import { accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import * as util from "@polkadot/util"
 
-export async function userPrograms ({ accounts, endpoint }) {
+export async function userPrograms ({ accounts, endpoints }, options) {
+  const endpoint = endpoints[options.ENDPOINT]
+
   const accountQuestion = {
     type: "list",
     name: "selectedAccount",
@@ -13,8 +15,6 @@ export async function userPrograms ({ accounts, endpoint }) {
   const answers = await inquirer.prompt([accountQuestion])
   const selectedAccount = answers.selectedAccount
 
-  const accountData = selectedAccount.data
-  console.log("Selected account data:", accountData.seed)
 
   const actionChoice = await inquirer.prompt([
     {
@@ -30,7 +30,7 @@ export async function userPrograms ({ accounts, endpoint }) {
     },
   ])
 
-  const entropy = await initializeEntropy(accountData.data, endpoint)
+  const entropy = await initializeEntropy({data: selectedAccount.data}, endpoint)
 
   if (!entropy.account?.sigRequestKey) {
     throw new Error("Keys are undefined")
