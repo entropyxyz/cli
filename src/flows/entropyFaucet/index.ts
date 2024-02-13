@@ -2,7 +2,9 @@ import inquirer from "inquirer"
 import { accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
-export async function entropyFaucet ({ accounts, endpoint }) {
+export async function entropyFaucet ({ accounts, endpoints }, options) {
+  const endpoint = endpoints[options.ENDPOINT]
+
   const accountQuestion = {
     type: "list",
     name: "selectedAccount",
@@ -12,11 +14,9 @@ export async function entropyFaucet ({ accounts, endpoint }) {
 
   const answers = await inquirer.prompt([accountQuestion])
   const selectedAccount = answers.selectedAccount
-  const accountData = selectedAccount.data
+  console.log({selectedAccount})
 
-  console.log("Selected account data:", accountData.seed)
-
-  const recipientAddress = accountData.data.address
+  const recipientAddress = selectedAccount.address
   const aliceData = {
     data: {
       type: "seed",
@@ -25,8 +25,6 @@ export async function entropyFaucet ({ accounts, endpoint }) {
   }
 
   const entropy = await initializeEntropy(aliceData, endpoint)
-
-  await entropy.ready
 
   if (!entropy.account?.sigRequestKey?.pair) {
     throw new Error("Keys are undefined")

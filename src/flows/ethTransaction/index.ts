@@ -18,7 +18,10 @@ export async function ethTransaction ({ accounts, endpoints }, options) {
 
   console.log({ selectedAccount })
 
-  const entropy = await initializeEntropy(selectedAccount, endpoint)
+  const entropy = await initializeEntropy(
+    { data: selectedAccount.data },
+    endpoint
+  )
   console.log({ entropy })
 
   const address = entropy.account?.sigRequestKey?.wallet.address
@@ -77,7 +80,7 @@ export async function ethTransaction ({ accounts, endpoints }, options) {
     nonce: 1,
     data: '0x43726561746564204f6e20456e74726f7079'
   }
-  
+
   console.log({ basicTx })
 
   const entropySig = await entropy.signTransaction({txParams: basicTx, type: 'eth' }) as string

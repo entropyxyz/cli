@@ -27,8 +27,11 @@ export async function devPrograms ({ accounts, endpoints }, options) {
     },
   ])
 
-  const entropy = await initializeEntropy({data: selectedAccount.data}, endpoint)
-
+  const entropy = await initializeEntropy(
+    { data: selectedAccount.data },
+    endpoint
+  )
+  
   switch (actionChoice.action) {
   case "Deploy":
     await deployProgram(entropy, selectedAccount)

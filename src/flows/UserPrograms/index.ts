@@ -30,8 +30,11 @@ export async function userPrograms ({ accounts, endpoints }, options) {
     },
   ])
 
-  const entropy = await initializeEntropy({data: selectedAccount.data}, endpoint)
-
+  const entropy = await initializeEntropy(
+    { data: selectedAccount.data },
+    endpoint
+  )
+  
   if (!entropy.account?.sigRequestKey) {
     throw new Error("Keys are undefined")
   }

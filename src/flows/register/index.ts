@@ -3,37 +3,35 @@ import { accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 // import * as util from "@polkadot/util"
 
-export async function register ({ accounts, endpoints }, options) {
+export async function register({ accounts, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
 
   const accountQuestion = {
     type: "list",
     name: "selectedAccount",
     message: "Choose account:",
-    choices: accountChoices (accounts),
+    choices: accountChoices(accounts),
   }
-  const answers = await inquirer.prompt ([accountQuestion])
+
+  const answers = await inquirer.prompt([accountQuestion])
   const selectedAccount = answers.selectedAccount
 
-  const accountData = selectedAccount.data
+  const entropy = await initializeEntropy(
+    { data: selectedAccount.data },
+    endpoint
+  )
 
-  console.log("Selected account data:", accountData.seed)
-
-  const entropy = await initializeEntropy (accountData.seed, endpoint)
-
-  await entropy
-
-  console.log({ entropy })
+  await entropy.ready
 
   const isRegistered =
     await entropy.registrationManager.checkRegistrationStatus(
-      selectedAccount.data.address
+      selectedAccount.address
     )
 
   if (isRegistered) {
-    console.log("Address is already registered:", selectedAccount.data.address)
+    console.log("Address is already registered:", selectedAccount.address)
 
-    // allow list program 
+    // allow list program
     //   const pointer =
     //     "0x7572505786b022118475733546a273d772b3857de537a0981c3e4a805678e3a0"
 
@@ -54,8 +52,9 @@ export async function register ({ accounts, endpoints }, options) {
     //   const programConfig = util.u8aToHex (new Uint8Array(byteArray))
 
     // barebones program
-    const pointer='0x3873f6f91334cfb6cad84f94aa1e1025069405a4ea3577a818a5ad8d0e26bb39'
-    const programConfig= '0x'
+    const pointer =
+      "0x3873f6f91334cfb6cad84f94aa1e1025069405a4ea3577a818a5ad8d0e26bb39"
+    const programConfig = "0x"
 
     const programData = {
       programPointer: pointer,
@@ -64,22 +63,18 @@ export async function register ({ accounts, endpoints }, options) {
 
     console.log({ programData })
 
-    console.log (
-      "Attempting to register the address:",
-      selectedAccount.data.address
-    )
-    await entropy.register ({
-      programModAccount: selectedAccount.data.address,
+    console.log("Attempting to register the address:", selectedAccount.address)
+    await entropy.register({
+      programModAccount: selectedAccount.address,
       keyVisibility: "Permissioned",
       initialPrograms: [programData],
       freeTx: false,
     })
 
-    console.log (
+    console.log(
       "Your address",
       selectedAccount.data.address,
       "has been successfully registered."
     )
-
   }
 }

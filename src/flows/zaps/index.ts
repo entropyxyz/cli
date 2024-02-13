@@ -1,8 +1,6 @@
-import { handleChainEndpoint, handleUserSeed } from "../../common/questions"
 import inquirer from "inquirer"
-import { Controller } from "../../../controller"
-import { returnToMain } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
+import { accountChoices } from "../../common/utils"
 
 const question = [
   {
@@ -19,10 +17,24 @@ const question = [
   },
 ]
 
-export const giveZaps = async (controller: Controller) => {
-  const seed = await handleUserSeed()
-  const endpoint = await handleChainEndpoint()
-  const entropy = await initializeEntropy(seed, endpoint)
+export async function giveZaps ({accounts, endpoints}, options){
+  const endpoint = endpoints[options.ENDPOINT]
+
+  const accountQuestion = {
+    type: "list",
+    name: "selectedAccount",
+    message: "Choose account:",
+    choices: accountChoices(accounts),
+  }
+
+  const answers = await inquirer.prompt([accountQuestion])
+  const selectedAccount = answers.selectedAccount
+  console.log("selectedAccount:", { selectedAccount })
+
+  const entropy = await initializeEntropy(
+    { data: selectedAccount.data },
+    endpoint
+  )
 
   const { amount, account } = await inquirer.prompt(question)
 
@@ -36,13 +48,6 @@ export const giveZaps = async (controller: Controller) => {
     async ({ status }) => {
       if (status.isInBlock || status.isFinalized) {
         console.log(`${account} given ${amount} zaps`)
-        
-        if (await returnToMain()) {
-          console.clear()
-          controller.emit('returnToMain')
-        } else {
-          controller.emit('exit')
-        }
       }
     }
   )
