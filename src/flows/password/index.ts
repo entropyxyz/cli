@@ -1,5 +1,10 @@
 import * as crypto from 'crypto'
 
+// type: 'password',
+// name: 'password',
+// message: 'Enter password to decrypt data:',
+// mask: '*',
+
 export const questions = [
   {
     type: 'password:',
@@ -26,12 +31,12 @@ export const questions = [
 
 
 // Function to generate a key and IV using a password and salt
-function generateKeyAndIV(password, salt) {
+function generateKeyAndIV (password, salt) {
   return crypto.scryptSync(password, salt, 32, { N: 2 ** 14 }).slice(0, 32)
 }
 
 // Function to encrypt data with a password
-export function encrypt(anyData, password) {
+export function encrypt (anyData, password) {
   const data = JSON.stringify(anyData)
   const salt = crypto.randomBytes(16)
   const key = generateKeyAndIV(password, salt)
@@ -43,7 +48,7 @@ export function encrypt(anyData, password) {
 }
 
 // Function to decrypt data with a password
-export function decrypt(encryptedData, password) {
+export function decrypt (encryptedData, password) {
   const buffer = Buffer.from(encryptedData, 'base64')
   const salt = buffer.slice(0, 16)
   const tag = buffer.slice(16, 32)

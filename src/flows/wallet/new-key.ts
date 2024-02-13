@@ -3,6 +3,7 @@ import { randomAsHex } from '@polkadot/util-crypto'
 import { getWallet } from '@entropyxyz/sdk/dist/keys'
 import { importQuestions } from './import-key'
 import * as passwordFlow from '../password'
+
 const questions = [
   {
     type: 'confirm',
