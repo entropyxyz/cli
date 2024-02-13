@@ -17,10 +17,14 @@ export async function entropyFaucet ({ accounts, endpoint }) {
   console.log("Selected account data:", accountData.seed)
 
   const recipientAddress = accountData.data.address
-  const AliceSeed =
-    "0xe5be9a5092b81bca64be81d212e7f2f9eba183bb7a90954f7b76361f6edb5c0a"
+  const aliceData = {
+    data: {
+      type: "seed",
+      seed: "0xe5be9a5092b81bca64be81d212e7f2f9eba183bb7a90954f7b76361f6edb5c0a",
+    },
+  }
 
-  const entropy = await initializeEntropy(AliceSeed, endpoint)
+  const entropy = await initializeEntropy(aliceData, endpoint)
 
   await entropy.ready
 

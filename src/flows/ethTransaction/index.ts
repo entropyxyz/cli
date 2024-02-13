@@ -1,19 +1,9 @@
 import inquirer from "inquirer"
 import { accountChoices } from "../../common/utils"
-import { ethers } from "ethers"
-import { privateKeyToAccount } from "viem/accounts"
-import { Client, type Hex } from "viem"
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { createWalletClient, http } from "viem"
-import { sepolia } from "viem/chains"
-import {
-  prepareTransactionRequest,
-  sendRawTransaction,
-  waitForTransactionReceipt,
-} from "viem/actions"
-import { Chain } from "viem"
 
-export async function ethTransaction({ accounts, endpoints }, options) {
+
+export async function ethTransaction ({ accounts, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
 
   const accountQuestion = {
@@ -79,8 +69,6 @@ export async function ethTransaction({ accounts, endpoints }, options) {
   //   maxPriorityFeePerGas: '0x3b9aca00', 
   //   maxFeePerGas: '', 
   // }
-
-  const provider = new ethers.providers.JsonRpcProvider('https://goerli.infura.io/v3/66a5ebbced6a4fdb8a54d121d054b49c')
 
 
   const basicTx = {

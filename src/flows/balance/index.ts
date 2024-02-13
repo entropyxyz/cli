@@ -25,44 +25,14 @@ export async function checkBalance ({ accounts, endpoints }, options) {
   const selectedAccount = answers.selectedAccount
   console.log('selectedAccount:', selectedAccount)
   if (!selectedAccount) {
-    // handle other case 
     console.log('whoops')
     return
   } else {
     console.log('before entropy creation', endpoint)
-    const entropy = await initializeEntropy('', endpoint)
+    const entropy = await initializeEntropy({data: {}}, endpoint)
     console.log('entropy:', entropy)
     const accountInfo = (await entropy.substrate.query.system.account(selectedAccount.address)) as any
     const freeBalance = hexToBigInt(accountInfo.data.free)
     console.log(`Address ${selectedAccount.address} has a balance of: ${freeBalance.toString()} bits`)
   }
 }
-
-// function flattenAccountKeys (entropyAccounts) {
-//   return entropyAccounts.reduce((agg, account) => {
-//     if (account.address && !agg.includes(account.address)) {
-//       agg.push(account.address)
-//     }
-//     if (account.sigRequestKey) {
-//       const address = account.sigRequestKey.wallet.address
-//       if (!agg.includes(address)) agg.push(address)
-//     }
-//     if (account.programModKey) {
-//       const address = account.programModKey.wallet.address
-//       if (!agg.includes(address)) agg.push(address)
-//     }
-//     if (account.programDeployKey) {
-//       const address = account.programDeployKey.wallet.address
-//       if (!agg.includes(address)) agg.push(address)
-//     }
-//     return agg
-//   }, [])
-// }
-
-
-// function accountChoices (accounts) {
-//   return accounts.map(account => ({
-//     name: `${account.name} (${account.address})`, 
-//     value: account 
-//   })).concat([{ name: 'Other', value: null }])
-// }

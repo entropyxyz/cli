@@ -4,19 +4,19 @@ import { accountChoices } from "../../common/utils"
 import { readFileSync } from "fs"
 import * as util from "@polkadot/util"
 
-export async function devPrograms ({ accounts, endpoint }) {
+export async function devPrograms ({ accounts, endpoints }, options) {
+  const endpoint = endpoints[options.ENDPOINT]
   const accountQuestion = {
     type: "list",
     name: "selectedAccount",
     message: "Choose account:",
-    choices: accountChoices(accounts),
+    choices: accountChoices(accounts) 
   }
+
   const answers = await inquirer.prompt([accountQuestion])
   const selectedAccount = answers.selectedAccount
-  let accountData
+  console.log('selectedAccount:', {selectedAccount})
 
-  accountData = selectedAccount.data
-  console.log("Selected account data:", accountData.seed)
 
   const actionChoice = await inquirer.prompt ([
     {
@@ -27,18 +27,18 @@ export async function devPrograms ({ accounts, endpoint }) {
     },
   ])
 
-  const entropy = await initializeEntropy (accountData.seed, endpoint)
+  const entropy = await initializeEntropy({data: selectedAccount.data}, endpoint)
 
   switch (actionChoice.action) {
-    case "Deploy":
-      await deployProgram(entropy, selectedAccount)
-      break
-    case "Get Program Pointers":
-      await getProgramPointers(entropy, selectedAccount)
-      break
-    case "Exit":
-      console.log("Exiting.")
-      break
+  case "Deploy":
+    await deployProgram(entropy, selectedAccount)
+    break
+  case "Get Program Pointers":
+    await getProgramPointers(entropy, selectedAccount)
+    break
+  case "Exit":
+    console.log("Exiting.")
+    break
   }
 }
 

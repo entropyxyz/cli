@@ -4,9 +4,14 @@ import { EntropyAccount } from "@entropyxyz/sdk"
 import { decrypt } from "../flows/password"
 import inquirer from "inquirer"
 
-export const initializeEntropy = async ({ data}, endpoint: string): Promise<Entropy> => {
-  let accountData
+export const initializeEntropy = async ({data}, endpoint: string): Promise<Entropy> => {
+  if (Object.keys(data).length === 0) {
+    const entropy = new Entropy({ endpoint });
+    await entropy.ready;
+    return entropy;
+  }
 
+  let accountData;
   if (data && typeof data === 'object' && 'type' in data && 'seed' in data) {
     accountData = data
   } else if (typeof data === 'string') {

@@ -28,18 +28,18 @@ export const options = [
 const setOptions = getActiveOptions(options)
 
 const devChoices = {
-  'Entropy Faucet': undefined,
+  'Entropy Faucet': flows.entropyFaucet,
 }
 
 const choices = {
   'Balance': flows.checkBalance,
-  'Deploy Program': async () => {},
-  'User Programs': async () => {},
-  'Register': async () => {},
-  'Construct an Ethereum Tx': async () => {},
-  'Sign': async () => {},
-  'Transfer': async () => {},
-  'Give Zaps': async () => {},
+  'Deploy Program': flows.devPrograms,
+  'User Programs': flows.userPrograms,
+  'Register': flows.register,
+  'Construct an Ethereum Tx': flows.ethTransaction,
+  'Sign': flows.sign,
+  'Transfer': flows.entropyTransfer,
+  'Give Zaps': flows.giveZaps,
   'Wallet': flows.wallet,
 }
 
@@ -65,14 +65,13 @@ const returnToMainMenu = {
 
 main()
 
-
 export async function main () {
   const storedConfig = await config.get()
   const answers = await inquirer.prompt([intro])
   const user = await config.get()
   console.log('user',user)
   if (!user.accounts.length) {
-
+    console.log("empty")
   }
 
   if (answers.choice === 'Exit') return console.log('Have a nice day')
