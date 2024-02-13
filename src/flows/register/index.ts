@@ -3,7 +3,9 @@ import { accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import * as util from "@polkadot/util"
 
-export async function register ({ accounts, endpoint }) {
+export async function register ({ accounts, endpoints }, options) {
+  const endpoint = endpoints[options.ENDPOINT]
+
   const accountQuestion = {
     type: "list",
     name: "selectedAccount",
