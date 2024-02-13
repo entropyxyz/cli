@@ -22,6 +22,8 @@ export async function sign ({ accounts, endpoints }, options) {
     endpoint
   )
 
+  await entropy.ready
+
   const address = entropy.account?.sigRequestKey?.wallet.address
   console.log({ address })
   if (address == undefined) {

@@ -36,7 +36,7 @@ const choices = {
   'Deploy Program': flows.devPrograms,
   'User Programs': flows.userPrograms,
   'Register': flows.register,
-  'Entropy Faucet': flows.entropyFaucet,
+  // 'Entropy Faucet': flows.entropyFaucet,
   'Construct an Ethereum Tx': flows.ethTransaction,
   'Sign': flows.sign,
   'Transfer': flows.entropyTransfer,

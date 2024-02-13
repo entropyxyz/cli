@@ -3,7 +3,7 @@ import { accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 // import * as util from "@polkadot/util"
 
-export async function register({ accounts, endpoints }, options) {
+export async function register ({ accounts, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
 
   const accountQuestion = {
@@ -23,13 +23,15 @@ export async function register({ accounts, endpoints }, options) {
 
   await entropy.ready
 
-  const isRegistered =
-    await entropy.registrationManager.checkRegistrationStatus(
-      selectedAccount.address
-    )
+  const isRegistered = await entropy.registrationManager.checkRegistrationStatus(
+    selectedAccount.address
+  )
+
+  console.log("isRegistered", isRegistered)
 
   if (isRegistered) {
-    console.log("Address is already registered:", selectedAccount.address)
+    console.log("Address is already registered:", selectedAccount.address) 
+  } else {
 
     // allow list program
     //   const pointer =

@@ -22,10 +22,11 @@ export async function ethTransaction ({ accounts, endpoints }, options) {
     { data: selectedAccount.data },
     endpoint
   )
-  console.log({ entropy })
+
+  await entropy.ready
 
   const address = entropy.account?.sigRequestKey?.wallet.address
-  console.log({ address })
+
   if (address == undefined) {
     throw new Error("address issue")
   }
