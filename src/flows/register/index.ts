@@ -16,6 +16,10 @@ export async function register ({ accounts, endpoints }, options) {
   const selectedAccountAnswer = await inquirer.prompt([accountQuestion])
   const selectedAccount = selectedAccountAnswer.selectedAccount
 
+  const entropy = await initializeEntropy({ data: selectedAccount.data }, endpoint)
+
+  await entropy.ready
+
 
   const filteredAccountChoices = accountChoices(accounts).filter(choice => choice.name !== "Other")
 
@@ -46,10 +50,6 @@ export async function register ({ accounts, endpoints }, options) {
   } else {
     programModAccount = programModAccountAnswer.programModAccount.address
   }
-
-  const entropy = await initializeEntropy({ data: selectedAccount.data }, endpoint)
-
-  await entropy.ready
 
   const isRegistered = await entropy.registrationManager.checkRegistrationStatus(selectedAccount.address)
 
