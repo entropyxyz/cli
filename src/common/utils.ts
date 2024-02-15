@@ -1,5 +1,16 @@
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex } from "@polkadot/util"
+import { keccak256 } from "ethereum-cryptography/keccak"
+import { Buffer } from 'buffer'
+
+export function pubToAddress (publicKey) {
+  const publicKeyBuffer = Buffer.from(publicKey, 'hex')
+  const hash = keccak256(publicKeyBuffer)
+  const address = `0x${Buffer.from(hash.subarray(hash.length - 20)).toString('hex')}`
+  
+  return address
+}
+
 
 export function getActiveOptions (options) {
   return options.reduce((setOptions, option) => {

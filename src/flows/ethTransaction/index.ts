@@ -1,5 +1,5 @@
 import inquirer from "inquirer"
-import { accountChoices } from "../../common/utils"
+import { accountChoices, pubToAddress} from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 
@@ -30,6 +30,16 @@ export async function ethTransaction ({ accounts, endpoints }, options) {
   if (address == undefined) {
     throw new Error("address issue")
   }
+
+  try {
+    const verifyingKey = await entropy.getVerifyingKey(address)
+    const ethAddress = pubToAddress(verifyingKey)
+    console.log(`Verifying Key: ${verifyingKey}`)
+    console.log(`Eth Address: ${ethAddress}`)
+  } catch (error) {
+    console.error("Error retrieving verifying key:", error.message)
+  }
+
   // for formatting transactions// 
   // const txDetails = await inquirer.prompt([
   //   {
