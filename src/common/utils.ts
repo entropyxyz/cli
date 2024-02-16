@@ -3,13 +3,16 @@ import { hexToU8a, isHex } from "@polkadot/util"
 import { keccak256 } from "ethereum-cryptography/keccak"
 import { Buffer } from 'buffer'
 
-export function pubToAddress (publicKey) {
+export function pubToAddress (publicKey: string): string {  
+  publicKey = publicKey.startsWith('0x') ? publicKey.slice(2) : publicKey
   const publicKeyBuffer = Buffer.from(publicKey, 'hex')
   const hash = keccak256(publicKeyBuffer)
   const address = `0x${Buffer.from(hash.subarray(hash.length - 20)).toString('hex')}`
-  
+  // const address = `0x${hash.slice(-20)}`
+  console.log({address})
   return address
 }
+
 
 
 export function getActiveOptions (options) {
