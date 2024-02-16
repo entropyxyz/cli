@@ -8,7 +8,6 @@ export function pubToAddress (publicKey: string): string {
   const publicKeyBuffer = Buffer.from(publicKey, 'hex')
   const hash = keccak256(publicKeyBuffer)
   const address = `0x${Buffer.from(hash.subarray(hash.length - 20)).toString('hex')}`
-  // const address = `0x${hash.slice(-20)}`
   console.log({address})
   return address
 }
