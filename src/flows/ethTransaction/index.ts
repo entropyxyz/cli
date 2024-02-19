@@ -223,7 +223,7 @@ export async function ethTransaction ({ accounts, endpoints }, options): Promise
 //     console.log({ethAddress})
 //   } catch (error) {
 //     console.error("Error retrieving verifying key:", error.message)
-//     return // Exit if we can't get the Ethereum address
+//     return
 //   }
 //   const balanceWei = await getAccountBalance(ethAddress, infuraEndpoint)
 //   if (balanceWei) {
