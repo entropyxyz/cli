@@ -1,43 +1,38 @@
 import inquirer from "inquirer"
-import { handleChainEndpoint, handleUserSeed } from "../../common/questions"
-import { Controller } from "../../../controller"
-import { returnToMain, isValidSubstrateAddress } from "../../common/utils"
+import { accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
-export async function checkBalance ({accounts, endpoint}) {
+const hexToBigInt = (hexString: string) => BigInt(hexString)
+
+
+export async function checkBalance ({ accounts, endpoints }, options) {
+  const endpoint = endpoints[options.ENDPOINT]
   const accountQuestion = {
     type: "list",
-    name: "account",
+    name: "selectedAccount",
     message: "Choose account:",
-    choices: [ ...flattenAccountKeys(accounts), 'other']
+    choices: accountChoices(accounts) 
   }
 
   const otherQuestion = {
     type: "input",
-    name: "account",
-    message: "Check balance of:",
-    when: ({ account }) => { return (account === 'other') }
+    name: "accountAddress",
+    message: "Enter the account address:",
+    when: (answers) => !answers.selectedAccount
   }
 
-  const { account } = await inquirer.prompt([ accountQuestion, otherQuestion ])
-  const entropy = await initializeEntropy(null, endpoint)
-  const accountInfo = (await entropy.substrate.query.system.account(account)).toHuman()
-  // @ts-ignore: next line
-  console.log(`Address ${account} has free balance: ${accountInfo.balance.free} bits`)
-}
-function flattenAccountKeys (entropyAccounts) {
-  return entropyAccounts.reduce((agg, account) => {
-    if (account.sigRequestKey) {
-      const address = account.sigRequestKey.wallet.address
-      if (!agg.include(address)) agg.push(address)
-    }
-    if (account.programModKey) {
-      const address = account.programModKey.wallet.address
-      if (!agg.include(address)) agg.push(address)
-    }
-    if (account.programDeployKey) {
-      const address = account.programDeployKey.wallet.address
-      if (!agg.include(address)) agg.push(address)
-    }
-  }, {})
+  const answers = await inquirer.prompt([accountQuestion, otherQuestion])
+  const selectedAccount = answers.selectedAccount
+  console.log('selectedAccount:', selectedAccount)
+  if (!selectedAccount) {
+    console.log('whoops')
+    return
+  } else {
+    console.log('before entropy creation', endpoint)
+    const entropy = await initializeEntropy({data: {}}, endpoint)
+    console.log('entropy:', entropy)
+    const accountInfo = (await entropy.substrate.query.system.account(selectedAccount.address)) as any
+    const freeBalance = hexToBigInt(accountInfo.data.free)
+    console.log(`Address ${selectedAccount.address} has a balance of: ${freeBalance.toString()} bits`)
+  }
 }
