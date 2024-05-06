@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "noEmit": true,
+    "target": "esnext",
+    "esModuleInterop": true,
+  },
+  // "exclude": ["node_modules", "dist", "build", "examples", "old", "src/flows/*"],
+  "ts-node": {
+    "swc": true,
+    "experimentalSpecifierResolution": "node",
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  }
+}

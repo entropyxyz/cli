@@ -1,54 +1,38 @@
 import inquirer from "inquirer"
-import { handleChainEndpoint, handleUserSeed } from "../../common/questions"
-import { Controller } from "../../../controller"
-import { returnToMain } from "../../common/utils"
+import { accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 const hexToBigInt = (hexString: string) => BigInt(hexString)
 
-export const balance = async (controller: Controller) => {
-  try {
-    const seed = await handleUserSeed()
-    const endpoint = await handleChainEndpoint()
-    const entropy = await initializeEntropy(seed, endpoint)
 
-    const balanceChoice = await inquirer.prompt([
-      {
-        type: "list",
-        name: "action",
-        message: "Choose an action:",
-        choices: ["Check my balance", "Query an address balance"],
-      },
-    ])
+export async function checkBalance ({ accounts, endpoints }, options) {
+  const endpoint = endpoints[options.ENDPOINT]
+  const accountQuestion = {
+    type: "list",
+    name: "selectedAccount",
+    message: "Choose account:",
+    choices: accountChoices(accounts) 
+  }
 
-    let accountToCheck
-    if (balanceChoice.action === "Check my balance") {
-      accountToCheck = entropy.account?.sigRequestKey?.wallet.address
-      if (!accountToCheck) {
-        throw new Error("User address not found")
-      }
-    } else {
-      const question = {
-        type: "input",
-        name: "account",
-        message: "Input account to check balance for:",
-        default: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
-      }
-      const { account: inputAccount } = await inquirer.prompt([question])
-      accountToCheck = inputAccount
-    }
+  const otherQuestion = {
+    type: "input",
+    name: "accountAddress",
+    message: "Enter the account address:",
+    when: (answers) => !answers.selectedAccount
+  }
 
-    const accountInfo = (await entropy.substrate.query.system.account(accountToCheck)) as any
+  const answers = await inquirer.prompt([accountQuestion, otherQuestion])
+  const selectedAccount = answers.selectedAccount
+  console.log('selectedAccount:', selectedAccount)
+  if (!selectedAccount) {
+    console.log('whoops')
+    return
+  } else {
+    console.log('before entropy creation', endpoint)
+    const entropy = await initializeEntropy({data: {}}, endpoint)
+    console.log('entropy:', entropy)
+    const accountInfo = (await entropy.substrate.query.system.account(selectedAccount.address)) as any
     const freeBalance = hexToBigInt(accountInfo.data.free)
-    console.log(`Address ${accountToCheck} has free balance: ${freeBalance.toString()} bits`)
-  } catch (error: any) {
-    console.error("Error in balance:", error.message)
-  } finally {
-    if (await returnToMain()) {
-      console.clear()
-      controller.emit('returnToMain')
-    } else {
-      controller.emit('exit')
-    }
+    console.log(`Address ${selectedAccount.address} has a balance of: ${freeBalance.toString()} bits`)
   }
 }

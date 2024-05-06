@@ -11,7 +11,7 @@ const questionSeed = [
       "0x29b55504652cedded9ce0ee1f5a25b328ae6c6e97827f84eee6315d0f44816d8",
   },
 ]
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const questionThresholdEndpoints = [
   {
     type: "input",
