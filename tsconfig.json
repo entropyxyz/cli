@@ -3,12 +3,14 @@
     "skipLibCheck": true,
     "noEmit": true,
     "target": "esnext",
-    "module": "commonjs",
     "esModuleInterop": true,
   },
   // "exclude": ["node_modules", "dist", "build", "examples", "old", "src/flows/*"],
   "ts-node": {
     "swc": true,
-    "experimentalSpecifierResolution": "node"
+    "experimentalSpecifierResolution": "node",
+    "compilerOptions": {
+      "module": "commonjs"
+    }
   }
 }
