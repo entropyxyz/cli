@@ -18,29 +18,34 @@ export async function checkBalance ({ accounts, endpoints }, options) {
 
   const otherQuestion = {
     type: "input",
-    name: "accountAddress",
-    message: "Enter the account address:",
+    name: "accountSeedOrPrivateKey",
+    message: "Enter the account seed or private key:",
     when: (answers) => !answers.selectedAccount
   }
 
   const answers = await inquirer.prompt([accountQuestion, otherQuestion])
   console.log('answers', answers);
   const selectedAccount = answers.selectedAccount
-  const accountAddress = answers.accountAddress;
+  const accountSeedOrPrivateKey = answers.accountSeedOrPrivateKey
   console.log('selectedAccount:', selectedAccount)
-  if (!selectedAccount && !accountAddress) {
+  if (!selectedAccount && !accountSeedOrPrivateKey) {
     console.log('whoops')
     return
   } else {
     console.log('before entropy creation', endpoint)
-    const entropyData = {
-      type: 'registering',
-      seed: selectedAccount?.seed ?? accountAddress,
+
+    let data = selectedAccount?.data;
+    if (!data || Object.keys(data).length === 0) {
+      data = {
+        type: "seed",
+        seed: accountSeedOrPrivateKey,
+      }
     }
-    const entropy = await initializeEntropy({ data: entropyData }, endpoint)
-    const accountInfo = (await entropy.substrate.query.system.account(entropy.account.sigRequestKey.wallet.address)) as any
+    const entropy = await initializeEntropy({ data }, endpoint)
+    console.log('entropy:', entropy)
+    const accountAddress = selectedAccount?.address ?? entropy.account.sigRequestKey.wallet.address
+    const accountInfo = (await entropy.substrate.query.system.account(accountAddress)) as any
     const freeBalance = hexToBigInt(accountInfo.data.free)
-    
-    console.log(`Address ${entropy.account.sigRequestKey.wallet.address} has a balance of: ${freeBalance.toString()} bits`)
+    console.log(`Address ${accountAddress} has a balance of: ${freeBalance.toString()} bits`)
   }
 }
