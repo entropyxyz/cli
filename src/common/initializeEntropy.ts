@@ -50,7 +50,8 @@ export const initializeEntropy = async ({data}, endpoint: string): Promise<Entro
   } else {
     throw new Error("Data format is not recognized as either encrypted or unencrypted")
   }
-
+  console.log('accountData', accountData);
+  
   if (!accountData.seed) {
     const entropy = new Entropy({ endpoint })
     await entropy.ready

@@ -72,10 +72,13 @@ export async function main () {
   const user = await config.get()
   console.log('user',user)
   if (!user.accounts.length) {
-    console.log("empty")
+    console.log("User accounts is empty")
   }
 
-  if (answers.choice === 'Exit') return console.log('Have a nice day')
+  if (answers.choice === 'Exit')  {
+    console.log('Have a nice day')
+    process.exit()
+  }
   console.log(answers)
   const newConfigUpdates = await choices[answers.choice](storedConfig, setOptions)
 
