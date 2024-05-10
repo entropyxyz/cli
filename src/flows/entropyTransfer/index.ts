@@ -1,5 +1,7 @@
 import inquirer from "inquirer"
-import { accountChoices } from "../../common/utils"
+import { hexToU8a, isHex } from "@polkadot/util"
+import { encodeAddress, decodeAddress } from "@polkadot/util-crypto"
+import { accountChoices, adjustAmount } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 const question = [
@@ -26,11 +28,27 @@ export async function entropyTransfer ({ accounts, endpoints }, options) {
     message: "Choose account:",
     choices: accountChoices(accounts),
   }
-  const answers = await inquirer.prompt ([accountQuestion])
+
+  const otherQuestion = {
+    type: "input",
+    name: "accountSeedOrPrivateKey",
+    message: "Enter the account seed or private key:",
+    when: (answers) => !answers.selectedAccount
+  }
+  const answers = await inquirer.prompt ([accountQuestion, otherQuestion])
   const selectedAccount = answers.selectedAccount
+  const accountSeedOrPrivateKey = answers.accountSeedOrPrivateKey
+
+  let data = selectedAccount?.data;
+  if (!data || Object.keys(data).length === 0) {
+    data = {
+      type: "seed",
+      seed: accountSeedOrPrivateKey,
+    }
+  }
  
   const entropy = await initializeEntropy(
-    { data: selectedAccount.data },
+    { data },
     endpoint
   )
 
@@ -39,9 +57,15 @@ export async function entropyTransfer ({ accounts, endpoints }, options) {
   if (!entropy.account?.sigRequestKey?.pair) {
     throw new Error("Signer keypair is undefined or not properly initialized.")
   }
+  const formattedAmount = adjustAmount(amount);
+  const formattedAddress = encodeAddress(
+    isHex(recipientAddress)
+      ? hexToU8a(recipientAddress)
+      : decodeAddress(recipientAddress)
+  );
   const tx = await entropy.substrate.tx.balances.transferAllowDeath(
-    recipientAddress,
-    amount
+    formattedAddress,
+    formattedAmount
   )
 
   console.log (entropy.account.sigRequestKey.wallet)

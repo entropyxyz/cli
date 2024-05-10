@@ -3,6 +3,9 @@ import { hexToU8a, isHex } from "@polkadot/util"
 import { keccak256 } from "ethereum-cryptography/keccak"
 import { Buffer } from 'buffer'
 
+// hardcoding for now instead of querying chain
+const DECIMALS = 10;
+
 export function pubToAddress (publicKey: string): string {  
   publicKey = publicKey.startsWith('0x') ? publicKey.slice(2) : publicKey
   const publicKeyBuffer = Buffer.from(publicKey, 'hex')
@@ -12,7 +15,9 @@ export function pubToAddress (publicKey: string): string {
   return address
 }
 
-
+export const adjustAmount = async (amount) => {
+	return (amount * (1 * (10 ** DECIMALS))).toString();
+}
 
 export function getActiveOptions (options) {
   return options.reduce((setOptions, option) => {
