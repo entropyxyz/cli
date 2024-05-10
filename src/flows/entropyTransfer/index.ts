@@ -1,8 +1,13 @@
 import inquirer from "inquirer"
-import { hexToU8a, isHex } from "@polkadot/util"
-import { encodeAddress, decodeAddress } from "@polkadot/util-crypto"
-import { accountChoices, adjustAmount } from "../../common/utils"
+import { accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
+
+const cliProgress = require('cli-progress');
+
+// note: you have to install this dependency manually since it's not required by cli-progress
+const colors = require('ansi-colors');
+
+// create new progress bar
 
 const question = [
   {
@@ -46,34 +51,55 @@ export async function entropyTransfer ({ accounts, endpoints }, options) {
       seed: accountSeedOrPrivateKey,
     }
   }
- 
-  const entropy = await initializeEntropy(
-    { data },
-    endpoint
-  )
 
-  const { amount, recipientAddress } = await inquirer.prompt(question)
+  try {
+    const entropy = await initializeEntropy(
+      { data },
+      endpoint
+    )
 
-  if (!entropy.account?.sigRequestKey?.pair) {
-    throw new Error("Signer keypair is undefined or not properly initialized.")
-  }
-  const formattedAmount = adjustAmount(amount);
-  const formattedAddress = encodeAddress(
-    isHex(recipientAddress)
-      ? hexToU8a(recipientAddress)
-      : decodeAddress(recipientAddress)
-  );
-  const tx = await entropy.substrate.tx.balances.transferAllowDeath(
-    formattedAddress,
-    formattedAmount
-  )
+    const b1 = new cliProgress.SingleBar({
+      format: 'CLI Progress |' + colors.cyan('{bar}') + '| {percentage}% || {value}/{total} Chunks || Speed: {speed}',
+      barCompleteChar: '\u2588',
+      barIncompleteChar: '\u2591',
+      hideCursor: true
+    })
 
-  console.log (entropy.account.sigRequestKey.wallet)
-  await tx.signAndSend (entropy.account.sigRequestKey.wallet, ({ status }) => {
-    if (status.isFinalized) {
-      console.log(
-        `Transaction successful: Sent ${amount} to ${recipientAddress}`
-      )
+    const { amount, recipientAddress } = await inquirer.prompt(question)
+
+    if (!entropy.account?.sigRequestKey?.pair) {
+      throw new Error("Signer keypair is undefined or not properly initialized.")
     }
-  })
+    
+    const tx = await entropy.substrate.tx.balances.transferAllowDeath(
+      recipientAddress,
+      amount
+    )
+
+    console.log (entropy.account.sigRequestKey.wallet)
+    await tx.signAndSend (entropy.account.sigRequestKey.wallet, ({ status }) => {
+      // initialize the bar - defining payload token "speed" with the default value "N/A"
+      b1.start(500, 0, {
+          speed: "N/A"
+      });
+      // update values
+      const interval = setInterval(() => {
+        b1.increment()
+      }, 100)
+      if (status.isFinalized) {
+        b1.stop()
+        clearInterval(interval)
+        console.log(
+          `\nTransaction successful: Sent ${amount} to ${recipientAddress}`
+        )
+        console.log('\nPress enter to return to main menu');
+      }
+    })
+    return;
+    
+  } catch (error) {
+    console.error('ERR:::', error);
+    
+    
+  }
 }
