@@ -4,7 +4,8 @@ import { keccak256 } from "ethereum-cryptography/keccak"
 import { Buffer } from 'buffer'
 
 // hardcoding for now instead of querying chain
-const DECIMALS = 10;
+const DECIMALS = 10
+const PREFIX = '0x'
 
 export function pubToAddress (publicKey: string): string {  
   publicKey = publicKey.startsWith('0x') ? publicKey.slice(2) : publicKey
@@ -15,8 +16,8 @@ export function pubToAddress (publicKey: string): string {
   return address
 }
 
-export const adjustAmount = async (amount) => {
-	return (amount * (1 * (10 ** DECIMALS))).toString();
+export const formatAmountAsHex = (amount) => {
+	return `${PREFIX}${(amount * (1 * (10 ** DECIMALS))).toString(16)}`;
 }
 
 export function getActiveOptions (options) {
