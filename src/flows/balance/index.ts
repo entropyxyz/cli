@@ -37,13 +37,12 @@ export async function checkBalance ({ accounts, endpoints }, options) {
     let data = selectedAccount?.data;
     if (!data || Object.keys(data).length === 0) {
       data = {
-        type: "seed",
         seed: accountSeedOrPrivateKey,
       }
     }
     const entropy = await initializeEntropy({ data }, endpoint)
     console.log('entropy:', entropy)
-    const accountAddress = selectedAccount?.address ?? entropy.account.sigRequestKey.wallet.address
+    const accountAddress = selectedAccount?.address ?? entropy.keyring.getRegisteringKey().address
     const accountInfo = (await entropy.substrate.query.system.account(accountAddress)) as any
     const freeBalance = hexToBigInt(accountInfo.data.free)
     console.log(`Address ${accountAddress} has a balance of: ${freeBalance.toString()} bits`)

@@ -1,6 +1,6 @@
 import inquirer from 'inquirer'
 import { randomAsHex } from '@polkadot/util-crypto'
-import { getWallet } from '@entropyxyz/sdk/dist/keys'
+import { getWallet } from '@entropyxyz/sdk/keys'
 import { importQuestions } from './import-key'
 import * as passwordFlow from '../password'
 
