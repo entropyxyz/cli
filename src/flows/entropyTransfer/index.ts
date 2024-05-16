@@ -1,5 +1,5 @@
 import inquirer from "inquirer"
-import { accountChoices, formatAmountAsHex } from "../../common/utils"
+import { accountChoices, formatAmountAsHex, isEmpty } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 const cliProgress = require('cli-progress');
@@ -40,19 +40,18 @@ export async function entropyTransfer ({ accounts, endpoints }, options) {
     message: "Enter the account seed or private key:",
     when: (answers) => !answers.selectedAccount
   }
-  const answers = await inquirer.prompt ([accountQuestion, otherQuestion])
-  const selectedAccount = answers.selectedAccount
-  const accountSeedOrPrivateKey = answers.accountSeedOrPrivateKey
-
-  let data = selectedAccount?.data;
-  if (!data || Object.keys(data).length === 0) {
-    data = {
-      type: "seed",
-      seed: accountSeedOrPrivateKey,
-    }
-  }
-
   try {
+    const answers = await inquirer.prompt ([accountQuestion, otherQuestion])
+    const { selectedAccount, accountSeedOrPrivateKey } = answers
+
+    let data = selectedAccount?.data;
+    if (isEmpty(data)) {
+      data = {
+        type: "seed",
+        seed: accountSeedOrPrivateKey,
+      }
+    }
+
     const entropy = await initializeEntropy(
       { data },
       endpoint
@@ -76,16 +75,15 @@ export async function entropyTransfer ({ accounts, endpoints }, options) {
       BigInt(formattedAmount),
     )
 
-    console.log (entropy.account.sigRequestKey.wallet)
+    // initialize the bar - defining payload token "speed" with the default value "N/A"
+    b1.start(500, 0, {
+      speed: "N/A"
+    });
+    // update values
+    const interval = setInterval(() => {
+      b1.increment()
+    }, 100)
     await tx.signAndSend (entropy.account.sigRequestKey.wallet, ({ status }) => {
-      // initialize the bar - defining payload token "speed" with the default value "N/A"
-      b1.start(500, 0, {
-          speed: "N/A"
-      });
-      // update values
-      const interval = setInterval(() => {
-        b1.increment()
-      }, 100)
       if (status.isFinalized) {
         b1.stop()
         clearInterval(interval)
