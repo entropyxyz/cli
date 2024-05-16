@@ -34,7 +34,7 @@ Follow these steps to build and install the CLI:
 1. Start the CLI with:
 
     ```shell
-    yarn
+    yarn start
     ```
 
 <!--### Running -->
