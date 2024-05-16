@@ -45,28 +45,20 @@ export const initializeEntropy = async ({data}, endpoint: string): Promise<Entro
   } else {
     throw new Error("Data format is not recognized as either encrypted or unencrypted")
   }
-  console.log('accountData', accountData);
   
   if (!accountData.seed) {
-    // const entropy = new Entropy({ endpoint })
-    // await entropy.ready
-    // return entropy
     throw new Error("Data format is not recognized as either encrypted or unencrypted")
   }
 
   const keyring = new Keyring(accountData)
 
   const entropy = new Entropy({ keyring, endpoint})
-  console.log('entropy', entropy);
   
   await entropy.ready
 
-  console.log('entropy ready', entropy);
-  
-
-  // if (!entropy.account?.sigRequestKey?.pair) {
-  //   throw new Error("Keys are undefined")
-  // }
+  if (!entropy?.keyring?.accounts?.registration?.seed) {
+    throw new Error("Keys are undefined")
+  }
 
   return entropy
 }

@@ -21,7 +21,7 @@ export const options = [
     short: '-e',
     default: 'test-net',
     key: 'ENDPOINT',
-    define: 'Runs entropy with the given endpoint and ignores network endpoints in config`entropy --endpoint ws://127.0.0.1:9944` can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`',
+    define: 'Runs entropy with the given endpoint and ignores network endpoints in config`entropy --endpoint ws://testnet.entropy.xyz:9944/` can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`',
   },
 ]
 
@@ -68,6 +68,8 @@ main()
 
 export async function main () {
   const storedConfig = await config.get()
+  console.log('stored config', storedConfig);
+  
   const answers = await inquirer.prompt([intro])
   const user = await config.get()
   console.log('user',user)
