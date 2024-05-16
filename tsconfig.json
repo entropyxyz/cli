@@ -4,6 +4,7 @@
     "noEmit": true,
     "target": "esnext",
     "esModuleInterop": true,
+    "moduleResolution": "node"
   },
   // "exclude": ["node_modules", "dist", "build", "examples", "old", "src/flows/*"],
   "ts-node": {
