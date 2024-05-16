@@ -47,7 +47,6 @@ export async function entropyTransfer ({ accounts, endpoints }, options) {
   let data = selectedAccount?.data;
   if (!data || Object.keys(data).length === 0) {
     data = {
-      type: "seed",
       seed: accountSeedOrPrivateKey,
     }
   }
@@ -67,7 +66,7 @@ export async function entropyTransfer ({ accounts, endpoints }, options) {
 
     const { amount, recipientAddress } = await inquirer.prompt(question)
 
-    if (!entropy.account?.sigRequestKey?.pair) {
+    if (!entropy?.registrationManager?.signer?.pair) {
       throw new Error("Signer keypair is undefined or not properly initialized.")
     }
     const formattedAmount = formatAmountAsHex(amount)
@@ -76,8 +75,7 @@ export async function entropyTransfer ({ accounts, endpoints }, options) {
       BigInt(formattedAmount),
     )
 
-    console.log (entropy.account.sigRequestKey.wallet)
-    await tx.signAndSend (entropy.account.sigRequestKey.wallet, ({ status }) => {
+    await tx.signAndSend (entropy.registrationManager.signer.pair, ({ status }) => {
       // initialize the bar - defining payload token "speed" with the default value "N/A"
       b1.start(500, 0, {
           speed: "N/A"

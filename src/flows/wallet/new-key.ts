@@ -1,6 +1,6 @@
 import inquirer from 'inquirer'
 import { randomAsHex } from '@polkadot/util-crypto'
-import { getWallet } from '@entropyxyz/sdk/keys'
+import Keyring from '@entropyxyz/sdk/keys'
 import { importQuestions } from './import-key'
 import * as passwordFlow from '../password'
 
@@ -50,8 +50,8 @@ export async function newKey ({ accounts }) {
   const { secret, secretType, name, path, password, importKey } = answers
 
   const seed = importKey ? secret : randomAsHex(32)
-  const signer = await getWallet(seed)
-  const address = signer.wallet.address
+  const keyring = new Keyring({ seed })
+  const address = keyring.accounts.registration.address
 
   const data = {
     type: secretType || 'seed',
