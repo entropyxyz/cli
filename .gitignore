@@ -152,3 +152,9 @@ dist
 # End of https://www.toptal.com/developers/gitignore/api/macos,node
 
 *.log
+
+
+# built files:
+src/*/*/*.js
+src/*/*.js
+src/*.js
