@@ -1,34 +1,17 @@
 import inquirer from 'inquirer'
 import * as config from './config'
 import * as flows from './flows'
+import { EntropyTuiOptions } from './types'
 import { ascii } from './common/ascii'
-import { getActiveOptions } from './common/utils'
-
-// TODO: extract, replace with e.g. minimist
-export const options = [
-  {
-    long: '--dev',
-    short: '-d',
-    key: 'DEV_MODE',
-    define: 'Runs entropy in a developer mode uses the dev endpoint as the main endpoint and allows for faucet option to be available in the main menu',
-  },
-  {
-    long: '--endpoint',
-    short: '-e',
-    default: 'test-net',
-    key: 'ENDPOINT',
-    define: 'Runs entropy with the given endpoint and ignores network endpoints in config`entropy --endpoint ws://testnet.entropy.xyz:9944/` can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`',
-  },
-]
+import { debug } from './common/utils'
 
 // tui = text user interface
-export default function tui () {
+export default function tui (options: EntropyTuiOptions) {
   config.init()
 
   console.clear()
   console.log(ascii)
-
-  const setOptions = getActiveOptions(options)
+  debug(options)
 
   const choices = {
     'Balance': flows.checkBalance,
@@ -47,7 +30,7 @@ export default function tui () {
     'Entropy Faucet': flows.entropyFaucet,
   }
 
-  if (setOptions.DEV_MODE) Object.assign(choices, devChoices)
+  if (options.dev) Object.assign(choices, devChoices)
 
   // assign exit so its last
   Object.assign(choices, { 'Exit': async () => {} })
@@ -85,7 +68,7 @@ export default function tui () {
       process.exit()
     }
     console.log(answers)
-    const newConfigUpdates = await choices[answers.choice](storedConfig, setOptions)
+    const newConfigUpdates = await choices[answers.choice](storedConfig, options)
 
     if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
 
