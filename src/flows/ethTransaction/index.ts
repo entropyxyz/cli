@@ -1,12 +1,11 @@
 import inquirer from "inquirer"
 import { exec } from 'child_process'
 import util from 'util'
+import { ethers } from "ethers"
+import { http, Hex, createPublicClient } from 'viem'
+import { sepolia } from 'viem/chains'
 import { accountChoices, pubToAddress } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { ethers } from "ethers"
-import { Hex, createPublicClient } from 'viem'
-import { sepolia } from 'viem/chains'
-import { http } from "viem"
 
 const execAsync = util.promisify(exec)
 
@@ -81,7 +80,7 @@ export async function ethTransaction ({ accounts, endpoints }, options): Promise
 
   await entropy.ready
 
-  const address = entropy.account?.sigRequestKey?.wallet.address
+  const { address } = entropy.keyring.accounts.registration
   if (address === undefined) {
     throw new Error("Address issue")
   }
@@ -118,7 +117,7 @@ export async function ethTransaction ({ accounts, endpoints }, options): Promise
   }
 
 
-  const entropySig = await entropy.signTransaction({ txParams: basicTx, type: 'eth' }) as string
+  const entropySig = await entropy.signWithAdapter({ msg: basicTx, type: 'eth' }) as string
   const addy = await getSenderAddressFromSignedTx(entropySig)
   console.log({ addy })
 

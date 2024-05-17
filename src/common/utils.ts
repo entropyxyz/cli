@@ -17,7 +17,7 @@ export function pubToAddress (publicKey: string): string {
 }
 
 export const formatAmountAsHex = (amount) => {
-	return `${PREFIX}${(amount * (1 * (10 ** DECIMALS))).toString(16)}`;
+  return `${PREFIX}${(amount * (1 * (10 ** DECIMALS))).toString(16)}`;
 }
 
 export function getActiveOptions (options) {

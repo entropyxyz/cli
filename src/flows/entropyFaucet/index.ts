@@ -26,7 +26,7 @@ export async function entropyFaucet ({ accounts, endpoints }, options) {
 
   const entropy = await initializeEntropy(aliceData, endpoint)
 
-  if (!entropy.account?.sigRequestKey?.pair) {
+  if (!entropy.registrationManager.signer.pair) {
     throw new Error("Keys are undefined")
   }
 
@@ -37,7 +37,7 @@ export async function entropyFaucet ({ accounts, endpoints }, options) {
   )
 
   await tx.signAndSend(
-    entropy.account.sigRequestKey.wallet,
+    entropy.registrationManager.signer.pair,
     async ({ status }) => {
       if (status.isInBlock || status.isFinalized) {
         console.log(recipientAddress, "funded")
