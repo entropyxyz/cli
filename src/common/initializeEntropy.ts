@@ -52,7 +52,10 @@ export const initializeEntropy = async ({data}, endpoint: string): Promise<Entro
     throw new Error("Data format is not recognized as either encrypted or unencrypted")
   }
 
-  const keyring = new Keyring(accountData)
+  console.log('account data', accountData);
+  
+
+  const keyring = new Keyring({ ...accountData, debug: true })
 
   const entropy = new Entropy({ keyring, endpoint})
   
