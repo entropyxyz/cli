@@ -1,5 +1,5 @@
 import inquirer from "inquirer"
-import { accountChoices } from "../../common/utils"
+import { accountChoices, isEmpty } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 const hexToBigInt = (hexString: string) => BigInt(hexString)
@@ -31,13 +31,13 @@ export async function checkBalance ({ accounts, endpoints }, options) {
   } else {
     console.log('before entropy creation', endpoint)
 
-    let data = selectedAccount?.data;
-    if (!data || Object.keys(data).length === 0) {
-      data = {
+    let keyMaterial = selectedAccount?.data;
+    if (!keyMaterial || isEmpty(keyMaterial)) {
+      keyMaterial = {
         seed: accountSeedOrPrivateKey,
       }
     }
-    const entropy = await initializeEntropy({ data }, endpoint)
+    const entropy = await initializeEntropy({ keyMaterial }, endpoint)
     const accountAddress = selectedAccount?.address ?? entropy.keyring.accounts.registration.address
     
     const accountInfo = (await entropy.substrate.query.system.account(accountAddress)) as any

@@ -19,7 +19,7 @@ export async function register ({ accounts, endpoints }, options) {
   console.log('selectedAccount', selectedAccount);
   
 
-  const entropy = await initializeEntropy({ data: selectedAccount.data }, endpoint)
+  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data }, endpoint)
 
   await entropy.ready
 
