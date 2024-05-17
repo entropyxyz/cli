@@ -1,6 +1,6 @@
 import inquirer from "inquirer"
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { accountChoices } from "../../common/utils"
+import { debug, accountChoices } from "../../common/utils"
 
 const question = [
   {
@@ -29,7 +29,7 @@ export async function giveZaps ({accounts, endpoints}, options){
 
   const answers = await inquirer.prompt([accountQuestion])
   const selectedAccount = answers.selectedAccount
-  console.log("selectedAccount:", { selectedAccount })
+  debug("selectedAccount:", { selectedAccount })
 
   const entropy = await initializeEntropy(
     { data: selectedAccount.data },

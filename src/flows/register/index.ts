@@ -1,7 +1,6 @@
 import inquirer from "inquirer"
-import { accountChoices } from "../../common/utils"
+import { debug, accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
-// import * as util from "@polkadot/util"
 
 export async function register ({ accounts, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
@@ -53,8 +52,6 @@ export async function register ({ accounts, endpoints }, options) {
 
   const isRegistered = await entropy.isRegistered(selectedAccount.address)
 
-  console.log("isRegistered", isRegistered)
-
   if (isRegistered) {
     console.log("Address is already registered:", selectedAccount.address)
   } else {
@@ -65,8 +62,7 @@ export async function register ({ accounts, endpoints }, options) {
       programPointer: pointer,
       programConfig: programConfig,
     }
-
-    console.log({ programData })
+    debug('programData', programData)
 
     console.log("Attempting to register the address:", selectedAccount.address)
     await entropy.register({

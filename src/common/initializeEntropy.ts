@@ -1,9 +1,8 @@
 import Entropy, { wasmGlobalsReady } from "@entropyxyz/sdk"
-// TODO: fix importing of types from @entropy/sdk/keys
-// @ts-ignore
+// @ts-ignore TODO: fix this failure to import module + types message
 import Keyring from "@entropyxyz/sdk/keys"
-import { decrypt } from "../flows/password"
 import inquirer from "inquirer"
+import { decrypt } from "../flows/password"
 
 export const initializeEntropy = async ({data}, endpoint: string): Promise<Entropy> => {
   await wasmGlobalsReady()
