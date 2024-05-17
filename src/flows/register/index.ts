@@ -51,7 +51,7 @@ export async function register ({ accounts, endpoints }, options) {
     programModAccount = programModAccountAnswer.programModAccount.address
   }
 
-  const isRegistered = await entropy.registrationManager.checkRegistrationStatus(selectedAccount.address)
+  const isRegistered = await entropy.isRegistered(selectedAccount.address)
 
   console.log("isRegistered", isRegistered)
 
@@ -70,10 +70,8 @@ export async function register ({ accounts, endpoints }, options) {
 
     console.log("Attempting to register the address:", selectedAccount.address)
     await entropy.register({
-      programModAccount: programModAccount,
-      keyVisibility: "Permissioned",
-      initialPrograms: [programData],
-      freeTx: false,
+      programData: [programData],
+      programDeployer: programModAccount,
     })
 
     console.log("Your address", selectedAccount.data.address, "has been successfully registered.")

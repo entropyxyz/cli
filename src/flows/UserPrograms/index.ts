@@ -35,13 +35,13 @@ export async function userPrograms ({ accounts, endpoints }, options) {
     endpoint
   )
   
-  if (!entropy.account?.sigRequestKey) {
+  if (!entropy.registrationManager?.signer?.pair) {
     throw new Error("Keys are undefined")
   }
 
   switch (actionChoice.action) {
   case "View My Programs": {
-    const programs = await entropy.programs.get(entropy.account.sigRequestKey.wallet.address)
+    const programs = await entropy.programs.get(entropy.keyring.accounts.registration.address)
     if (programs.length === 0) {
       console.log("You currently have no programs set.")
     } else {
@@ -90,7 +90,7 @@ export async function userPrograms ({ accounts, endpoints }, options) {
         programPointer: programPointerToAdd,
         programConfig: programConfigHex,
       },
-      entropy.account.sigRequestKey.wallet.address
+      entropy.keyring.accounts.registration.address,
     )
 
     console.log("Program added successfully.")
@@ -106,7 +106,8 @@ export async function userPrograms ({ accounts, endpoints }, options) {
     ])
     await entropy.programs.remove(
       programPointerToRemove,
-      entropy.account.sigRequestKey.wallet.address
+      entropy.keyring.accounts.registration.address,
+      entropy.keyring.accounts.registration.verifyingKeys[0]
     )
     console.log("Program removed successfully.")
     break

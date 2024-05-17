@@ -1,8 +1,9 @@
-import { initializeEntropy } from "../../common/initializeEntropy"
-import { accountChoices } from "../../common/utils"
 import inquirer from "inquirer"
 import { ethers } from "ethers"
+import { initializeEntropy } from "../../common/initializeEntropy"
+import { accountChoices } from "../../common/utils"
 
+// TODO revisit this file, rename as signEthTransaction?
 export async function sign ({ accounts, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
 
@@ -24,7 +25,7 @@ export async function sign ({ accounts, endpoints }, options) {
 
   await entropy.ready
 
-  const address = entropy.account?.sigRequestKey?.wallet.address
+  const { address } = entropy.keyring.accounts.registration
   console.log({ address })
   if (address == undefined) {
     throw new Error("address issue")
@@ -63,6 +64,7 @@ export async function sign ({ accounts, endpoints }, options) {
     },
   ])
 
+  // TODO: this is assuming signing an eth Tx, should remove?
   const basicTx = {
     to: txDetails.to,
     value: ethers.utils.parseEther(txDetails.value).toHexString(),
@@ -71,8 +73,8 @@ export async function sign ({ accounts, endpoints }, options) {
     data: "0x" + Buffer.from(`${txDetails.data}`).toString("hex"),
   }
 
-  const signature = (await entropy.signTransaction({
-    txParams: basicTx,
+  const signature = (await entropy.signWithAdapter({
+    msg: basicTx,
     type: "eth",
   })) as string
 

@@ -78,7 +78,7 @@ export async function entropyTransfer ({ accounts, endpoints }, options) {
     await tx.signAndSend (entropy.registrationManager.signer.pair, ({ status }) => {
       // initialize the bar - defining payload token "speed" with the default value "N/A"
       b1.start(500, 0, {
-          speed: "N/A"
+        speed: "N/A"
       });
       // update values
       const interval = setInterval(() => {

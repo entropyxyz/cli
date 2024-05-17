@@ -1,8 +1,8 @@
-import * as config from './src/config'
 import inquirer from 'inquirer'
-import * as flows from './src/flows'
-import { ascii } from './src/common/ascii'
-import { getActiveOptions } from './src/common/utils'
+import * as config from './config'
+import * as flows from './flows'
+import { ascii } from './common/ascii'
+import { getActiveOptions } from './common/utils'
 
 config.init()
 
@@ -37,7 +37,7 @@ const choices = {
   'User Programs': flows.userPrograms,
   'Register': flows.register,
   // 'Entropy Faucet': flows.entropyFaucet,
-  'Construct an Ethereum Tx': flows.ethTransaction,
+  // 'Construct an Ethereum Tx': flows.ethTransaction,
   'Sign': flows.sign,
   'Transfer': flows.entropyTransfer,
   'Give Zaps': flows.giveZaps,
@@ -90,8 +90,3 @@ export async function main () {
   if (returnToMain) main()
   console.log('Have a nice day')
 }
-
-
-
-
-

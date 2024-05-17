@@ -4,8 +4,21 @@
     "noEmit": true,
     "target": "esnext",
     "esModuleInterop": true,
+    "moduleResolution": "node",
+    "typeRoots": [
+      "node_modules/@types",
+      "@types/",
+      "@entropyxyz/sdk",
+      "@entropyxyz/sdk/keys"
+    ]
   },
-  // "exclude": ["node_modules", "dist", "build", "examples", "old", "src/flows/*"],
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/flows/ethTransaction/*.ts"
+  ],
   "ts-node": {
     "swc": true,
     "experimentalSpecifierResolution": "node",

@@ -38,13 +38,13 @@ export async function giveZaps ({accounts, endpoints}, options){
 
   const { amount, account } = await inquirer.prompt(question)
 
-  if (!entropy.account?.sigRequestKey?.wallet) {
+  if (!entropy.registrationManager.signer.pair) {
     throw new Error("Keys are undefined")
   }
 
   const tx = entropy.substrate.tx.freeTx.giveZaps(account, amount)
   await tx.signAndSend(
-    entropy.account?.sigRequestKey?.wallet,
+    entropy.registrationManager.signer.pair,
     async ({ status }) => {
       if (status.isInBlock || status.isFinalized) {
         console.log(`${account} given ${amount} zaps`)
