@@ -6,7 +6,9 @@
     "esModuleInterop": true,
     "moduleResolution": "node"
   },
-  // "exclude": ["node_modules", "dist", "build", "examples", "old", "src/flows/*"],
+  "exclude": [
+    "node_modules"
+  ],
   "ts-node": {
     "swc": true,
     "experimentalSpecifierResolution": "node",
