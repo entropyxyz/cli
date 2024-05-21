@@ -2,6 +2,12 @@ import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex } from "@polkadot/util"
 import { keccak256 } from "ethereum-cryptography/keccak"
 import { Buffer } from 'buffer'
+import Debug from 'debug'
+
+const _debug = Debug('@entropyxyz/cli')
+export function debug (...args) {
+  _debug(...args.map(arg => JSON.stringify(arg, null, 2)))
+}
 
 // hardcoding for now instead of querying chain
 const DECIMALS = 10
@@ -16,7 +22,7 @@ export function pubToAddress (publicKey: string): string {
   const publicKeyBuffer = Buffer.from(publicKey, 'hex')
   const hash = keccak256(publicKeyBuffer)
   const address = `0x${Buffer.from(hash.subarray(hash.length - 20)).toString('hex')}`
-  console.log({address})
+  debug('address:', address)
   return address
 }
 
@@ -60,6 +66,6 @@ export function accountChoices (accounts) {
 }
 
 export function accountChoicesWithOther (accounts) {
-    return accountChoices(accounts)
-      .concat([{ name: "Other", value: null }])
+  return accountChoices(accounts)
+    .concat([{ name: "Other", value: null }])
 }

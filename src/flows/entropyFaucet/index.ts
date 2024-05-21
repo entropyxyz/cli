@@ -1,5 +1,5 @@
 import inquirer from "inquirer"
-import { accountChoices } from "../../common/utils"
+import { debug, accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 export async function entropyFaucet ({ accounts, endpoints }, options) {
@@ -14,7 +14,7 @@ export async function entropyFaucet ({ accounts, endpoints }, options) {
 
   const answers = await inquirer.prompt([accountQuestion])
   const selectedAccount = answers.selectedAccount
-  console.log({selectedAccount})
+  debug('selectedAccount', selectedAccount)
 
   const recipientAddress = selectedAccount.address
   const aliceData = {
@@ -24,7 +24,7 @@ export async function entropyFaucet ({ accounts, endpoints }, options) {
     },
   }
 
-  const entropy = await initializeEntropy(aliceData, endpoint)
+  const entropy = await initializeEntropy({ keyMaterial: aliceData }, endpoint)
 
   if (!entropy.registrationManager.signer.pair) {
     throw new Error("Keys are undefined")

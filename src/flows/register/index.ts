@@ -1,5 +1,5 @@
 import inquirer from "inquirer"
-import { accountChoices } from "../../common/utils"
+import { debug, accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 export async function register ({ accounts, endpoints, selectedAccount: selectedFromConfig }, options) {
@@ -7,15 +7,13 @@ export async function register ({ accounts, endpoints, selectedAccount: selected
 
   if (!selectedFromConfig) return
   const selectedAccount = accounts.find(obj => obj.address === selectedFromConfig)
-  console.log('selectedAccount', selectedAccount);
+  debug('selectedAccount', selectedAccount);
   
 
   const entropy = await initializeEntropy(selectedAccount.data, endpoint)
 
   const filteredAccountChoices = accountChoices(accounts).filter(choice => choice.name !== "Other")
-
-  console.log(filteredAccountChoices);
-  
+  debug('filteredAccountChoices', filteredAccountChoices);
 
   const programModKeyAccountQuestion = {
     type: "list",
@@ -44,8 +42,7 @@ export async function register ({ accounts, endpoints, selectedAccount: selected
   } else {
     programModAccount = programModAccountAnswer.programModAccount.address
   }
-  console.log('programModAccount', programModAccountAnswer, programModAccount);
-  
+  debug('programModAccount', programModAccountAnswer, programModAccount);
   
   console.log("Attempting to register the address:", selectedAccount.address)
   await entropy.register()

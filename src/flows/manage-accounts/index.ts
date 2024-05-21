@@ -23,5 +23,5 @@ const questions = [{
 export async function manageAccounts (config) {
   const { choice } = await inquirer.prompt(questions)
   const { accounts, selectedAccount } = await actions[choice](config)
-  return { accounts: !!accounts ? accounts : config.accounts, selectedAccount }
+  return { accounts: accounts ? accounts : config.accounts, selectedAccount }
 }

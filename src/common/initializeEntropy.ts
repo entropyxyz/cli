@@ -2,17 +2,20 @@ import Entropy, { wasmGlobalsReady } from "@entropyxyz/sdk"
 // TODO: fix importing of types from @entropy/sdk/keys
 // @ts-ignore
 import Keyring from "@entropyxyz/sdk/keys"
-import { decrypt } from "../flows/password"
 import inquirer from "inquirer"
-// have a main account to use
-let defaultAccount
+import { decrypt } from "../flows/password"
+import { debug } from "../common/utils"
+
+// TODO: unused
+// let defaultAccount // have a main account to use
+// let entropys 
+
 // have a main keyring
 const keyrings = {
   default: undefined
 }
-let entropys
 
-export function getKeyring(address) {
+export function getKeyring (address) {
   if (!address && keyrings.default) return keyrings.default
   if (address && keyrings[address]) return keyrings[address]
   if (address && !keyrings[address]) throw new Error('No keyring for this account')
@@ -21,13 +24,13 @@ export function getKeyring(address) {
 }
 
 
-export function setupKeyrings (config) {
-  const { accounts } = config;
-  
-}
+// export function setupKeyrings (config) {
+//   const { accounts } = config;
+//   
+// }
 
 export const initializeEntropy = async (keyMaterial, endpoint: string): Promise<Entropy> => {
-  console.log('KEY MATERIAL', keyMaterial);
+  debug('key material', keyMaterial);
   
   // if (defaultAccount && defaultAccount.seed === keyMaterial.seed) return entropys[defaultAccount.registering.address]
   await wasmGlobalsReady()
@@ -76,29 +79,25 @@ export const initializeEntropy = async (keyMaterial, endpoint: string): Promise<
     throw new Error("Data format is not recognized as either encrypted or unencrypted")
   }
 
-  console.log('account keyMaterial', accountData);
-  let selectedAccount;
+  debug('account keyMaterial', accountData);
+  let selectedAccount
   if(!keyrings.default) {
     const keyring = new Keyring({ ...accountData, debug: true })
     keyrings.default = keyring
     selectedAccount = keyring
   } else {
     const keyring = new Keyring({ ...accountData, debug: true })
-    keyrings[keyring.registration.address] = keyring
+    keyrings[keyring.accounts.masterAccountView.registration.address] = keyring
     selectedAccount = keyring
   }
 
-  const entropy = new Entropy({ keyring: selectedAccount, endpoint})
-  
+  const entropy = new Entropy({ keyring: selectedAccount, endpoint })
   await entropy.ready
-  console.log('data sent', accountData);
-  
-  console.log('storage', keyrings);
-  
-  console.log('selected', selectedAccount);
-  
-  console.log('keyring', entropy.keyring);
-  
+
+  debug('data sent', accountData);
+  debug('storage', keyrings);
+  debug('selected', selectedAccount);
+  debug('keyring', entropy.keyring);
 
   if (!entropy?.keyring?.accounts?.registration?.seed) {
     throw new Error("Keys are undefined")

@@ -2,7 +2,7 @@ import inquirer from 'inquirer'
 import * as config from './config'
 import * as flows from './flows'
 import { ascii } from './common/ascii'
-import { getActiveOptions } from './common/utils'
+import { debug, getActiveOptions } from './common/utils'
 
 config.init()
 
@@ -48,7 +48,6 @@ if (setOptions.DEV_MODE) Object.assign(choices, devChoices)
 // assign exit so its last
 Object.assign(choices, { 'Exit': async () => {} })
 
-
 const intro = {
   type: 'list',
   name: 'choice',
@@ -66,13 +65,10 @@ const returnToMainMenu = {
 main()
 
 export async function main () {
-  let noAccounts: boolean = true
   const storedConfig = await config.get()
+  debug('stored config', storedConfig)
 
   const { selectedAccount } = storedConfig
-
-  // console.log('stored config', storedConfig);
-  
   const answers = await inquirer.prompt([intro])
 
   if (answers.choice === 'Exit')  {
@@ -91,5 +87,6 @@ export async function main () {
 
   const { returnToMain } = await inquirer.prompt([returnToMainMenu])
   if (returnToMain) main()
+
   console.log('Have a nice day')
 }

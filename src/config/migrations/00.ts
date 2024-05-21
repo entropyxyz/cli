@@ -1,5 +1,3 @@
-import { selectAccount } from "../../flows/manage-accounts/select-account"
-
 export const version = '0'
 
 export function migrate (data= {}) {
