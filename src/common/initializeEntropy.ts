@@ -80,23 +80,23 @@ export const initializeEntropy = async (keyMaterial, endpoint: string): Promise<
   }
 
   debug('account keyMaterial', accountData);
-  let selected
+  let selectedAccount
   if(!keyrings.default) {
     const keyring = new Keyring({ ...accountData, debug: true })
     keyrings.default = keyring
-    selected = keyring
+    selectedAccount = keyring
   } else {
     const keyring = new Keyring({ ...accountData, debug: true })
     keyrings[keyring.registering.address] = keyring
-    selected = keyring
+    selectedAccount = keyring
   }
 
-  const entropy = new Entropy({ keyring: selected, endpoint })
+  const entropy = new Entropy({ keyring: selectedAccount, endpoint })
   await entropy.ready
 
   debug('data sent', accountData);
   debug('storage', keyrings);
-  debug('selected', selected);
+  debug('selected', selectedAccount);
   debug('keyring', entropy.keyring);
 
   if (!entropy?.keyring?.accounts?.registration?.seed) {
