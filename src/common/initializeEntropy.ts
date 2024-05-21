@@ -87,7 +87,7 @@ export const initializeEntropy = async (keyMaterial, endpoint: string): Promise<
     selectedAccount = keyring
   } else {
     const keyring = new Keyring({ ...accountData, debug: true })
-    keyrings[keyring.registering.address] = keyring
+    keyrings[keyring.accounts.masterAccountView.registration.address] = keyring
     selectedAccount = keyring
   }
 
