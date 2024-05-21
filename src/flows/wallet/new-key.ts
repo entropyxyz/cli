@@ -51,8 +51,8 @@ export async function newKey ({ accounts }) {
   const { secret, secretType, name, path, password, importKey } = answers
 
   const seed = importKey ? secret : randomAsHex(32)
-  const keyring = new Keyring({ seed })
-  const address = keyring.accounts.registration.address
+  const keyring = new Keyring({ seed, debug: true })
+  const address = keyring.accounts.masterAccountView.registration.address
 
   const data = {
     type: secretType || 'seed',
@@ -60,12 +60,15 @@ export async function newKey ({ accounts }) {
     path,
   }
 
-  const encryptedData = password ? passwordFlow.encrypt(data, password) : data
+  // const encryptedData = password ? passwordFlow.encrypt(data, password) : data
 
   const newAccount = {
     name: name,
     address,
-    data: encryptedData,
+    data: {
+      ...data,
+      ...keyring.accounts.masterAccountView
+    }
   }
 
   console.log(`New account:\n{\n\tname: ${newAccount.name}\n\taddress: ${newAccount.address}\n\ttype: ${data.type}\n}`)

@@ -21,6 +21,11 @@ export function getKeyring(address) {
 }
 
 
+export function setupKeyrings (config) {
+  const { accounts } = config;
+
+}
+
 export const initializeEntropy = async ({keyMaterial}, endpoint: string): Promise<Entropy> => {
   if (defaultAccount && defaultAccount.seed === keyMaterial.seed) return entropys[defaultAccount.registering.address]
   await wasmGlobalsReady()

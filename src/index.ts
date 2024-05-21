@@ -66,14 +66,17 @@ const returnToMainMenu = {
 main()
 
 export async function main () {
+  let noAccounts: boolean = true
   const storedConfig = await config.get()
+
+  if (storedConfig.accounts.length) noAccounts = false
   console.log('stored config', storedConfig);
   
   const answers = await inquirer.prompt([intro])
-  const user = await config.get()
-  console.log('user',user)
-  if (!user.accounts.length) {
-    console.log("User accounts is empty")
+
+  if (noAccounts && answers.choice !== 'Manage Accounts') {
+    console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
+    main()
   }
 
   if (answers.choice === 'Exit')  {
