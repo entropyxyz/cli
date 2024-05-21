@@ -3,12 +3,12 @@ import { newKey } from './new-key'
 import { selectAccount } from './select-account'
 
 const actions = {
-  'New Key': newKey,
   'Select Account': selectAccount,
   'List Accounts': async (config) => {
     const accountsArray = Array.isArray(config.accounts) ? config.accounts : [config.accounts]
     accountsArray.forEach((account) => console.log(account))
-  }
+  },
+  'Create/Import Account': newKey,
 }
 
 const choices = Object.keys(actions)
