@@ -11,7 +11,8 @@
     "prepare": "husky",
     "postinstall": "husky",
     "prepack": "pinst --disable",
-    "postpack": "pinst --enable"
+    "postpack": "pinst --enable",
+    "reload-local-sdk": "yarn unlink @entropyxyz/sdk && yarn link @entropyxyz/sdk"
   },
   "bin": {
     "entropy": "./src/bin/entropy.sh"

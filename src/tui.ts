@@ -14,7 +14,7 @@ export default function tui (options: EntropyTuiOptions) {
   debug(options)
 
   const choices = {
-    'Manage Accounts': flows.wallet,
+    'Manage Accounts': flows.manageAccounts,
     'Balance': flows.checkBalance,
     'Register': flows.register,
     'Sign': flows.sign,
@@ -34,7 +34,6 @@ export default function tui (options: EntropyTuiOptions) {
   // assign exit so its last
   Object.assign(choices, { 'Exit': async () => {} })
 
-
   const intro = {
     type: 'list',
     name: 'choice',
@@ -53,23 +52,21 @@ export default function tui (options: EntropyTuiOptions) {
 
   async function main () {
     const storedConfig = await config.get()
-    debug('stored config', storedConfig);
-    
     const answers = await inquirer.prompt([intro])
-    const user = await config.get()
-    debug('user', user)
-    if (!user.accounts.length) {
-      console.log('User accounts is empty')
-    }
-
     if (answers.choice === 'Exit')  {
       console.log('Have a nice day')
       process.exit()
     }
-    debug(answers)
-    const newConfigUpdates = await choices[answers.choice](storedConfig, options)
 
-    if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
+    const { selectedAccount } = storedConfig
+    if (!selectedAccount && answers.choice !== 'Manage Accounts') {
+      console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
+    } else {
+      debug('answers', answers)
+      const newConfigUpdates = await choices[answers.choice](storedConfig, options)
+
+      if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
+    }
 
     const { returnToMain } = await inquirer.prompt([returnToMainMenu])
     if (returnToMain) main()

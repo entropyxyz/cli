@@ -2,8 +2,10 @@ import inquirer from "inquirer"
 import { debug, accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
-export async function register ({ accounts, endpoints }, options) {
+export async function register ({ accounts, endpoints, selectedAccount: selectedFromConfig }, options) {
   const endpoint = endpoints[options.ENDPOINT]
+
+  if (!selectedFromConfig) return
 
   const accountQuestion = {
     type: "list",

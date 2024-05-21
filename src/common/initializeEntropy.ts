@@ -4,7 +4,11 @@ import Entropy, { wasmGlobalsReady } from "@entropyxyz/sdk"
 import Keyring from "@entropyxyz/sdk/keys"
 import inquirer from "inquirer"
 import { decrypt } from "../flows/password"
-import { debug } from "./utils"
+import { debug } from "../common/utils"
+
+// TODO: unused
+// let defaultAccount // have a main account to use
+// let entropys 
 
 // have a main keyring
 const keyrings = {
@@ -37,6 +41,7 @@ interface InitializeEntropyOpts {
 // WARNING: in full-cli mode this function should NEVER prompt users, but it will if no password was provided
 
 export const initializeEntropy = async ({ keyMaterial, password, endpoint }: InitializeEntropyOpts): Promise<Entropy> => {
+  debug('key material', keyMaterial);
   // if (defaultAccount && defaultAccount.seed === keyMaterial.seed) return entropys[defaultAccount.registering.address]
   await wasmGlobalsReady()
 
@@ -46,19 +51,24 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint }: Ini
   }
   debug('account:', accountData);
 
-  let selected: Keyring
+  let selectedAccount: Keyring
   if (!keyrings.default) {
     const keyring = new Keyring({ ...accountData, debug: true })
     keyrings.default = keyring
-    selected = keyring
+    selectedAccount = keyring
   } else {
     const keyring = new Keyring({ ...accountData, debug: true })
     keyrings[keyring.registering.address] = keyring
-    selected = keyring
+    selectedAccount = keyring
   }
 
-  const entropy = new Entropy({ keyring: selected, endpoint })
+  const entropy = new Entropy({ keyring: selectedAccount, endpoint })
   await entropy.ready
+
+  debug('data sent', accountData);
+  debug('storage', keyrings);
+  debug('selected', selectedAccount);
+  debug('keyring', entropy.keyring);
 
   if (!entropy?.keyring?.accounts?.registration?.seed) {
     throw new Error("Keys are undefined")

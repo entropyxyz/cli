@@ -5,6 +5,7 @@ export function migrate (data= {}) {
     const migratedData = {
       ...data,
       accounts: [],
+      selectAccount: '',
       endpoints: {
         dev: 'ws://127.0.0.1:9944',
         'test-net': 'ws://testnet.entropy.xyz:9944/'
