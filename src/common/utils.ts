@@ -31,6 +31,7 @@ export function pubToAddress (publicKey: string): string {
 }
 
 export const formatAmountAsHex = (amount) => {
+  if (isNaN(amount)) throw new Error(`${amount} cannot be coerced into a number`)
   return `${PREFIX}${(amount * (1 * (10 ** DECIMALS))).toString(16)}`;
 }
 
