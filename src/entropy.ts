@@ -3,7 +3,8 @@ import { Command, Option } from 'commander'
 import launchTui from './tui'
 import { EntropyTuiOptions } from './types'
 
-import getBalance from './flows/balance/cli'
+import { cliGetBalance } from './flows/balance/cli'
+import { cliListAccounts } from './flows/manage-accounts/cli'
 // import { debug } from './common/utils'
 
 const { version } = require('../package.json')
@@ -22,7 +23,7 @@ const endpointOption = new Option(
   .default('ws://127.0.0.1:9944')
   .env('ENDPOINT')
 
-/* No Command */
+/* no command */
 program
   .name('entropy')
   .description('CLI interface for interacting with entropy.xyz. Running without commands starts an interactive ui')
@@ -40,10 +41,22 @@ program
     launchTui(options)
   })
 
+/* list */
+program.command('list')
+  .alias('ls')
+  .description('list all accounts. Output is JSON of form [{ name, address, data }]')
+  // .addOption(endpointOption)
+  .action(async () => {
+    // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
 
-/* Balance */
+    const accounts = await cliListAccounts()
+    writeOut(accounts)
+    process.exit(0)
+  })
+
+/* balance */
 program.command('balance')
-  .description('get the balance of an Entropy account')
+  .description('get the balance of an Entropy account. Output is a number')
   .argument('account', 'account to print the balance of')
   // QUESTION: is account optional? (probably no, because each encrypted account requires a password)
   .option('-p, --password <password>', 'password for the account')
@@ -51,7 +64,7 @@ program.command('balance')
   .action(async (account, opts) => {
     // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
 
-    const balance = await getBalance(account, opts.password, opts.endpoint)
+    const balance = await cliGetBalance(account, opts.password, opts.endpoint)
     writeOut(balance)
     process.exit(0)
   })
@@ -73,7 +86,10 @@ program.command('transfer')
 
 
 function writeOut (result) {
-  process.stdout.write(result)
+  const prettyResult = typeof result === 'object'
+    ? JSON.stringify(result, null, 2)
+    : result
+  process.stdout.write(prettyResult)
 }
 
 program.parse()
