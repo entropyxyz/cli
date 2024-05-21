@@ -72,10 +72,7 @@ export async function ethTransaction ({ accounts, endpoints }, options): Promise
   const answers = await inquirer.prompt([accountQuestion])
   const selectedAccount = answers.selectedAccount
 
-  const entropy = await initializeEntropy(
-    { data: selectedAccount.data },
-    endpoint
-  )
+  const entropy = await initializeEntropy({ keyRing: selectedAccount.data, endpoint })
 
   await entropy.ready
 

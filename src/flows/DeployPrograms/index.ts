@@ -33,10 +33,10 @@ export async function devPrograms ({ accounts, endpoints }, options) {
     },
   ])
 
-  const entropy = await initializeEntropy(
-    { keyMaterial: selectedAccount.data },
+  const entropy = await initializeEntropy({
+    keyMaterial: selectedAccount.data,
     endpoint
-  )
+  })
   
   const flow = choices[actionChoice.action]
   await flow(entropy, selectedAccount)

@@ -53,20 +53,20 @@ export default function tui (options: EntropyTuiOptions) {
 
   async function main () {
     const storedConfig = await config.get()
-    console.log('stored config', storedConfig);
+    debug('stored config', storedConfig);
     
     const answers = await inquirer.prompt([intro])
     const user = await config.get()
-    console.log('user',user)
+    debug('user', user)
     if (!user.accounts.length) {
-      console.log("User accounts is empty")
+      console.log('User accounts is empty')
     }
 
     if (answers.choice === 'Exit')  {
       console.log('Have a nice day')
       process.exit()
     }
-    console.log(answers)
+    debug(answers)
     const newConfigUpdates = await choices[answers.choice](storedConfig, options)
 
     if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })

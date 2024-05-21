@@ -30,10 +30,10 @@ export async function userPrograms ({ accounts, endpoints }, options) {
     },
   ])
 
-  const entropy = await initializeEntropy(
-    { keyMaterial: selectedAccount.data },
+  const entropy = await initializeEntropy({
+    keyMaterial: selectedAccount.data,
     endpoint
-  )
+  })
   
   if (!entropy.registrationManager?.signer?.pair) {
     throw new Error("Keys are undefined")

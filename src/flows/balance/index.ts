@@ -8,6 +8,9 @@ const hexToBigInt = (hexString: string) => BigInt(hexString)
 export async function checkBalance ({ accounts, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
 
+  // TODO: refactor this to make clearer control flow
+  // 1. selectedAccount? great, do everything with that
+  // 2. other? start a new flow for that
   const answers = await inquirer.prompt([
     {
       name: "selectedAccount",
@@ -32,12 +35,12 @@ export async function checkBalance ({ accounts, endpoints }, options) {
     debug('before entropy creation', endpoint)
 
     let keyMaterial = selectedAccount?.data;
-    if (!keyMaterial || isEmpty(keyMaterial)) {
+    if (isEmpty(keyMaterial)) {
       keyMaterial = {
         seed: accountSeedOrPrivateKey,
       }
     }
-    const entropy = await initializeEntropy({ keyMaterial }, endpoint)
+    const entropy = await initializeEntropy({ keyMaterial, endpoint })
     const accountAddress = selectedAccount?.address ?? entropy.keyring.accounts.registration.address
     
     const accountInfo = (await entropy.substrate.query.system.account(accountAddress)) as any

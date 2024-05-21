@@ -2,16 +2,14 @@ import Entropy, { wasmGlobalsReady } from "@entropyxyz/sdk"
 // TODO: fix importing of types from @entropy/sdk/keys
 // @ts-ignore
 import Keyring from "@entropyxyz/sdk/keys"
-import { decrypt } from "../flows/password"
 import inquirer from "inquirer"
-// have a main account to use
-let defaultAccount
+import { decrypt } from "../flows/password"
+import { debug } from "./utils"
+
 // have a main keyring
 const keyrings = {
   default: undefined
 }
-let entropys
-
 export function getKeyring (address) {
   if (!address && keyrings.default) return keyrings.default
   if (address && keyrings[address]) return keyrings[address]
@@ -20,58 +18,36 @@ export function getKeyring (address) {
   return keyrings.default
 }
 
+// TODO: pull this type from somewhere else?
+interface AccountData {
+  type: string,
+  seed: string
+}
+type MaybeKeyMaterial = AccountData | string
 
-export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Promise<Entropy> => {
-  if (defaultAccount && defaultAccount.seed === keyMaterial.seed) return entropys[defaultAccount.registering.address]
+interface InitializeEntropyOpts {
+  keyMaterial: MaybeKeyMaterial,
+  password?: string,
+  endpoint: string
+}
+
+// TODO: someone re-enable these
+// let defaultAccount 
+// let entropys
+// WARNING: in full-cli mode this function should NEVER prompt users, but it will if no password was provided
+
+export const initializeEntropy = async ({ keyMaterial, password, endpoint }: InitializeEntropyOpts): Promise<Entropy> => {
+  // if (defaultAccount && defaultAccount.seed === keyMaterial.seed) return entropys[defaultAccount.registering.address]
   await wasmGlobalsReady()
 
-  let accountData
-  if (keyMaterial && typeof keyMaterial === 'object' && 'seed' in keyMaterial) {
-    accountData = keyMaterial
-  } else if (typeof keyMaterial === 'string') {
-
-    let decryptedData
-    let attempts = 0
-
-    while (attempts < 3) {
-      const answers = await inquirer.prompt([
-        {
-          type: 'password',
-          name: 'password',
-          message: 'Enter password to decrypt keyMaterial:',
-          mask: '*',
-        }
-      ])
-
-      try {
-        decryptedData = decrypt(keyMaterial, answers.password)
-        //@ts-ignore
-        if (!decryptedData || typeof decryptedData !== 'object' || !('seed' in decryptedData)) {
-          throw new Error("Failed to decrypt keyMaterial or decrypted keyMaterial is invalid")
-        }
-
-        break
-      } catch (error) {
-        console.error("Incorrect password. Try again")
-        attempts++
-        if (attempts >= 3) {
-          throw new Error("Failed to decrypt keyMaterial after 3 attempts.")
-        }
-      }
-    }
-
-    accountData = decryptedData as { seed: string; type: string }
-  } else {
-    throw new Error("Data format is not recognized as either encrypted or unencrypted")
-  }
-  
+  const accountData = await getAccountData(keyMaterial, password)
   if (!accountData.seed) {
     throw new Error("Data format is not recognized as either encrypted or unencrypted")
   }
+  debug('account:', accountData);
 
-  console.log('account keyMaterial', accountData);
-  let selected
-  if(!keyrings.default) {
+  let selected: Keyring
+  if (!keyrings.default) {
     const keyring = new Keyring({ ...accountData, debug: true })
     keyrings.default = keyring
     selected = keyring
@@ -82,7 +58,6 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
   }
 
   const entropy = new Entropy({ keyring: selected, endpoint })
-  
   await entropy.ready
 
   if (!entropy?.keyring?.accounts?.registration?.seed) {
@@ -90,4 +65,63 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
   }
 
   return entropy
+}
+
+async function getAccountData (keyMaterial: MaybeKeyMaterial, password?: string): Promise<AccountData> {
+  if (isAccountData(keyMaterial)) return keyMaterial as AccountData
+
+  if (typeof keyMaterial !== 'string') {
+    throw new Error("Data format is not recognized as either encrypted or unencrypted")
+  }
+
+  /* Programmatic Mode */
+  if (password) {
+    const decryptedData = decrypt(keyMaterial, password)
+    if (!isAccountData(decryptedData)) {
+      throw new Error("Failed to decrypt keyMaterial or decrypted keyMaterial is invalid")
+    }
+    // @ts-ignore TODO: some type work here
+    return decryptedData
+  }
+
+  /* Interactive Mode */
+  let decryptedData
+  let attempts = 0
+
+  while (attempts < 3) {
+    const answers = await inquirer.prompt([
+      {
+        type: 'password',
+        name: 'password',
+        message: 'Enter password to decrypt keyMaterial:',
+        mask: '*',
+      }
+    ])
+
+    try {
+      decryptedData = decrypt(keyMaterial, answers.password)
+      //@ts-ignore
+      if (!isAccountData(decryptedData)) {
+        throw new Error("Failed to decrypt keyMaterial or decrypted keyMaterial is invalid")
+      }
+
+      break
+    } catch (error) {
+      console.error("Incorrect password. Try again")
+      attempts++
+      if (attempts >= 3) {
+        throw new Error("Failed to decrypt keyMaterial after 3 attempts.")
+      }
+    }
+  }
+
+  return decryptedData as { seed: string; type: string }
+}
+
+function isAccountData (maybeAccountData: any) {
+  return (
+    maybeAccountData &&
+    typeof maybeAccountData === 'object' &&
+    'seed' in maybeAccountData
+  )
 }

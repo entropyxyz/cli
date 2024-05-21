@@ -14,7 +14,7 @@
     "postpack": "pinst --enable"
   },
   "bin": {
-    "entropy": "./src/bin/cli.sh"
+    "entropy": "./src/bin/entropy.sh"
   },
   "repository": {
     "type": "git",

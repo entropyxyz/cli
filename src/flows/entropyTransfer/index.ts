@@ -52,10 +52,7 @@ export async function entropyTransfer ({ accounts, endpoints }, options) {
   }
 
   try {
-    const entropy = await initializeEntropy(
-      { keyMaterial },
-      endpoint
-    )
+    const entropy = await initializeEntropy({ keyMaterial, endpoint })
 
     const b1 = new cliProgress.SingleBar({
       format: 'CLI Progress |' + colors.cyan('{bar}') + '| {percentage}% || {value}/{total} Chunks || Speed: {speed}',

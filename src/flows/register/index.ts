@@ -16,7 +16,7 @@ export async function register ({ accounts, endpoints }, options) {
   const selectedAccount = selectedAccountAnswer.selectedAccount
   debug('selectedAccount:', selectedAccount);
   
-  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data }, endpoint)
+  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint })
 
   const filteredAccountChoices = accountChoices(accounts).filter(choice => choice.name !== "Other")
   console.log(filteredAccountChoices);

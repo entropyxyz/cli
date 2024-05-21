@@ -34,7 +34,7 @@ Follow these steps to build and install the CLI:
 
 1. Ensure you have Yarn installed:
 
-    ```shell
+    ```bash
     yarn --version
     
     # Output example:
@@ -43,7 +43,7 @@ Follow these steps to build and install the CLI:
 
 1. Grab this repository and move into the new directory:
 
-    ```shell
+    ```bash
     git clone https://github.com/entropyxyz/cli
     cd cli
     ```
@@ -61,12 +61,23 @@ Follow these steps to build and install the CLI:
 
     
     For an interactive text user interface:
-    ```shell
+    ```bash
     yarn start
     ```
 
     To read about programmatic use:
-    ```shell
+    ```bash
     yarn start --help
     ```
+
+### Testing bin script
+
+```bash
+npm i -g
+```
+This will register the `entropy` bin script globally so that you can run
+
+```bash
+entropy --help
+```
 
