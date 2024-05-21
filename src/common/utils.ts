@@ -13,6 +13,10 @@ export function debug (...args) {
 const DECIMALS = 10
 const PREFIX = '0x'
 
+export function isEmpty (data?: object) {
+  return data === undefined || Object.keys(data).length === 0
+}
+
 export function pubToAddress (publicKey: string): string {  
   publicKey = publicKey.startsWith('0x') ? publicKey.slice(2) : publicKey
   const publicKeyBuffer = Buffer.from(publicKey, 'hex')

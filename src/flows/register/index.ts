@@ -14,13 +14,12 @@ export async function register ({ accounts, endpoints }, options) {
 
   const selectedAccountAnswer = await inquirer.prompt([accountQuestion])
   const selectedAccount = selectedAccountAnswer.selectedAccount
-
-  const entropy = await initializeEntropy({ data: selectedAccount.data }, endpoint)
-
-  await entropy.ready
-
+  debug('selectedAccount:', selectedAccount);
+  
+  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data }, endpoint)
 
   const filteredAccountChoices = accountChoices(accounts).filter(choice => choice.name !== "Other")
+  console.log(filteredAccountChoices);
 
   const programModKeyAccountQuestion = {
     type: "list",
@@ -49,27 +48,10 @@ export async function register ({ accounts, endpoints }, options) {
   } else {
     programModAccount = programModAccountAnswer.programModAccount.address
   }
+  debug('programModAccount', programModAccountAnswer, programModAccount);
+  
+  console.log("Attempting to register the address:", selectedAccount.address)
+  await entropy.register()
 
-  const isRegistered = await entropy.isRegistered(selectedAccount.address)
-
-  if (isRegistered) {
-    console.log("Address is already registered:", selectedAccount.address)
-  } else {
-    const pointer = "0x3873f6f91334cfb6cad84f94aa1e1025069405a4ea3577a818a5ad8d0e26bb39"
-    const programConfig = "0x"
-
-    const programData = {
-      programPointer: pointer,
-      programConfig: programConfig,
-    }
-    debug('programData', programData)
-
-    console.log("Attempting to register the address:", selectedAccount.address)
-    await entropy.register({
-      programData: [programData],
-      programDeployer: programModAccount,
-    })
-
-    console.log("Your address", selectedAccount.data.address, "has been successfully registered.")
-  }
+  console.log("Your address", selectedAccount.data.address, "has been successfully registered.")
 }

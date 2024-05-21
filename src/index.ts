@@ -32,16 +32,15 @@ const devChoices = {
 }
 
 const choices = {
+  'Manage Accounts': flows.wallet,
   'Balance': flows.checkBalance,
   'Register': flows.register,
-  'Transfer': flows.entropyTransfer,
   'Sign': flows.sign,
-  'Wallet': flows.wallet,
-  'User Programs': flows.userPrograms,
-  'Deploy Program': flows.devPrograms,
+  'Transfer': flows.entropyTransfer,
+  // 'Deploy Program': flows.devPrograms,
+  // 'User Programs': flows.userPrograms,
   // 'Entropy Faucet': flows.entropyFaucet,
   // 'Construct an Ethereum Tx': flows.ethTransaction,
-  // 'Give Zaps': flows.giveZaps,
 }
 
 if (setOptions.DEV_MODE) Object.assign(choices, devChoices)

@@ -24,7 +24,7 @@ export async function entropyFaucet ({ accounts, endpoints }, options) {
     },
   }
 
-  const entropy = await initializeEntropy(aliceData, endpoint)
+  const entropy = await initializeEntropy({ keyMaterial: aliceData }, endpoint)
 
   if (!entropy.registrationManager.signer.pair) {
     throw new Error("Keys are undefined")

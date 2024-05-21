@@ -1,5 +1,5 @@
 import inquirer from "inquirer"
-import { accountChoices, formatAmountAsHex } from "../../common/utils"
+import { accountChoices, formatAmountAsHex, isEmpty } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 const cliProgress = require('cli-progress');
@@ -44,16 +44,16 @@ export async function entropyTransfer ({ accounts, endpoints }, options) {
   const selectedAccount = answers.selectedAccount
   const accountSeedOrPrivateKey = answers.accountSeedOrPrivateKey
 
-  let data = selectedAccount?.data;
-  if (!data || Object.keys(data).length === 0) {
-    data = {
+  let keyMaterial = selectedAccount?.data;
+  if (!keyMaterial || isEmpty(keyMaterial)) {
+    keyMaterial = {
       seed: accountSeedOrPrivateKey,
     }
   }
 
   try {
     const entropy = await initializeEntropy(
-      { data },
+      { keyMaterial },
       endpoint
     )
 

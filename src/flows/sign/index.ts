@@ -1,9 +1,9 @@
 import inquirer from "inquirer"
 import { ethers } from "ethers"
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { debug, accountChoices } from "../../common/utils"
+import { accountChoices, debug, isEmpty } from "../../common/utils"
 
-// TODO revisit this file, rename as signEthTransaction?
+// TODO: revisit this file, rename as signEthTransaction?
 export async function sign ({ accounts, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
 
@@ -14,16 +14,25 @@ export async function sign ({ accounts, endpoints }, options) {
     choices: accountChoices(accounts),
   }
 
-  const answers = await inquirer.prompt([accountQuestion])
+  const otherQuestion = {
+    type: "input",
+    name: "accountSeedOrPrivateKey",
+    message: "Enter the account seed or private key:",
+    when: (answers) => !answers.selectedAccount
+  }
+
+  const answers = await inquirer.prompt([accountQuestion, otherQuestion])
   const selectedAccount = answers.selectedAccount
   debug("selectedAccount:", { selectedAccount })
+  const accountSeedOrPrivateKey = answers.accountSeedOrPrivateKey
+  let keyMaterial = selectedAccount?.data;
+  if (!keyMaterial || isEmpty(keyMaterial)) {
+    keyMaterial = {
+      seed: accountSeedOrPrivateKey,
+    }
+  }
 
-  const entropy = await initializeEntropy(
-    { data: selectedAccount.data },
-    endpoint
-  )
-
-  await entropy.ready
+  const entropy = await initializeEntropy({ keyMaterial }, endpoint)
 
   const { address } = entropy.keyring.accounts.registration
   debug("address:", address)

@@ -4,7 +4,7 @@ import util from 'util'
 import { ethers } from "ethers"
 import { http, Hex, createPublicClient } from 'viem'
 import { sepolia } from 'viem/chains'
-import { debug, accountChoices, pubToAddress } from "../../common/utils"
+import { accountChoices, debug, pubToAddress } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 const execAsync = util.promisify(exec)

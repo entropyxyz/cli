@@ -32,7 +32,7 @@ export async function giveZaps ({accounts, endpoints}, options){
   debug("selectedAccount:", { selectedAccount })
 
   const entropy = await initializeEntropy(
-    { data: selectedAccount.data },
+    { keyMaterial: selectedAccount.data },
     endpoint
   )
 
