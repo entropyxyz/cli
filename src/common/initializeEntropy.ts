@@ -4,14 +4,31 @@ import Entropy, { wasmGlobalsReady } from "@entropyxyz/sdk"
 import Keyring from "@entropyxyz/sdk/keys"
 import { decrypt } from "../flows/password"
 import inquirer from "inquirer"
+// have a main account to use
+let defaultAccount
+// have a main keyring
+const keyrings = {
+  default: undefined
+}
+let entropys
 
-export const initializeEntropy = async ({data}, endpoint: string): Promise<Entropy> => {
+export function getKeyring (address) {
+  if (!address && keyrings.default) return keyrings.default
+  if (address && keyrings[address]) return keyrings[address]
+  if (address && !keyrings[address]) throw new Error('No keyring for this account')
+  if (!keyrings.default) throw new Error('no default set please create a keyring')
+  return keyrings.default
+}
+
+
+export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Promise<Entropy> => {
+  if (defaultAccount && defaultAccount.seed === keyMaterial.seed) return entropys[defaultAccount.registering.address]
   await wasmGlobalsReady()
 
   let accountData
-  if (data && typeof data === 'object' && 'seed' in data) {
-    accountData = data
-  } else if (typeof data === 'string') {
+  if (keyMaterial && typeof keyMaterial === 'object' && 'seed' in keyMaterial) {
+    accountData = keyMaterial
+  } else if (typeof keyMaterial === 'string') {
 
     let decryptedData
     let attempts = 0
@@ -21,16 +38,16 @@ export const initializeEntropy = async ({data}, endpoint: string): Promise<Entro
         {
           type: 'password',
           name: 'password',
-          message: 'Enter password to decrypt data:',
+          message: 'Enter password to decrypt keyMaterial:',
           mask: '*',
         }
       ])
 
       try {
-        decryptedData = decrypt(data, answers.password)
+        decryptedData = decrypt(keyMaterial, answers.password)
         //@ts-ignore
         if (!decryptedData || typeof decryptedData !== 'object' || !('seed' in decryptedData)) {
-          throw new Error("Failed to decrypt data or decrypted data is invalid")
+          throw new Error("Failed to decrypt keyMaterial or decrypted keyMaterial is invalid")
         }
 
         break
@@ -38,7 +55,7 @@ export const initializeEntropy = async ({data}, endpoint: string): Promise<Entro
         console.error("Incorrect password. Try again")
         attempts++
         if (attempts >= 3) {
-          throw new Error("Failed to decrypt data after 3 attempts.")
+          throw new Error("Failed to decrypt keyMaterial after 3 attempts.")
         }
       }
     }
@@ -52,9 +69,19 @@ export const initializeEntropy = async ({data}, endpoint: string): Promise<Entro
     throw new Error("Data format is not recognized as either encrypted or unencrypted")
   }
 
-  const keyring = new Keyring(accountData)
+  console.log('account keyMaterial', accountData);
+  let selected
+  if(!keyrings.default) {
+    const keyring = new Keyring({ ...accountData, debug: true })
+    keyrings.default = keyring
+    selected = keyring
+  } else {
+    const keyring = new Keyring({ ...accountData, debug: true })
+    keyrings[keyring.registering.address] = keyring
+    selected = keyring
+  }
 
-  const entropy = new Entropy({ keyring, endpoint})
+  const entropy = new Entropy({ keyring: selected, endpoint })
   
   await entropy.ready
 

@@ -22,7 +22,6 @@ export default function tui (options: EntropyTuiOptions) {
     // 'Construct an Ethereum Tx': flows.ethTransaction,
     'Sign': flows.sign,
     'Transfer': flows.entropyTransfer,
-    'Give Zaps': flows.giveZaps,
     'Wallet': flows.wallet,
   }
 
