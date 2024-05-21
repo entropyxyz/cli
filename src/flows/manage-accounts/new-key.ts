@@ -72,5 +72,5 @@ export async function newKey ({ accounts }) {
   console.log(`New account:\n{\n\tname: ${newAccount.name}\n\taddress: ${newAccount.address}\n\ttype: ${data.type}\n}`)
 
   accounts.push(newAccount)
-  return accounts
+  return { accounts, selectedAccount: newAccount.address }
 }

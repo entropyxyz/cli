@@ -2,9 +2,7 @@ import inquirer from 'inquirer'
 import * as config from './config'
 import * as flows from './flows'
 import { ascii } from './common/ascii'
-import { accountChoices, getActiveOptions } from './common/utils'
-import Entropy from '@entropyxyz/sdk'
-import { initializeEntropy } from './common/initializeEntropy'
+import { getActiveOptions } from './common/utils'
 
 config.init()
 
@@ -34,7 +32,7 @@ const devChoices = {
 }
 
 const choices = {
-  'Manage Accounts': flows.wallet,
+  'Manage Accounts': flows.manageAccounts,
   'Balance': flows.checkBalance,
   'Register': flows.register,
   'Sign': flows.sign,
@@ -50,7 +48,8 @@ if (setOptions.DEV_MODE) Object.assign(choices, devChoices)
 // assign exit so its last
 Object.assign(choices, { 'Exit': async () => {} })
 
-const actionsPrompt = {
+
+const intro = {
   type: 'list',
   name: 'choice',
   message: 'Select Action',
@@ -67,58 +66,28 @@ const returnToMainMenu = {
 main()
 
 export async function main () {
-  // let noAccounts: boolean = true
-  let storedConfig = await config.get()
+  let noAccounts: boolean = true
+  const storedConfig = await config.get()
 
-  // if (storedConfig.accounts.length) noAccounts = false
-  console.log('stored config', storedConfig);
+  const { selectedAccount } = storedConfig
 
-  // Setup account to be used throughout cli
-  const storedAccounts = accountChoices(storedConfig.accounts);
-  const accChoices = storedAccounts.concat([{ name: 'Create new account', value: 'create-new' }, { name: 'Exit', value: 'exit' }])
-  const intro = {
-    type: 'list',
-    name: 'selectedAccountOrCreate',
-    message: 'Select or Create Account',
-    pageSize: accChoices.length,
-    choices: accChoices
-  }
-  const accountPrompt = await inquirer.prompt([intro])
-
-  console.log('accountPrompt', accountPrompt);
-  if (accountPrompt.selectedAccountOrCreate === 'exit')  {
-    console.log('Have a nice day')
-    process.exit()
-  }
-
-  if (accountPrompt.selectedAccountOrCreate === 'create-new') {
-    const newConfigUpdates = await flows.wallet(storedConfig)
-
-    if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
-    
-    storedConfig = await config.get();
-  }
-
-  const selectedAccount = accountPrompt.selectedAccountOrCreate;
-  const entropy = await initializeEntropy(selectedAccount.data, storedConfig.endpoints[setOptions.ENDPOINT])
-
-  const answers = await inquirer.prompt([actionsPrompt])
-
-  // if (noAccounts && answers.choice !== 'Manage Accounts') {
-  //   console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
-  //   main()
-  // }
+  // console.log('stored config', storedConfig);
+  
+  const answers = await inquirer.prompt([intro])
 
   if (answers.choice === 'Exit')  {
     console.log('Have a nice day')
     process.exit()
   }
 
-  const newConfigUpdates = await choices[answers.choice](entropy)
+  if (!selectedAccount && answers.choice !== 'Manage Accounts') {
+    console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
+  } else {
+    console.log(answers)
+    const newConfigUpdates = await choices[answers.choice](storedConfig, setOptions)
 
-  if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
-  console.log(answers)
-  
+    if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
+  }
 
   const { returnToMain } = await inquirer.prompt([returnToMainMenu])
   if (returnToMain) main()

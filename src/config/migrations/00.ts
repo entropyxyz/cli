@@ -1,3 +1,5 @@
+import { selectAccount } from "../../flows/manage-accounts/select-account"
+
 export const version = '0'
 
 export function migrate (data= {}) {
@@ -5,6 +7,7 @@ export function migrate (data= {}) {
     const migratedData = {
       ...data,
       accounts: [],
+      selectAccount: '',
       endpoints: {
         dev: 'ws://127.0.0.1:9944',
         'test-net': 'ws://testnet.entropy.xyz:9944/'
