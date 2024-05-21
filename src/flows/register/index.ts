@@ -6,22 +6,14 @@ export async function register ({ accounts, endpoints, selectedAccount: selected
   const endpoint = endpoints[options.ENDPOINT]
 
   if (!selectedFromConfig) return
-
-  const accountQuestion = {
-    type: "list",
-    name: "selectedAccount",
-    message: "Choose account:",
-    choices: accountChoices(accounts),
-  }
-
-  const selectedAccountAnswer = await inquirer.prompt([accountQuestion])
-  const selectedAccount = selectedAccountAnswer.selectedAccount
-  debug('selectedAccount:', selectedAccount);
+  const selectedAccount = accounts.find(obj => obj.address === selectedFromConfig)
+  debug('selectedAccount', selectedAccount);
   
-  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data }, endpoint)
+
+  const entropy = await initializeEntropy(selectedAccount.data, endpoint)
 
   const filteredAccountChoices = accountChoices(accounts).filter(choice => choice.name !== "Other")
-  console.log(filteredAccountChoices);
+  debug('filteredAccountChoices', filteredAccountChoices);
 
   const programModKeyAccountQuestion = {
     type: "list",
