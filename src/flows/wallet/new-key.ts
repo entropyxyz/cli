@@ -58,17 +58,15 @@ export async function newKey ({ accounts }) {
     type: secretType || 'seed',
     seed,
     path,
+    ...keyring.accounts.masterAccountView
   }
 
-  // const encryptedData = password ? passwordFlow.encrypt(data, password) : data
+  const encryptedData = password ? passwordFlow.encrypt(data, password) : data
 
   const newAccount = {
     name: name,
     address,
-    data: {
-      ...data,
-      ...keyring.accounts.masterAccountView
-    }
+    data: encryptedData,
   }
 
   console.log(`New account:\n{\n\tname: ${newAccount.name}\n\taddress: ${newAccount.address}\n\ttype: ${data.type}\n}`)

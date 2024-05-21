@@ -23,7 +23,7 @@ export function getKeyring(address) {
 
 export function setupKeyrings (config) {
   const { accounts } = config;
-
+  
 }
 
 export const initializeEntropy = async ({keyMaterial}, endpoint: string): Promise<Entropy> => {
@@ -76,15 +76,15 @@ export const initializeEntropy = async ({keyMaterial}, endpoint: string): Promis
 
   console.log('account keyMaterial', accountData);
   let selectedAccount;
-  if(!keyrings.default) {
-    const keyring = new Keyring({ ...accountData, debug: true })
-    keyrings.default = keyring
-    selectedAccount = keyring
-  } else {
-    const keyring = new Keyring({ ...accountData, debug: true })
-    keyrings[keyring.registration.address] = keyring
-    selectedAccount = keyring
-  }
+  // if(!keyrings.default) {
+  //   const keyring = new Keyring({ ...accountData, debug: true })
+  //   keyrings.default = keyring
+  //   selectedAccount = keyring
+  // } else {
+  //   const keyring = new Keyring({ ...accountData, debug: true })
+  //   keyrings[keyring.registration.address] = keyring
+  //   selectedAccount = keyring
+  // }
 
   const entropy = new Entropy({ keyring: selectedAccount, endpoint})
   

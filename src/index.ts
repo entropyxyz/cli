@@ -3,6 +3,8 @@ import * as config from './config'
 import * as flows from './flows'
 import { ascii } from './common/ascii'
 import { accountChoices, getActiveOptions } from './common/utils'
+import Entropy from '@entropyxyz/sdk'
+import { initializeEntropy } from './common/initializeEntropy'
 
 config.init()
 
@@ -91,6 +93,9 @@ export async function main () {
     storedConfig = await config.get();
   }
 
+  const selectedAccount = accountPrompt.selectedAccountOrCreate;
+  const entropy = await initializeEntropy(selectedAccount, storedConfig.endpoints[setOptions.ENDPOINT])
+
   const answers = await inquirer.prompt([actionsPrompt])
 
   // if (noAccounts && answers.choice !== 'Manage Accounts') {
@@ -102,6 +107,10 @@ export async function main () {
     console.log('Have a nice day')
     process.exit()
   }
+
+  const newConfigUpdates = await choices[answers.choice](entropy)
+
+  if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
   console.log(answers)
   
 
