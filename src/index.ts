@@ -75,18 +75,24 @@ export async function main () {
 
   // Setup account to be used throughout cli
   const storedAccounts = accountChoices(storedConfig.accounts);
-  const accChoices = storedAccounts.concat([{ 'Create new account': flows.wallet }])
+  const accChoices = storedAccounts.concat([{ name: 'Create new account', value: 'create-new' }, { name: 'Exit', value: 'exit' }])
   const intro = {
     type: 'list',
     name: 'selectedAccountOrCreate',
     message: 'Select or Create Account',
-    pageSize: Object.keys(accChoices).length,
-    choices: Object.keys(accChoices)
+    pageSize: accChoices.length,
+    choices: accChoices
   }
   const accountPrompt = await inquirer.prompt([intro])
 
-  if (accountPrompt.selectedAccountOrCreate === 'Create new account') {
-    const newConfigUpdates = await accChoices[accountPrompt.selectedAccountOrCreate](storedConfig, setOptions)
+  console.log('accountPrompt', accountPrompt);
+  if (accountPrompt.selectedAccountOrCreate === 'exit')  {
+    console.log('Have a nice day')
+    process.exit()
+  }
+
+  if (accountPrompt.selectedAccountOrCreate === 'create-new') {
+    const newConfigUpdates = await flows.wallet(storedConfig)
 
     if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
     
@@ -94,7 +100,7 @@ export async function main () {
   }
 
   const selectedAccount = accountPrompt.selectedAccountOrCreate;
-  const entropy = await initializeEntropy(selectedAccount, storedConfig.endpoints[setOptions.ENDPOINT])
+  const entropy = await initializeEntropy(selectedAccount.data, storedConfig.endpoints[setOptions.ENDPOINT])
 
   const answers = await inquirer.prompt([actionsPrompt])
 
