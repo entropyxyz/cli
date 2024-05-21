@@ -32,7 +32,7 @@ const devChoices = {
 }
 
 const choices = {
-  'Manage Accounts': flows.wallet,
+  'Manage Accounts': flows.manageAccounts,
   'Balance': flows.checkBalance,
   'Register': flows.register,
   'Sign': flows.sign,
@@ -66,25 +66,24 @@ main()
 
 export async function main () {
   const storedConfig = await config.get()
-  debug('stored config:', storedConfig)
-  
-  const answer = await inquirer.prompt([intro])
-  debug('answer:', answer)
-  if (answer.choice === 'Exit')  {
+  debug('stored config', storedConfig)
+
+  const { selectedAccount } = storedConfig
+  const answers = await inquirer.prompt([intro])
+
+  if (answers.choice === 'Exit')  {
     console.log('Have a nice day')
     process.exit()
   }
 
-  const user = await config.get()
-  debug('user:', user)
-  if (!user.accounts.length) {
-    console.log("User accounts is empty")
+  if (!selectedAccount && answers.choice !== 'Manage Accounts') {
+    console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
+  } else {
+    console.log(answers)
+    const newConfigUpdates = await choices[answers.choice](storedConfig, setOptions)
+
+    if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
   }
-
-  const flow = choices[answer.choice]
-  const newConfigUpdates = await flow(storedConfig, setOptions)
-
-  if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
 
   const { returnToMain } = await inquirer.prompt([returnToMainMenu])
   if (returnToMain) main()

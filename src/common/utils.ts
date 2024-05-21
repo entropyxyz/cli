@@ -63,5 +63,9 @@ export function accountChoices (accounts) {
       name: `${account.name} (${account.address})`,
       value: account,
     }))
+}
+
+export function accountChoicesWithOther (accounts) {
+  return accountChoices(accounts)
     .concat([{ name: "Other", value: null }])
 }

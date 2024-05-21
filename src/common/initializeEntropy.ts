@@ -2,15 +2,18 @@ import Entropy, { wasmGlobalsReady } from "@entropyxyz/sdk"
 // TODO: fix importing of types from @entropy/sdk/keys
 // @ts-ignore
 import Keyring from "@entropyxyz/sdk/keys"
-import { decrypt } from "../flows/password"
 import inquirer from "inquirer"
-// have a main account to use
-let defaultAccount
+import { decrypt } from "../flows/password"
+import { debug } from "../common/utils"
+
+// TODO: unused
+// let defaultAccount // have a main account to use
+// let entropys 
+
 // have a main keyring
 const keyrings = {
   default: undefined
 }
-let entropys
 
 export function getKeyring (address) {
   if (!address && keyrings.default) return keyrings.default
@@ -21,8 +24,15 @@ export function getKeyring (address) {
 }
 
 
-export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Promise<Entropy> => {
-  if (defaultAccount && defaultAccount.seed === keyMaterial.seed) return entropys[defaultAccount.registering.address]
+// export function setupKeyrings (config) {
+//   const { accounts } = config;
+//   
+// }
+
+export const initializeEntropy = async (keyMaterial, endpoint: string): Promise<Entropy> => {
+  debug('key material', keyMaterial);
+  
+  // if (defaultAccount && defaultAccount.seed === keyMaterial.seed) return entropys[defaultAccount.registering.address]
   await wasmGlobalsReady()
 
   let accountData
@@ -69,7 +79,7 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
     throw new Error("Data format is not recognized as either encrypted or unencrypted")
   }
 
-  console.log('account keyMaterial', accountData);
+  debug('account keyMaterial', accountData);
   let selected
   if(!keyrings.default) {
     const keyring = new Keyring({ ...accountData, debug: true })
@@ -82,8 +92,12 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
   }
 
   const entropy = new Entropy({ keyring: selected, endpoint })
-  
   await entropy.ready
+
+  debug('data sent', accountData);
+  debug('storage', keyrings);
+  debug('selected', selected);
+  debug('keyring', entropy.keyring);
 
   if (!entropy?.keyring?.accounts?.registration?.seed) {
     throw new Error("Keys are undefined")
