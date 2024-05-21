@@ -27,6 +27,7 @@ entropy balance --help       # a specific command
 ```
 
 
+
 ## Build and run
 
 Follow these steps to build and install the CLI:
@@ -56,9 +57,16 @@ Follow these steps to build and install the CLI:
     # [1/4] Resolving packages...
     ```
 
-1. Start the CLI with:
+1. Start the CLI:
 
+    
+    For an interactive text user interface:
     ```shell
     yarn start
+    ```
+
+    To read about programmatic use:
+    ```shell
+    yarn start --help
     ```
 

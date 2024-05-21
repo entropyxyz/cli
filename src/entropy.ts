@@ -16,9 +16,10 @@ const endpointOption = new Option(
   ].join(' ')
 )
   //
-  .default('ws://127.0.0.1:9944', 'local testing')
+  .default('ws://127.0.0.1:9944')
   .env('ENDPOINT')
 
+/* No Command */
 program
   .name('entropy')
   .description('CLI interface for interacting with entropy.xyz. Running without commands starts an interactive ui')
@@ -37,12 +38,14 @@ program
   })
 
 
+/* Balance */
 program.command('balance')
-  .description('get the balance of account(s)')
-  .argument('[account]', 'account to print balance for')
+  .description('get the balance of Entropy account(s)')
+  .argument('[account]', 'account to print balance for, if not provided, prints balance of all accounts')
+  .option('--password', 'password for the account')
+  // QUESTION: are passwords for whole account or just some .... account keys?
+  // QUESTION: what happens if opts.password is set when there is no account provided?
   .addOption(endpointOption)
-  // .option('--first', 'display just the first substring')
-  // .option('-s, --separator <char>', 'separator character', ',')
   .action((account, options) => {
     // WIP here
     console.log('account:', account)
@@ -58,5 +61,21 @@ program.command('balance')
       }))
     }
   })
+
+/* Transfer */
+program.command('transfer')
+  .description('transfer funds between two Entropy accounts')
+  .argument('source', 'account which funds will be drawn from')
+  .argument('destination', 'account which funds will be deposited to')
+  .argument('amount', 'amount of funds to be moved')
+  .addOption(endpointOption)
+  .action((source, destination, amount, options) => {
+    // WIP here
+    console.log('source:', source)
+    console.log('destination:', destination)
+    console.log('amount:', amount)
+    console.log('options:', options)
+  })
+
 
 program.parse()

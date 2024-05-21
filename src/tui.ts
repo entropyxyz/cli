@@ -14,15 +14,15 @@ export default function tui (options: EntropyTuiOptions) {
   debug(options)
 
   const choices = {
+    'Manage Accounts': flows.wallet,
     'Balance': flows.checkBalance,
-    'Deploy Program': flows.devPrograms,
-    'User Programs': flows.userPrograms,
     'Register': flows.register,
-    // 'Entropy Faucet': flows.entropyFaucet,
-    // 'Construct an Ethereum Tx': flows.ethTransaction,
     'Sign': flows.sign,
     'Transfer': flows.entropyTransfer,
-    'Wallet': flows.wallet,
+    // 'Deploy Program': flows.devPrograms,
+    // 'User Programs': flows.userPrograms,
+    // 'Entropy Faucet': flows.entropyFaucet,
+    // 'Construct an Ethereum Tx': flows.ethTransaction,
   }
 
   const devChoices = {
