@@ -70,20 +70,28 @@ export const initializeEntropy = async ({keyMaterial}, endpoint: string): Promis
   }
 
   console.log('account keyMaterial', accountData);
-  let selcted
+  let selectedAccount;
   if(!keyrings.default) {
     const keyring = new Keyring({ ...accountData, debug: true })
     keyrings.default = keyring
-    selcted = keyring
+    selectedAccount = keyring
   } else {
     const keyring = new Keyring({ ...accountData, debug: true })
-    keyrings[keyring.registering.address] = keyring
-    selcted = keyring
+    keyrings[keyring.registration.address] = keyring
+    selectedAccount = keyring
   }
 
-  const entropy = new Entropy({ selcted, endpoint})
+  const entropy = new Entropy({ keyring: selectedAccount, endpoint})
   
   await entropy.ready
+  console.log('data sent', accountData);
+  
+  console.log('storage', keyrings);
+  
+  console.log('selected', selectedAccount);
+  
+  console.log('keyring', entropy.keyring);
+  
 
   if (!entropy?.keyring?.accounts?.registration?.seed) {
     throw new Error("Keys are undefined")

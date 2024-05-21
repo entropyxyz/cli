@@ -5,7 +5,7 @@ export const importQuestions = [
     type: 'list',
     name: 'secretType',
     message: 'select secret type:',
-    choices: ['mnemonic', 'seed'],
+    choices: ['seed'],
     when: ({ importKey }) => importKey
   },
   {
@@ -14,15 +14,15 @@ export const importQuestions = [
     message: ({ secretType }) => `${secretType}:`,
     validate: (secret, {secretType}) => {
       console.log('\nsecret:', secret, typeof secret)
-      if (secretType === 'mnemonic') return mnemonicValidate(secret) ? true : 'not a valid mnemonic'
+      // if (secretType === 'mnemonic') return mnemonicValidate(secret) ? true : 'not a valid mnemonic'
       if (secret.length === 66 && secret.startsWith('0x')) return true
       if (secret.length === 64) return true
       return 'not a valid seed'
     },
     filter: (secret, { secretType }) => {
-      if (secretType === 'mnemonic') {
-        return mnemonicToMiniSecret(secret)
-      }
+      // if (secretType === 'mnemonic') {
+      //   return mnemonicToMiniSecret(secret)
+      // }
       return secret
     },
     when: ({ importKey }) => importKey
