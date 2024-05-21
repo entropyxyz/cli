@@ -2,7 +2,7 @@ import inquirer from 'inquirer'
 import * as config from './config'
 import * as flows from './flows'
 import { ascii } from './common/ascii'
-import { getActiveOptions } from './common/utils'
+import { accountChoices, getActiveOptions } from './common/utils'
 
 config.init()
 
@@ -48,8 +48,7 @@ if (setOptions.DEV_MODE) Object.assign(choices, devChoices)
 // assign exit so its last
 Object.assign(choices, { 'Exit': async () => {} })
 
-
-const intro = {
+const actionsPrompt = {
   type: 'list',
   name: 'choice',
   message: 'Select Action',
@@ -66,27 +65,45 @@ const returnToMainMenu = {
 main()
 
 export async function main () {
-  let noAccounts: boolean = true
-  const storedConfig = await config.get()
+  // let noAccounts: boolean = true
+  let storedConfig = await config.get()
 
-  if (storedConfig.accounts.length) noAccounts = false
+  // if (storedConfig.accounts.length) noAccounts = false
   console.log('stored config', storedConfig);
-  
-  const answers = await inquirer.prompt([intro])
 
-  if (noAccounts && answers.choice !== 'Manage Accounts') {
-    console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
-    main()
+  // Setup account to be used throughout cli
+  const storedAccounts = accountChoices(storedConfig.accounts);
+  const accChoices = storedAccounts.concat([{ 'Create new account': flows.wallet }])
+  const intro = {
+    type: 'list',
+    name: 'selectedAccountOrCreate',
+    message: 'Select or Create Account',
+    pageSize: Object.keys(accChoices).length,
+    choices: Object.keys(accChoices)
   }
+  const accountPrompt = await inquirer.prompt([intro])
+
+  if (accountPrompt.selectedAccountOrCreate === 'Create new account') {
+    const newConfigUpdates = await accChoices[accountPrompt.selectedAccountOrCreate](storedConfig, setOptions)
+
+    if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
+    
+    storedConfig = await config.get();
+  }
+
+  const answers = await inquirer.prompt([actionsPrompt])
+
+  // if (noAccounts && answers.choice !== 'Manage Accounts') {
+  //   console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
+  //   main()
+  // }
 
   if (answers.choice === 'Exit')  {
     console.log('Have a nice day')
     process.exit()
   }
   console.log(answers)
-  const newConfigUpdates = await choices[answers.choice](storedConfig, setOptions)
-
-  if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
+  
 
   const { returnToMain } = await inquirer.prompt([returnToMainMenu])
   if (returnToMain) main()
