@@ -23,7 +23,7 @@ export async function sign ({ accounts, endpoints }, options) {
 
   const answers = await inquirer.prompt([accountQuestion, otherQuestion])
   const selectedAccount = answers.selectedAccount
-  debug("selectedAccount:", { selectedAccount })
+  debug("selectedAccount:", selectedAccount)
   const accountSeedOrPrivateKey = answers.accountSeedOrPrivateKey
   let keyMaterial = selectedAccount?.data;
   if (!keyMaterial || isEmpty(keyMaterial)) {
