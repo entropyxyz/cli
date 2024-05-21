@@ -6,7 +6,11 @@ import Debug from 'debug'
 
 const _debug = Debug('@entropyxyz/cli')
 export function debug (...args: any[]) {
-  _debug(...args.map(arg => JSON.stringify(arg, null, 2)))
+  _debug(...args.map(arg => {
+    return typeof arg === 'object'
+      ? JSON.stringify(arg, null, 2)
+      : arg
+  }))
 }
 
 // hardcoding for now instead of querying chain

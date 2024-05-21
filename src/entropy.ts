@@ -4,7 +4,7 @@ import launchTui from './tui'
 import { EntropyTuiOptions } from './types'
 
 import getBalance from './flows/balance/cli'
-import { debug } from './common/utils'
+// import { debug } from './common/utils'
 
 const { version } = require('../package.json')
 
@@ -46,13 +46,11 @@ program.command('balance')
   .description('get the balance of an Entropy account')
   .argument('account', 'account to print the balance of')
   // QUESTION: is account optional? (probably no, because each encrypted account requires a password)
-  .option('--password', 'password for the account')
+  .option('-p, --password <password>', 'password for the account')
   .addOption(endpointOption)
   .action(async (account, opts) => {
     // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
 
-    debug('account:', account)
-    debug('options:', opts)
     const balance = await getBalance(account, opts.password, opts.endpoint)
     writeOut(balance)
     process.exit(0)
