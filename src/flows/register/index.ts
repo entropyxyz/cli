@@ -1,5 +1,5 @@
 import inquirer from "inquirer"
-import { debug, accountChoices } from "../../common/utils"
+import { debug, print, accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 export async function register (storedConfig, options) {
@@ -49,7 +49,7 @@ export async function register (storedConfig, options) {
     default: '0x0000000000000000000000000000000000000000000000000000000000000000'
   }])
   
-  console.log("Attempting to register the address:", selectedAccount.address)
+  print("Attempting to register the address:", selectedAccount.address)
   let verifyingKey: string
   try {
     verifyingKey = await entropy.register({
@@ -60,7 +60,7 @@ export async function register (storedConfig, options) {
       }]
     })
     if (verifyingKey) {
-      console.log("Your address", selectedAccount.address, "has been successfully registered.")
+      print("Your address", selectedAccount.address, "has been successfully registered.")
       selectedAccount?.data?.registration?.verifyingKeys?.push(verifyingKey)
       selectedAccount?.registration?.verifyingKeys?.push(verifyingKey)
       const arrIdx = accounts.indexOf(selectedAccount)
@@ -73,7 +73,7 @@ export async function register (storedConfig, options) {
       const tx = await entropy.substrate.tx.registry.pruneRegistration()
       await tx.signAndSend(entropy.keyring.accounts.registration.pair, ({ status }) => {
         if (status.isFinalized) {
-          console.log('Successfully pruned registration');
+          print('Successfully pruned registration');
         }
       })
     }

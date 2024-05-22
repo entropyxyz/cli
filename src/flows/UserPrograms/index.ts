@@ -1,6 +1,7 @@
 import inquirer from "inquirer"
-import { initializeEntropy } from "../../common/initializeEntropy"
 import * as util from "@polkadot/util"
+import { initializeEntropy } from "../../common/initializeEntropy"
+import { debug, print } from "../../common/utils"
 
 export async function userPrograms ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
@@ -34,11 +35,11 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
     try {
       const programs = await entropy.programs.get(entropy.keyring.accounts.registration.address)
       if (programs.length === 0) {
-        console.log("You currently have no programs set.")
+        print("You currently have no programs set.")
       } else {
-        console.log("Your Programs:")
+        print("Your Programs:")
         programs.forEach((program, index) => {
-          console.log(
+          print(
             `${index + 1}. Pointer: ${
               program.programPointer
             }, Config: ${JSON.stringify(program.programConfig)}`
@@ -58,11 +59,11 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
         message: "Enter the program pointer you wish to check:",
         validate: (input) => (input ? true : "Program pointer is required!"),
       }])
-      console.log('program pointer', programPointer);
+      debug('program pointer', programPointer);
       
       const program = await entropy.programs.dev.get(programPointer);
-      console.log('Program from:', programPointer);
-      console.log(program);
+      debug('Program from:', programPointer);
+      print(program);
     } catch (error) {
       console.error(error.message);
     }
@@ -105,7 +106,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
       entropy.keyring.accounts.registration.address,
     )
 
-    console.log("Program added successfully.")
+    print("Program added successfully.")
     break
   }
   case "Remove a Program from My List": {
@@ -120,7 +121,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
       programPointerToRemove,
       entropy.keyring.accounts.registration.verifyingKeys?.[0]
     )
-    console.log("Program removed successfully.")
+    print("Program removed successfully.")
     break
   }
   }

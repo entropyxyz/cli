@@ -1,7 +1,7 @@
 import inquirer from "inquirer"
 import { ethers } from "ethers"
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { debug } from "../../common/utils"
+import { debug, print } from "../../common/utils"
 
 // TODO: revisit this file, rename as signEthTransaction?
 export async function sign ({ accounts, endpoints, selectedAccount: selectedAccountAddress }, options) {
@@ -88,5 +88,5 @@ export async function sign ({ accounts, endpoints, selectedAccount: selectedAcco
     type: "eth",
   })) as string
 
-  console.log('signature:', signature)
+  print('signature:', signature)
 }

@@ -4,6 +4,7 @@ import { randomAsHex } from '@polkadot/util-crypto'
 import Keyring from '@entropyxyz/sdk/keys'
 import { importQuestions } from './import-key'
 import * as passwordFlow from '../password'
+import { debug, print } from '../../common/utils'
 
 export async function newKey ({ accounts }) {
   accounts = Array.isArray(accounts) ? accounts : []
@@ -49,21 +50,21 @@ export async function newKey ({ accounts }) {
   }
 
   const { secret, name, path, password, importKey } = answers
-  let debug = false
+  let isDebugMode = false
   let seed
   // never create debug keys only ever import them
   if (importKey && secret.includes('#debug')) {
-    debug = true
+    isDebugMode = true
     seed = secret.split('#debug')[0]
   } else {
     seed = importKey ? secret : randomAsHex(32)
   }
 
 
-  const keyring = new Keyring({ seed, path, debug })
+  const keyring = new Keyring({ seed, path, debug: isDebugMode })
   const fullAccount = keyring.getAccount()
   // const { admin } = keyring.getAccount()
-  console.log('fullAccount:', fullAccount)
+  debug('fullAccount:', fullAccount)
   
   const data = fullAccount
   delete fullAccount.admin.pair
@@ -75,7 +76,7 @@ export async function newKey ({ accounts }) {
     data: encryptedData,
   }
 
-  console.log(`New account:\n{\n\tname: ${newAccount.name}\n\taddress: ${newAccount.address}\n}`)
+  print(`New account:\n{\n\tname: ${newAccount.name}\n\taddress: ${newAccount.address}\n}`)
 
   accounts.push(newAccount)
   return { accounts, selectedAccount: newAccount.address }

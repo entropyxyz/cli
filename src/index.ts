@@ -2,12 +2,12 @@ import inquirer from 'inquirer'
 import * as config from './config'
 import * as flows from './flows'
 import { ascii } from './common/ascii'
-import { getActiveOptions } from './common/utils'
+import { print, debug, getActiveOptions } from './common/utils'
 
 config.init()
 
 console.clear()
-console.log(ascii)
+print(ascii)
 
 export const options = [
   {
@@ -78,14 +78,14 @@ export async function main () {
   const answers = await inquirer.prompt([intro])
 
   if (answers.choice === 'Exit')  {
-    console.log('Have a nice day')
+    print('Have a nice day')
     process.exit()
   }
 
   if (!storedConfig.selectedAccount && answers.choice !== 'Manage Accounts') {
     console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
   } else {
-    console.log(answers)
+    debug(answers)
     const newConfigUpdates = await choices[answers.choice](storedConfig, setOptions)
 
     if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
@@ -95,7 +95,7 @@ export async function main () {
   const { returnToMain } = await inquirer.prompt([returnToMainMenu])
   if (returnToMain) main()
   else {
-    console.log('Have a nice day')
+    print('Have a nice day')
     process.exit()
   }
 }

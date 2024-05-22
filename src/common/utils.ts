@@ -9,6 +9,10 @@ export function debug (...args) {
   _debug(...args.map(arg => JSON.stringify(arg, null, 2)))
 }
 
+export function print (...args) {
+  console.log(...args)
+}
+
 // hardcoding for now instead of querying chain
 const DECIMALS = 10
 const PREFIX = '0x'
