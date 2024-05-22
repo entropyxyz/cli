@@ -11,15 +11,14 @@ import * as config from "../config"
 // let defaultAccount // have a main account to use
 // let entropys 
 
-// have a main keyring
+// a cache of keyrings
 const keyrings = {
-  default: undefined
+  default: undefined // this is the "selected account" keyring
 }
 
 export function getKeyring (address) {
   if (!address && keyrings.default) return keyrings.default
   if (address && keyrings[address]) return keyrings[address]
-  if (address && !keyrings[address]) throw new Error('No keyring for this account')
   return keyrings.default
 }
 
@@ -102,6 +101,7 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
 
     })
     keyrings.default = keyring
+    debug(keyring)
     keyrings[keyring.accounts.admin.address] = keyring
     selectedAccount = keyring
   } else {
