@@ -102,6 +102,7 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
     })
     keyrings.default = keyring
     debug(keyring)
+    // keyring.accounts.admin === undefined
     keyrings[keyring.accounts.admin.address] = keyring
     selectedAccount = keyring
   } else {

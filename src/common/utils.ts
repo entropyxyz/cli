@@ -5,8 +5,18 @@ import { Buffer } from 'buffer'
 import Debug from 'debug'
 
 const _debug = Debug('@entropyxyz/cli')
-export function debug (...args) {
-  _debug(...args.map(arg => JSON.stringify(arg, null, 2)))
+export function debug (...args: any[]) {
+  _debug(...args.map(arg => {
+    return typeof arg === 'object'
+      ? JSON.stringify(arg, replacer, 2)
+      : arg
+  }))
+}
+function replacer (key, value) {
+  if(value instanceof Uint8Array ){
+    return Buffer.from(value).toString('base64')
+  }
+  else return value
 }
 
 export function print (...args) {
