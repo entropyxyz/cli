@@ -70,6 +70,7 @@ export async function entropyTransfer ({ accounts, endpoints }, options) {
     const tx = await entropy.substrate.tx.balances.transferAllowDeath(
       recipientAddress,
       BigInt(formattedAmount),
+      // WARNING: this is moving ... a lot? What?
     )
 
     await tx.signAndSend (entropy.registrationManager.signer.pair, ({ status }) => {

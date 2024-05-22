@@ -2,7 +2,7 @@ import inquirer from 'inquirer'
 import * as config from './config'
 import * as flows from './flows'
 import { EntropyTuiOptions } from './types'
-import { ascii } from './common/ascii'
+import { logo } from './common/ascii'
 import { debug } from './common/utils'
 
 // tui = text user interface
@@ -10,7 +10,8 @@ export default function tui (options: EntropyTuiOptions) {
   config.init()
 
   console.clear()
-  console.log(ascii)
+  const icon = ['@', '#', '%', 'α', 'ε'].sort(() => Math.random() - 0.5).pop()
+  console.log(logo(icon)) // the Entropy logo
   debug(options)
 
   const choices = {

@@ -29,7 +29,7 @@ async function getAccountBalance (address: string, sepoliaEndpoint: string): Pro
 async function getSenderAddressFromSignedTx (signedTx: string): Promise<string> {
   try {
     const tx = ethers.utils.parseTransaction(signedTx)
-    console.log({tx})
+    debug({tx})
     return tx.from
   } catch (error) {
     console.error('Error extracting sender address:', error)

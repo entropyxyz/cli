@@ -4,6 +4,7 @@ import { randomAsHex } from '@polkadot/util-crypto'
 import Keyring from '@entropyxyz/sdk/keys'
 import { importQuestions } from './import-key'
 import * as passwordFlow from '../password'
+import { debug } from '../../common/utils'
 
 export async function newKey ({ accounts }) {
   accounts = Array.isArray(accounts) ? accounts : []
@@ -55,7 +56,7 @@ export async function newKey ({ accounts }) {
   keyring.getAccount()
   // const { admin } = keyring.getAccount()
   
-  console.log(JSON.stringify(keyring, null, 2));
+  debug('keyring', keyring);
   
   const address = keyring.accounts.registration.address
 
