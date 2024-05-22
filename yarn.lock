@@ -24,10 +24,10 @@
   resolved "https://registry.yarnpkg.com/@entropyxyz/entropy-protocol-web/-/entropy-protocol-web-0.2.0.tgz#b9478438386fefb4b821dbac95ec81d251d2dd55"
   integrity sha512-lLa/lLNJnwH1R8fJvLlUn1kw7d4Rbnt9LjhUC69HKxkU69J+bw/EY6fAjBnpVbgNmqCnYpf/DBLtMyOayZeNDQ==
 
-"@entropyxyz/sdk@^0.1.5-1":
-  version "0.1.5-1"
-  resolved "https://registry.yarnpkg.com/@entropyxyz/sdk/-/sdk-0.1.5-1.tgz#0bc3435e60c2e0c9221e7428b9f64754d9295701"
-  integrity sha512-XWDJCeUOINv21WphZ6GGBAAU5yLNwbz3Ex62eourM04AF6XdpRCIzVdyNZD/kyKNguud45tC3oRAd4sxIUY+bw==
+"@entropyxyz/sdk@^0.1.5-2":
+  version "0.1.5-2"
+  resolved "https://registry.yarnpkg.com/@entropyxyz/sdk/-/sdk-0.1.5-2.tgz#5c19334596e1b3f1d069b111e3433a0c0f1e63cf"
+  integrity sha512-PR8Xbs5SzFmzreP2Av2zaeOtvGw2dT+NndVGlSCLxt+z/q24T5iFVcB43umRsPfUgOeuqULl4NI84YtXCcRexg==
   dependencies:
     "@entropyxyz/entropy-protocol-nodejs" "^0.2.0"
     "@entropyxyz/entropy-protocol-web" "^0.2.0"
