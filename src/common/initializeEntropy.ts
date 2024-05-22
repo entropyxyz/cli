@@ -35,10 +35,10 @@ interface InitializeEntropyOpts {
   endpoint: string
 }
 
-// TODO: someone re-enable these
+// TODO: re-enable these?
 // let defaultAccount 
 // let entropys
-// WARNING: in full-cli mode this function should NEVER prompt users, but it will if no password was provided
+// WARNING: in programatic cli mode this function should NEVER prompt users, but it will if no password was provided
 
 export const initializeEntropy = async ({ keyMaterial, password, endpoint }: InitializeEntropyOpts): Promise<Entropy> => {
   debug('key material', keyMaterial);
