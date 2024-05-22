@@ -1,36 +1,37 @@
 import inquirer from "inquirer"
 import { ethers } from "ethers"
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { accountChoices, debug, isEmpty } from "../../common/utils"
+import { debug } from "../../common/utils"
 
 // TODO: revisit this file, rename as signEthTransaction?
-export async function sign ({ accounts, endpoints }, options) {
+export async function sign ({ accounts, endpoints, selectedAccount: selectedAccountAddress }, options) {
   const endpoint = endpoints[options.ENDPOINT]
 
-  const accountQuestion = {
-    type: "list",
-    name: "selectedAccount",
-    message: "Choose account:",
-    choices: accountChoices(accounts),
-  }
+  // const accountQuestion = {
+  //   type: "list",
+  //   name: "selectedAccount",
+  //   message: "Choose account:",
+  //   choices: accountChoices(accounts),
+  // }
 
-  const otherQuestion = {
-    type: "input",
-    name: "accountSeedOrPrivateKey",
-    message: "Enter the account seed or private key:",
-    when: (answers) => !answers.selectedAccount
-  }
+  // const otherQuestion = {
+  //   type: "input",
+  //   name: "accountSeedOrPrivateKey",
+  //   message: "Enter the account seed or private key:",
+  //   when: (answers) => !answers.selectedAccount
+  // }
 
-  const answers = await inquirer.prompt([accountQuestion, otherQuestion])
-  const selectedAccount = answers.selectedAccount
+  // const answers = await inquirer.prompt([accountQuestion, otherQuestion])
+  // const selectedAccount = answers.selectedAccount
+  const selectedAccount = accounts.find(obj => obj.address === selectedAccountAddress)
   debug("selectedAccount:", selectedAccount)
-  const accountSeedOrPrivateKey = answers.accountSeedOrPrivateKey
-  let keyMaterial = selectedAccount?.data;
-  if (!keyMaterial || isEmpty(keyMaterial)) {
-    keyMaterial = {
-      seed: accountSeedOrPrivateKey,
-    }
-  }
+  // const accountSeedOrPrivateKey = answers.accountSeedOrPrivateKey
+  const keyMaterial = selectedAccount?.data;
+  // if (!keyMaterial || isEmpty(keyMaterial)) {
+  //   keyMaterial = {
+  //     seed: accountSeedOrPrivateKey,
+  //   }
+  // }
 
   const entropy = await initializeEntropy({ keyMaterial }, endpoint)
 

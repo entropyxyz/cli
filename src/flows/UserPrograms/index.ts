@@ -21,7 +21,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
   ])
 
   const entropy = await initializeEntropy(
-    selectedAccount.data,
+    { keyMaterial: selectedAccount.data },
     endpoint
   )
   
