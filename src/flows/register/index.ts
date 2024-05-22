@@ -44,7 +44,17 @@ export async function register ({ accounts, endpoints, selectedAccount: selected
   debug('programModAccount', programModAccountAnswer, programModAccount);
   
   console.log("Attempting to register the address:", selectedAccount.address)
-  await entropy.register()
+  try {
+    await entropy.register()
+  } catch (error) {
+    console.error('error', error);
+    const tx = await entropy.substrate.tx.registry.pruneRegistration()
+    await tx.signAndSend(entropy.keyring.accounts.registration.pair, ({ status }) => {
+      if (status.isFinalized) {
+        console.log('Successfully pruned registration');
+      }
+    })
+  }
 
   console.log("Your address", selectedAccount.data.address, "has been successfully registered.")
 }

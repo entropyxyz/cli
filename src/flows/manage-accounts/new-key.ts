@@ -52,7 +52,12 @@ export async function newKey ({ accounts }) {
 
   const seed = importKey ? secret : randomAsHex(32)
   const keyring = new Keyring({ seed, debug: true })
-  const address = keyring.accounts.masterAccountView.registration.address
+  keyring.getAccount()
+  // const { admin } = keyring.getAccount()
+  
+  console.log(JSON.stringify(keyring, null, 2));
+  
+  const address = keyring.accounts.registration.address
 
   const data = {
     type: secretType || 'seed',
