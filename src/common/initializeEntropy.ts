@@ -3,7 +3,7 @@ import Entropy, { wasmGlobalsReady } from "@entropyxyz/sdk"
 // @ts-ignore
 import Keyring from "@entropyxyz/sdk/keys"
 import inquirer from "inquirer"
-import { decrypt } from "../flows/password"
+import { decrypt, encrypt } from "../flows/password"
 import { debug } from "../common/utils"
 import * as config from "../config"
 
@@ -20,7 +20,6 @@ export function getKeyring (address) {
   if (!address && keyrings.default) return keyrings.default
   if (address && keyrings[address]) return keyrings[address]
   if (address && !keyrings[address]) throw new Error('No keyring for this account')
-  if (!keyrings.default) throw new Error('no default set please create a keyring')
   return keyrings.default
 }
 
@@ -31,20 +30,19 @@ export function getKeyring (address) {
 // }
 
 export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Promise<Entropy> => {
-  debug('key material', keyMaterial);
   
   // if (defaultAccount && defaultAccount.seed === keyMaterial.seed) return entropys[defaultAccount.registering.address]
   await wasmGlobalsReady()
+  let password
 
   let accountData
-  console.log('keyMaterial:', keyMaterial)
   if (keyMaterial && typeof keyMaterial === 'object' && 'seed' in keyMaterial) {
     accountData = keyMaterial
   } else if (typeof keyMaterial === 'string') {
 
     let decryptedData
     let attempts = 0
-
+    // TO-DO: this should be a generator function not a while loop
     while (attempts < 3) {
       const answers = await inquirer.prompt([
         {
@@ -61,7 +59,7 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
         if (!decryptedData || typeof decryptedData !== 'object' || !('seed' in decryptedData)) {
           throw new Error("Failed to decrypt keyMaterial or decrypted keyMaterial is invalid")
         }
-
+        password = answers.password
         break
       } catch (error) {
         console.error("Incorrect password. Try again")
@@ -83,14 +81,32 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
 
   debug('account keyMaterial', accountData);
   let selectedAccount
-  if(!keyrings.default) {
+  const storedKeyring = getKeyring(accountData.admin.address)
+  if(!storedKeyring) {
     const keyring = new Keyring({ ...accountData })
+    keyring.accounts.on('#account-update', async (newAccoutData) => {
+      const store = await config.get()
+      store.accounts.map((account) => {
+        if (account.address === selectedAccount.address) {
+          let data = newAccoutData
+          if (typeof account.data === 'string' ) data = encrypt(newAccoutData, password)
+          account = {
+            ...account,
+            data,
+          }
+        }
+        return account
+      })
+      // re save the entire config
+      await config.set(store)
+
+    })
     keyrings.default = keyring
+    keyrings[keyring.accounts.admin.address] = keyring
     selectedAccount = keyring
   } else {
-    const keyring = new Keyring({ ...accountData })
-    keyrings[keyring.accounts.masterAccountView.registration.address] = keyring
-    selectedAccount = keyring
+    keyrings.default = storedKeyring
+    selectedAccount = storedKeyring
   }
 
   const entropy = new Entropy({ keyring: selectedAccount, endpoint })

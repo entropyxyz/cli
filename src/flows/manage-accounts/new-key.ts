@@ -48,9 +48,10 @@ export async function newKey ({ accounts }) {
     answers = { ...answers, ...passwordFlowAnswers }
   }
 
-  const { secret, secretType, name, path, password, importKey } = answers
+  const { secret, name, path, password, importKey } = answers
   let debug = false
   let seed
+  // never create debug keys only ever import them
   if (importKey && secret.includes('#debug')) {
     debug = true
     seed = secret.split('#debug')[0]
@@ -59,25 +60,18 @@ export async function newKey ({ accounts }) {
   }
 
 
-  const keyring = new Keyring({ seed, debug })
-  keyring.getAccount()
+  const keyring = new Keyring({ seed, path, debug })
+  const fullAccount = keyring.getAccount()
   // const { admin } = keyring.getAccount()
+  console.log('fullAccount:', fullAccount)
   
-  
-  const address = keyring.accounts.registration.address
-
-  const data = {
-    type: secretType || 'seed',
-    seed,
-    path,
-    ...keyring.accounts.masterAccountView
-  }
-
+  const data = fullAccount
+  delete fullAccount.admin.pair
   const encryptedData = password ? passwordFlow.encrypt(data, password) : data
 
   const newAccount = {
     name: name,
-    address,
+    address: fullAccount.admin.address,
     data: encryptedData,
   }
 

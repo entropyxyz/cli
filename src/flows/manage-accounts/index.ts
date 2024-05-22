@@ -23,6 +23,7 @@ const questions = [{
 
 export async function manageAccounts (config) {
   const { choice } = await inquirer.prompt(questions)
-  const { accounts, selectedAccount } = await actions[choice](config) || {}
-  return { accounts: accounts ? accounts : config.accounts, selectedAccount }
+  const responses = await actions[choice](config) || {}
+  console.log('returned config update:', { accounts: responses.accounts ? responses.accounts : config.accounts, selectedAccount: responses.selectedAccount || config.selectedAccount })
+  return { accounts: responses.accounts ? responses.accounts : config.accounts, selectedAccount: responses.selectedAccount || config.selectedAccount }
 }

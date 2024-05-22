@@ -66,13 +66,13 @@ const returnToMainMenu = {
 main()
 
 export async function main () {
-  const storedConfig = await config.get()
+  let storedConfig = await config.get()
 
-  const { selectedAccount, accounts } = storedConfig
   // if there are accounts available and selected account is not set, 
   // first account in list is set as the selected account
-  if (!selectedAccount && accounts.length) {
-    await config.set({ ...storedConfig, ...{ selectedAccount: accounts[0].address } })
+  if (!storedConfig.selectedAccount && storedConfig.accounts.length) {
+    await config.set({ ...storedConfig, ...{ selectedAccount: storedConfig.accounts[0].address } })
+    storedConfig = await config.get()
   }
 
   const answers = await inquirer.prompt([intro])
@@ -82,13 +82,14 @@ export async function main () {
     process.exit()
   }
 
-  if (!selectedAccount && answers.choice !== 'Manage Accounts') {
+  if (!storedConfig.selectedAccount && answers.choice !== 'Manage Accounts') {
     console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
   } else {
     console.log(answers)
     const newConfigUpdates = await choices[answers.choice](storedConfig, setOptions)
 
     if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
+    storedConfig = await config.get()
   }
 
   const { returnToMain } = await inquirer.prompt([returnToMainMenu])
