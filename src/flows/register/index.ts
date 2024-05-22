@@ -43,20 +43,17 @@ export async function register ({ accounts, endpoints, selectedAccount: selected
   }
   debug('programModAccount', programModAccountAnswer, programModAccount);
 
-  const { programPointer } = await inquirer.prompt([{
-    type: 'input',
-    message: 'Enter the program pointer here:',
-    name: 'programPointer',
-    // Bare bones program? @frankie please confirm
-    default: '0x6c8228950ca8dfb557d42ce11643c67ba5a3e5cee3ce7232808ea7477b846bcb'
-  }])
+  // const { programPointer } = await inquirer.prompt([{
+  //   type: 'input',
+  //   message: 'Enter the program pointer here:',
+  //   name: 'programPointer',
+  //   // Bare bones program? @frankie please confirm
+  //   default: '0x6c8228950ca8dfb557d42ce11643c67ba5a3e5cee3ce7232808ea7477b846bcb'
+  // }])
   
   console.log("Attempting to register the address:", selectedAccount.address)
   try {
-    await entropy.register({
-      programDeployer: programModAccount,
-      programData: [{ programPointer, programConfig: '0x' }]
-    })
+    await entropy.register()
 
     console.log("Your address", selectedAccount.address, "has been successfully registered.")
   } catch (error) {

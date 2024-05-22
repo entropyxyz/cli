@@ -101,6 +101,8 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
   debug('selected', selectedAccount);
   debug('keyring', entropy.keyring);
 
+  entropy.keyring.getAccount()
+
   if (!entropy?.keyring?.accounts?.registration?.seed) {
     throw new Error("Keys are undefined")
   }

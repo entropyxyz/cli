@@ -31,18 +31,22 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
 
   switch (actionChoice.action) {
   case "View My Programs": {
-    const programs = await entropy.programs.get(entropy.keyring.accounts.registration.address)
-    if (programs.length === 0) {
-      console.log("You currently have no programs set.")
-    } else {
-      console.log("Your Programs:")
-      programs.forEach((program, index) => {
-        console.log(
-          `${index + 1}. Pointer: ${
-            program.programPointer
-          }, Config: ${JSON.stringify(program.programConfig)}`
-        )
-      })
+    try {
+      const programs = await entropy.programs.get(entropy.keyring.accounts.registration.address)
+      if (programs.length === 0) {
+        console.log("You currently have no programs set.")
+      } else {
+        console.log("Your Programs:")
+        programs.forEach((program, index) => {
+          console.log(
+            `${index + 1}. Pointer: ${
+              program.programPointer
+            }, Config: ${JSON.stringify(program.programConfig)}`
+          )
+        })
+      }
+    } catch (error) {
+      console.error(error.message)
     }
     break
   }

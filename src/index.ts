@@ -27,9 +27,10 @@ export const options = [
 
 const setOptions = getActiveOptions(options)
 
-const devChoices = {
-  'Entropy Faucet': flows.entropyFaucet,
-}
+// @frankie correct me if i'm wrong, but i don't believe we are releasing with the faucet right?
+// const devChoices = {
+//   'Entropy Faucet': flows.entropyFaucet,
+// }
 
 const choices = {
   'Manage Accounts': flows.manageAccounts,
@@ -37,13 +38,13 @@ const choices = {
   'Register': flows.register,
   'Sign': flows.sign,
   'Transfer': flows.entropyTransfer,
-  // 'Deploy Program': flows.devPrograms,
+  'Deploy Program': flows.devPrograms,
   'User Programs': flows.userPrograms,
   // 'Entropy Faucet': flows.entropyFaucet,
   // 'Construct an Ethereum Tx': flows.ethTransaction,
 }
 
-if (setOptions.DEV_MODE) Object.assign(choices, devChoices)
+// if (setOptions.DEV_MODE) Object.assign(choices, devChoices)
 
 // assign exit so its last
 Object.assign(choices, { 'Exit': async () => {} })
@@ -68,7 +69,13 @@ export async function main () {
   const storedConfig = await config.get()
   debug('stored config', storedConfig)
 
-  const { selectedAccount } = storedConfig
+  const { selectedAccount, accounts } = storedConfig
+  // if there are accounts available and selected account is not set, 
+  // first account in list is set as the selected account
+  if (!selectedAccount && accounts.length) {
+    await config.set({ ...storedConfig, ...{ selectedAccount: accounts[0].address } })
+  }
+
   const answers = await inquirer.prompt([intro])
 
   if (answers.choice === 'Exit')  {
