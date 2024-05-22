@@ -109,8 +109,10 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
   const storedConfig = await config.get();
 
   entropy.keyring.accounts.on('#account-update', async (account) => {
+    debug('ACCT SUBSCRIBER::', account)
     const { admin: { address: adminAddress } } = account
     const masterAccount = storedConfig.accounts.find(obj => obj.address === adminAddress)
+    debug('STORED ACCT::', masterAccount);
     Object.assign(masterAccount, account)
     const newAccounts = storedConfig.accounts.filter(obj => obj.address !== adminAddress).concat([masterAccount])
     await config.set({ ...storedConfig, ...{ accounts: newAccounts, selectedAccount: adminAddress } })

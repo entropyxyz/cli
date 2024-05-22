@@ -50,8 +50,9 @@ export async function register (storedConfig, options) {
   }])
   
   console.log("Attempting to register the address:", selectedAccount.address)
+  let verifyingKey: string
   try {
-    const verifyingKey = await entropy.register({
+    verifyingKey = await entropy.register({
       programDeployer: selectedAccount.address,
       programData: [{
         programPointer,
@@ -60,19 +61,21 @@ export async function register (storedConfig, options) {
     })
     if (verifyingKey) {
       console.log("Your address", selectedAccount.address, "has been successfully registered.")
-      selectedAccount.data.registration.verifyingKeys.push(verifyingKey)
-      selectedAccount.registration.verifyingKeys.push(verifyingKey)
+      selectedAccount?.data?.registration?.verifyingKeys?.push(verifyingKey)
+      selectedAccount?.registration?.verifyingKeys?.push(verifyingKey)
       const arrIdx = accounts.indexOf(selectedAccount)
       accounts.splice(arrIdx, 1, selectedAccount)
       return { accounts, selectedAccount: selectedAccount.address }
     }
   } catch (error) {
     console.error('error', error);
-    const tx = await entropy.substrate.tx.registry.pruneRegistration()
-    await tx.signAndSend(entropy.keyring.accounts.registration.pair, ({ status }) => {
-      if (status.isFinalized) {
-        console.log('Successfully pruned registration');
-      }
-    })
+    if (!verifyingKey) {
+      const tx = await entropy.substrate.tx.registry.pruneRegistration()
+      await tx.signAndSend(entropy.keyring.accounts.registration.pair, ({ status }) => {
+        if (status.isFinalized) {
+          console.log('Successfully pruned registration');
+        }
+      })
+    }
   }
 }

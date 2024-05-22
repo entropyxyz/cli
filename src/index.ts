@@ -2,7 +2,7 @@ import inquirer from 'inquirer'
 import * as config from './config'
 import * as flows from './flows'
 import { ascii } from './common/ascii'
-import { debug, getActiveOptions } from './common/utils'
+import { getActiveOptions } from './common/utils'
 
 config.init()
 
@@ -67,7 +67,6 @@ main()
 
 export async function main () {
   const storedConfig = await config.get()
-  debug('stored config', storedConfig)
 
   const { selectedAccount, accounts } = storedConfig
   // if there are accounts available and selected account is not set, 

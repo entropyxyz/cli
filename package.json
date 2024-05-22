@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "start": "ts-node src/index.ts",
+    "start:debug": "DEBUG=@entropyxyz/cli yarn start",
     "entropy": "npm run start",
     "test": "npm run type-check && npm run lint",
     "lint": "eslint . --ext .ts --fix",
