@@ -30,13 +30,14 @@ export function getKeyring (address) {
 //   
 // }
 
-export const initializeEntropy = async (keyMaterial, endpoint: string): Promise<Entropy> => {
+export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Promise<Entropy> => {
   debug('key material', keyMaterial);
   
   // if (defaultAccount && defaultAccount.seed === keyMaterial.seed) return entropys[defaultAccount.registering.address]
   await wasmGlobalsReady()
 
   let accountData
+  console.log('keyMaterial:', keyMaterial)
   if (keyMaterial && typeof keyMaterial === 'object' && 'seed' in keyMaterial) {
     accountData = keyMaterial
   } else if (typeof keyMaterial === 'string') {

@@ -49,13 +49,20 @@ export async function newKey ({ accounts }) {
   }
 
   const { secret, secretType, name, path, password, importKey } = answers
+  let debug = false
+  let seed
+  if (importKey && secret.includes('#debug')) {
+    debug = true
+    seed = secret.split('#debug')[0]
+  } else {
+    seed = importKey ? secret : randomAsHex(32)
+  }
 
-  const seed = importKey ? secret : randomAsHex(32)
-  const keyring = new Keyring({ seed, debug: true })
+
+  const keyring = new Keyring({ seed, debug })
   keyring.getAccount()
   // const { admin } = keyring.getAccount()
   
-  console.log(JSON.stringify(keyring, null, 2));
   
   const address = keyring.accounts.registration.address
 

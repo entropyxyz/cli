@@ -16,6 +16,7 @@ export const importQuestions = [
     // validate: (secret, { secretType }) => {
       console.log('\nsecret:', secret, typeof secret)
       // if (secretType === 'mnemonic') return mnemonicValidate(secret) ? true : 'not a valid mnemonic'
+      if (secret.includes('#debug')) return true
       if (secret.length === 66 && secret.startsWith('0x')) return true
       if (secret.length === 64) return true
       return 'not a valid seed'
