@@ -110,7 +110,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
     ])
     await entropy.programs.remove(
       programPointerToRemove,
-      entropy.keyring.accounts.registration.verifyingKeys[0]
+      entropy.keyring.accounts.registration.verifyingKeys?.[0]
     )
     console.log("Program removed successfully.")
     break
