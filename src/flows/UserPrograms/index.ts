@@ -1,21 +1,10 @@
 import inquirer from "inquirer"
-import { accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import * as util from "@polkadot/util"
 
-export async function userPrograms ({ accounts, endpoints }, options) {
+export async function userPrograms ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
-
-  const accountQuestion = {
-    type: "list",
-    name: "selectedAccount",
-    message: "Choose account:",
-    choices: accountChoices(accounts),
-  }
-  const answers = await inquirer.prompt([accountQuestion])
-  const selectedAccount = answers.selectedAccount
-
-
+  const selectedAccount = accounts.find(obj => obj.address === selectedAccountAddress);
   const actionChoice = await inquirer.prompt([
     {
       type: "list",
@@ -25,13 +14,14 @@ export async function userPrograms ({ accounts, endpoints }, options) {
         "View My Programs",
         "Add a Program to My List",
         "Remove a Program from My List",
+        "Check if Program Exists",
         "Exit to Main Menu",
       ],
     },
   ])
 
   const entropy = await initializeEntropy(
-    { keyMaterial: selectedAccount.data },
+    selectedAccount.data,
     endpoint
   )
   
@@ -55,6 +45,20 @@ export async function userPrograms ({ accounts, endpoints }, options) {
       })
     }
     break
+  }
+  case "Check if Program Exists": {
+    const { programPointer } = await inquirer.prompt([{
+      type: "input",
+      name: "programPointer",
+      message: "Enter the program pointer you wish to check:",
+      validate: (input) => (input ? true : "Program pointer is required!"),
+    }])
+    console.log('program pointer', programPointer);
+    
+    const program = await entropy.programs.dev.get(programPointer);
+    console.log('Program from:', programPointer);
+    console.log(program);
+    break;
   }
 
   case "Add a Program to My List": {

@@ -38,7 +38,7 @@ const choices = {
   'Sign': flows.sign,
   'Transfer': flows.entropyTransfer,
   // 'Deploy Program': flows.devPrograms,
-  // 'User Programs': flows.userPrograms,
+  'User Programs': flows.userPrograms,
   // 'Entropy Faucet': flows.entropyFaucet,
   // 'Construct an Ethereum Tx': flows.ethTransaction,
 }
@@ -87,6 +87,8 @@ export async function main () {
 
   const { returnToMain } = await inquirer.prompt([returnToMainMenu])
   if (returnToMain) main()
-
-  console.log('Have a nice day')
+  else {
+    console.log('Have a nice day')
+    process.exit()
+  }
 }
