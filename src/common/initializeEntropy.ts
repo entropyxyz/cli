@@ -5,6 +5,7 @@ import Keyring from "@entropyxyz/sdk/keys"
 import inquirer from "inquirer"
 import { decrypt } from "../flows/password"
 import { debug } from "../common/utils"
+import * as config from "../config"
 
 // TODO: unused
 // let defaultAccount // have a main account to use
@@ -102,6 +103,15 @@ export const initializeEntropy = async (keyMaterial, endpoint: string): Promise<
   if (!entropy?.keyring?.accounts?.registration?.seed) {
     throw new Error("Keys are undefined")
   }
+  const storedConfig = await config.get();
+
+  entropy.keyring.accounts.on('#account-update', async (account) => {
+    const { admin: { address: adminAddress } } = account
+    const masterAccount = storedConfig.accounts.find(obj => obj.address === adminAddress)
+    Object.assign(masterAccount, account)
+    const newAccounts = storedConfig.accounts.filter(obj => obj.address !== adminAddress).concat([masterAccount])
+    await config.set({ ...storedConfig, ...{ accounts: newAccounts, selectedAccount: adminAddress } })
+  })
 
   return entropy
 }

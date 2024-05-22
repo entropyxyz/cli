@@ -106,7 +106,6 @@ export async function userPrograms ({ accounts, endpoints }, options) {
     ])
     await entropy.programs.remove(
       programPointerToRemove,
-      entropy.keyring.accounts.registration.address,
       entropy.keyring.accounts.registration.verifyingKeys[0]
     )
     console.log("Program removed successfully.")
