@@ -79,6 +79,10 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
   }
 
   debug('account keyMaterial', accountData);
+  if (accountData && accountData.admin && !accountData.registration) {
+    accountData.registration = accountData.admin
+    accountData.registration.used = true
+  }
   let selectedAccount
   const storedKeyring = getKeyring(accountData.admin.address)
   if(!storedKeyring) {
@@ -102,8 +106,10 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
     })
     keyrings.default = keyring
     debug(keyring)
-    // keyring.accounts.admin === undefined
-    keyrings[keyring.accounts.admin.address] = keyring
+
+    // TO-DO: fix in sdk: admin should be on kering.accounts by default
+    // /*WANT*/ keyrings[keyring.admin.address] = keyring
+    keyrings[keyring.getAccount().admin.address] = keyring
     selectedAccount = keyring
   } else {
     keyrings.default = storedKeyring
@@ -118,7 +124,6 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
   debug('selected', selectedAccount);
   debug('keyring', entropy.keyring);
 
-  entropy.keyring.getAccount()
 
   if (!entropy?.keyring?.accounts?.registration?.seed) {
     throw new Error("Keys are undefined")

@@ -63,16 +63,17 @@ export async function newKey ({ accounts }) {
 
   const keyring = new Keyring({ seed, path, debug: isDebugMode })
   const fullAccount = keyring.getAccount()
-  // const { admin } = keyring.getAccount()
+  // TO-DO: sdk should create account on constructor
+  const { admin } = keyring.getAccount()
   debug('fullAccount:', fullAccount)
   
   const data = fullAccount
-  delete fullAccount.admin.pair
+  delete admin.pair
   const encryptedData = password ? passwordFlow.encrypt(data, password) : data
 
   const newAccount = {
     name: name,
-    address: fullAccount.admin.address,
+    address: admin.address,
     data: encryptedData,
   }
 
