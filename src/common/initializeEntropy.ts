@@ -72,7 +72,7 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
       }
     }
 
-    accountData = decryptedData as { seed: string; type: string }
+    accountData = decryptedData
   } else {
     throw new Error("Data format is not recognized as either encrypted or unencrypted")
   }
@@ -84,11 +84,11 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
   debug('account keyMaterial', accountData);
   let selectedAccount
   if(!keyrings.default) {
-    const keyring = new Keyring({ ...accountData, debug: true })
+    const keyring = new Keyring({ ...accountData })
     keyrings.default = keyring
     selectedAccount = keyring
   } else {
-    const keyring = new Keyring({ ...accountData, debug: true })
+    const keyring = new Keyring({ ...accountData })
     keyrings[keyring.accounts.masterAccountView.registration.address] = keyring
     selectedAccount = keyring
   }
