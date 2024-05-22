@@ -51,17 +51,21 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
     break
   }
   case "Check if Program Exists": {
-    const { programPointer } = await inquirer.prompt([{
-      type: "input",
-      name: "programPointer",
-      message: "Enter the program pointer you wish to check:",
-      validate: (input) => (input ? true : "Program pointer is required!"),
-    }])
-    console.log('program pointer', programPointer);
-    
-    const program = await entropy.programs.dev.get(programPointer);
-    console.log('Program from:', programPointer);
-    console.log(program);
+    try {
+      const { programPointer } = await inquirer.prompt([{
+        type: "input",
+        name: "programPointer",
+        message: "Enter the program pointer you wish to check:",
+        validate: (input) => (input ? true : "Program pointer is required!"),
+      }])
+      console.log('program pointer', programPointer);
+      
+      const program = await entropy.programs.dev.get(programPointer);
+      console.log('Program from:', programPointer);
+      console.log(program);
+    } catch (error) {
+      console.error(error.message);
+    }
     break;
   }
 
