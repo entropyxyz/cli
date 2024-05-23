@@ -1,5 +1,4 @@
-import inquirer from "inquirer"
-import { ethers } from "ethers"
+// import inquirer from "inquirer"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { debug, print } from "../../common/utils"
 
@@ -41,52 +40,12 @@ export async function sign ({ accounts, endpoints, selectedAccount: selectedAcco
     throw new Error("address issue")
   }
 
-  const txDetails = await inquirer.prompt([
-    {
-      type: "input",
-      name: "to",
-      message: "Recipient address (0x...):",
-      validate: (input) =>
-        ethers.utils.isAddress(input)
-          ? true
-          : "Please enter a valid Ethereum address.",
-    },
-    {
-      type: "input",
-      name: "value",
-      message: "Amount to send (in Ether):",
-      validate: (input) =>
-        !isNaN(parseFloat(input)) ? true : "Please enter a valid amount.",
-    },
-    {
-      type: "input",
-      name: "chainId",
-      message: "Chain ID:",
-      default: 1, 
-      validate: (input) =>
-        !isNaN(parseInt(input, 10)) ? true : "Please enter a valid chain ID.",
-    },
-    {
-      type: "input",
-      name: "data",
-      message: "Data to send (optional):",
-      default: "",
-    },
-  ])
+  const msg = Buffer.from('Hello world: signature from entropy!').toString('hex')
 
-  // TODO: this is assuming signing an eth Tx, should remove?
-  const basicTx = {
-    to: txDetails.to,
-    value: ethers.utils.parseEther(txDetails.value).toHexString(),
-    chainId: txDetails.chainId,
-    nonce: 1,
-    data: "0x" + Buffer.from(`${txDetails.data}`).toString("hex"),
-  }
-
-  const signature = (await entropy.signWithAdapter({
-    msg: basicTx,
-    type: "eth",
-  })) as string
+  const signature = (await entropy.sign({
+    sigRequestHash: msg,
+    hash: 'sha3',
+  }))
 
   print('signature:', signature)
 }
