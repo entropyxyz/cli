@@ -2,7 +2,7 @@ import Entropy from "@entropyxyz/sdk"
 import * as util from "@polkadot/util"
 import inquirer from "inquirer"
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { debug, accountChoices } from "../../common/utils"
+import { debug, print, accountChoices } from "../../common/utils"
 import { readFileSync } from "fs"
 
 export async function devPrograms ({ accounts, endpoints }, options) {
@@ -21,7 +21,7 @@ export async function devPrograms ({ accounts, endpoints }, options) {
   const choices = {
     "Deploy": deployProgram,
     "Get Program Pointers": getProgramPointers,
-    "Exit": () => console.log("Exiting")
+    "Exit": () => print("Exiting")
   }
 
   const actionChoice = await inquirer.prompt([
@@ -83,12 +83,12 @@ async function deployProgram (entropy: Entropy, account: any) {
       userProgram,
       programConfig
     )
-    console.log("Program deployed successfully with pointer:", pointer)
+    print("Program deployed successfully with pointer:", pointer)
   } catch (deployError) {
     console.error("Deployment failed:", deployError)
   }
 
-  console.log("Deploying from account:", account.address)
+  print("Deploying from account:", account.address)
 }
 
 async function getProgramPointers (entropy: Entropy, account: any) {
@@ -98,7 +98,7 @@ async function getProgramPointers (entropy: Entropy, account: any) {
 
   try {
     const fetchedProgram = await entropy.programs.get(userAddress)
-    console.log("Retrieved program pointers:", fetchedProgram)
+    print("Retrieved program pointers:", fetchedProgram)
   } catch (error) {
     console.error("Failed to retrieve program pointers:", error)
   }

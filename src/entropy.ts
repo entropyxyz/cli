@@ -7,7 +7,7 @@ import { cliGetBalance } from './flows/balance/cli'
 import { cliListAccounts } from './flows/manage-accounts/cli'
 import { cliEntropyTransfer } from './flows/entropyTransfer/cli'
 import { cliSign } from './flows/sign/cli'
-import { debug } from './common/utils'
+// import { debug } from './common/utils'
 
 const { version } = require('../package.json')
 

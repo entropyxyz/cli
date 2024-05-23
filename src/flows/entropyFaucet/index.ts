@@ -1,5 +1,5 @@
 import inquirer from "inquirer"
-import { debug, accountChoices } from "../../common/utils"
+import { print, debug, accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 export async function entropyFaucet ({ accounts, endpoints }, options) {
@@ -40,7 +40,7 @@ export async function entropyFaucet ({ accounts, endpoints }, options) {
     entropy.registrationManager.signer.pair,
     async ({ status }) => {
       if (status.isInBlock || status.isFinalized) {
-        console.log(recipientAddress, "funded")
+        print(recipientAddress, "funded")
       }
     }
   )

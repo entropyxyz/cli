@@ -3,7 +3,7 @@ import * as config from './config'
 import * as flows from './flows'
 import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
-import { debug } from './common/utils'
+import { debug, print } from './common/utils'
 
 // tui = text user interface
 export default function tui (options: EntropyTuiOptions) {
@@ -20,8 +20,8 @@ export default function tui (options: EntropyTuiOptions) {
     'Register': flows.register,
     'Sign': flows.sign,
     'Transfer': flows.entropyTransfer,
-    // 'Deploy Program': flows.devPrograms,
-    // 'User Programs': flows.userPrograms,
+    'Deploy Program': flows.devPrograms,
+    'User Programs': flows.userPrograms,
     // 'Entropy Faucet': flows.entropyFaucet,
     // 'Construct an Ethereum Tx': flows.ethTransaction,
   }
@@ -52,25 +52,37 @@ export default function tui (options: EntropyTuiOptions) {
   main()
 
   async function main () {
-    const storedConfig = await config.get()
+    let storedConfig = await config.get()
+
+    // if there are accounts available and selected account is not set, 
+    // first account in list is set as the selected account
+    if (!storedConfig.selectedAccount && storedConfig.accounts.length) {
+      await config.set({ ...storedConfig, ...{ selectedAccount: storedConfig.accounts[0].address } })
+      storedConfig = await config.get()
+    }
+
     const answers = await inquirer.prompt([intro])
+
     if (answers.choice === 'Exit')  {
-      console.log('Have a nice day')
+      print('Have a nice day')
       process.exit()
     }
 
-    const { selectedAccount } = storedConfig
-    if (!selectedAccount && answers.choice !== 'Manage Accounts') {
+    if (!storedConfig.selectedAccount && answers.choice !== 'Manage Accounts') {
       console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
     } else {
-      debug('answers', answers)
+      debug(answers)
       const newConfigUpdates = await choices[answers.choice](storedConfig, options)
 
       if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
+      storedConfig = await config.get()
     }
 
     const { returnToMain } = await inquirer.prompt([returnToMainMenu])
     if (returnToMain) main()
-    console.log('Have a nice day')
+    else {
+      print('Have a nice day')
+      process.exit()
+    }
   }
 }

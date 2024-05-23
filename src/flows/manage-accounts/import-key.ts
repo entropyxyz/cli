@@ -1,3 +1,4 @@
+import { debug } from '../../common/utils'
 // import { mnemonicValidate, mnemonicToMiniSecret } from '@polkadot/util-crypto'
 
 export const importQuestions = [
@@ -14,8 +15,9 @@ export const importQuestions = [
     message: ({ secretType }) => `${secretType}:`,
     validate: (secret) => {
     // validate: (secret, { secretType }) => {
-      console.log('\nsecret:', secret, typeof secret)
+      debug('\nsecret:', secret, typeof secret)
       // if (secretType === 'mnemonic') return mnemonicValidate(secret) ? true : 'not a valid mnemonic'
+      if (secret.includes('#debug')) return true
       if (secret.length === 66 && secret.startsWith('0x')) return true
       if (secret.length === 64) return true
       return 'not a valid seed'

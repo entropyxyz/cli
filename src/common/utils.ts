@@ -19,6 +19,10 @@ function replacer (key, value) {
   else return value
 }
 
+export function print (...args) {
+  console.log(...args)
+}
+
 // hardcoding for now instead of querying chain
 const DECIMALS = 10
 const PREFIX = '0x'

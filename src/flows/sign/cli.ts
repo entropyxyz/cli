@@ -13,6 +13,8 @@ export async function cliSign ({ address, message, endpoint }) {
 
   const entropy = await initializeEntropy({ keyMaterial: account.data, endpoint })
 
+  // TODO: WIP
+  // @ts-ignore ... something here frankie
   const signature = await entropy.signWithAdapter({
     type: 'deviceKeyProxy',
     msg: message,

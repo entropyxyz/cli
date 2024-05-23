@@ -4,7 +4,7 @@ import util from 'util'
 import { ethers } from "ethers"
 import { http, Hex, createPublicClient } from 'viem'
 import { sepolia } from 'viem/chains'
-import { accountChoices, debug, pubToAddress } from "../../common/utils"
+import { accountChoices, debug, print, pubToAddress } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 const execAsync = util.promisify(exec)
@@ -40,7 +40,7 @@ async function getSenderAddressFromSignedTx (signedTx: string): Promise<string> 
 async function sendCurlCommand (entropySig: string, sepoliaEndpoint: string) {
   try {
     const senderAddress = await getSenderAddressFromSignedTx(entropySig)
-    console.log(`Transaction being sent from address: ${senderAddress}`)
+    print(`Transaction being sent from address: ${senderAddress}`)
 
     const data = {
       id: 1,
@@ -97,9 +97,9 @@ export async function ethTransaction ({ accounts, endpoints }, options): Promise
   const balanceWei = await getAccountBalance(ethAddress, sepoliaEndpoint)
   if (balanceWei) {
     const balanceEther = ethers.utils.formatEther(balanceWei)
-    console.log(`Balance: ${balanceEther} ETH`)
+    print(`Balance: ${balanceEther} ETH`)
   } else {
-    console.log('Could not retrieve account balance.')
+    console.error('Could not retrieve account balance.')
   }
 
   const basicTx = {

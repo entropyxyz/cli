@@ -3,7 +3,7 @@ import Entropy, { wasmGlobalsReady } from "@entropyxyz/sdk"
 // @ts-ignore
 import Keyring from "@entropyxyz/sdk/keys"
 import inquirer from "inquirer"
-import { decrypt } from "../flows/password"
+import { decrypt, encrypt } from "../flows/password"
 import { debug } from "../common/utils"
 import * as config from "../config"
 
@@ -11,23 +11,30 @@ import * as config from "../config"
 // let defaultAccount // have a main account to use
 // let entropys 
 
-// have a main keyring
+// a cache of keyrings
 const keyrings = {
-  default: undefined
+  default: undefined // this is the "selected account" keyring
 }
 
 export function getKeyring (address) {
   if (!address && keyrings.default) return keyrings.default
   if (address && keyrings[address]) return keyrings[address]
-  if (address && !keyrings[address]) throw new Error('No keyring for this account')
-  if (!keyrings.default) throw new Error('no default set please create a keyring')
   return keyrings.default
 }
 
 // TODO: pull this type from somewhere else?
 interface AccountData {
-  type: string,
+  type: string
   seed: string
+  admin?: AdminDetails
+  registration?: RegistrationDetails
+}
+interface AdminDetails {
+  used: unknown
+  address: unknown
+}
+interface RegistrationDetails {
+  used: unknown
 }
 type MaybeKeyMaterial = AccountData | string
 
@@ -37,59 +44,90 @@ interface InitializeEntropyOpts {
   endpoint: string
 }
 
-// TODO: re-enable these?
-// let defaultAccount 
-// let entropys
 // WARNING: in programatic cli mode this function should NEVER prompt users, but it will if no password was provided
 
 export const initializeEntropy = async ({ keyMaterial, password, endpoint }: InitializeEntropyOpts): Promise<Entropy> => {
   debug('key material', keyMaterial);
-  // if (defaultAccount && defaultAccount.seed === keyMaterial.seed) return entropys[defaultAccount.registering.address]
   await wasmGlobalsReady()
 
-  const accountData = await getAccountData(keyMaterial, password)
+  const { password: successfulPassword, accountData } = await getAccountDataAndPassword(keyMaterial, password)
+
   if (!accountData.seed) {
     throw new Error("Data format is not recognized as either encrypted or unencrypted")
   }
-  debug('account:', accountData);
 
-  let selectedAccount: Keyring
-  if (!keyrings.default) {
-    const keyring = new Keyring({ ...accountData, debug: true })
+  debug('account:', accountData);
+  if (accountData && accountData.admin && !accountData.registration) {
+    accountData.registration = accountData.admin
+    accountData.registration.used = true
+    const store = await config.get()
+    store.accounts.map((account) => {
+      if (account.address === accountData.admin.address) {
+        const data = (typeof account.data === 'string')
+          ? encrypt(accountData, successfulPassword)
+          : accountData
+        account = {
+          ...account,
+          data,
+        }
+      }
+      return account
+    })
+    // re save the entire config
+    await config.set(store)
+  }
+
+  let selectedAccount
+  const storedKeyring = getKeyring(accountData.admin.address)
+  if(!storedKeyring) {
+    const keyring = new Keyring({ ...accountData })
+    keyring.accounts.on('#account-update', async (newAccoutData) => {
+      const store = await config.get()
+      store.accounts.map((account) => {
+        if (account.address === selectedAccount.address) {
+          let data = newAccoutData
+          if (typeof account.data === 'string' ) data = encrypt(newAccoutData, successfulPassword)
+          account = {
+            ...account,
+            data,
+          }
+        }
+        return account
+      })
+      // re save the entire config
+      await config.set(store)
+
+    })
     keyrings.default = keyring
+    debug(keyring)
+
+    // TO-DO: fix in sdk: admin should be on kering.accounts by default
+    // /*WANT*/ keyrings[keyring.admin.address] = keyring
+    keyrings[keyring.getAccount().admin.address] = keyring
     selectedAccount = keyring
   } else {
-    const keyring = new Keyring({ ...accountData, debug: true })
-    keyrings[keyring.accounts.masterAccountView.registration.address] = keyring
-    selectedAccount = keyring
+    keyrings.default = storedKeyring
+    selectedAccount = storedKeyring
   }
 
   const entropy = new Entropy({ keyring: selectedAccount, endpoint })
   await entropy.ready
 
-  debug('data sent', accountData);
-  debug('storage', keyrings);
-  debug('selected', selectedAccount);
-  debug('keyring', entropy.keyring);
-
   if (!entropy?.keyring?.accounts?.registration?.seed) {
     throw new Error("Keys are undefined")
   }
-  const storedConfig = await config.get();
-
-  entropy.keyring.accounts.on('#account-update', async (account) => {
-    const { admin: { address: adminAddress } } = account
-    const masterAccount = storedConfig.accounts.find(obj => obj.address === adminAddress)
-    Object.assign(masterAccount, account)
-    const newAccounts = storedConfig.accounts.filter(obj => obj.address !== adminAddress).concat([masterAccount])
-    await config.set({ ...storedConfig, ...{ accounts: newAccounts, selectedAccount: adminAddress } })
-  })
 
   return entropy
 }
 
-async function getAccountData (keyMaterial: MaybeKeyMaterial, password?: string): Promise<AccountData> {
-  if (isAccountData(keyMaterial)) return keyMaterial as AccountData
+// NOTE: frankie this was prettier before I had to refactor it for merge conflicts, promise
+async function getAccountDataAndPassword (keyMaterial: MaybeKeyMaterial, password?: string): Promise<{ password: string | void, accountData: AccountData }> {
+  if (isAccountData(keyMaterial)) {
+    return { 
+      password: null,
+      accountData: keyMaterial as AccountData
+    }
+  }
 
   if (typeof keyMaterial !== 'string') {
     throw new Error("Data format is not recognized as either encrypted or unencrypted")
@@ -102,10 +140,11 @@ async function getAccountData (keyMaterial: MaybeKeyMaterial, password?: string)
       throw new Error("Failed to decrypt keyMaterial or decrypted keyMaterial is invalid")
     }
     // @ts-ignore TODO: some type work here
-    return decryptedData
+    return { password, accountData: decryptedData }
   }
 
   /* Interactive Mode */
+  let sucessfulPassword: string
   let decryptedData
   let attempts = 0
 
@@ -126,6 +165,7 @@ async function getAccountData (keyMaterial: MaybeKeyMaterial, password?: string)
         throw new Error("Failed to decrypt keyMaterial or decrypted keyMaterial is invalid")
       }
 
+      sucessfulPassword = answers.password
       break
     } catch (error) {
       console.error("Incorrect password. Try again")
@@ -136,7 +176,10 @@ async function getAccountData (keyMaterial: MaybeKeyMaterial, password?: string)
     }
   }
 
-  return decryptedData as { seed: string; type: string }
+  return {
+    password: sucessfulPassword,
+    accountData: decryptedData as AccountData
+  }
 }
 
 function isAccountData (maybeAccountData: any) {

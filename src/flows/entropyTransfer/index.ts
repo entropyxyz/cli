@@ -1,5 +1,5 @@
 import inquirer from "inquirer"
-import { accountChoices, formatAmountAsHex, isEmpty } from "../../common/utils"
+import { accountChoices, print, formatAmountAsHex, isEmpty } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 const cliProgress = require('cli-progress');
@@ -85,10 +85,10 @@ export async function entropyTransfer ({ accounts, endpoints }, options) {
       if (status.isFinalized) {
         b1.stop()
         clearInterval(interval)
-        console.log(
+        print(
           `\nTransaction successful: Sent ${amount} to ${recipientAddress}`
         )
-        console.log('\nPress enter to return to main menu');
+        print('\nPress enter to return to main menu');
       }
     })
     return;

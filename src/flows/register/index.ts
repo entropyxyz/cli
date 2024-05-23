@@ -1,8 +1,10 @@
 import inquirer from "inquirer"
-import { debug, accountChoices } from "../../common/utils"
+// TO-DO: what is this from: frankie
+import { debug, print, /*accountChoices*/ } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
-export async function register ({ accounts, endpoints, selectedAccount: selectedFromConfig }, options) {
+export async function register (storedConfig, options) {
+  const { accounts, endpoints, selectedAccount: selectedFromConfig } = storedConfig;
   const endpoint = endpoints[options.ENDPOINT]
 
   if (!selectedFromConfig) return
@@ -10,51 +12,45 @@ export async function register ({ accounts, endpoints, selectedAccount: selected
   debug('selectedAccount', selectedAccount);
   
   const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint })
+  // TO-DO: investigate this a little more
+  // const filteredAccountChoices = accountChoices(accounts)
 
-  const filteredAccountChoices = accountChoices(accounts).filter(choice => choice.name !== "Other")
-  debug('filteredAccountChoices', filteredAccountChoices);
-
-  const programModKeyAccountQuestion = {
-    type: "list",
-    name: "programModAccount",
-    message: "Choose account for programModKey or paste an address:",
-    choices: [
-      ...filteredAccountChoices,
-      new inquirer.Separator(),
-      { name: "Paste an address", value: "paste" },
-    ],
-  }
-
-
-  const programModAccountAnswer = await inquirer.prompt([programModKeyAccountQuestion])
-  let programModAccount
-
-  if (programModAccountAnswer.programModAccount === "paste") {
-    const pasteAddressQuestion = {
-      type: "input",
-      name: "pastedAddress",
-      message: "Paste the address here:",
-    }
-
-    const pastedAddressAnswer = await inquirer.prompt([pasteAddressQuestion])
-    programModAccount = pastedAddressAnswer.pastedAddress
-  } else {
-    programModAccount = programModAccountAnswer.programModAccount.address
-  }
-  debug('programModAccount', programModAccountAnswer, programModAccount);
-  
-  console.log("Attempting to register the address:", selectedAccount.address)
+  const { programPointer } = await inquirer.prompt([{
+    type: 'input',
+    message: 'Enter the program pointer here:',
+    name: 'programPointer',
+    // Setting default to default key proxy program
+    default: '0x0000000000000000000000000000000000000000000000000000000000000000'
+  }])
+  //@ts-ignore:
+  debug('about to register selectedAccount.address' +  selectedAccount.address + 'keyring:' + entropy.keyring.getLazyLoadAccountProxy('registration').pair.address)
+  print("Attempting to register the address:", selectedAccount.address, )
+  let verifyingKey: string
   try {
-    await entropy.register()
+    verifyingKey = await entropy.register({
+      programDeployer: entropy.keyring.accounts.registration.address,
+      programData: [{
+        programPointer,
+        programConfig: '0x',
+      }]
+    })
+    if (verifyingKey) {
+      print("Your address", selectedAccount.address, "has been successfully registered.")
+      selectedAccount?.data?.registration?.verifyingKeys?.push(verifyingKey)
+      selectedAccount?.registration?.verifyingKeys?.push(verifyingKey)
+      const arrIdx = accounts.indexOf(selectedAccount)
+      accounts.splice(arrIdx, 1, selectedAccount)
+      return { accounts, selectedAccount: selectedAccount.address }
+    }
   } catch (error) {
     console.error('error', error);
-    const tx = await entropy.substrate.tx.registry.pruneRegistration()
-    await tx.signAndSend(entropy.keyring.accounts.registration.pair, ({ status }) => {
-      if (status.isFinalized) {
-        console.log('Successfully pruned registration');
-      }
-    })
+    if (!verifyingKey) {
+      const tx = await entropy.substrate.tx.registry.pruneRegistration()
+      await tx.signAndSend(entropy.keyring.accounts.registration.pair, ({ status }) => {
+        if (status.isFinalized) {
+          print('Successfully pruned registration');
+        }
+      })
+    }
   }
-
-  console.log("Your address", selectedAccount.data.address, "has been successfully registered.")
 }
