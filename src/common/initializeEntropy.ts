@@ -84,7 +84,7 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
     accountData.registration.used = true
     const store = await config.get()
     store.accounts.map((account) => {
-      if (account.address === selectedAccount.address) {
+      if (account.address === accountData.admin.address) {
         let data = accountData
         if (typeof account.data === 'string' ) data = encrypt(accountData, password)
         account = {
@@ -134,26 +134,9 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
   const entropy = new Entropy({ keyring: selectedAccount, endpoint })
   await entropy.ready
 
-  debug('data sent', accountData);
-  debug('storage', keyrings);
-  debug('selected', selectedAccount);
-  debug('keyring', entropy.keyring);
-
-
   if (!entropy?.keyring?.accounts?.registration?.seed) {
     throw new Error("Keys are undefined")
   }
-  const storedConfig = await config.get();
-
-  entropy.keyring.accounts.on('#account-update', async (account) => {
-    debug('ACCT SUBSCRIBER::', account)
-    const { admin: { address: adminAddress } } = account
-    const masterAccount = storedConfig.accounts.find(obj => obj.address === adminAddress)
-    debug('STORED ACCT::', masterAccount);
-    Object.assign(masterAccount, account)
-    const newAccounts = storedConfig.accounts.filter(obj => obj.address !== adminAddress).concat([masterAccount])
-    await config.set({ ...storedConfig, ...{ accounts: newAccounts, selectedAccount: adminAddress } })
-  })
 
   return entropy
 }
