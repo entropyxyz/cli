@@ -1,5 +1,6 @@
 import inquirer from "inquirer"
-import { debug, print, accountChoices } from "../../common/utils"
+// TO-DO: what is this from: frankie
+import { debug, print, /*accountChoices*/ } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 export async function register (storedConfig, options) {
@@ -10,36 +11,8 @@ export async function register (storedConfig, options) {
   const selectedAccount = accounts.find(obj => obj.address === selectedFromConfig)
 
   const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data }, endpoint)
-
-  const filteredAccountChoices = accountChoices(accounts)
-
-  const programModKeyAccountQuestion = {
-    type: "list",
-    name: "programModAccount",
-    message: "Choose account for programModKey or paste an address:",
-    choices: [
-      ...filteredAccountChoices,
-      new inquirer.Separator(),
-      { name: "Paste an address", value: "paste" },
-    ],
-  }
-
-  const programModAccountAnswer = await inquirer.prompt([programModKeyAccountQuestion])
-  let programModAccount
-
-  if (programModAccountAnswer.programModAccount === "paste") {
-    const pasteAddressQuestion = {
-      type: "input",
-      name: "pastedAddress",
-      message: "Paste the address here:",
-    }
-
-    const pastedAddressAnswer = await inquirer.prompt([pasteAddressQuestion])
-    programModAccount = pastedAddressAnswer.pastedAddress
-  } else {
-    programModAccount = programModAccountAnswer.programModAccount.address
-  }
-  debug('programModAccount', programModAccountAnswer, programModAccount);
+  // TO-DO: investigate this a little more
+  // const filteredAccountChoices = accountChoices(accounts)
 
   const { programPointer } = await inquirer.prompt([{
     type: 'input',
@@ -48,12 +21,12 @@ export async function register (storedConfig, options) {
     // Setting default to default key proxy program
     default: '0x0000000000000000000000000000000000000000000000000000000000000000'
   }])
-  
+  debug('about to register')
   print("Attempting to register the address:", selectedAccount.address)
   let verifyingKey: string
   try {
     verifyingKey = await entropy.register({
-      programDeployer: selectedAccount.address,
+      programDeployer: entropy.keyring.accounts.registration.address,
       programData: [{
         programPointer,
         programConfig: '0x',
