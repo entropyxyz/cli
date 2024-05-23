@@ -41,8 +41,8 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
         programs.forEach((program, index) => {
           print(
             `${index + 1}. Pointer: ${
-              program.programPointer
-            }, Config: ${JSON.stringify(program.programConfig)}`
+              program.program_pointer
+            }, Config: ${JSON.stringify(program.program_config)}`
           )
         })
       }
@@ -101,8 +101,8 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
   
       await entropy.programs.add(
         {
-          programPointer: programPointerToAdd,
-          programConfig: programConfigHex,
+          program_pointer: programPointerToAdd,
+          program_config: programConfigHex,
         },
         entropy.keyring.accounts.registration.address,
       )

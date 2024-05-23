@@ -29,14 +29,13 @@ export async function register (storedConfig, options) {
     verifyingKey = await entropy.register({
       programDeployer: entropy.keyring.accounts.registration.address,
       programData: [{
-        programPointer,
-        programConfig: '0x',
+        program_pointer: programPointer,
+        program_config: '0x',
       }]
     })
     if (verifyingKey) {
       print("Your address", selectedAccount.address, "has been successfully registered.")
       selectedAccount?.data?.registration?.verifyingKeys?.push(verifyingKey)
-      selectedAccount?.registration?.verifyingKeys?.push(verifyingKey)
       const arrIdx = accounts.indexOf(selectedAccount)
       accounts.splice(arrIdx, 1, selectedAccount)
       return { accounts, selectedAccount: selectedAccount.address }
