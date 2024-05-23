@@ -21,8 +21,11 @@ export async function register (storedConfig, options) {
     // Setting default to default key proxy program
     default: '0x0000000000000000000000000000000000000000000000000000000000000000'
   }])
-  debug('about to register')
-  print("Attempting to register the address:", selectedAccount.address)
+  // @ts-ignore: next line
+  print('about to register selectedAccount.address' +  selectedAccount.address + 'keyring:' + entropy.keyring.getLazyLoadAccountProxy('registration').pair.address)
+  // @ts-ignore: next line
+  debug('about to register selectedAccount.address' +  selectedAccount.address + 'keyring:' + entropy.keyring.getLazyLoadAccountProxy('registration').pair.address)
+  print("Attempting to register the address:", selectedAccount.address, )
   let verifyingKey: string
   try {
     verifyingKey = await entropy.register({
