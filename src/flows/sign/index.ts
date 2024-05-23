@@ -1,6 +1,6 @@
 // import inquirer from "inquirer"
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { debug, print } from "../../common/utils"
+import { debug, getSelectedAccount, print } from "../../common/utils"
 
 // TODO: revisit this file, rename as signEthTransaction?
 export async function sign ({ accounts, endpoints, selectedAccount: selectedAccountAddress }, options) {
@@ -22,7 +22,7 @@ export async function sign ({ accounts, endpoints, selectedAccount: selectedAcco
 
   // const answers = await inquirer.prompt([accountQuestion, otherQuestion])
   // const selectedAccount = answers.selectedAccount
-  const selectedAccount = accounts.find(obj => obj.address === selectedAccountAddress)
+  const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
   debug("selectedAccount:", selectedAccount)
   // const accountSeedOrPrivateKey = answers.accountSeedOrPrivateKey
   const keyMaterial = selectedAccount?.data;

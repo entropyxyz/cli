@@ -2,21 +2,12 @@ import Entropy from "@entropyxyz/sdk"
 import * as util from "@polkadot/util"
 import inquirer from "inquirer"
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { debug, print, accountChoices } from "../../common/utils"
+import { debug, print, getSelectedAccount } from "../../common/utils"
 import { readFileSync } from "fs"
 
-export async function devPrograms ({ accounts, endpoints }, options) {
+export async function devPrograms ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
-  const accountQuestion = {
-    type: "list",
-    name: "selectedAccount",
-    message: "Choose account:",
-    choices: accountChoices(accounts) 
-  }
-
-  const answers = await inquirer.prompt([accountQuestion])
-  const selectedAccount = answers.selectedAccount
-  debug('selectedAccount:', {selectedAccount})
+  const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
 
   const choices = {
     "Deploy": deployProgram,

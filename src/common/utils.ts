@@ -83,3 +83,7 @@ export function accountChoicesWithOther (accounts) {
   return accountChoices(accounts)
     .concat([{ name: "Other", value: null }])
 }
+
+export function getSelectedAccount (accounts, address) {
+  return accounts.find(account => account.address === address)
+}

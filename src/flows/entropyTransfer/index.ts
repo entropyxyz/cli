@@ -1,5 +1,5 @@
 import inquirer from "inquirer"
-import { print, formatAmountAsHex } from "../../common/utils"
+import { print, formatAmountAsHex, getSelectedAccount } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 const cliProgress = require('cli-progress');
@@ -26,7 +26,7 @@ const question = [
 
 export async function entropyTransfer ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
-  const selectedAccount = accounts.find(obj => obj.address === selectedAccountAddress)
+  const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
 
   try {
     const entropy = await initializeEntropy(

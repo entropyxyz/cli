@@ -1,11 +1,11 @@
 import inquirer from "inquirer"
 import * as util from "@polkadot/util"
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { debug, print } from "../../common/utils"
+import { debug, getSelectedAccount, print } from "../../common/utils"
 
 export async function userPrograms ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
-  const selectedAccount = accounts.find(obj => obj.address === selectedAccountAddress);
+  const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
   const actionChoice = await inquirer.prompt([
     {
       type: "list",

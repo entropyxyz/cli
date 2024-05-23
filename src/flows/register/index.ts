@@ -1,6 +1,6 @@
 import inquirer from "inquirer"
 // TO-DO: what is this from: frankie
-import { debug, print, /*accountChoices*/ } from "../../common/utils"
+import { debug, getSelectedAccount, print, /*accountChoices*/ } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 export async function register (storedConfig, options) {
@@ -8,7 +8,7 @@ export async function register (storedConfig, options) {
   const endpoint = endpoints[options.ENDPOINT]
 
   if (!selectedFromConfig) return
-  const selectedAccount = accounts.find(obj => obj.address === selectedFromConfig)
+  const selectedAccount = getSelectedAccount(accounts, selectedFromConfig)
 
   const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data }, endpoint)
   // TO-DO: investigate this a little more
