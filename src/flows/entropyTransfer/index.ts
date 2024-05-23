@@ -1,5 +1,5 @@
 import inquirer from "inquirer"
-import { accountChoices, print, formatAmountAsHex, isEmpty } from "../../common/utils"
+import { print, formatAmountAsHex } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 const cliProgress = require('cli-progress');
@@ -24,41 +24,18 @@ const question = [
   },
 ]
 
-export async function entropyTransfer ({ accounts, endpoints }, options) {
+export async function entropyTransfer ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
-
-  const accountQuestion = {
-    type: "list",
-    name: "selectedAccount",
-    message: "Choose account:",
-    choices: accountChoices(accounts),
-  }
-
-  const otherQuestion = {
-    type: "input",
-    name: "accountSeedOrPrivateKey",
-    message: "Enter the account seed or private key:",
-    when: (answers) => !answers.selectedAccount
-  }
-  const answers = await inquirer.prompt ([accountQuestion, otherQuestion])
-  const selectedAccount = answers.selectedAccount
-  const accountSeedOrPrivateKey = answers.accountSeedOrPrivateKey
-
-  let keyMaterial = selectedAccount?.data;
-  if (!keyMaterial || isEmpty(keyMaterial)) {
-    keyMaterial = {
-      seed: accountSeedOrPrivateKey,
-    }
-  }
+  const selectedAccount = accounts.find(obj => obj.address === selectedAccountAddress)
 
   try {
     const entropy = await initializeEntropy(
-      { keyMaterial },
+      { keyMaterial: selectedAccount.data },
       endpoint
     )
 
     const b1 = new cliProgress.SingleBar({
-      format: 'CLI Progress |' + colors.cyan('{bar}') + '| {percentage}% || {value}/{total} Chunks || Speed: {speed}',
+      format: 'Transferring Funds |' + colors.cyan('{bar}') + '| {percentage}%',
       barCompleteChar: '\u2588',
       barIncompleteChar: '\u2591',
       hideCursor: true
@@ -77,7 +54,7 @@ export async function entropyTransfer ({ accounts, endpoints }, options) {
 
     await tx.signAndSend (entropy.registrationManager.signer.pair, ({ status }) => {
       // initialize the bar - defining payload token "speed" with the default value "N/A"
-      b1.start(500, 0, {
+      b1.start(300, 0, {
         speed: "N/A"
       });
       // update values

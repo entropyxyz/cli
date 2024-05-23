@@ -74,7 +74,7 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
     throw new Error("Data format is not recognized as either encrypted or unencrypted")
   }
   
-  if (!accountData.seed) {
+  if (!accountData.seed || !accountData.admin) {
     throw new Error("Data format is not recognized as either encrypted or unencrypted")
   }
 

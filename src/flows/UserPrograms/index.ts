@@ -71,57 +71,66 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
   }
 
   case "Add a Program to My List": {
-    const { programPointerToAdd, programConfigJson } = await inquirer.prompt([
-      {
-        type: "input",
-        name: "programPointerToAdd",
-        message: "Enter the program pointer you wish to add:",
-        validate: (input) => (input ? true : "Program pointer is required!"),
-      },
-      {
-        type: "editor",
-        name: "programConfigJson",
-        message:
-            "Enter the program configuration as a JSON string (this will open your default editor):",
-        validate: (input) => {
-          try {
-            JSON.parse(input)
-            return true
-          } catch (e) {
-            return "Please enter a valid JSON string for the configuration."
-          }
+    try {
+      const { programPointerToAdd, programConfigJson } = await inquirer.prompt([
+        {
+          type: "input",
+          name: "programPointerToAdd",
+          message: "Enter the program pointer you wish to add:",
+          validate: (input) => (input ? true : "Program pointer is required!"),
         },
-      },
-    ])
-
-    const encoder = new TextEncoder()
-    const byteArray = encoder.encode(programConfigJson)
-    const programConfigHex = util.u8aToHex(byteArray)
-
-    await entropy.programs.add(
-      {
-        programPointer: programPointerToAdd,
-        programConfig: programConfigHex,
-      },
-      entropy.keyring.accounts.registration.address,
-    )
-
-    print("Program added successfully.")
+        {
+          type: "editor",
+          name: "programConfigJson",
+          message:
+              "Enter the program configuration as a JSON string (this will open your default editor):",
+          validate: (input) => {
+            try {
+              JSON.parse(input)
+              return true
+            } catch (e) {
+              return "Please enter a valid JSON string for the configuration."
+            }
+          },
+        },
+      ])
+  
+      const encoder = new TextEncoder()
+      const byteArray = encoder.encode(programConfigJson)
+      const programConfigHex = util.u8aToHex(byteArray)
+  
+      await entropy.programs.add(
+        {
+          programPointer: programPointerToAdd,
+          programConfig: programConfigHex,
+        },
+        entropy.keyring.accounts.registration.address,
+      )
+  
+      print("Program added successfully.")
+    } catch (error) {
+      console.error(error.message)
+    }
     break
   }
   case "Remove a Program from My List": {
-    const { programPointerToRemove } = await inquirer.prompt([
-      {
-        type: "input",
-        name: "programPointerToRemove",
-        message: "Enter the program pointer you wish to remove:",
-      },
-    ])
-    await entropy.programs.remove(
-      programPointerToRemove,
-      entropy.keyring.accounts.registration.verifyingKeys?.[0]
-    )
-    print("Program removed successfully.")
+    try {
+      const { programPointerToRemove } = await inquirer.prompt([
+        {
+          type: "input",
+          name: "programPointerToRemove",
+          message: "Enter the program pointer you wish to remove:",
+        },
+      ])
+      await entropy.programs.remove(
+        programPointerToRemove,
+        entropy.keyring.accounts.registration.verifyingKeys?.[0]
+      )
+      print("Program removed successfully.")
+    } catch (error) {
+      console.error(error.message)
+      
+    }
     break
   }
   }
