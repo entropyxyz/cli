@@ -82,7 +82,22 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
   if (accountData && accountData.admin && !accountData.registration) {
     accountData.registration = accountData.admin
     accountData.registration.used = true
+    const store = await config.get()
+    store.accounts.map((account) => {
+      if (account.address === selectedAccount.address) {
+        let data = accountData
+        if (typeof account.data === 'string' ) data = encrypt(accountData, password)
+        account = {
+          ...account,
+          data,
+        }
+      }
+      return account
+    })
+    // re save the entire config
+    await config.set(store)
   }
+
   let selectedAccount
   const storedKeyring = getKeyring(accountData.admin.address)
   if(!storedKeyring) {
