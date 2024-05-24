@@ -50,18 +50,17 @@ export async function newKey ({ accounts }) {
   }
 
   const { secret, name, path, password, importKey } = answers
-  let isDebugMode = false
+  // let isDebugMode = false
   let seed
   // never create debug keys only ever import them
   if (importKey && secret.includes('#debug')) {
-    isDebugMode = true
+    // isDebugMode = true
     seed = secret.split('#debug')[0]
   } else {
     seed = importKey ? secret : randomAsHex(32)
   }
 
-
-  const keyring = new Keyring({ seed, path, debug: isDebugMode })
+  const keyring = new Keyring({ seed, path, debug: true })
   const fullAccount = keyring.getAccount()
   // TO-DO: sdk should create account on constructor
   const { admin } = keyring.getAccount()

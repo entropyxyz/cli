@@ -101,7 +101,7 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
   let selectedAccount
   const storedKeyring = getKeyring(accountData.admin.address)
   if(!storedKeyring) {
-    const keyring = new Keyring({ ...accountData })
+    const keyring = new Keyring({ ...accountData, debug: true })
     keyring.accounts.on('#account-update', async (newAccoutData) => {
       const store = await config.get()
       store.accounts.map((account) => {
