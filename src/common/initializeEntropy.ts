@@ -78,7 +78,6 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
     throw new Error("Data format is not recognized as either encrypted or unencrypted")
   }
 
-  debug('account keyMaterial', accountData);
   if (accountData && accountData.admin && !accountData.registration) {
     accountData.registration = accountData.admin
     accountData.registration.used = true

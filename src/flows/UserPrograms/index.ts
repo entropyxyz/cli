@@ -3,9 +3,12 @@ import * as util from "@polkadot/util"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { debug, getSelectedAccount, print } from "../../common/utils"
 
+let verifyingKey: string;
+
 export async function userPrograms ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
+
   const actionChoice = await inquirer.prompt([
     {
       type: "list",
@@ -30,10 +33,21 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
     throw new Error("Keys are undefined")
   }
 
+  const verifyingKeyQuestion = [{
+    type: 'list',
+    name: 'verifyingKey',
+    message: 'Select the key to proceeed',
+    choices: entropy.keyring.accounts.registration.verifyingKeys,
+    default: entropy.keyring.accounts.registration.verifyingKeys[0]
+  }]
+
   switch (actionChoice.action) {
   case "View My Programs": {
     try {
-      const programs = await entropy.programs.get(entropy.keyring.accounts.registration.address)
+      if (!verifyingKey) {
+        ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion))
+      }
+      const programs = await entropy.programs.get(verifyingKey)
       if (programs.length === 0) {
         print("You currently have no programs set.")
       } else {
@@ -103,8 +117,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
         {
           program_pointer: programPointerToAdd,
           program_config: programConfigHex,
-        },
-        entropy.keyring.accounts.registration.address,
+        }
       )
   
       print("Program added successfully.")
@@ -115,6 +128,9 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
   }
   case "Remove a Program from My List": {
     try {
+      if (!verifyingKey) {
+        ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion))
+      }
       const { programPointerToRemove } = await inquirer.prompt([
         {
           type: "input",
@@ -124,7 +140,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
       ])
       await entropy.programs.remove(
         programPointerToRemove,
-        entropy.keyring.accounts.registration.verifyingKeys?.[0]
+        verifyingKey
       )
       print("Program removed successfully.")
     } catch (error) {

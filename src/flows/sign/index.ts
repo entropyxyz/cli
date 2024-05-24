@@ -41,11 +41,13 @@ export async function sign ({ accounts, endpoints, selectedAccount: selectedAcco
   }
 
   const msg = Buffer.from('Hello world: signature from entropy!').toString('hex')
+  debug('msg', msg);
+  
 
-  const signature = (await entropy.sign({
+  const signature = await entropy.sign({
     sigRequestHash: msg,
     hash: 'sha3',
-  }))
+  })
 
   print('signature:', signature)
 }
