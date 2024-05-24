@@ -43,12 +43,17 @@ export async function register (storedConfig, options) {
   } catch (error) {
     console.error('error', error);
     if (!verifyingKey) {
-      const tx = await entropy.substrate.tx.registry.pruneRegistration()
-      await tx.signAndSend(entropy.keyring.accounts.registration.pair, ({ status }) => {
-        if (status.isFinalized) {
-          print('Successfully pruned registration');
-        }
-      })
+      debug('Pruning Registration')
+      try {
+        const tx = await entropy.substrate.tx.registry.pruneRegistration()
+        await tx.signAndSend(entropy.keyring.accounts.registration.pair, ({ status }) => {
+          if (status.isFinalized) {
+            print('Successfully pruned registration');
+          }
+        })
+      } catch (error) {
+        console.error('Unable to prune registration due to:', error.message);
+      }
     }
   }
 }
