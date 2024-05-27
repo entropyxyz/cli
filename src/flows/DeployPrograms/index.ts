@@ -1,51 +1,39 @@
+import Entropy from "@entropyxyz/sdk"
+import * as util from "@polkadot/util"
 import inquirer from "inquirer"
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { accountChoices } from "../../common/utils"
+import { debug, print, getSelectedAccount } from "../../common/utils"
 import { readFileSync } from "fs"
-import * as util from "@polkadot/util"
 
-export async function devPrograms ({ accounts, endpoints }, options) {
+export async function devPrograms ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
-  const accountQuestion = {
-    type: "list",
-    name: "selectedAccount",
-    message: "Choose account:",
-    choices: accountChoices(accounts) 
+  const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
+
+  const choices = {
+    "Deploy": deployProgram,
+    "Get Program Pointers": getProgramPointers,
+    "Exit": () => print("Exiting")
   }
 
-  const answers = await inquirer.prompt([accountQuestion])
-  const selectedAccount = answers.selectedAccount
-  console.log('selectedAccount:', {selectedAccount})
-
-
-  const actionChoice = await inquirer.prompt ([
+  const actionChoice = await inquirer.prompt([
     {
       type: "list",
       name: "action",
       message: "Select your action:",
-      choices: ["Deploy", "Get Program Pointers", "Exit"],
+      choices: Object.keys(choices)
     },
   ])
 
   const entropy = await initializeEntropy(
-    { data: selectedAccount.data },
+    { keyMaterial: selectedAccount.data },
     endpoint
   )
   
-  switch (actionChoice.action) {
-  case "Deploy":
-    await deployProgram(entropy, selectedAccount)
-    break
-  case "Get Program Pointers":
-    await getProgramPointers(entropy, selectedAccount)
-    break
-  case "Exit":
-    console.log("Exiting.")
-    break
-  }
+  const flow = choices[actionChoice.action]
+  await flow(entropy, selectedAccount)
 }
 
-async function deployProgram (entropy, account) {
+async function deployProgram (entropy: Entropy, account: any) {
   const deployQuestions = [
     {
       type: "input",
@@ -86,32 +74,23 @@ async function deployProgram (entropy, account) {
       userProgram,
       programConfig
     )
-    console.log("Program deployed successfully with pointer:", pointer)
+    print("Program deployed successfully with pointer:", pointer)
   } catch (deployError) {
     console.error("Deployment failed:", deployError)
   }
 
-  console.log(`Deploying from account: ${account.address}`)
+  print("Deploying from account:", account.address)
 }
 
-async function getProgramPointers (entropy, account) {
+async function getProgramPointers (entropy: Entropy, account: any) {
   const userAddress = account.address
-  console.log(userAddress)
+  debug('Account address:',userAddress)
   if (!userAddress) return
 
   try {
     const fetchedProgram = await entropy.programs.get(userAddress)
-    console.log("Retrieved program pointers:", fetchedProgram)
+    print("Retrieved program pointers:", fetchedProgram)
   } catch (error) {
     console.error("Failed to retrieve program pointers:", error)
   }
 }
-
-// function accountChoices (accounts) {
-//   return accounts
-//     .map((account) => ({
-//       name: `${account.name} (${account.address})`,
-//       value: account,
-//     }))
-//     .concat([{ name: "Other", value: null }])
-// }

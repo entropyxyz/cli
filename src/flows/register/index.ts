@@ -1,81 +1,59 @@
 import inquirer from "inquirer"
-import { accountChoices } from "../../common/utils"
+// TO-DO: what is this from: frankie
+import { debug, getSelectedAccount, print, /*accountChoices*/ } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
-// import * as util from "@polkadot/util"
 
-export async function register ({ accounts, endpoints }, options) {
+export async function register (storedConfig, options) {
+  const { accounts, endpoints, selectedAccount: selectedFromConfig } = storedConfig;
   const endpoint = endpoints[options.ENDPOINT]
 
-  const accountQuestion = {
-    type: "list",
-    name: "selectedAccount",
-    message: "Choose account:",
-    choices: accountChoices(accounts),
-  }
+  if (!selectedFromConfig) return
+  const selectedAccount = getSelectedAccount(accounts, selectedFromConfig)
 
-  const selectedAccountAnswer = await inquirer.prompt([accountQuestion])
-  const selectedAccount = selectedAccountAnswer.selectedAccount
+  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data }, endpoint)
+  // TO-DO: investigate this a little more
+  // const filteredAccountChoices = accountChoices(accounts)
 
-  const entropy = await initializeEntropy({ data: selectedAccount.data }, endpoint)
-
-  await entropy.ready
-
-
-  const filteredAccountChoices = accountChoices(accounts).filter(choice => choice.name !== "Other")
-
-  const programModKeyAccountQuestion = {
-    type: "list",
-    name: "programModAccount",
-    message: "Choose account for programModKey or paste an address:",
-    choices: [
-      ...filteredAccountChoices,
-      new inquirer.Separator(),
-      { name: "Paste an address", value: "paste" },
-    ],
-  }
-
-
-  const programModAccountAnswer = await inquirer.prompt([programModKeyAccountQuestion])
-  let programModAccount
-
-  if (programModAccountAnswer.programModAccount === "paste") {
-    const pasteAddressQuestion = {
-      type: "input",
-      name: "pastedAddress",
-      message: "Paste the address here:",
-    }
-
-    const pastedAddressAnswer = await inquirer.prompt([pasteAddressQuestion])
-    programModAccount = pastedAddressAnswer.pastedAddress
-  } else {
-    programModAccount = programModAccountAnswer.programModAccount.address
-  }
-
-  const isRegistered = await entropy.registrationManager.checkRegistrationStatus(selectedAccount.address)
-
-  console.log("isRegistered", isRegistered)
-
-  if (isRegistered) {
-    console.log("Address is already registered:", selectedAccount.address)
-  } else {
-    const pointer = "0x3873f6f91334cfb6cad84f94aa1e1025069405a4ea3577a818a5ad8d0e26bb39"
-    const programConfig = "0x"
-
-    const programData = {
-      programPointer: pointer,
-      programConfig: programConfig,
-    }
-
-    console.log({ programData })
-
-    console.log("Attempting to register the address:", selectedAccount.address)
-    await entropy.register({
-      programModAccount: programModAccount,
-      keyVisibility: "Permissioned",
-      initialPrograms: [programData],
-      freeTx: false,
+  const { programPointer } = await inquirer.prompt([{
+    type: 'input',
+    message: 'Enter the program pointer here:',
+    name: 'programPointer',
+    // Setting default to default key proxy program
+    default: '0x0000000000000000000000000000000000000000000000000000000000000000'
+  }])
+  //@ts-ignore:
+  debug('about to register selectedAccount.address' +  selectedAccount.address + 'keyring:' + entropy.keyring.getLazyLoadAccountProxy('registration').pair.address)
+  print("Attempting to register the address:", selectedAccount.address, )
+  let verifyingKey: string
+  try {
+    verifyingKey = await entropy.register({
+      programDeployer: entropy.keyring.accounts.registration.address,
+      programData: [{
+        program_pointer: programPointer,
+        program_config: '0x',
+      }]
     })
-
-    console.log("Your address", selectedAccount.data.address, "has been successfully registered.")
+    if (verifyingKey) {
+      print("Your address", selectedAccount.address, "has been successfully registered.")
+      selectedAccount?.data?.registration?.verifyingKeys?.push(verifyingKey)
+      const arrIdx = accounts.indexOf(selectedAccount)
+      accounts.splice(arrIdx, 1, selectedAccount)
+      return { accounts, selectedAccount: selectedAccount.address }
+    }
+  } catch (error) {
+    console.error('error', error);
+    if (!verifyingKey) {
+      debug('Pruning Registration')
+      try {
+        const tx = await entropy.substrate.tx.registry.pruneRegistration()
+        await tx.signAndSend(entropy.keyring.accounts.registration.pair, ({ status }) => {
+          if (status.isFinalized) {
+            print('Successfully pruned registration');
+          }
+        })
+      } catch (error) {
+        console.error('Unable to prune registration due to:', error.message);
+      }
+    }
   }
 }

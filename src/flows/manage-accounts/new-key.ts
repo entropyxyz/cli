@@ -1,8 +1,10 @@
 import inquirer from 'inquirer'
 import { randomAsHex } from '@polkadot/util-crypto'
-import { getWallet } from '@entropyxyz/sdk/dist/keys'
+// @ts-ignore
+import Keyring from '@entropyxyz/sdk/keys'
 import { importQuestions } from './import-key'
 import * as passwordFlow from '../password'
+import { debug, print } from '../../common/utils'
 
 export async function newKey ({ accounts }) {
   accounts = Array.isArray(accounts) ? accounts : []
@@ -47,28 +49,35 @@ export async function newKey ({ accounts }) {
     answers = { ...answers, ...passwordFlowAnswers }
   }
 
-  const { secret, secretType, name, path, password, importKey } = answers
-
-  const seed = importKey ? secret : randomAsHex(32)
-  const signer = await getWallet(seed)
-  const address = signer.wallet.address
-
-  const data = {
-    type: secretType || 'seed',
-    seed,
-    path,
+  const { secret, name, path, password, importKey } = answers
+  // let isDebugMode = false
+  let seed
+  // never create debug keys only ever import them
+  if (importKey && secret.includes('#debug')) {
+    // isDebugMode = true
+    seed = secret.split('#debug')[0]
+  } else {
+    seed = importKey ? secret : randomAsHex(32)
   }
 
+  const keyring = new Keyring({ seed, path, debug: true })
+  const fullAccount = keyring.getAccount()
+  // TO-DO: sdk should create account on constructor
+  const { admin } = keyring.getAccount()
+  debug('fullAccount:', fullAccount)
+  
+  const data = fullAccount
+  delete admin.pair
   const encryptedData = password ? passwordFlow.encrypt(data, password) : data
 
   const newAccount = {
     name: name,
-    address,
+    address: admin.address,
     data: encryptedData,
   }
 
-  console.log(`New account:\n{\n\tname: ${newAccount.name}\n\taddress: ${newAccount.address}\n\ttype: ${data.type}\n}`)
+  print(`New account:\n{\n\tname: ${newAccount.name}\n\taddress: ${newAccount.address}\n}`)
 
   accounts.push(newAccount)
-  return accounts
+  return { accounts, selectedAccount: newAccount.address }
 }

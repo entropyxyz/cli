@@ -1,20 +1,13 @@
 import inquirer from "inquirer"
-import { accountChoices } from "../../common/utils"
-import { initializeEntropy } from "../../common/initializeEntropy"
 import * as util from "@polkadot/util"
+import { initializeEntropy } from "../../common/initializeEntropy"
+import { debug, getSelectedAccount, print } from "../../common/utils"
 
-export async function userPrograms ({ accounts, endpoints }, options) {
+let verifyingKey: string;
+
+export async function userPrograms ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
-
-  const accountQuestion = {
-    type: "list",
-    name: "selectedAccount",
-    message: "Choose account:",
-    choices: accountChoices(accounts),
-  }
-  const answers = await inquirer.prompt([accountQuestion])
-  const selectedAccount = answers.selectedAccount
-
+  const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
 
   const actionChoice = await inquirer.prompt([
     {
@@ -25,90 +18,135 @@ export async function userPrograms ({ accounts, endpoints }, options) {
         "View My Programs",
         "Add a Program to My List",
         "Remove a Program from My List",
+        "Check if Program Exists",
         "Exit to Main Menu",
       ],
     },
   ])
 
   const entropy = await initializeEntropy(
-    { data: selectedAccount.data },
+    { keyMaterial: selectedAccount.data },
     endpoint
   )
   
-  if (!entropy.account?.sigRequestKey) {
+  if (!entropy.registrationManager?.signer?.pair) {
     throw new Error("Keys are undefined")
   }
 
+  const verifyingKeyQuestion = [{
+    type: 'list',
+    name: 'verifyingKey',
+    message: 'Select the key to proceeed',
+    choices: entropy.keyring.accounts.registration.verifyingKeys,
+    default: entropy.keyring.accounts.registration.verifyingKeys[0]
+  }]
+
   switch (actionChoice.action) {
   case "View My Programs": {
-    const programs = await entropy.programs.get(entropy.account.sigRequestKey.wallet.address)
-    if (programs.length === 0) {
-      console.log("You currently have no programs set.")
-    } else {
-      console.log("Your Programs:")
-      programs.forEach((program, index) => {
-        console.log(
-          `${index + 1}. Pointer: ${
-            program.programPointer
-          }, Config: ${JSON.stringify(program.programConfig)}`
-        )
-      })
+    try {
+      if (!verifyingKey) {
+        ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion))
+      }
+      const programs = await entropy.programs.get(verifyingKey)
+      if (programs.length === 0) {
+        print("You currently have no programs set.")
+      } else {
+        print("Your Programs:")
+        programs.forEach((program, index) => {
+          print(
+            `${index + 1}. Pointer: ${
+              program.program_pointer
+            }, Config: ${JSON.stringify(program.program_config)}`
+          )
+        })
+      }
+    } catch (error) {
+      console.error(error.message)
     }
     break
   }
+  case "Check if Program Exists": {
+    try {
+      const { programPointer } = await inquirer.prompt([{
+        type: "input",
+        name: "programPointer",
+        message: "Enter the program pointer you wish to check:",
+        validate: (input) => (input ? true : "Program pointer is required!"),
+      }])
+      debug('program pointer', programPointer);
+      
+      const program = await entropy.programs.dev.get(programPointer);
+      debug('Program from:', programPointer);
+      print(program);
+    } catch (error) {
+      console.error(error.message);
+    }
+    break;
+  }
 
   case "Add a Program to My List": {
-    const { programPointerToAdd, programConfigJson } = await inquirer.prompt([
-      {
-        type: "input",
-        name: "programPointerToAdd",
-        message: "Enter the program pointer you wish to add:",
-        validate: (input) => (input ? true : "Program pointer is required!"),
-      },
-      {
-        type: "editor",
-        name: "programConfigJson",
-        message:
-            "Enter the program configuration as a JSON string (this will open your default editor):",
-        validate: (input) => {
-          try {
-            JSON.parse(input)
-            return true
-          } catch (e) {
-            return "Please enter a valid JSON string for the configuration."
-          }
+    try {
+      const { programPointerToAdd, programConfigJson } = await inquirer.prompt([
+        {
+          type: "input",
+          name: "programPointerToAdd",
+          message: "Enter the program pointer you wish to add:",
+          validate: (input) => (input ? true : "Program pointer is required!"),
         },
-      },
-    ])
-
-    const encoder = new TextEncoder()
-    const byteArray = encoder.encode(programConfigJson)
-    const programConfigHex = util.u8aToHex(byteArray)
-
-    await entropy.programs.add(
-      {
-        programPointer: programPointerToAdd,
-        programConfig: programConfigHex,
-      },
-      entropy.account.sigRequestKey.wallet.address
-    )
-
-    console.log("Program added successfully.")
+        {
+          type: "editor",
+          name: "programConfigJson",
+          message:
+              "Enter the program configuration as a JSON string (this will open your default editor):",
+          validate: (input) => {
+            try {
+              JSON.parse(input)
+              return true
+            } catch (e) {
+              return "Please enter a valid JSON string for the configuration."
+            }
+          },
+        },
+      ])
+  
+      const encoder = new TextEncoder()
+      const byteArray = encoder.encode(programConfigJson)
+      const programConfigHex = util.u8aToHex(byteArray)
+  
+      await entropy.programs.add(
+        {
+          program_pointer: programPointerToAdd,
+          program_config: programConfigHex,
+        }
+      )
+  
+      print("Program added successfully.")
+    } catch (error) {
+      console.error(error.message)
+    }
     break
   }
   case "Remove a Program from My List": {
-    const { programPointerToRemove } = await inquirer.prompt([
-      {
-        type: "input",
-        name: "programPointerToRemove",
-        message: "Enter the program pointer you wish to remove:",
-      },
-    ])
-    await entropy.programs.remove(
-      programPointerToRemove,
-      entropy.account.sigRequestKey.wallet.address
-    )
-    console.log("Program removed successfully.")
+    try {
+      if (!verifyingKey) {
+        ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion))
+      }
+      const { programPointerToRemove } = await inquirer.prompt([
+        {
+          type: "input",
+          name: "programPointerToRemove",
+          message: "Enter the program pointer you wish to remove:",
+        },
+      ])
+      await entropy.programs.remove(
+        programPointerToRemove,
+        verifyingKey
+      )
+      print("Program removed successfully.")
+    } catch (error) {
+      console.error(error.message)
+      
+    }
     break
   }
   }

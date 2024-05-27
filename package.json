@@ -1,36 +1,43 @@
 {
-  "name": "devnet_cli_tool",
+  "name": "@entropyxyz/cli",
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "entropy": "yarn run start",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint:fix": "eslint . --ext .ts --fix",
-    "lint": "eslint . --ext .ts",
-    "tsc": "tsc",
-    "start": "ts-node index.ts"
+    "start": "ts-node src/index.ts",
+    "start:debug": "DEBUG=@entropyxyz/cli yarn start",
+    "entropy": "npm run start",
+    "test": "npm run type-check && npm run lint",
+    "lint": "eslint . --ext .ts --fix",
+    "type-check": "tsc --project tsconfig.json",
+    "prepare": "husky",
+    "postinstall": "husky",
+    "prepack": "pinst --disable",
+    "postpack": "pinst --enable",
+    "reload-local-sdk": "yarn unlink @entropyxyz/sdk && yarn link @entropyxyz/sdk"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/entropyxyz/devnet_cli_tool.git"
+    "url": "git+https://github.com/entropyxyz/cli.git"
   },
   "keywords": [],
   "author": "Jesse Abramowitz",
-  "license": "ISC",
+  "license": "AGPL-3.0-only",
   "bugs": {
-    "url": "https://github.com/entropyxyz/devnet_cli_tool/issues"
+    "url": "https://github.com/entropyxyz/cli/issues"
   },
-  "homepage": "https://github.com/entropyxyz/devnet_cli_tool#readme",
+  "homepage": "https://github.com/entropyxyz/cli#readme",
   "dependencies": {
-    "@entropyxyz/sdk": "^0.1.4",
+    "@entropyxyz/sdk": "^0.1.5-3",
     "@ethereumjs/util": "^9.0.2",
-    "@polkadot/util-crypto": "^12.5.1",
+    "@types/node": "^20.12.12",
     "alchemy-sdk": "^3.1.2",
-    "axios": "^0.27.2",
+    "ansi-colors": "^4.1.3",
+    "cli-progress": "^3.12.0",
+    "debug": "^4.3.4",
     "dotenv": "^16.4.1",
     "ethers": "^5.7.2",
     "inquirer": "8.0.0",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "typescript": "^4.8.4",
     "viem": "^2.7.8",
     "x25519": "^0.1.0"
@@ -38,10 +45,19 @@
   "devDependencies": {
     "@swc/core": "^1.4.0",
     "@swc/helpers": "^0.5.6",
+    "@types/cli-progress": "^3",
     "@types/inquirer": "^9.0.2",
+    "@types/node": "^20.12.12",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.56.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "pinst": "^3.0.0",
     "regenerator-runtime": "^0.14.1"
+  },
+  "packageManager": "yarn@1.22.1",
+  "lint-staged": {
+    "*.ts": "eslint --fix"
   }
 }
