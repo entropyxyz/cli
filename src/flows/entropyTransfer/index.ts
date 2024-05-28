@@ -15,6 +15,12 @@ const question = [
     name: "amount",
     message: "Input amount to transfer:",
     default: "1",
+    validate: (amount) => {
+      if (isNaN(amount) || parseInt(amount) <= 0) {
+        return 'Please enter a value greater than 0'
+      }
+      return true
+    }
   },
   {
     type: "input",
@@ -42,11 +48,15 @@ export async function entropyTransfer ({ accounts, selectedAccount: selectedAcco
     })
 
     const { amount, recipientAddress } = await inquirer.prompt(question)
+    console.log('amount', amount);
+    
 
     if (!entropy?.registrationManager?.signer?.pair) {
       throw new Error("Signer keypair is undefined or not properly initialized.")
     }
     const formattedAmount = formatAmountAsHex(amount)
+    console.log('formatted', formattedAmount, BigInt(formattedAmount));
+    
     const tx = await entropy.substrate.tx.balances.transferAllowDeath(
       recipientAddress,
       BigInt(formattedAmount),

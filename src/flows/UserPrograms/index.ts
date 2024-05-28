@@ -44,8 +44,13 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
   switch (actionChoice.action) {
   case "View My Programs": {
     try {
-      if (!verifyingKey) {
+      console.log(entropy.keyring.accounts.registration);
+      
+      if (!verifyingKey && entropy.keyring.accounts.registration.verifyingKeys.length) {
         ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion))
+      } else {
+        print('You currently have no verifying keys, please register this account to generate the keys')
+        break
       }
       const programs = await entropy.programs.get(verifyingKey)
       if (programs.length === 0) {

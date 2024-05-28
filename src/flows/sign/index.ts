@@ -23,8 +23,6 @@ export async function sign ({ accounts, endpoints, selectedAccount: selectedAcco
   const keyMaterial = selectedAccount?.data;
 
   const entropy = await initializeEntropy({ keyMaterial }, endpoint)
-  const msg = Buffer.from('Hello world: signature from entropy!').toString('hex')
-  debug('msg', msg);
   const { address } = entropy.keyring.accounts.registration
   debug("address:", address)
   if (address == undefined) {
@@ -32,7 +30,8 @@ export async function sign ({ accounts, endpoints, selectedAccount: selectedAcco
   }
   switch (actionChoice.action) {
   case 'Raw Sign': {
-      
+    const msg = Buffer.from('Hello world: new signature from entropy!').toString('hex')
+    debug('msg', msg);
     const signature = await entropy.sign({
       sigRequestHash: msg,
       hash: 'sha3',
@@ -42,6 +41,8 @@ export async function sign ({ accounts, endpoints, selectedAccount: selectedAcco
     return
   }
   case 'Sign With Adapter': {
+    const msg = Buffer.from('Hello world: new signature from entropy!').toString('hex')
+    debug('msg', msg);
     const msgParam = { msg }
     const signature =  await entropy.signWithAdaptersInOrder({
       msg: msgParam,
