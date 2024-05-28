@@ -62,7 +62,7 @@ export async function entropyTransfer ({ accounts, selectedAccount: selectedAcco
       BigInt(formattedAmount),
     )
 
-    await tx.signAndSend (entropy.registrationManager.signer.pair, ({ status }) => {
+    await tx.signAndSend (entropy.keyring.accounts.registration.pair, ({ status }) => {
       // initialize the bar - defining payload token "speed" with the default value "N/A"
       b1.start(300, 0, {
         speed: "N/A"

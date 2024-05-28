@@ -2,7 +2,6 @@ import inquirer from "inquirer"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { debug, getSelectedAccount, print } from "../../common/utils"
 
-// TODO: revisit this file, rename as signEthTransaction?
 export async function sign ({ accounts, endpoints, selectedAccount: selectedAccountAddress }, options) {
   const endpoint = endpoints[options.ENDPOINT]
   const actionChoice = await inquirer.prompt([

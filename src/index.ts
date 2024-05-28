@@ -40,8 +40,6 @@ const choices = {
   'Transfer': flows.entropyTransfer,
   'Deploy Program': flows.devPrograms,
   'User Programs': flows.userPrograms,
-  // 'Entropy Faucet': flows.entropyFaucet,
-  // 'Construct an Ethereum Tx': flows.ethTransaction,
 }
 
 // if (setOptions.DEV_MODE) Object.assign(choices, devChoices)
