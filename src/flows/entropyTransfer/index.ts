@@ -1,5 +1,5 @@
 import inquirer from "inquirer"
-import { print, formatAmountAsHex, getSelectedAccount } from "../../common/utils"
+import { print, getSelectedAccount } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 const cliProgress = require('cli-progress');
@@ -57,7 +57,7 @@ export async function entropyTransfer ({ accounts, selectedAccount: selectedAcco
     if (!entropy?.keyring?.accounts?.registration?.pair) {
       throw new Error("Signer keypair is undefined or not properly initialized.")
     }
-    const formattedAmount = formatAmountAsHex(amount)
+    const formattedAmount = BigInt(parseInt(amount) * 1e10)
     console.log('formatted', formattedAmount, BigInt(formattedAmount));
     
     const tx = await entropy.substrate.tx.balances.transferAllowDeath(
