@@ -7,6 +7,8 @@ import { EntropyAccountConfig } from "../types"
 
 const _debug = Debug('@entropyxyz/cli')
 
+export const TIME_THRESHOLD = 25
+
 export function stripHexPrefix (str: string): string {
   if (str.startsWith('0x')) return str.slice(2)
   return str
