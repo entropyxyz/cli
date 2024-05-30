@@ -32,16 +32,12 @@ const question = [
 export async function entropyTransfer ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
   const endpoint = endpoints[options.ENDPOINT]
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
-  console.log('selectedAccount', selectedAccount);
-  
+
   try {
     const entropy = await initializeEntropy(
       { keyMaterial: selectedAccount.data },
       endpoint
     )
-
-    console.log('keyring', entropy.keyring);
-    
 
     const b1 = new cliProgress.SingleBar({
       format: 'Transferring Funds |' + colors.cyan('{bar}') + '| {percentage}%',
@@ -53,7 +49,6 @@ export async function entropyTransfer ({ accounts, selectedAccount: selectedAcco
     const { amount, recipientAddress } = await inquirer.prompt(question)
     console.log('amount', amount);
     
-
     if (!entropy?.keyring?.accounts?.registration?.pair) {
       throw new Error("Signer keypair is undefined or not properly initialized.")
     }

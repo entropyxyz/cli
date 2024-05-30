@@ -10,7 +10,9 @@ export async function sign ({ accounts, endpoints, selectedAccount: selectedAcco
       name: "action",
       message: "What would you like to do?",
       choices: [
-        "Raw Sign",
+        // Removing the option to select Raw Sign until we fully release signing.
+        // We will need to update the flow to ask the user to input the auxilary data for the signature request
+        // "Raw Sign",
         "Sign With Adapter",
         "Exit to Main Menu",
       ],
@@ -28,17 +30,26 @@ export async function sign ({ accounts, endpoints, selectedAccount: selectedAcco
     throw new Error("address issue")
   }
   switch (actionChoice.action) {
-  case 'Raw Sign': {
-    const msg = Buffer.from('Hello world: new signature from entropy!').toString('hex')
-    debug('msg', msg);
-    const signature = await entropy.sign({
-      sigRequestHash: msg,
-      hash: 'sha3',
-    })
+  // case 'Raw Sign': {
+  //   const msg = Buffer.from('Hello world: new signature from entropy!').toString('hex')
+  //   debug('msg', msg);
+  //   const signature = await entropy.sign({
+  //     sigRequestHash: msg,
+  //     hash: 'sha3',
+  // naynay does not think he is doing this properly
+  //     auxiliaryData: [
+  //       {
+  //         public_key_type: 'sr25519',
+  //         public_key: Buffer.from(entropy.keyring.accounts.registration.pair.publicKey).toString('base64'),
+  //         signature: entropy.keyring.accounts.registration.pair.sign(msg),
+  //         context: 'substrate',
+  //       },
+  //     ],
+  //   })
 
-    print('signature:', signature)
-    return
-  }
+  //   print('signature:', signature)
+  //   return
+  // }
   case 'Sign With Adapter': {
     const msg = Buffer.from('Hello world: new signature from entropy!').toString('hex')
     debug('msg', msg);
