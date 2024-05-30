@@ -95,16 +95,25 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
     const storedKeyring = getKeyring(accountData.admin.address)
     if(!storedKeyring) {
       const keyring = new Keyring({ ...accountData, debug: true })
-      keyring.accounts.on('account-update', async (newAccoutData) => {
+      keyring.accounts.on('account-update', async (newAccountData) => {
+        console.log('new acct data', newAccountData);
+        
         const store = await config.get()
         store.accounts.map((account) => {
-          if (account.address === selectedAccount.address) {
-            let data = newAccoutData
-            if (typeof account.data === 'string' ) data = encrypt(newAccoutData, password)
-            account = {
+          console.log('acc', account.address);
+          console.log('sel', store.selectedAccount);
+          if (account.address === store.selectedAccount) {
+            console.log('account matches current selected acct');
+            console.log(account);
+            let data = newAccountData
+            if (typeof account.data === 'string' ) data = encrypt(newAccountData, password)
+            const newAccount = {
               ...account,
               data,
             }
+            console.log('newACCT', newAccount);
+            
+            return newAccount
           }
           return account
         })
