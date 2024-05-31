@@ -63,7 +63,7 @@ program.command('list')
 /* balance */
 program.command('balance')
   .description('Get the balance of an Entropy account. Output is a number')
-  .argument('address', 'Account address you whose balance you want to query')
+  .argument('address', 'Account address whose balance you want to query')
   .addOption(passwordOption())
   .addOption(endpointOption())
   .action(async (address, opts) => {
