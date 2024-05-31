@@ -99,7 +99,7 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
         console.log('new acct data', newAccountData);
         
         const store = await config.get()
-        store.accounts.map((account) => {
+        store.accounts = store.accounts.map((account) => {
           console.log('acc', account.address);
           console.log('sel', store.selectedAccount);
           if (account.address === store.selectedAccount) {
@@ -117,6 +117,7 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
           }
           return account
         })
+        
         // re save the entire config
         await config.set(store)
 
