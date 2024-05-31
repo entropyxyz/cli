@@ -1,5 +1,7 @@
 # Entropy CLI
 
+### Disclaimer: CLI currently in Alpha Stage, expect breaking changes
+
 A straight-forward command-line interface (CLI) tool to showcase how to perform basic Entropy actions.
 
 ## Build and run
