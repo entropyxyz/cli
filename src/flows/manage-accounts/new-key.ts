@@ -3,7 +3,7 @@ import { randomAsHex } from '@polkadot/util-crypto'
 // @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
 import { importQuestions } from './import-key'
-import * as passwordFlow from '../password'
+// import * as passwordFlow from '../password'
 import { debug, print } from '../../common/utils'
 
 export async function newKey ({ accounts }) {
@@ -22,34 +22,36 @@ export async function newKey ({ accounts }) {
       name: 'name',
       default: 'My Key'
     },
-    {
-      type: 'confirm',
-      name: 'newPassword',
-      message: 'Would you like to password protect this key?',
-      default: true,
-    }
+    // {
+    //   type: 'confirm',
+    //   name: 'newPassword',
+    //   message: 'Would you like to password protect this key?',
+    //   default: true,
+    // }
   ]
 
-  let answers = await inquirer.prompt(questions)
+  const answers = await inquirer.prompt(questions)
 
-  if (answers.newPassword) {
-    const passwordAnswer = await inquirer.prompt([
-      {
-        type: 'password',
-        name: 'password',
-        mask: '*',
-        message: 'Enter a password for the key:',
-      }
-    ])
-    answers = { ...answers, ...passwordAnswer }
-  }
+  // if (answers.newPassword) {
+  //   const passwordAnswer = await inquirer.prompt([
+  //     {
+  //       type: 'password',
+  //       name: 'password',
+  //       mask: '*',
+  //       message: 'Enter a password for the key:',
+  //     }
+  //   ])
+  //   answers = { ...answers, ...passwordAnswer }
+  // }
+  // The below conditional resolves as true, but the passwordFlow questions never get asked
+  // most likely due to the when field criteria not being satified on the individual questions
+  // if (passwordFlow.questions.length > 0) {
+  //   const passwordFlowAnswers = await inquirer.prompt(passwordFlow.questions)
+  //   answers = { ...answers, ...passwordFlowAnswers }
+  // }
 
-  if (passwordFlow.questions.length > 0) {
-    const passwordFlowAnswers = await inquirer.prompt(passwordFlow.questions)
-    answers = { ...answers, ...passwordFlowAnswers }
-  }
-
-  const { secret, name, path, password, importKey } = answers
+  // const { secret, name, path, password, importKey } = answers
+  const { secret, name, path, importKey } = answers
   // let isDebugMode = false
   let seed
   // never create debug keys only ever import them
@@ -68,12 +70,13 @@ export async function newKey ({ accounts }) {
   
   const data = fullAccount
   delete admin.pair
-  const encryptedData = password ? passwordFlow.encrypt(data, password) : data
+  // const encryptedData = password ? passwordFlow.encrypt(data, password) : data
 
   const newAccount = {
     name: name,
     address: admin.address,
-    data: encryptedData,
+    // TODO: replace with data: encryptedData once pasword input is added back
+    data,
   }
 
   print(`New account:\n{\n\tname: ${newAccount.name}\n\taddress: ${newAccount.address}\n}`)
