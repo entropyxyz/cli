@@ -16,8 +16,7 @@
     "src/**/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    "src/flows/ethTransaction/*.ts"
+    "node_modules"
   ],
   "ts-node": {
     "swc": true,

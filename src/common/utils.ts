@@ -6,6 +6,14 @@ import Debug from 'debug'
 import { EntropyAccountConfig } from "../types"
 
 const _debug = Debug('@entropyxyz/cli')
+
+export const TIME_THRESHOLD = 25
+
+export function stripHexPrefix (str: string): string {
+  if (str.startsWith('0x')) return str.slice(2)
+  return str
+}
+
 export function debug (...args: any[]) {
   _debug(...args.map(arg => {
     return typeof arg === 'object'
@@ -42,7 +50,7 @@ export function pubToAddress (publicKey: string): string {
 }
 
 export const formatAmountAsHex = (amount: number) => {
-  return `${PREFIX}${(amount * (1 * (10 ** DECIMALS))).toString(16)}`;
+  return `${PREFIX}${(amount * (1 * (10 ** DECIMALS))).toString(16)}`
 }
 
 export function getActiveOptions (options) {

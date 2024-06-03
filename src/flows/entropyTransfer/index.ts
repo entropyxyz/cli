@@ -1,5 +1,5 @@
 import inquirer from "inquirer"
-import { print, formatAmountAsHex, getSelectedAccount } from "../../common/utils"
+import { print, getSelectedAccount } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 const cliProgress = require('cli-progress');
@@ -15,12 +15,17 @@ const question = [
     name: "amount",
     message: "Input amount to transfer:",
     default: "1",
+    validate: (amount) => {
+      if (isNaN(amount) || parseInt(amount) <= 0) {
+        return 'Please enter a value greater than 0'
+      }
+      return true
+    }
   },
   {
     type: "input",
     name: "recipientAddress",
     message: "Input recipient's address:",
-    default: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
   },
 ]
 
@@ -42,17 +47,17 @@ export async function entropyTransfer ({ accounts, selectedAccount: selectedAcco
     })
 
     const { amount, recipientAddress } = await inquirer.prompt(question)
-
-    if (!entropy?.registrationManager?.signer?.pair) {
+    
+    if (!entropy?.keyring?.accounts?.registration?.pair) {
       throw new Error("Signer keypair is undefined or not properly initialized.")
     }
-    const formattedAmount = formatAmountAsHex(amount)
+    const formattedAmount = BigInt(parseInt(amount) * 1e10)
     const tx = await entropy.substrate.tx.balances.transferAllowDeath(
       recipientAddress,
       BigInt(formattedAmount),
     )
 
-    await tx.signAndSend (entropy.registrationManager.signer.pair, ({ status }) => {
+    await tx.signAndSend (entropy.keyring.accounts.registration.pair, ({ status }) => {
       // initialize the bar - defining payload token "speed" with the default value "N/A"
       b1.start(300, 0, {
         speed: "N/A"
