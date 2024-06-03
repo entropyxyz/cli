@@ -31,6 +31,7 @@
   "dependencies": {
     "@entropyxyz/sdk": "^0.1.5-5",
     "@ethereumjs/util": "^9.0.2",
+    "@polkadot/util": "^12.6.2",
     "@types/node": "^20.12.12",
     "alchemy-sdk": "^3.1.2",
     "ansi-colors": "^4.1.3",
