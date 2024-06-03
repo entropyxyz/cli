@@ -96,6 +96,8 @@ export async function sign ({ accounts, endpoints, selectedAccount: selectedAcco
     print('signature:', signature)
     return
   }
+  case 'Exit to Main Menu': 
+    return 'exit'
   default: 
     throw new Error('Unrecognizable action')
   }
