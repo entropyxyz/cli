@@ -19,7 +19,9 @@ const keyrings = {
 export function getKeyring (address) {
   if (!address && keyrings.default) return keyrings.default
   if (address && keyrings[address]) return keyrings[address]
-  return keyrings.default
+  // If there is no default keyring and no keyring matching the address
+  // provided, return undefined instead of keyring.default
+  return undefined
 }
 
 export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Promise<Entropy> => {
@@ -93,6 +95,7 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
 
     let selectedAccount
     const storedKeyring = getKeyring(accountData.admin.address)
+
     if(!storedKeyring) {
       const keyring = new Keyring({ ...accountData, debug: true })
       keyring.accounts.on('account-update', async (newAccountData) => {
@@ -139,7 +142,7 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
     if (((now - currentBlockTime) / 1000) >= TIME_THRESHOLD) {
       throw new Error('TimeError: This machine\'s time is out of sync with the network time')
     }
-
+    
     return entropy
   } catch (error) {
     console.error(error.message)

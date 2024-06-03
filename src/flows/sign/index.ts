@@ -51,7 +51,41 @@ export async function sign ({ accounts, endpoints, selectedAccount: selectedAcco
   //   return
   // }
   case 'Sign With Adapter': {
-    const msg = Buffer.from('Hello world: new signature from entropy!').toString('hex')
+    const messageQuestion = {
+      type: 'list',
+      name: 'messageAction',
+      message: 'Please choose how you would like to input your message to sign:',
+      choices: [
+        'Text Input',
+        // 'From a File',
+      ],
+    }
+    const userInputQuestion = {
+      type: "editor",
+      name: "userInput",
+      message: "Enter the message you wish to sign (this will open your default editor):",
+    }
+    // const pathToFileQuestion = {
+    //   type: 'input',
+    //   name: 'pathToFile',
+    //   message: 'Enter the path to the file you wish to sign:',
+    // }
+    const { messageAction } = await inquirer.prompt([messageQuestion])
+    let msg: string
+    switch (messageAction) {
+    case 'Text Input': {
+      const { userInput } = await inquirer.prompt([userInputQuestion])
+      msg = Buffer.from(userInput).toString('hex')
+      break
+    }
+    // case 'From a File': {
+    //   break
+    // }
+    default: {
+      console.error('Unsupported Action')
+      return
+    }
+    }
     debug('msg', msg);
     const msgParam = { msg }
     const signature =  await entropy.signWithAdaptersInOrder({
