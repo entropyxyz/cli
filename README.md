@@ -64,3 +64,7 @@ Follow these steps to build and install the CLI:
 <!--8. Give Zaps-->
 <!--9. New Entropy Wallet-->
 <!---->
+
+## Support
+
+Need help with something? [Head over to the Entropy Community repository for support or to raise a ticket →](https://github.com/entropyxyz/community#support)
