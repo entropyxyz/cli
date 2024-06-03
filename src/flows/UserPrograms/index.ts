@@ -44,8 +44,6 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
   switch (actionChoice.action) {
   case "View My Programs": {
     try {
-      console.log(entropy.keyring.accounts.registration);
-      
       if (!verifyingKey && entropy.keyring.accounts.registration.verifyingKeys.length) {
         ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion))
       } else {
