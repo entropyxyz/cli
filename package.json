@@ -13,7 +13,9 @@
     "postinstall": "husky",
     "prepack": "pinst --disable",
     "postpack": "pinst --enable",
-    "reload-local-sdk": "yarn unlink @entropyxyz/sdk && yarn link @entropyxyz/sdk"
+    "link:sdk": "yarn link @entropyxyz/sdk",
+    "unlink:sdk": "yarn unlink @entropyxyz/sdk",
+    "re-link:sdk": "yarn unlink:sdk && yarn link:sdk"
   },
   "bin": {
     "entropy": "./src/bin/entropy.sh"
@@ -33,7 +35,7 @@
   },
   "homepage": "https://github.com/entropyxyz/cli#readme",
   "dependencies": {
-    "@entropyxyz/sdk": "^0.1.5-3",
+    "@entropyxyz/sdk": "^0.1.5-5",
     "@ethereumjs/util": "^9.0.2",
     "@types/node": "^20.12.12",
     "alchemy-sdk": "^3.1.2",
@@ -46,7 +48,6 @@
     "inquirer": "8.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^4.8.4",
-    "viem": "^2.7.8",
     "x25519": "^0.1.0"
   },
   "devDependencies": {

@@ -3,8 +3,17 @@ import { hexToU8a, isHex } from "@polkadot/util"
 import { keccak256 } from "ethereum-cryptography/keccak"
 import { Buffer } from 'buffer'
 import Debug from 'debug'
+import { EntropyAccountConfig } from "../types"
 
 const _debug = Debug('@entropyxyz/cli')
+
+export const TIME_THRESHOLD = 25
+
+export function stripHexPrefix (str: string): string {
+  if (str.startsWith('0x')) return str.slice(2)
+  return str
+}
+
 export function debug (...args: any[]) {
   _debug(...args.map(arg => {
     return typeof arg === 'object'
@@ -40,9 +49,21 @@ export function pubToAddress (publicKey: string): string {
   return address
 }
 
-export const formatAmountAsHex = (amount) => {
-  if (isNaN(amount)) throw new Error(`${amount} cannot be coerced into a number`)
-  return `${PREFIX}${(amount * (1 * (10 ** DECIMALS))).toString(16)}`;
+export const formatAmountAsHex = (amount: number) => {
+  return `${PREFIX}${(amount * (10 ** DECIMALS)).toString(16)}`
+}
+
+export function getActiveOptions (options) {
+  return options.reduce((setOptions, option) => {
+    if (option.default) setOptions[option.key] = option.default
+    if (
+      process.argv.includes(option.long) ||
+      process.argv.includes(option.short)
+    ) {
+      setOptions[option.key] = true
+    }
+    return setOptions
+  }, {})
 }
 
 export function buf2hex (buffer: ArrayBuffer): string {
@@ -59,7 +80,7 @@ export function isValidSubstrateAddress (address: any) {
   }
 }
 
-export function accountChoices (accounts) {
+export function accountChoices (accounts: EntropyAccountConfig[]) {
   return accounts
     .map((account) => ({
       name: `${account.name} (${account.address})`,
@@ -67,7 +88,11 @@ export function accountChoices (accounts) {
     }))
 }
 
-export function accountChoicesWithOther (accounts) {
+export function accountChoicesWithOther (accounts: EntropyAccountConfig[]) {
   return accountChoices(accounts)
     .concat([{ name: "Other", value: null }])
+}
+
+export function getSelectedAccount (accounts: EntropyAccountConfig[], address: string) {
+  return accounts.find(account => account.address === address)
 }

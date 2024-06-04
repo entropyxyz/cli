@@ -1,3 +1,4 @@
+/*
 import inquirer from "inquirer"
 import { exec } from 'child_process'
 import util from 'util'
@@ -120,3 +121,4 @@ export async function ethTransaction ({ accounts, endpoints }, options): Promise
 
   await sendCurlCommand(entropySig, sepoliaEndpoint)
 }
+*/

@@ -1,5 +1,7 @@
 # Entropy CLI
 
+### Disclaimer: CLI currently in Alpha Stage, expect breaking changes
+
 A straight-forward command-line interface (CLI) tool to showcase how to perform basic Entropy actions.
 
 ## Install
@@ -81,3 +83,6 @@ This will register the `entropy` bin script globally so that you can run
 entropy --help
 ```
 
+## Support
+
+Need help with something? [Head over to the Entropy Community repository for support or to raise a ticket →](https://github.com/entropyxyz/community#support)
