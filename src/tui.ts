@@ -10,8 +10,7 @@ export default function tui (options: EntropyTuiOptions) {
   config.init()
 
   console.clear()
-  const icon = ['@', '#', '%', 'α', 'ε'].sort(() => Math.random() - 0.5).pop()
-  console.log(logo(icon)) // the Entropy logo
+  console.log(logo) // the Entropy logo
   debug(options)
 
   const choices = {
