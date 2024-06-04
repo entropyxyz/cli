@@ -6,7 +6,7 @@ import { debug, getSelectedAccount, print } from "../../common/utils"
 let msg: string
 let signingAttempts: number = 0
 
-async function signWithAdapter (entropy, signingData?: { msg: { msg: string }, order: string[] }) {
+async function signWithAdaptersInOrder (entropy, signingData?: { msg: { msg: string }, order: string[] }) {
   try {
     const messageQuestion = {
       type: 'list',
@@ -53,8 +53,10 @@ async function signWithAdapter (entropy, signingData?: { msg: { msg: string }, o
         order: ['deviceKeyProxy', 'noop'],
       }
     }
-    const signature =  await entropy.signWithAdaptersInOrder(signingData)
+    const signature = await entropy.signWithAdaptersInOrder(signingData)
     const signatureHexString = u8aToHex(signature)
+    // Resetting signingAttempts on success
+    signingAttempts = 0
     print('signature:', signatureHexString)
     print('verifying key:', entropy.signingManager.verifyingKey)
   } catch (error) {
@@ -69,13 +71,10 @@ async function signWithAdapter (entropy, signingData?: { msg: { msg: string }, o
           order: ['noop', 'deviceKeyProxy']
         }
         // Recursively retries signing with a reverse order in the subgroups list
-        await signWithAdapter(entropy, signingData)
-      } else {
-        console.error(message)
+        await signWithAdaptersInOrder(entropy, signingData)
       }
-    } else {
-      console.error(message)
     }
+    console.error(message)
     return
   }
 }
@@ -129,7 +128,7 @@ export async function sign ({ accounts, endpoints, selectedAccount: selectedAcco
   //   return
   // }
   case 'Sign With Adapter': {
-    await signWithAdapter(entropy)
+    await signWithAdaptersInOrder(entropy)
     return
   }
   case 'Exit to Main Menu': 
