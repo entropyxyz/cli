@@ -4,7 +4,7 @@ import Entropy, { wasmGlobalsReady } from "@entropyxyz/sdk"
 import Keyring from "@entropyxyz/sdk/keys"
 import inquirer from "inquirer"
 import { decrypt, encrypt } from "../flows/password"
-import { TIME_THRESHOLD, debug } from "../common/utils"
+import { debug } from "../common/utils"
 import * as config from "../config"
 
 // TODO: unused
@@ -135,22 +135,7 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
     if (!entropy?.keyring?.accounts?.registration?.seed) {
       throw new Error("Keys are undefined")
     }
-    // Decision was made to force our users to fix their machine before using the CLI in the case
-    // of the machine time and network time being out of sync
-    // get the time before query
-    const queryStartTime = Date.now()
-    const currentNetworkTime = parseInt((await entropy.substrate.query.timestamp.now()).toString())
-    const queryEndTime = Date.now()
 
-    // get the time diff of the query
-    const queryTime = queryEndTime - queryStartTime
-    const now = Date.now()
-    //  get the diff of the network time vs are time also buffer the time it took to query that data
-    const timeDiff = now - (currentNetworkTime + queryTime)
-    // the time difference between are time locally and the machine time should be less then 25 seconds
-    if ((timeDiff) >= TIME_THRESHOLD) {
-      throw new Error('TimeError: This machine\'s time is out of sync with the network time')
-    }
     
     return entropy
   } catch (error) {
