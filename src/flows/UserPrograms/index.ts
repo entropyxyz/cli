@@ -78,7 +78,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
       }])
       debug('program pointer', programPointer);
         
-      const program = await entropy.programs.dev.get(programPointer);
+      const program = await entropy.programs.dev.getProgramInfo(programPointer);
       debug('Program from:', programPointer);
       print(program);
     } catch (error) {
