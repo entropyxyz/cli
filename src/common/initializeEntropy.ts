@@ -17,6 +17,12 @@ const keyrings = {
   default: undefined // this is the "selected account" keyring
 }
 
+export function getKeyring (address) {
+  if (!address && keyrings.default) return keyrings.default
+  if (address && keyrings[address]) return keyrings[address]
+  return keyrings.default
+}
+
 interface InitializeEntropyOpts {
   keyMaterial: MaybeKeyMaterial,
   password?: string,
@@ -176,12 +182,6 @@ async function getAccountDataAndPassword (keyMaterial: MaybeKeyMaterial, passwor
     password: sucessfulPassword,
     accountData: decryptedData as EntropyAccountData
   }
-}
-
-export function getKeyring (address) {
-  if (!address && keyrings.default) return keyrings.default
-  if (address && keyrings[address]) return keyrings[address]
-  return keyrings.default
 }
 
 function isEntropyAccountData (maybeAccountData: any) {

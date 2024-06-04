@@ -22,12 +22,11 @@ export default function tui (options: EntropyTuiOptions) {
     'Transfer': flows.entropyTransfer,
     'Deploy Program': flows.devPrograms,
     'User Programs': flows.userPrograms,
-    // 'Entropy Faucet': flows.entropyFaucet,
     // 'Construct an Ethereum Tx': flows.ethTransaction,
   }
 
   const devChoices = {
-    'Entropy Faucet': flows.entropyFaucet,
+    // 'Entropy Faucet': flows.entropyFaucet,
   }
 
   if (options.dev) Object.assign(choices, devChoices)
@@ -68,17 +67,24 @@ export default function tui (options: EntropyTuiOptions) {
       process.exit()
     }
 
+    let returnToMain: boolean | undefined = undefined;
+
     if (!storedConfig.selectedAccount && answers.choice !== 'Manage Accounts') {
       console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
     } else {
       debug(answers)
       const newConfigUpdates = await choices[answers.choice](storedConfig, options)
-
-      if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
+      if (typeof newConfigUpdates === 'string' && newConfigUpdates === 'exit') {
+        returnToMain = true
+      } else {
+        await config.set({ ...storedConfig, ...newConfigUpdates })
+      }
       storedConfig = await config.get()
     }
 
-    const { returnToMain } = await inquirer.prompt([returnToMainMenu])
+    if (!returnToMain) {
+      ({ returnToMain } = await inquirer.prompt([returnToMainMenu]))
+    }
     if (returnToMain) main()
     else {
       print('Have a nice day')
