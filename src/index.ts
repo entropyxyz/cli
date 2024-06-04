@@ -80,17 +80,24 @@ export async function main () {
     process.exit()
   }
 
+  let returnToMain: boolean | undefined = undefined;
+
   if (!storedConfig.selectedAccount && answers.choice !== 'Manage Accounts') {
     console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
   } else {
     debug(answers)
     const newConfigUpdates = await choices[answers.choice](storedConfig, setOptions)
-
-    if (newConfigUpdates) await config.set({ ...storedConfig, ...newConfigUpdates })
+    if (typeof newConfigUpdates === 'string' && newConfigUpdates === 'exit') {
+      returnToMain = true
+    } else {
+      await config.set({ ...storedConfig, ...newConfigUpdates })
+    }
     storedConfig = await config.get()
   }
 
-  const { returnToMain } = await inquirer.prompt([returnToMainMenu])
+  if (!returnToMain) {
+    ({ returnToMain } = await inquirer.prompt([returnToMainMenu]))
+  }
   if (returnToMain) main()
   else {
     print('Have a nice day')

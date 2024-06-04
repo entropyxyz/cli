@@ -77,7 +77,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
         validate: (input) => (input ? true : "Program pointer is required!"),
       }])
       debug('program pointer', programPointer);
-      
+        
       const program = await entropy.programs.dev.get(programPointer);
       debug('Program from:', programPointer);
       print(program);
@@ -100,7 +100,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
           type: "editor",
           name: "programConfigJson",
           message:
-              "Enter the program configuration as a JSON string (this will open your default editor):",
+                "Enter the program configuration as a JSON string (this will open your default editor):",
           validate: (input) => {
             try {
               JSON.parse(input)
@@ -111,18 +111,18 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
           },
         },
       ])
-  
+    
       const encoder = new TextEncoder()
       const byteArray = encoder.encode(programConfigJson)
       const programConfigHex = util.u8aToHex(byteArray)
-  
+    
       await entropy.programs.add(
         {
           program_pointer: programPointerToAdd,
           program_config: programConfigHex,
         }
       )
-  
+    
       print("Program added successfully.")
     } catch (error) {
       console.error(error.message)
@@ -148,9 +148,11 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
       print("Program removed successfully.")
     } catch (error) {
       console.error(error.message)
-      
+        
     }
     break
   }
+  case 'Exit to Main Menu':
+    return 'exit'
   }
 }
