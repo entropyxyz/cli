@@ -89,9 +89,9 @@ async function getOwnedPrograms (entropy: Entropy, account: any) {
 
   try {
     const fetchedPrograms = await entropy.programs.dev.get(userAddress)
-    if (fetchedPrograms.toHuman().length) {
+    if (fetchedPrograms.length) {
       print("Retrieved program pointers:")
-      print(fetchedPrograms.toHuman())
+      print(fetchedPrograms)
     } else {
       print("There are no programs to show")
     }
