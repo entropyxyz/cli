@@ -14,6 +14,7 @@ async function signWithAdaptersInOrder (entropy, signingData?: { msg: { msg: str
       message: 'Please choose how you would like to input your message to sign:',
       choices: [
         'Text Input',
+        /* DO NOT DELETE THIS */
         // 'From a File',
       ],
     }
@@ -22,6 +23,7 @@ async function signWithAdaptersInOrder (entropy, signingData?: { msg: { msg: str
       name: "userInput",
       message: "Enter the message you wish to sign (this will open your default editor):",
     }
+    /* DO NOT DELETE THIS */
     // const pathToFileQuestion = {
     //   type: 'input',
     //   name: 'pathToFile',
@@ -36,6 +38,7 @@ async function signWithAdaptersInOrder (entropy, signingData?: { msg: { msg: str
         msg = Buffer.from(userInput).toString('hex')
         break
       }
+      /* DO NOT DELETE THIS */
       // case 'From a File': {
       //   break
       // }
