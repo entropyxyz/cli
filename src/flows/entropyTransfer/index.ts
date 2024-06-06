@@ -29,8 +29,8 @@ const question = [
   },
 ]
 
-export async function entropyTransfer ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
-  const endpoint = endpoints[options.ENDPOINT]
+export async function entropyTransfer ({ accounts, selectedAccount: selectedAccountAddress }, options) {
+  const { endpoint } = options
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
 
   try {

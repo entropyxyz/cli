@@ -60,8 +60,8 @@ async function sendCurlCommand (entropySig: string, sepoliaEndpoint: string) {
   }
 }
 
-export async function ethTransaction ({ accounts, endpoints }, options): Promise<void> {
-  const endpoint = endpoints[options.ENDPOINT]
+export async function ethTransaction ({ accounts }, options): Promise<void> {
+  const { endpoint } = options
 
   const accountQuestion = {
     type: "list",

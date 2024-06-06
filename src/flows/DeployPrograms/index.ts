@@ -5,8 +5,8 @@ import { readFileSync } from "fs"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { debug, print, getSelectedAccount } from "../../common/utils"
 
-export async function devPrograms ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
-  const endpoint = endpoints[options.ENDPOINT]
+export async function devPrograms ({ accounts, selectedAccount: selectedAccountAddress }, options) {
+  const { endpoint } = options
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
 
   const choices = {

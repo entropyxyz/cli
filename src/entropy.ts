@@ -1,6 +1,7 @@
 /* NOTE: calling this file entropy.ts helps commander parse process.argv */
 import { Command, Option } from 'commander'
 import launchTui from './tui'
+import * as config from './config'
 import { EntropyTuiOptions } from './types'
 
 import { cliGetBalance } from './flows/balance/cli'
@@ -21,9 +22,21 @@ const endpointOption = () => new Option(
     // TODO: enable this!
   ].join(' ')
 )
-  //
-  .default('ws://127.0.0.1:9944')
   .env('ENDPOINT')
+  .argParser(aliasOrEndpoint => {
+    // NOTE: this cannot be async (T_T)
+    /* see if it's a raw endpoint */
+    if (aliasOrEndpoint.match(/^wss?:\/\//)) return aliasOrEndpoint
+
+    /* look up endpoint-alias */
+    const storedConfig = config.getSync()
+    const endpoint = storedConfig.endpoints[aliasOrEndpoint]
+    if (!endpoint) throw Error('unknown endpoint alias: ' + aliasOrEndpoint)
+
+    return endpoint
+  })
+  .default('ws://testnet.entropy.xyz:9944/')
+  // NOTE: argParser is only run IF an option is provided, so this cannot be 'test-net'
 
 const passwordOption = (description?: string) => new Option(
   '-p, --password <password>',
