@@ -2,17 +2,18 @@ import { debug } from '../../common/utils'
 // import { mnemonicValidate, mnemonicToMiniSecret } from '@polkadot/util-crypto'
 
 export const importQuestions = [
-  {
-    type: 'list',
-    name: 'secretType',
-    message: 'select secret type:',
-    choices: ['seed'],
-    when: ({ importKey }) => importKey
-  },
+  // {
+  //   type: 'list',
+  //   name: 'secretType',
+  //   message: 'select secret type:',
+  //   choices: ['seed'],
+  //   when: ({ importKey }) => importKey
+  // },
   {
     type: 'input',
     name: 'secret',
-    message: ({ secretType }) => `${secretType}:`,
+    // message: ({ secretType }) => `${secretType}:`,
+    message: 'Enter seed:',
     validate: (secret) => {
     // validate: (secret, { secretType }) => {
       debug('\nsecret:', secret, typeof secret)

@@ -4,7 +4,7 @@ import Entropy, { wasmGlobalsReady } from "@entropyxyz/sdk"
 import Keyring from "@entropyxyz/sdk/keys"
 import inquirer from "inquirer"
 import { decrypt, encrypt } from "../flows/password"
-import { TIME_THRESHOLD, debug } from "../common/utils"
+import { debug } from "../common/utils"
 import * as config from "../config"
 import { EntropyAccountData } from "../types"
 
@@ -104,13 +104,7 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint }: Ini
     if (!entropy?.keyring?.accounts?.registration?.seed) {
       throw new Error("Keys are undefined")
     }
-    // Decision was made to force our users to fix their machine before using the CLI in the case
-    // of the machine time and network time being out of sync
-    const currentBlockTime = parseInt((await entropy.substrate.query.timestamp.now()).toString())
-    const now = Date.now()
-    if (((now - currentBlockTime) / 1000) >= TIME_THRESHOLD) {
-      throw new Error('TimeError: This machine\'s time is out of sync with the network time')
-    }
+
     
     return entropy
   } catch (error) {

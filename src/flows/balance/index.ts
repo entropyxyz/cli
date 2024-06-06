@@ -14,5 +14,5 @@ export async function checkBalance ({ accounts, selectedAccount: selectedAccount
   // @ts-ignore
   const accountInfo = (await entropy.substrate.query.system.account(accountAddress)) as any
   const freeBalance = hexToBigInt(accountInfo.data.free)
-  print(`Address ${accountAddress} has a balance of: ${freeBalance.toString()} bits`)
+  print(`Address ${accountAddress} has a balance of: ${freeBalance.toString()} BITS`)
 }
