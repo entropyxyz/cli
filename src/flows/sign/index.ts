@@ -3,10 +3,10 @@ import { u8aToHex } from '@polkadot/util'
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { debug, getSelectedAccount, print } from "../../common/utils"
 
-let msg: string
-let signingAttempts: number = 0
+let userInput: string
 
-async function signWithAdaptersInOrder (entropy, signingData?: { msg: { msg: string }, order: string[] }) {
+async function signWithAdaptersInOrder (entropy, signingData: { msg?: { msg: string }, order?: string[] } = {}, signingAttempts = 0) {
+  let msg = signingData?.msg?.msg
   try {
     const messageQuestion = {
       type: 'list',
@@ -34,7 +34,7 @@ async function signWithAdaptersInOrder (entropy, signingData?: { msg: { msg: str
       ({ messageAction } = await inquirer.prompt([messageQuestion]))
       switch (messageAction) {
       case 'Text Input': {
-        const { userInput } = await inquirer.prompt([userInputQuestion])
+        ({ userInput } = await inquirer.prompt([userInputQuestion]))
         msg = Buffer.from(userInput).toString('hex')
         break
       }
@@ -48,34 +48,30 @@ async function signWithAdaptersInOrder (entropy, signingData?: { msg: { msg: str
       }
       }
     }
-    debug('msg', msg);
+
     const msgParam = { msg }
-    if (!signingData) {
+    if (!signingData?.msg?.msg) {
       signingData = {
         msg: msgParam,
         order: ['deviceKeyProxy', 'noop'],
       }
     }
+    print('msg to be signed:', `"${userInput}"`)
     const signature = await entropy.signWithAdaptersInOrder(signingData)
     const signatureHexString = u8aToHex(signature)
-    // Resetting signingAttempts on success
-    signingAttempts = 0
     print('signature:', signatureHexString)
     print('verifying key:', entropy.signingManager.verifyingKey)
   } catch (error) {
-    signingAttempts++
     const { message } = error
     // See https://github.com/entropyxyz/sdk/issues/367 for reasoning behind adding this retry mechanism
-    if (message.includes('Invalid Signer') || message.includes('Invalid Signer in Signing group')) {
-      if (signingAttempts <= 1) {
-        const msgParam = { msg }
-        signingData = {
-          msg: msgParam,
-          order: ['noop', 'deviceKeyProxy']
-        }
-        // Recursively retries signing with a reverse order in the subgroups list
-        await signWithAdaptersInOrder(entropy, signingData)
+    if ((message.includes('Invalid Signer') || message.includes('Invalid Signer in Signing group')) && signingAttempts <= 1) {
+      const msgParam = { msg }
+      signingData = {
+        msg: msgParam,
+        order: ['noop', 'deviceKeyProxy']
       }
+      // Recursively retries signing with a reverse order in the subgroups list
+      await signWithAdaptersInOrder(entropy, signingData, signingAttempts + 1)
     }
     console.error(message)
     return
