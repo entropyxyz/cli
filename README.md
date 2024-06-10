@@ -1,8 +1,8 @@
 # Entropy CLI
 
-### Disclaimer: CLI currently in Alpha Stage, expect breaking changes
-
 A straight-forward command-line interface (CLI) tool to showcase how to perform basic Entropy actions.
+
+> This tool is early development. As such, a lot of things do not work. Feel free to play around with it and report any issues at [github.com/entropyxyz/cli](https://github.com/entropyxyz/sdk).
 
 ## Build and run
 
