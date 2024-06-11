@@ -8,13 +8,14 @@ A straight-forward command-line interface (CLI) tool to showcase how to perform 
 
 Follow these steps to build and install the CLI:
 
-1. Ensure you have Yarn installed:
+1. Ensure you have the correct Yarn and Node version installed:
 
     ```shell
-    yarn --version
+    yarn --version && node --version
     
     # Output example:
     # 1.22.22
+    # v20.9.0 or above
     ```
 
 1. Grab this repository and move into the new directory:
