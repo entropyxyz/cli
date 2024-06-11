@@ -4,7 +4,7 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "start": "ts-node src/entropy.ts",
+    "start": "ts-node src/cli.ts",
     "start:debug": "DEBUG=@entropyxyz/cli yarn start",
     "build": "tsup",
     "test": "npm run type-check && npm run lint",
@@ -22,7 +22,7 @@
     "dist"
   ],
   "bin": {
-    "entropy": "./dist/index.js"
+    "entropy": "./dist/cli.js"
   },
   "repository": {
     "type": "git",

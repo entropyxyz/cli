@@ -14,34 +14,36 @@ import { cliSign } from './flows/sign/cli'
 
 const program = new Command()
 
-const endpointOption = () => new Option(
-  '-e, --endpoint <endpoint>',
-  [
-    'Runs entropy with the given endpoint and ignores network endpoints in config.',
-    // 'Can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`.'
-    // TODO: enable this!
-  ].join(' ')
-)
-  .env('ENDPOINT')
-  .argParser(aliasOrEndpoint => {
-    // NOTE: this cannot be async (T_T)
-    /* see if it's a raw endpoint */
-    if (aliasOrEndpoint.match(/^wss?:\/\//)) return aliasOrEndpoint
+function endpointOption (){
+  return new Option(
+    '-e, --endpoint <endpoint>',
+    [
+      'Runs entropy with the given endpoint and ignores network endpoints in config.',
+      'Can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`.'
+    ].join(' ')
+  )
+    .env('ENDPOINT')
+    .argParser(aliasOrEndpoint => {
+      /* see if it's a raw endpoint */
+      if (aliasOrEndpoint.match(/^wss?:\/\//)) return aliasOrEndpoint
 
-    /* look up endpoint-alias */
-    const storedConfig = config.getSync()
-    const endpoint = storedConfig.endpoints[aliasOrEndpoint]
-    if (!endpoint) throw Error('unknown endpoint alias: ' + aliasOrEndpoint)
+      /* look up endpoint-alias */
+      const storedConfig = config.getSync()
+      const endpoint = storedConfig.endpoints[aliasOrEndpoint]
+      if (!endpoint) throw Error('unknown endpoint alias: ' + aliasOrEndpoint)
 
-    return endpoint
-  })
-  .default('ws://testnet.entropy.xyz:9944/')
-  // NOTE: argParser is only run IF an option is provided, so this cannot be 'test-net'
+      return endpoint
+    })
+    .default('ws://testnet.entropy.xyz:9944/')
+    // NOTE: argParser is only run IF an option is provided, so this cannot be 'test-net'
+}
 
-const passwordOption = (description?: string) => new Option(
-  '-p, --password <password>',
-  description || 'Password for the account'
-)
+function passwordOption (description?: string) {
+  return new Option(
+    '-p, --password <password>',
+    description || 'Password for the account'
+  )
+}
 
 /* no command */
 program
