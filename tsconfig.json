@@ -17,7 +17,6 @@
     "dist",
     "build",
     "examples",
-    "substrate-generated-types"
   ],
   "ts-node": {
     "experimentalSpecifierResolution": "node"
