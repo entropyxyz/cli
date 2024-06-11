@@ -2,10 +2,11 @@
   "name": "@entropyxyz/cli",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "ts-node src/cli.ts",
     "start:debug": "DEBUG=@entropyxyz/cli yarn start",
-    "entropy": "npm run start",
+    "build": "tsup",
     "test": "npm run type-check && npm run lint",
     "lint": "eslint . --ext .ts --fix",
     "type-check": "tsc --project tsconfig.json",
@@ -17,11 +18,20 @@
     "unlink:sdk": "yarn unlink @entropyxyz/sdk",
     "re-link:sdk": "yarn unlink:sdk && yarn link:sdk"
   },
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "entropy": "./dist/cli.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/entropyxyz/cli.git"
   },
-  "keywords": [],
+  "keywords": [
+    "entropy",
+    "entropyxyz"
+  ],
   "author": "Jesse Abramowitz",
   "license": "AGPL-3.0-only",
   "bugs": {
@@ -35,13 +45,11 @@
     "alchemy-sdk": "^3.1.2",
     "ansi-colors": "^4.1.3",
     "cli-progress": "^3.12.0",
+    "commander": "^12.0.0",
     "debug": "^4.3.4",
     "dotenv": "^16.4.1",
     "ethers": "^5.7.2",
     "inquirer": "8.0.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^4.8.4",
-    "viem": "^2.7.8",
     "x25519": "^0.1.0"
   },
   "devDependencies": {
@@ -56,7 +64,10 @@
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "pinst": "^3.0.0",
-    "regenerator-runtime": "^0.14.1"
+    "regenerator-runtime": "^0.14.1",
+    "tsup": "^6.7.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^4.8.4"
   },
   "packageManager": "yarn@1.22.1",
   "lint-staged": {

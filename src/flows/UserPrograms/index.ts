@@ -5,8 +5,8 @@ import { debug, getSelectedAccount, print } from "../../common/utils"
 
 let verifyingKey: string;
 
-export async function userPrograms ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
-  const endpoint = endpoints[options.ENDPOINT]
+export async function userPrograms ({ accounts, selectedAccount: selectedAccountAddress }, options) {
+  const { endpoint } = options
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
 
   const actionChoice = await inquirer.prompt([

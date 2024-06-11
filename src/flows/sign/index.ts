@@ -2,8 +2,8 @@ import inquirer from "inquirer"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { debug, getSelectedAccount, print } from "../../common/utils"
 
-export async function sign ({ accounts, endpoints, selectedAccount: selectedAccountAddress }, options) {
-  const endpoint = endpoints[options.ENDPOINT]
+export async function sign ({ accounts, selectedAccount: selectedAccountAddress }, options) {
+  const { endpoint } = options
   const actionChoice = await inquirer.prompt([
     {
       type: "list",
