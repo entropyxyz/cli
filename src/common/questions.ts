@@ -1,6 +1,4 @@
 import inquirer from "inquirer"
-require('dotenv').config()
-
 
 const questionSeed = [
   {

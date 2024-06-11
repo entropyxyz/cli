@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 /* NOTE: calling this file entropy.ts helps commander parse process.argv */
 import { Command, Option } from 'commander'
 import launchTui from './tui'
@@ -9,8 +11,6 @@ import { cliListAccounts } from './flows/manage-accounts/cli'
 import { cliEntropyTransfer } from './flows/entropyTransfer/cli'
 import { cliSign } from './flows/sign/cli'
 // import { debug } from './common/utils'
-
-const { version } = require('../package.json')
 
 const program = new Command()
 
@@ -47,7 +47,6 @@ const passwordOption = (description?: string) => new Option(
 program
   .name('entropy')
   .description('CLI interface for interacting with entropy.xyz. Running without commands starts an interactive ui')
-  .version(version)
   .addOption(endpointOption())
   .addOption(
     new Option(

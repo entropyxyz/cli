@@ -2,10 +2,11 @@
   "name": "@entropyxyz/cli",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "scripts": {
     "start": "ts-node src/entropy.ts",
     "start:debug": "DEBUG=@entropyxyz/cli yarn start",
-    "entropy": "npm run start",
+    "build": "tsup",
     "test": "npm run type-check && npm run lint",
     "lint": "eslint . --ext .ts --fix",
     "type-check": "tsc --project tsconfig.json",
@@ -17,8 +18,11 @@
     "unlink:sdk": "yarn unlink @entropyxyz/sdk",
     "re-link:sdk": "yarn unlink:sdk && yarn link:sdk"
   },
+  "files": [
+    "dist"
+  ],
   "bin": {
-    "entropy": "./src/bin/entropy.sh"
+    "entropy": "./dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -46,8 +50,6 @@
     "dotenv": "^16.4.1",
     "ethers": "^5.7.2",
     "inquirer": "8.0.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^4.8.4",
     "x25519": "^0.1.0"
   },
   "devDependencies": {
@@ -62,7 +64,10 @@
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "pinst": "^3.0.0",
-    "regenerator-runtime": "^0.14.1"
+    "regenerator-runtime": "^0.14.1",
+    "tsup": "^6.7.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^4.8.4"
   },
   "packageManager": "yarn@1.22.1",
   "lint-staged": {

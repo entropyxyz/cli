@@ -4,8 +4,8 @@ export async function cliListAccounts () {
   const storedConfig = await config.get()
 
   return storedConfig.accounts
-  // TODO: check what sort of data is safe to export:
-  // - ✓ name
-  // - ✓ address
-  // - ? data (keyMaterial)
+    .map(account => ({
+      name: account.name,
+      address: account.address
+    }))
 }

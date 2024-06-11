@@ -1,13 +1,9 @@
 import inquirer from "inquirer"
+import cliProgress from 'cli-progress'
+import colors from 'ansi-colors'
+
 import { print, getSelectedAccount } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
-
-const cliProgress = require('cli-progress');
-
-// note: you have to install this dependency manually since it's not required by cli-progress
-const colors = require('ansi-colors');
-
-// create new progress bar
 
 const question = [
   {
