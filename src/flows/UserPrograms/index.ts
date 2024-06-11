@@ -77,9 +77,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
         validate: (input) => (input ? true : "Program pointer is required!"),
       }])
       debug('program pointer', programPointer);
-
       const program = await entropy.programs.dev.get(programPointer);
-      debug('Program from:', programPointer);
       print(program);
     } catch (error) {
       console.error(error.message);

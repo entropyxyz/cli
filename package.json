@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "ts-node src/entropy.ts",
     "start:debug": "DEBUG=@entropyxyz/cli yarn start",
     "entropy": "npm run start",
     "test": "npm run type-check && npm run lint",
@@ -35,7 +35,7 @@
   },
   "homepage": "https://github.com/entropyxyz/cli#readme",
   "dependencies": {
-    "@entropyxyz/sdk": "^0.1.5-5",
+    "@entropyxyz/sdk": "^0.2.1",
     "@ethereumjs/util": "^9.0.2",
     "@types/node": "^20.12.12",
     "alchemy-sdk": "^3.1.2",

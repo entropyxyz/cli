@@ -11,8 +11,8 @@ export async function devPrograms ({ accounts, selectedAccount: selectedAccountA
 
   const choices = {
     "Deploy": deployProgram,
-    "Get Program Pointers": getProgramPointers,
-    "Exit": () => print("Exiting")
+    "Get Owned Programs": getOwnedPrograms,
+    "Exit to Main Menu": () => 'exit'
   }
 
   const actionChoice = await inquirer.prompt([
@@ -82,14 +82,19 @@ async function deployProgram (entropy: Entropy, account: any) {
   print("Deploying from account:", account.address)
 }
 
-async function getProgramPointers (entropy: Entropy, account: any) {
+async function getOwnedPrograms (entropy: Entropy, account: any) {
   const userAddress = account.address
   debug('Account address:',userAddress)
   if (!userAddress) return
 
   try {
-    const fetchedProgram = await entropy.programs.get(userAddress)
-    print("Retrieved program pointers:", fetchedProgram)
+    const fetchedPrograms = await entropy.programs.dev.get(userAddress)
+    if (fetchedPrograms.length) {
+      print("Retrieved program pointers:")
+      print(fetchedPrograms)
+    } else {
+      print("There are no programs to show")
+    }
   } catch (error) {
     console.error("Failed to retrieve program pointers:", error)
   }
