@@ -7,8 +7,6 @@
     "typeRoots": [
       "node_modules/@types",
       "@types/",
-      "@polkadot/types/*",
-      "substrate-generated-types/interfaces"
     ],
     "tsBuildInfoFile": ".tsbuildinfo",
     "moduleResolution": "node",
