@@ -1,5 +1,7 @@
 import * as migration00 from './00'
 
-export const migrations = [
+const migrations = [
   migration00
 ]
+
+export default migrations
