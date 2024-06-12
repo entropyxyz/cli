@@ -1,9 +1,89 @@
 import inquirer from "inquirer"
+import { u8aToHex } from '@polkadot/util'
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { debug, getSelectedAccount, print } from "../../common/utils"
 
-export async function sign ({ accounts, selectedAccount: selectedAccountAddress }, options) {
-  const { endpoint } = options
+function utf8ToHex (str: string) {
+  return Buffer.from(str).toString('hex')
+}
+function hexToUtf8 (str: string) {
+  return Buffer.from(str, 'hex').toString('utf8')
+}
+
+async function signWithAdaptersInOrder (entropy, signingData: { msg?: { msg: string }, order?: string[] } = {}, signingAttempts = 0) {
+  let msg = signingData?.msg?.msg
+  try {
+    const messageQuestion = {
+      type: 'list',
+      name: 'messageAction',
+      message: 'Please choose how you would like to input your message to sign:',
+      choices: [
+        'Text Input',
+        /* DO NOT DELETE THIS */
+        // 'From a File',
+      ],
+    }
+    const userInputQuestion = {
+      type: "editor",
+      name: "userInput",
+      message: "Enter the message you wish to sign (this will open your default editor):",
+    }
+    /* DO NOT DELETE THIS */
+    // const pathToFileQuestion = {
+    //   type: 'input',
+    //   name: 'pathToFile',
+    //   message: 'Enter the path to the file you wish to sign:',
+    // }
+    if (!msg) {
+      const { messageAction } = await inquirer.prompt([messageQuestion])
+      switch (messageAction) {
+      case 'Text Input': {
+        const { userInput } = await inquirer.prompt([userInputQuestion])
+        msg = utf8ToHex(userInput)
+        break
+      }
+      /* DO NOT DELETE THIS */
+      // case 'From a File': {
+      //   break
+      // }
+      default: {
+        console.error('Unsupported Action')
+        return
+      }
+      }
+    }
+
+    const msgParam = { msg }
+    if (!signingData?.msg?.msg) {
+      signingData = {
+        msg: msgParam,
+        order: ['deviceKeyProxy', 'noop'],
+      }
+    }
+    print('msg to be signed:', `"${hexToUtf8(msg)}"`)
+    const signature = await entropy.signWithAdaptersInOrder(signingData)
+    const signatureHexString = u8aToHex(signature)
+    print('signature:', signatureHexString)
+    print('verifying key:', entropy.signingManager.verifyingKey)
+  } catch (error) {
+    const { message } = error
+    // See https://github.com/entropyxyz/sdk/issues/367 for reasoning behind adding this retry mechanism
+    if ((message.includes('Invalid Signer') || message.includes('Invalid Signer in Signing group')) && signingAttempts <= 1) {
+      const msgParam = { msg }
+      signingData = {
+        msg: msgParam,
+        order: ['noop', 'deviceKeyProxy']
+      }
+      // Recursively retries signing with a reverse order in the subgroups list
+      await signWithAdaptersInOrder(entropy, signingData, signingAttempts + 1)
+    }
+    console.error(message)
+    return
+  }
+}
+
+export async function sign ({ accounts, endpoints, selectedAccount: selectedAccountAddress }, options) {
+  const endpoint = endpoints[options.ENDPOINT]
   const actionChoice = await inquirer.prompt([
     {
       type: "list",
@@ -51,49 +131,7 @@ export async function sign ({ accounts, selectedAccount: selectedAccountAddress 
   //   return
   // }
   case 'Sign With Adapter': {
-    const messageQuestion = {
-      type: 'list',
-      name: 'messageAction',
-      message: 'Please choose how you would like to input your message to sign:',
-      choices: [
-        'Text Input',
-        // 'From a File',
-      ],
-    }
-    const userInputQuestion = {
-      type: "editor",
-      name: "userInput",
-      message: "Enter the message you wish to sign (this will open your default editor):",
-    }
-    // const pathToFileQuestion = {
-    //   type: 'input',
-    //   name: 'pathToFile',
-    //   message: 'Enter the path to the file you wish to sign:',
-    // }
-    const { messageAction } = await inquirer.prompt([messageQuestion])
-    let msg: string
-    switch (messageAction) {
-    case 'Text Input': {
-      const { userInput } = await inquirer.prompt([userInputQuestion])
-      msg = Buffer.from(userInput).toString('hex')
-      break
-    }
-    // case 'From a File': {
-    //   break
-    // }
-    default: {
-      console.error('Unsupported Action')
-      return
-    }
-    }
-    debug('msg', msg);
-    const msgParam = { msg }
-    const signature =  await entropy.signWithAdaptersInOrder({
-      msg: msgParam,
-      order: ['deviceKeyProxy', 'noop'],
-    })
-
-    print('signature:', signature)
+    await signWithAdaptersInOrder(entropy)
     return
   }
   case 'Exit to Main Menu': 
