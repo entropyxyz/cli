@@ -1,29 +1,20 @@
-import { statSync, mkdirSync } from 'node:fs'
+import { statSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
+import envPaths from 'env-paths'
+import { mkdirp } from 'mkdirp'
+import path from 'path'
+
 import { migrations } from './migrations'
+import { debug } from '../common/utils'
 
-const configFile = '.entropy-cli.config'
-const configDir  = process.env.XDG_CONFIG_HOME
-  ? `${process.env.XDG_CONFIG_HOME}/entropy-cryptography` : process.env.HOME
-const configPath = `${configDir}/${configFile}`
+const paths = envPaths('entropyxyz', { suffix: '' })
 
-try {
-  mkdirSync(configDir, {mode: '0700'})
-} catch (e) {
-  switch (e.code) {
-  // These "errors" are actually good things.
-  case 'EEXIST': {
-    // Do nothing. We good.
-    break;
-  }
-  default: {
-    // Something bad happened.
-    console.error(e);
-    throw new Error(`Error creating configuration directory ${configDir}`)
-    break;
-  }
-  }
-}
+const configDir  = paths.config
+const configFile = 'entropy-cli.json'
+const configPath = path.join(configDir, configFile)
+debug('configPath', configPath)
+
+mkdirp.sync(configDir)
 
 export function migrateData (data = {}) {
   return migrations.reduce((migratedData, { migrate }) => {
