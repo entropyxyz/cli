@@ -17,5 +17,5 @@ export const logo =
                                                       @@@@@@            TEST
                                                       @@@@@@            *NET
                                                       @@@@@@     ENTROPY-CLI
-                                                      @@@@@@     CORE-v0.1.0
+                                                      @@@@@@     COREv0.1.0
 `
