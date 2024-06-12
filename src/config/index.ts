@@ -1,7 +1,15 @@
 import { statSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
+import envPaths from 'env-paths'
+import { mkdirp } from 'mkdirp'
+import path from 'path'
+
 import { migrations } from './migrations'
-const configPath = `${process.env.HOME}/.entropy-cli.config`
+import { debug } from '../common/utils'
+
+const { config: configDir } = envPaths('entropyxyz', { suffix: '' })
+const configFile = 'entropy-cli.json'
+const configPath = path.join(configDir, configFile)
 
 export function migrateData (data = {}) {
   return migrations.reduce((migratedData, { migrate }) => {
@@ -10,6 +18,9 @@ export function migrateData (data = {}) {
 }
 
 export async function init () {
+  debug('configPath', configPath)
+  mkdirp.sync(configDir)
+
   try { statSync(configPath) } catch(e: any) {
     if (e && e.code !== 'ENOENT') throw e
     set(migrateData({}))
