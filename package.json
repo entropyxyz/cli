@@ -1,7 +1,7 @@
 {
   "name": "@entropyxyz/cli",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "cli and tui for interacting with the entropy protocol",
   "scripts": {
     "start": "ts-node src/index.ts",
     "start:debug": "DEBUG=@entropyxyz/cli yarn start",
@@ -22,7 +22,7 @@
     "url": "git+https://github.com/entropyxyz/cli.git"
   },
   "keywords": [],
-  "author": "Jesse Abramowitz",
+  "author": "entropy.xyz",
   "license": "AGPL-3.0-only",
   "bugs": {
     "url": "https://github.com/entropyxyz/cli/issues"
