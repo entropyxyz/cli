@@ -1,7 +1,4 @@
-<!--- Please describe in detail what this pr is doing and/or link a issue that does so. -->
-
-<!-- un-comment the section below and put in the issue number -->
-<!-- closes #issue -->
+closes #issue
 
 <!-- PLEASE FILL THIS OUT BELLOW -->
 - [ ] Do you think code didn't change in this PR?
