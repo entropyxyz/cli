@@ -9,7 +9,7 @@ export async function checkBalance ({ accounts, selectedAccount: selectedAccount
   debug('endpoint', endpoint);
   
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
-  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data }, endpoint);
+  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint });
   const accountAddress = selectedAccountAddress
   // @ts-ignore
   const accountInfo = (await entropy.substrate.query.system.account(accountAddress)) as any

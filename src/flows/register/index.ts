@@ -1,4 +1,4 @@
-// TO-DO: what is this from: frankie
+// import inquirer from "inquirer"
 import { debug, getSelectedAccount, print, /*accountChoices*/ } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
@@ -9,7 +9,7 @@ export async function register (storedConfig, options) {
   if (!selectedFromConfig) return
   const selectedAccount = getSelectedAccount(accounts, selectedFromConfig)
 
-  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data }, endpoint)
+  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint })
   // TO-DO: investigate this a little more
   // const filteredAccountChoices = accountChoices(accounts)
   // Not going to ask for a pointer from the user just yet
