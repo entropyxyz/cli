@@ -1,6 +1,6 @@
 # Entropy CLI
 
-### Disclaimer: CLI currently in Alpha Stage, expect breaking changes
+> :warning: This tool is early development. As such, a lot of things do not work. Feel free to play around with it and report any issues at [github.com/entropyxyz/cli](https://github.com/entropyxyz/cli).
 
 A straight-forward command-line interface (CLI) tool to showcase how to perform basic Entropy actions.
 
@@ -22,19 +22,18 @@ See help on programmatic usage:
 entropy --help               # all commands
 ```
 
-
-
 ## Build and run
 
 Follow these steps to build and install the CLI:
 
-1. Ensure you have Yarn installed:
+1. Ensure you have the correct Yarn and Node version installed:
 
-    ```bash
-    yarn --version
+    ```shell
+    yarn --version && node --version
     
     # Output example:
     # 1.22.22
+    # v20.9.0 or above
     ```
 
 1. Grab this repository and move into the new directory:
