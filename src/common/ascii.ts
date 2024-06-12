@@ -17,4 +17,4 @@ export const ascii =
                                                     @@@@@@            TEST                                    
                                                     @@@@@@            *NET                                    
                                                     @@@@@@     ENTROPY-CLI                                    
-                                                    @@@@@@     COREv0.0.10`
+                                                    @@@@@@     COREv0.1.0`
