@@ -7,7 +7,7 @@ import path from 'path'
 import { migrations } from './migrations'
 import { debug } from '../common/utils'
 
-const { config: configDir } = envPaths('entropyxyz', { suffix: '' })
+const { config: configDir } = envPaths('entropy-cryptography', { suffix: '' })
 const configFile = 'entropy-cli.json'
 const configPath = path.join(configDir, configFile)
 
