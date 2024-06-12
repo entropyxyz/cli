@@ -7,14 +7,9 @@ import path from 'path'
 import { migrations } from './migrations'
 import { debug } from '../common/utils'
 
-const paths = envPaths('entropyxyz', { suffix: '' })
-
-const configDir  = paths.config
+const { config: configDir } = envPaths('entropyxyz', { suffix: '' })
 const configFile = 'entropy-cli.json'
 const configPath = path.join(configDir, configFile)
-debug('configPath', configPath)
-
-mkdirp.sync(configDir)
 
 export function migrateData (data = {}) {
   return migrations.reduce((migratedData, { migrate }) => {
@@ -23,6 +18,9 @@ export function migrateData (data = {}) {
 }
 
 export async function init () {
+  debug('configPath', configPath)
+  mkdirp.sync(configDir)
+
   try { statSync(configPath) } catch(e: any) {
     if (e && e.code !== 'ENOENT') throw e
     set(migrateData({}))
