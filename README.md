@@ -1,6 +1,6 @@
 # Entropy CLI
 
-> :warning: This tool is early development. As such, a lot of things do not work. Feel free to play around with it and report any issues at [github.com/entropyxyz/cli](https://github.com/entropyxyz/cli).
+> :warning: This tool is in early development. As such, a lot of things do not work. Feel free to play around with it and report any issues at [github.com/entropyxyz/cli](https://github.com/entropyxyz/cli).
 
 A straight-forward command-line interface (CLI) tool to showcase how to perform basic Entropy actions.
 
