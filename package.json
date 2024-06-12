@@ -4,7 +4,7 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "start": "ts-node src/cli.ts",
+    "start": "npx tsx src/cli.ts",
     "start:debug": "DEBUG=@entropyxyz/cli yarn start",
     "build": "tsup",
     "test": "npm run type-check && npm run lint",
@@ -54,7 +54,6 @@
     "ethers": "^5.7.2",
     "inquirer": "8.0.0",
     "mkdirp": "^3.0.1",
-    "ts-node": "^10.9.2",
     "typescript": "^4.8.4",
     "viem": "^2.7.8",
     "x25519": "^0.1.0"

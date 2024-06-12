@@ -6,7 +6,7 @@
     "incremental": true,
     "typeRoots": [
       "node_modules/@types",
-      "@types/",
+      "@types/"
     ],
     "tsBuildInfoFile": ".tsbuildinfo",
     "moduleResolution": "node",
@@ -16,9 +16,6 @@
     "node_modules",
     "dist",
     "build",
-    "examples",
-  ],
-  "ts-node": {
-    "experimentalSpecifierResolution": "node"
-  }
+    "examples"
+  ]
 }
