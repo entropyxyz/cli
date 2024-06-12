@@ -1,12 +1,12 @@
 import Entropy from "@entropyxyz/sdk"
 import * as util from "@polkadot/util"
 import inquirer from "inquirer"
+import { readFileSync } from "fs"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { debug, print, getSelectedAccount } from "../../common/utils"
-import { readFileSync } from "fs"
 
-export async function devPrograms ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
-  const endpoint = endpoints[options.ENDPOINT]
+export async function devPrograms ({ accounts, selectedAccount: selectedAccountAddress }, options) {
+  const { endpoint } = options
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
 
   const choices = {
@@ -24,10 +24,10 @@ export async function devPrograms ({ accounts, selectedAccount: selectedAccountA
     },
   ])
 
-  const entropy = await initializeEntropy(
-    { keyMaterial: selectedAccount.data },
+  const entropy = await initializeEntropy({
+    keyMaterial: selectedAccount.data,
     endpoint
-  )
+  })
   
   const flow = choices[actionChoice.action]
   await flow(entropy, selectedAccount)

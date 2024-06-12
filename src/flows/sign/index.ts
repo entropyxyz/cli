@@ -3,7 +3,12 @@ import { u8aToHex } from '@polkadot/util'
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { debug, getSelectedAccount, print } from "../../common/utils"
 
-let userInput: string
+function utf8ToHex (str: string) {
+  return Buffer.from(str).toString('hex')
+}
+function hexToUtf8 (str: string) {
+  return Buffer.from(str, 'hex').toString('utf8')
+}
 
 async function signWithAdaptersInOrder (entropy, signingData: { msg?: { msg: string }, order?: string[] } = {}, signingAttempts = 0) {
   let msg = signingData?.msg?.msg
@@ -29,13 +34,12 @@ async function signWithAdaptersInOrder (entropy, signingData: { msg?: { msg: str
     //   name: 'pathToFile',
     //   message: 'Enter the path to the file you wish to sign:',
     // }
-    let messageAction
     if (!msg) {
-      ({ messageAction } = await inquirer.prompt([messageQuestion]))
+      const { messageAction } = await inquirer.prompt([messageQuestion])
       switch (messageAction) {
       case 'Text Input': {
-        ({ userInput } = await inquirer.prompt([userInputQuestion]))
-        msg = Buffer.from(userInput).toString('hex')
+        const { userInput } = await inquirer.prompt([userInputQuestion])
+        msg = utf8ToHex(userInput)
         break
       }
       /* DO NOT DELETE THIS */
@@ -56,7 +60,7 @@ async function signWithAdaptersInOrder (entropy, signingData: { msg?: { msg: str
         order: ['deviceKeyProxy', 'noop'],
       }
     }
-    print('msg to be signed:', `"${userInput}"`)
+    print('msg to be signed:', `"${hexToUtf8(msg)}"`)
     const signature = await entropy.signWithAdaptersInOrder(signingData)
     const signatureHexString = u8aToHex(signature)
     print('signature:', signatureHexString)
@@ -99,7 +103,7 @@ export async function sign ({ accounts, endpoints, selectedAccount: selectedAcco
   debug("selectedAccount:", selectedAccount)
   const keyMaterial = selectedAccount?.data;
 
-  const entropy = await initializeEntropy({ keyMaterial }, endpoint)
+  const entropy = await initializeEntropy({ keyMaterial, endpoint })
   const { address } = entropy.keyring.accounts.registration
   debug("address:", address)
   if (address == undefined) {
