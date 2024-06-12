@@ -19,6 +19,7 @@ export interface EntropyAccount {
   address: string
   verifyingKeys?: string[]
   userContext?: EntropyAccountContextType
+  used?: boolean
 }
 
 export enum EntropyAccountContextType {
@@ -27,3 +28,9 @@ export enum EntropyAccountContextType {
   deviceKey = 'CONSUMER_KEY',
   undefined = 'MIXED_KEY',
 }
+
+export interface EntropyTuiOptions {
+  dev: boolean
+  endpoint: string
+}
+

@@ -3,8 +3,8 @@ import { debug, getSelectedAccount, print, /*accountChoices*/ } from "../../comm
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 export async function register (storedConfig, options) {
-  const { accounts, endpoints, selectedAccount: selectedFromConfig } = storedConfig;
-  const endpoint = endpoints[options.ENDPOINT]
+  const { accounts, selectedAccount: selectedFromConfig } = storedConfig;
+  const { endpoint } = options
 
   if (!selectedFromConfig) return
   const selectedAccount = getSelectedAccount(accounts, selectedFromConfig)

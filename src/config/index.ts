@@ -1,4 +1,4 @@
-import { statSync } from 'node:fs'
+import { statSync, readFileSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { migrations } from './migrations'
 const configPath = `${process.env.HOME}/.entropy-cli.config`
@@ -19,6 +19,11 @@ export async function init () {
 export async function get () {
   const configBuffer = await readFile(configPath)
   return JSON.parse(configBuffer.toString())
+}
+
+export function getSync () {
+  const configBuffer = readFileSync(configPath, 'utf8')
+  return JSON.parse(configBuffer)
 }
 
 export async function set (config = {}) {

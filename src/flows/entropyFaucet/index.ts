@@ -2,8 +2,8 @@ import inquirer from "inquirer"
 import { print, debug, accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
-export async function entropyFaucet ({ accounts, endpoints }, options) {
-  const endpoint = endpoints[options.ENDPOINT]
+export async function entropyFaucet ({ accounts }, options) {
+  const { endpoint } = options
 
   const accountQuestion = {
     type: "list",

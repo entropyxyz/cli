@@ -1,28 +1,21 @@
 {
   "compilerOptions": {
+    "target": "ES6",
     "skipLibCheck": true,
     "noEmit": true,
-    "target": "esnext",
-    "esModuleInterop": true,
-    "moduleResolution": "node",
+    "incremental": true,
     "typeRoots": [
       "node_modules/@types",
-      "@types/",
-      "@entropyxyz/sdk",
-      "@entropyxyz/sdk/keys"
-    ]
+      "@types/"
+    ],
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "moduleResolution": "node",
+    "module": "Node16"
   },
-  "include": [
-    "src/**/*.ts"
-  ],
   "exclude": [
-    "node_modules"
-  ],
-  "ts-node": {
-    "swc": true,
-    "experimentalSpecifierResolution": "node",
-    "compilerOptions": {
-      "module": "commonjs"
-    }
-  }
+    "node_modules",
+    "dist",
+    "build",
+    "examples"
+  ]
 }
