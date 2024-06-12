@@ -8,7 +8,11 @@ const actions = {
   'Select Account': selectAccount,
   'List Accounts': async (config) => {
     const accountsArray = Array.isArray(config.accounts) ? config.accounts : [config.accounts]
-    accountsArray.forEach((account) => print(account))
+    accountsArray.forEach((account) => print({
+      name: account.name,
+      address: account.address,
+      verifyingKeys: account?.data?.admin?.verifyingKeys
+    }))
     if (!accountsArray.length) console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
   },
 }
