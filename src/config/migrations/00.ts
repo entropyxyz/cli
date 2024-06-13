@@ -1,4 +1,4 @@
-export const version = 0
+export const version = '0' // make future versions a number plz
 
 export function migrate (data = {}) {
   try {

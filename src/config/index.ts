@@ -5,16 +5,16 @@ import { readFile, writeFile } from 'node:fs/promises'
 import allMigrations from './migrations'
 const CONFIG_PATH = `${process.env.HOME}/.entropy-cli.config`
 
-const VERSION = 'migrated-version'
+export const VERSION = 'migration-version'
 
 export function migrateData (migrations, currentConfig = {}) {
   return migrations.reduce((newConfig, { migrate, version }) => {
     // check if migration already run
-    if (hasRunMigration(newConfig, version)) return newConfig
+    if (hasRunMigration(newConfig, Number(version))) return newConfig
 
     return {
       ...migrate(newConfig),
-      [VERSION]: version
+      [VERSION]: Number(version)
     }
   }, currentConfig)
 }
@@ -29,7 +29,6 @@ function hasRunMigration (config: any, version: number) {
 export async function init (configPath = CONFIG_PATH) {
   const currentConfig = await get(configPath)
     .catch(async (err) => {
-      console.log(err)
       if (err && err.code !== 'ENOENT') throw err
 
       // TODO: when we do the migration of location, do it in here
