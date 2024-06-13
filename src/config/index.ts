@@ -10,7 +10,7 @@ export const VERSION = 'migration-version'
 export function migrateData (migrations, currentConfig = {}) {
   return migrations.reduce((newConfig, { migrate, version }) => {
     // check if migration already run
-    if (hasRunMigration(newConfig, Number(version))) return newConfig
+    if (hasRunMigration(newConfig, version)) return newConfig
 
     return {
       ...migrate(newConfig),
@@ -23,7 +23,7 @@ function hasRunMigration (config: any, version: number) {
   const currentVersion = config[VERSION]
   if (currentVersion === undefined) return false
 
-  return Number(currentVersion) >= version
+  return Number(currentVersion) >= Number(version)
 }
 
 export async function init (configPath = CONFIG_PATH) {
