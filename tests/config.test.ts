@@ -6,6 +6,7 @@ import { migrateData, init, get, set } from '../src/config'
 // used to ensure unique test ids
 let id = Date.now()
 const makeTmpPath = () => `/tmp/entropy-cli-${id++}.json`
+const fakeOldConfigPath = '/tmp/fake-old-config.json'
 
 test('config/migrations', async t => {
   migrations.forEach(({ migrate, version }, i) => {
@@ -95,7 +96,7 @@ test('config - init', async t => {
 
   let config
   {
-    await init(configPath)
+    await init(configPath, fakeOldConfigPath)
     const expected = migrateData(migrations)
     config = await get(configPath)
     t.deepEqual(config, expected, 'init empty state')
@@ -108,12 +109,40 @@ test('config - init', async t => {
       manualAddition: 'boop'
     }
     await set(newConfig, configPath)
-    await init(configPath)
+    await init(configPath, fakeOldConfigPath)
     config = await get(configPath)
     t.deepEqual(config, newConfig, 'init does not over-write manual changes')
   }
 
   // NOTE: there's scope for more testsing here but this is a decent start
+
+  t.end()
+})
+
+test('config - init (migration)', async t => {
+  const configPath = makeTmpPath()
+  const oldConfigPath = configPath.replace('json', '.old.json')
+
+  // old setup
+  await init(oldConfigPath, '/tmp/fake-old-config-path')
+
+  // customisation (to prove move done)
+  let config = await get(oldConfigPath)
+  const newConfig = {
+    ...config,
+    manualAddition: 'boop'
+  }
+  await set(newConfig, oldConfigPath)
+
+
+  // init with new path
+  await init(configPath, oldConfigPath)
+  config = await get(configPath)
+  t.deepEqual(config, newConfig, 'init migrates data to new location')
+
+  await get(oldConfigPath)
+    .then(() => t.fail('old config should be empty'))
+    .catch(() => t.pass('old config should be empty'))
 
   t.end()
 })
