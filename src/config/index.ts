@@ -1,7 +1,8 @@
 import { readFile, writeFile, rm } from 'node:fs/promises'
 import { readFileSync } from 'node:fs'
+import { mkdirp } from 'mkdirp'
+import { join, dirname } from 'path'
 import envPaths from 'env-paths'
-import { join } from 'path'
 
 import allMigrations from './migrations'
 
@@ -64,5 +65,6 @@ export function getSync (configPath = CONFIG_PATH) {
 }
 
 export async function set (config = {}, configPath = CONFIG_PATH) {
+  await mkdirp(dirname(configPath))
   await writeFile(configPath, JSON.stringify(config))
 }

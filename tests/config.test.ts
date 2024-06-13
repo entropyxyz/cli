@@ -120,8 +120,8 @@ test('config - init', async t => {
 })
 
 test('config - init (migration)', async t => {
-  const configPath = makeTmpPath()
-  const oldConfigPath = configPath.replace('json', '.old.json')
+  const configPath = makeTmpPath().replace('/tmp', '/tmp/some-folder')
+  const oldConfigPath = makeTmpPath()
 
   // old setup
   await init(oldConfigPath, '/tmp/fake-old-config-path')
