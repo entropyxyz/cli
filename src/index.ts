@@ -21,14 +21,8 @@ export default function tui (options: EntropyTuiOptions) {
     'Transfer': flows.entropyTransfer,
     'Deploy Program': flows.devPrograms,
     'User Programs': flows.userPrograms,
-    // 'Construct an Ethereum Tx': flows.ethTransaction,
+    'Entropy Faucet': flows.entropyFaucet,
   }
-
-  const devChoices = {
-    // 'Entropy Faucet': flows.entropyFaucet,
-  }
-
-  if (options.dev) Object.assign(choices, devChoices)
 
   // assign exit so its last
   Object.assign(choices, { 'Exit': async () => {} })
