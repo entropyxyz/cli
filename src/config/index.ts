@@ -1,4 +1,4 @@
-import { /* statSync, */ readFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 
 import allMigrations from './migrations'
