@@ -4,6 +4,7 @@ import { mkdirp } from 'mkdirp'
 import { join, dirname } from 'path'
 import envPaths from 'env-paths'
 
+
 import allMigrations from './migrations'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
