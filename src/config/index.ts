@@ -1,6 +1,5 @@
 import { /* statSync, */ readFileSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
-// import { join } from 'path'
 
 import allMigrations from './migrations'
 const CONFIG_PATH = `${process.env.HOME}/.entropy-cli.config`
