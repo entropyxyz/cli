@@ -42,6 +42,8 @@
   "dependencies": {
     "@entropyxyz/sdk": "^0.2.1",
     "@ethereumjs/util": "^9.0.2",
+    "@polkadot/api": "^11.2.1",
+    "@polkadot/types": "^11.2.1",
     "@polkadot/util": "^12.6.2",
     "@polkadot/util-crypto": "^12.6.2",
     "@substrate/txwrapper-polkadot": "^7.5.0",
@@ -56,7 +58,6 @@
     "inquirer": "8.0.0",
     "mkdirp": "^3.0.1",
     "typescript": "^4.8.4",
-    "viem": "^2.7.8",
     "x25519": "^0.1.0"
   },
   "devDependencies": {
