@@ -1,4 +1,4 @@
-import { blake2AsHex, encodeAddress } from '@polkadot/util-crypto'
+import { blake2AsHex, encodeAddress, signatureVerify } from '@polkadot/util-crypto'
 import { debug, getSelectedAccount } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import Entropy from "@entropyxyz/sdk"
@@ -8,9 +8,35 @@ const faucetProgramModKey = '5GWamxgW4XWcwGsrUynqnFq2oNZPqNXQhMDfgNH9xNsg2Yj7'
 
 async function faucetSignAndSend (call: any, api: any, entropy: Entropy, amount: number, senderAddress: string, chosenVerifyingKey: any) {
   const faucetSigner = new FaucetSigner(api.registry, entropy, amount, chosenVerifyingKey)
-  await call.signAsync(senderAddress, {
+  const sig = await call.signAsync(senderAddress, {
     signer: faucetSigner,
   });
+  const result = await sig.dryRun()
+  console.log({result})
+  // console.log({sig: sig.toHuman()})
+//   sig.send(({ status, dispatchError }: any) => {
+//     // status would still be set, but in the case of error we can shortcut
+//     // to just check it (so an error would indicate InBlock or Finalized)
+//     if (dispatchError) {
+//         if (dispatchError.isModule) {
+//             // for module errors, we have the section indexed, lookup
+//             const decoded = api.registry.findMetaError(dispatchError.asModule);
+//             const { documentation, method, section } = decoded;
+
+//             console.log(`${section}.${method}: ${documentation.join(' ')}`);
+//             process.exit();
+//         } else {
+//             // Other, CannotLookup, BadOrigin, no extra info
+//             console.log(dispatchError.toString());
+//             process.exit();
+//         }
+//     } else {
+//         if (status.isFinalized) {
+//             console.log('\ntransaction successful');
+//             process.exit();
+//         }
+//     }
+// })
 }
 
 export async function entropyFaucet ({ accounts, selectedAccount: selectedAccountAddress }, options) {
