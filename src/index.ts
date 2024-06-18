@@ -6,8 +6,8 @@ import { logo } from './common/ascii'
 import { debug, print } from './common/utils'
 
 // tui = text user interface
-export default function tui (options: EntropyTuiOptions) {
-  config.init()
+export default async function tui (options: EntropyTuiOptions) {
+  await config.init()
 
   console.clear()
   console.log(logo) // the Entropy logo
