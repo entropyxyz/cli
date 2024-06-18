@@ -29,7 +29,7 @@ export default class FaucetSigner implements Signer {
   public async signPayload (payload: SignerPayloadJSON): Promise<SignerResult> {
     const raw = this.#registry.createType('ExtrinsicPayload', payload, {
       version: payload.version,
-    });
+    }).toU8a(true);
     console.log({ payload: payload });
 
     const auxData = {
@@ -40,7 +40,7 @@ export default class FaucetSigner implements Signer {
     }
     console.log({auxData, vk: this.chosenVerifyingKey})
     const signature = await this.#entropy.sign({
-      sigRequestHash: raw.toHex(),
+      sigRequestHash: u8aToHex(raw),
       hash: {custom: 0},
       auxiliaryData: [auxData],
       verifyingKeyOverwrite: this.chosenVerifyingKey
@@ -48,6 +48,7 @@ export default class FaucetSigner implements Signer {
     // const sig = 
     let sigHex = u8aToHex(signature);
     sigHex = `0x02${stripHexPrefix(sigHex)}`
+    console.log({sigHex})
     // const signature_test = "0x02c80347ab124efac91a73b60b17b306b8e24c902e5f3aaf66dc1077ddc7993b660517ab74a501cba14020cd7afb3dc988c2956ba888d07c83221b539188bc7d5a00"
     // const sig = this.#registry.createType('EcdsaSignature', signature).toU8a(true)
     // let submitable = this.#registry.createTypeUnsafe('ExtrinsicSignature', [sigHex]).toU8a(true)
@@ -59,7 +60,7 @@ export default class FaucetSigner implements Signer {
 
     const publicKey = decodeAddress(faucetAddress);
     const hexPublicKey = u8aToHex(publicKey);
-    console.log("test valid", signatureVerify(raw.toHex(), sigHex, hexPublicKey))
+    console.log("test valid", signatureVerify(u8aToHex(raw), sigHex, hexPublicKey))
     // console.log({signature: signature, realSig: u8aToHex(signature)})
     return { id: id++, signature: sigHex };
   }
