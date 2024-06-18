@@ -5,8 +5,8 @@ import { debug, getSelectedAccount, print } from "../../common/utils"
 
 let verifyingKey: string;
 
-export async function userPrograms ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
-  const endpoint = endpoints[options.ENDPOINT]
+export async function userPrograms ({ accounts, selectedAccount: selectedAccountAddress }, options) {
+  const { endpoint } = options
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
 
   const actionChoice = await inquirer.prompt([
@@ -24,10 +24,10 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
     },
   ])
 
-  const entropy = await initializeEntropy(
-    { keyMaterial: selectedAccount.data },
+  const entropy = await initializeEntropy({ 
+    keyMaterial: selectedAccount.data,
     endpoint
-  )
+  })
   
   if (!entropy.registrationManager?.signer?.pair) {
     throw new Error("Keys are undefined")
@@ -77,9 +77,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
         validate: (input) => (input ? true : "Program pointer is required!"),
       }])
       debug('program pointer', programPointer);
-        
-      const program = await entropy.programs.dev.getProgramInfo(programPointer);
-      debug('Program from:', programPointer);
+      const program = await entropy.programs.dev.get(programPointer);
       print(program);
     } catch (error) {
       console.error(error.message);

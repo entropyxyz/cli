@@ -1,8 +1,32 @@
 # Entropy CLI
 
+> :warning: This tool is in early development. As such, a lot of things do not work. Feel free to play around with it and report any issues at [github.com/entropyxyz/cli](https://github.com/entropyxyz/cli).
+
 A straight-forward command-line interface (CLI) tool to showcase how to perform basic Entropy actions.
 
-> This tool is early development. As such, a lot of things do not work. Feel free to play around with it and report any issues at [github.com/entropyxyz/cli](https://github.com/entropyxyz/cli).
+## Install
+
+```bash
+npm install -g @entropyxyz/cli
+```
+
+## Usage
+
+Start an interactive interface:
+```bash
+entropy
+```
+
+Output current balances:
+```bash
+entropy balance
+```
+
+See help on programmatic usage:
+```bash
+entropy --help               # all commands
+entropy balance --help       # a specific command
+```
 
 ## Build and run
 
@@ -20,7 +44,7 @@ Follow these steps to build and install the CLI:
 
 1. Grab this repository and move into the new directory:
 
-    ```shell
+    ```bash
     git clone https://github.com/entropyxyz/cli
     cd cli
     ```
@@ -34,37 +58,29 @@ Follow these steps to build and install the CLI:
     # [1/4] Resolving packages...
     ```
 
-1. Start the CLI with:
+1. Start the CLI:
 
-    ```shell
+    
+    For an interactive text user interface:
+    ```bash
     yarn start
     ```
 
-<!--### Running -->
-<!---->
-<!--* ```yarn```-->
-<!---->
-<!--* you can add am .env file or input the info when prompted by the cli. -->
-<!---->
-<!--```-->
-<!--ENDPOINT_CHAIN=""-->
-<!--SEED=""-->
-<!--NAME=""-->
-<!--```-->
-<!--* before you start the cli ensure that you're running two chains and two validators. local and remote devnet spinup option coming soon. -->
-<!--* to start the CLI run: -->
-<!--* ```yarn entropy```-->
-<!---->
-<!--The CLI currently has the following options:-->
-<!--1. Entropy Faucet-->
-<!--2. Balance-->
-<!--3. Register-->
-<!--4. Programs-->
-<!--5. Sign-->
-<!--7. Transfer-->
-<!--8. Give Zaps-->
-<!--9. New Entropy Wallet-->
-<!---->
+    To read about programmatic use:
+    ```bash
+    yarn start --help
+    ```
+
+### Testing bin script
+
+```bash
+npm i -g
+```
+This will register the `entropy` bin script globally so that you can run
+
+```bash
+entropy --help
+```
 
 ## Support
 

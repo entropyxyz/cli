@@ -1,6 +1,7 @@
 import { BigNumber, ethers } from "ethers";
 
 export const getTx = async () => {
+  // NOTE: require not allowed in module
   // const address = require(`./tofn/${name.toLowerCase()}/address.json`);
   // // need to get address from stored tofn keys
   // const entropyAddress = address.address;
