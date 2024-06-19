@@ -30,10 +30,10 @@ export async function entropyTransfer ({ accounts, selectedAccount: selectedAcco
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
 
   try {
-    const entropy = await initializeEntropy(
-      { keyMaterial: selectedAccount.data },
+    const entropy = await initializeEntropy({
+      keyMaterial: selectedAccount.data,
       endpoint
-    )
+    })
 
     const b1 = new cliProgress.SingleBar({
       format: 'Transferring Funds |' + colors.cyan('{bar}') + '| {percentage}%',

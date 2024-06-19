@@ -103,7 +103,7 @@ export async function sign ({ accounts, endpoints, selectedAccount: selectedAcco
   debug("selectedAccount:", selectedAccount)
   const keyMaterial = selectedAccount?.data;
 
-  const entropy = await initializeEntropy({ keyMaterial }, endpoint)
+  const entropy = await initializeEntropy({ keyMaterial, endpoint })
   const { address } = entropy.keyring.accounts.registration
   debug("address:", address)
   if (address == undefined) {
