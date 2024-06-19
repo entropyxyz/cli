@@ -4,7 +4,7 @@
   "description": "cli and tui for interacting with the entropy protocol",
   "type": "module",
   "scripts": {
-    "start": "npx tsx src/cli.ts",
+    "start": "yarn build && npm install -g && entropy",
     "start:debug": "DEBUG=@entropyxyz/cli yarn start",
     "build": "tsup",
     "test": "yarn test:types && yarn test:ts && yarn test:only",
@@ -36,7 +36,6 @@
     "entropy protocol"
   ],
   "author": "entropy.xyz",
-
   "license": "AGPL-3.0-only",
   "bugs": {
     "url": "https://github.com/entropyxyz/cli/issues"
@@ -74,7 +73,6 @@
     "regenerator-runtime": "^0.14.1",
     "tap-spec": "^5.0.0",
     "tape": "^5.7.5",
-    "ts-node": "^10.9.2",
     "tsup": "^6.7.0",
     "tsx": "^4.15.3",
     "typescript": "^4.8.4"
