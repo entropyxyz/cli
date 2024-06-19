@@ -17,9 +17,15 @@ Start an interactive interface:
 entropy
 ```
 
+Output current balances:
+```bash
+entropy balance
+```
+
 See help on programmatic usage:
 ```bash
 entropy --help               # all commands
+entropy balance --help       # a specific command
 ```
 
 ## Build and run
