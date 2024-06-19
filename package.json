@@ -36,7 +36,6 @@
     "entropy protocol"
   ],
   "author": "entropy.xyz",
-
   "license": "AGPL-3.0-only",
   "bugs": {
     "url": "https://github.com/entropyxyz/cli/issues"
