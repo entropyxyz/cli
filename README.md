@@ -12,25 +12,27 @@ npm install -g @entropyxyz/cli
 
 ## Usage
 
-Start an interactive interface:
+### Interactive mode
+
 ```bash
 entropy
 ```
 
 This command will bring you to the main menu:
-```output
-? Select Action (Use arrow keys)
-> Manage Accounts
-  Balance
-  Register
-  Sign
-  Transfer
-  Deploy Program
-  User Programs
-  Exit
-```
+  ```output
+  ? Select Action (Use arrow keys)
+  > Manage Accounts
+    Balance
+    Register
+    Sign
+    Transfer
+    Deploy Program
+    User Programs
+    Exit
+  ```
 
-You can also use the CLI programmatically:
+### Programmatic mode
+
 ```bash
 entropy balance 5GYvMHuB8J4mpJFCJ7scdR8AXGbT69B2bAqbNxPEa9ZSgEJm
 ```
@@ -40,11 +42,6 @@ See help on programmatic usage:
 entropy --help               # all commands
 entropy balance --help       # a specific command
 ```
-
-- [Support](#support)
-- [License](#license)
-- [Development](#development)
-<!-- TODO: -->- [Contributions](#contributions) -->
 
 
 ### Available functions
@@ -78,59 +75,62 @@ yarn start --help
 ## Development
 
 <details>
-    <summary>Development install</summary>
+  <summary>
+    <strong>Development install</strong>
+  </summary>
 
 1. Install Node + yarn 1.22.x
 
-    - we recommend installing Node with e.g. [NVM](https://github.com/nvm-sh/nvm)
-    - enable yarn by running `corepack enable`
+  - we recommend installing Node with e.g. [NVM](https://github.com/nvm-sh/nvm)
+  - enable yarn by running `corepack enable`
 
 1. Grab this repository and move into the new directory:
 
-    ```bash
-    git clone https://github.com/entropyxyz/cli
-    cd cli
-    ```
+  ```bash
+  git clone https://github.com/entropyxyz/cli
+  cd cli
+  ```
 
 1. Build the CLI with Yarn:
 
-    ```bash
-    yarn
-    ```
+  ```bash
+  yarn
+  ```
 
 1. Start the CLI:
 
 For an interactive text user interface:
 
-    ```bash
-    yarn start
-    ```
+```bash
+yarn start
+```
 
 You should now see the main menu:
-    ```output
-    ? Select Action (Use arrow keys)
-    > Manage Accounts
-      Balance
-      Register
-      Sign
-      Transfer
-      Deploy Program
-      User Programs
-      Exit
-    ```
+  ```output
+  ? Select Action (Use arrow keys)
+  > Manage Accounts
+    Balance
+    Register
+    Sign
+    Transfer
+    Deploy Program
+    User Programs
+    Exit
+  ```
 
 For programmatic use, see:
-    ```bash
-    yarn start --help
-    ```
+```bash
+yarn start --help
+```
 
 </details>
-
 <details>
-    <summary>Testing bin script</summary>
+  <summary>
+    <strong>Global install</strong>
+  </summary>
 
 ```bash
-npm i -g
+npm install -g
 ```
 This will register the `entropy` bin script globally so that you can run
 
