@@ -27,6 +27,9 @@ export default class FaucetSigner implements Signer {
   }
 
   public async signPayload (payload: SignerPayloadJSON): Promise<SignerResult> {
+    // toU8a(true) is important as it strips the scale encoding length prefix from the payload
+    // without it transactions will fail
+    // ref: https://github.com/polkadot-js/api/issues/4446#issuecomment-1013213962
     const raw = this.#registry.createType('ExtrinsicPayload', payload, {
       version: payload.version,
     }).toU8a(true);
@@ -47,6 +50,8 @@ export default class FaucetSigner implements Signer {
     })
     // const sig = 
     let sigHex = u8aToHex(signature);
+    // the 02 prefix is needed for signature type edcsa (00 = ed25519, 01 = sr25519, 02 = ecdsa)
+    // ref: https://github.com/polkadot-js/tools/issues/175#issuecomment-767496439
     sigHex = `0x02${stripHexPrefix(sigHex)}`
     console.log({sigHex})
     // const signature_test = "0x02c80347ab124efac91a73b60b17b306b8e24c902e5f3aaf66dc1077ddc7993b660517ab74a501cba14020cd7afb3dc988c2956ba888d07c83221b539188bc7d5a00"

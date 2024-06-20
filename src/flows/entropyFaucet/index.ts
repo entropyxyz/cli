@@ -18,7 +18,7 @@ async function faucetSignAndSend (call: any, api: any, entropy: Entropy, amount:
   });
   const blockHash = await entropy.substrate.rpc.chain.getBlockHash()
   console.log({sig})
-  const test = await entropy.substrate.call.taggedTransactionQueue.validateTransaction("local", sig, blockHash.toHex())
+  const test = await entropy.substrate.call.taggedTransactionQueue.validateTransaction("Local", sig, blockHash.toHex())
   console.log({test: test.toHuman()})
   // console.log({result})
   // console.log({sig: sig.toHuman()})
