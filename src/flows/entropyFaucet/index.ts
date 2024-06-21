@@ -59,7 +59,7 @@ export async function entropyFaucet ({ accounts, selectedAccount: selectedAccoun
     throw new Error("Keys are undefined")
   }
 
-  const amount = "10000000000"
+  const amount = "10000000000000"
   const modifiableKeys = await entropy.substrate.query.registry.modifiableKeys(faucetProgramModKey)
   const verifyingKeys = modifiableKeys.toHuman()
   // Choosing one of the 5 verifiying keys at random to be used as the faucet sender
@@ -88,7 +88,7 @@ export async function entropyFaucet ({ accounts, selectedAccount: selectedAccoun
 
   const unsigned = methods.balances.transferAllowDeath(
 		{
-			value: 10000000000,
+			value: 10000000000000,
 			dest: { id: selectedAccountAddress }, // Bob
 		},
 		{
