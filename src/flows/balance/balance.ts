@@ -1,35 +1,32 @@
 import Entropy from "@entropyxyz/sdk";
-import { hexToBigInt } from "@polkadot/util";
+import { BalanceInfo } from "./types";
 
-export async function getBalance (entropy: Entropy, address: string): Promise<bigint> {
+const hexToBigInt = (hexString: string) => BigInt(hexString)
+
+export async function getBalance (entropy: Entropy, address: string): Promise<number> {
   try {
     const accountInfo = (await entropy.substrate.query.system.account(address)) as any
-    return hexToBigInt(accountInfo.data.free)
+    
+    return parseInt(hexToBigInt(accountInfo.data.free).toString())
   } catch (error) {
     // console.error(`There was an error getting balance for [acct = ${address}]`, error);
     throw new Error(error.message)
   }
 }
 
-type BalanceInfoWithError = {
-  balance?: bigint
-  error?: Error
-}
-
-interface BalanceInfo {
-  [address: string]: BalanceInfoWithError
-}
-
 export async function getBalances (entropy: Entropy, addresses: string[]): Promise<BalanceInfo> {
   const balanceInfo: BalanceInfo = {}
   try {
-    await entropy.substrate.query.system.account.multi(addresses, (balances: any[]) => {
-      balances.forEach((balance, idx) => {
-        balanceInfo[addresses[idx]] = {
-          balance: hexToBigInt(balance.data.free),
-        }
-      })
-    })
+    await Promise.all(addresses.map(async address => {
+      try {
+        const balance = await getBalance(entropy, address)
+        balanceInfo[address] = { balance }
+      } catch (error) {
+        console.error(`Error retrieving balance for ${address}`, error);
+        balanceInfo[address] = { error: error.message }
+      }
+    }))
+    
     return balanceInfo
   } catch (error) {
     // console.error(`There was an error getting balances for [${addresses}]`, error);

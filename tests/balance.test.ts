@@ -1,7 +1,7 @@
 import test from 'tape'
 import Entropy, { wasmGlobalsReady } from '@entropyxyz/sdk'
 // WIP: I'm seeing problems importing this?
-import Keyring from '@entropyxyz/sdk/keys'
+import Keyring from '@entropyxyz/sdk/dist/keys/index'
 import { 
   makeSeed,
   promiseRunner,
@@ -11,12 +11,12 @@ import {
 } from './testing-utils'
 
 import { getBalance, getBalances } from '../src/flows/balance/balance'
+import { initializeEntropy } from 'src/common/initializeEntropy'
 
 const networkType = 'two-nodes'
 
 // TODO: export charlieStashSeed
-const richSeed =
-  '0x66256c4e2f90e273bf387923a9a7860f2e9f47a1848d6263de512f7fb110fc08'
+const richAddress = '5Ck5SLSHYac6WFt5UZRSsdJjwmpSZq85fd5TRNAdZQVzEAPT'
 
 test('getBalance + getBalances', async (t) => {
   /* Setup */
@@ -33,41 +33,52 @@ test('getBalance + getBalances', async (t) => {
   await sleep(process.env.GITHUB_WORKSPACE ? 30_000 : 5_000)
 
   const newSeed = makeSeed()
-  const keyring = new Keyring({ seed: newSeed, debug: true })
-  const entropy = new Entropy({ keyring })
+  const entropy = await initializeEntropy({ keyMaterial: { seed: newSeed, debug: true }, endpoint: 'ws://127.0.0.1:9944', })
+  const newAddress = entropy.keyring.accounts.registration.address
+  
   await run('entropy ready', entropy.ready)
 
   /* getBalance */
-  const newSeedBalance = await run(
+  const newAddressBalance = await run(
     'getBalance (newSeed)',
-    getBalance(entropy, newSeed)
+    getBalance(entropy, newAddress)
   )
-  t.equal(newSeedBalance, 0, 'newSeed balance = 0')
+  
+  t.equal(newAddressBalance, 0, 'newSeed balance = 0')
 
-  const richSeedBalance = await run(
-    'getBalance (richSeed)',
-    getBalance(entropy, richSeed)
+  const richAddressBalance = await run(
+    'getBalance (richAddress)',
+    getBalance(entropy, richAddress)
   )
-  t.true(richSeedBalance > 10e12, 'richSeed balance >>> 0')
+  
+  t.true(richAddressBalance > BigInt(10e10), 'richAddress balance >>> 0')
 
   /* getBalances */
 
   const balances = await run(
     'getBalances',
-    getBalances(entropy, [newSeed, richSeed])
+    getBalances(entropy, [newAddress, richAddress])
   )
 
   t.deepEqual(
     balances,
     {
-      [newSeed]: newSeedBalance,
-      [richSeed]: richSeedBalance
+      [newAddress]: {balance: newAddressBalance},
+      [richAddress]: {balance: richAddressBalance}
     },
     'getBalances works'
   )
 
+  const balancesWithOneGoodAddress = await run(
+    'getBalances::one good address',
+    getBalances(entropy, ['000', richAddress])
+  )
+
+  console.log('balances', balancesWithOneGoodAddress);
+  
+
   // TODO:
-  // - test getBalances with 1 good seed, 1 bung seed
+  // - test getBalances with 1 good address, 1 bung seed
   // - test getBalances with all bung seeds
 
   t.end()

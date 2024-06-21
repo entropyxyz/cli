@@ -38,7 +38,7 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint }: Ini
     await wasmGlobalsReady()
 
     const { accountData, password: successfulPassword } = await getAccountDataAndPassword(keyMaterial, password)
-    if (!accountData.seed || !accountData.admin) {
+    if (!accountData.seed && !accountData.admin) {
       throw new Error("Data format is not recognized as either encrypted or unencrypted")
     }
 
@@ -63,7 +63,7 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint }: Ini
     }
 
     let selectedAccount
-    const storedKeyring = getKeyring(accountData.admin.address)
+    const storedKeyring = getKeyring(accountData?.admin?.address)
 
     if(!storedKeyring) {
       const keyring = new Keyring({ ...accountData, debug: true })

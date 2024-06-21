@@ -3,7 +3,6 @@ import { print, debug, getSelectedAccount } from "../../common/utils"
 
 const hexToBigInt = (hexString: string) => BigInt(hexString)
 
-
 export async function checkBalance ({ accounts, selectedAccount: selectedAccountAddress }, options) {
   const { endpoint } = options
   debug('endpoint', endpoint);
