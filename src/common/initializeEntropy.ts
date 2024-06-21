@@ -39,6 +39,7 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint }: Ini
     await wasmGlobalsReady()
 
     const { accountData, password: successfulPassword } = await getAccountDataAndPassword(keyMaterial, password)
+// check if there is no admin account and no seed so that we can throw an error
     if (!accountData.seed && !accountData.admin) {
       throw new Error("Data format is not recognized as either encrypted or unencrypted")
     }
