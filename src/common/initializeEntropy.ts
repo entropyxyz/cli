@@ -20,6 +20,7 @@ const keyrings = {
 export function getKeyring (address) {
   if (!address && keyrings.default) return keyrings.default
   if (address && keyrings[address]) return keyrings[address]
+// explicitly return undefined so there is no confusion around what is selected
   return undefined
 }
 
