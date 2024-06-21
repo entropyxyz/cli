@@ -20,9 +20,10 @@ export async function getBalances (entropy: Entropy, addresses: string[]): Promi
     await Promise.all(addresses.map(async address => {
       try {
         const balance = await getBalance(entropy, address)
+        
         balanceInfo[address] = { balance }
       } catch (error) {
-        console.error(`Error retrieving balance for ${address}`, error);
+        // console.error(`Error retrieving balance for ${address}`, error);
         balanceInfo[address] = { error: error.message }
       }
     }))

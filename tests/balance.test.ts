@@ -69,17 +69,17 @@ test('getBalance + getBalances', async (t) => {
     'getBalances works'
   )
 
-  const balancesWithOneGoodAddress = await run(
+  const badAddresses = ['5Cz6BfUaxxXCA3jninzxdan4JdmC1NVpgkiRPYhXbhr', '5Cz6BfUaxxXCA3jninzxdan4JdmC1NVpgkiRPYhXbhrfnD']
+  const balancesWithNoGoodAddress = await run(
     'getBalances::one good address',
-    getBalances(entropy, ['000', richAddress])
+    getBalances(entropy, badAddresses)
   )
 
-  console.log('balances', balancesWithOneGoodAddress);
-  
-
+  badAddresses.forEach(addr => {
+    t.true(!!balancesWithNoGoodAddress[addr].error, `error field is populated for ${addr}`)
+  })
   // TODO:
   // - test getBalances with 1 good address, 1 bung seed
-  // - test getBalances with all bung seeds
 
   t.end()
 })
