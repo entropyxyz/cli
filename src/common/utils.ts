@@ -1,6 +1,5 @@
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex } from "@polkadot/util"
-import { keccak256 } from "ethereum-cryptography/keccak"
 import { Buffer } from 'buffer'
 import Debug from 'debug'
 import { EntropyAccountConfig } from "../types"
@@ -36,15 +35,6 @@ const PREFIX = '0x'
 
 export function isEmpty (data?: object) {
   return data === undefined || Object.keys(data).length === 0
-}
-
-export function pubToAddress (publicKey: string): string {  
-  publicKey = publicKey.startsWith('0x') ? publicKey.slice(2) : publicKey
-  const publicKeyBuffer = Buffer.from(publicKey, 'hex')
-  const hash = keccak256(publicKeyBuffer)
-  const address = `0x${Buffer.from(hash.subarray(hash.length - 20)).toString('hex')}`
-  debug('address:', address)
-  return address
 }
 
 export const formatAmountAsHex = (amount: number) => {
