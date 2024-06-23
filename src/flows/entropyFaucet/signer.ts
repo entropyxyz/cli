@@ -46,7 +46,7 @@ export default class FaucetSigner implements Signer {
       // @ts-ignore
       hash: {custom: 0},
       auxiliaryData: [auxData],
-      verifyingKeyOverwrite: this.chosenVerifyingKey
+      signatureVerifyingKey: this.chosenVerifyingKey
     })
     // const sig = 
     let sigHex = u8aToHex(signature);
