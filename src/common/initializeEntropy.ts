@@ -20,7 +20,7 @@ const keyrings = {
 export function getKeyring (address) {
   if (!address && keyrings.default) return keyrings.default
   if (address && keyrings[address]) return keyrings[address]
-  return keyrings.default
+  return undefined
 }
 
 interface InitializeEntropyOpts {
