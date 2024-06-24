@@ -20,7 +20,8 @@ const keyrings = {
 export function getKeyring (address) {
   if (!address && keyrings.default) return keyrings.default
   if (address && keyrings[address]) return keyrings[address]
-  return keyrings.default
+// explicitly return undefined so there is no confusion around what is selected
+  return undefined
 }
 
 interface InitializeEntropyOpts {
@@ -38,7 +39,8 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint }: Ini
     await wasmGlobalsReady()
 
     const { accountData, password: successfulPassword } = await getAccountDataAndPassword(keyMaterial, password)
-    if (!accountData.seed || !accountData.admin) {
+// check if there is no admin account and no seed so that we can throw an error
+    if (!accountData.seed && !accountData.admin) {
       throw new Error("Data format is not recognized as either encrypted or unencrypted")
     }
 
@@ -63,7 +65,7 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint }: Ini
     }
 
     let selectedAccount
-    const storedKeyring = getKeyring(accountData.admin.address)
+    const storedKeyring = getKeyring(accountData?.admin?.address)
 
     if(!storedKeyring) {
       const keyring = new Keyring({ ...accountData, debug: true })

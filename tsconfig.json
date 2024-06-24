@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": "./",
     "target": "ES6",
     "skipLibCheck": true,
     "noEmit": true,
@@ -10,7 +11,10 @@
     ],
     "tsBuildInfoFile": ".tsbuildinfo",
     "moduleResolution": "node",
-    "module": "Node16"
+    "module": "Node16",
+    "paths": {
+      "@entropyxyz/sdk/*": ["node_modules/@entropyxyz/sdk/*"]
+    }
   },
   "exclude": [
     "node_modules",

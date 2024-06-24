@@ -5,9 +5,9 @@ export interface EntropyAccountConfig {
 }
 
 export interface EntropyAccountData {
-  debug: boolean
+  debug?: boolean
   seed: string
-  admin: EntropyAccount
+  admin?: EntropyAccount
   registration?: EntropyAccount
   deviceKey?: EntropyAccount
   programDev?: EntropyAccount

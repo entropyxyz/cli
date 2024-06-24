@@ -13,11 +13,12 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 ## [UNRELEASED]
 
 ### Added
-
+- new: './src/flows/balance/balance.ts' - service file separated out of main flow containing the pure functions to perform balance requests for one or multiple addresses
+- new: './tests/balance.test.ts' - new unit tests file for balance pure functions
 ### Fixed
-
+- keyring retrieval method was incorrectly returning the default keyring when no keyring was found, which is not the intended flow
 ### Changed
-
+- conditional when initializing entropy object to only error if no seed AND admin account is not found in the account data, new unit test caught bug with using OR condition
 ### Broke
 
 ### Meta/Dev
