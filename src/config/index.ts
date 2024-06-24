@@ -1,8 +1,15 @@
+import { readFile, writeFile, rm } from 'node:fs/promises'
 import { readFileSync } from 'node:fs'
-import { readFile, writeFile } from 'node:fs/promises'
+import { mkdirp } from 'mkdirp'
+import { join, dirname } from 'path'
+import envPaths from 'env-paths'
+
 
 import allMigrations from './migrations'
-const CONFIG_PATH = `${process.env.HOME}/.entropy-cli.config`
+
+const paths = envPaths('entropy-cryptography', { suffix: '' })
+const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
+const OLD_CONFIG_PATH = join(process.env.HOME, '.entropy-cli.config')
 
 export const VERSION = 'migration-version'
 
@@ -25,13 +32,19 @@ function hasRunMigration (config: any, version: number) {
   return Number(currentVersion) >= Number(version)
 }
 
-export async function init (configPath = CONFIG_PATH) {
+export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG_PATH) {
   const currentConfig = await get(configPath)
     .catch(async (err) => {
       if (err && err.code !== 'ENOENT') throw err
 
-      // TODO: when we do the migration of location, do it in here
-      return {}
+      const oldConfig = await get(oldConfigPath).catch(noop) // drop errors
+      if (oldConfig) {
+        // move the config
+        await set(oldConfig, configPath)
+        await rm(oldConfigPath)
+        return oldConfig
+      }
+      else return {}
     })
 
   const newConfig = migrateData(allMigrations, currentConfig)
@@ -40,6 +53,7 @@ export async function init (configPath = CONFIG_PATH) {
     await set(newConfig, configPath)
   }
 }
+function noop () {}
 
 export async function get (configPath = CONFIG_PATH) {
   const configBuffer = await readFile(configPath)
@@ -52,5 +66,6 @@ export function getSync (configPath = CONFIG_PATH) {
 }
 
 export async function set (config = {}, configPath = CONFIG_PATH) {
+  await mkdirp(dirname(configPath))
   await writeFile(configPath, JSON.stringify(config))
 }
