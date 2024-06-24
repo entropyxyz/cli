@@ -1,6 +1,6 @@
 ---
 name: Build, lint, test
-run-name: Test JS SDK (started by @${{ github.triggering_actor }})
+run-name: Test JS CLI (started by @${{ github.triggering_actor }})
 
 on:
   pull_request:
@@ -26,11 +26,6 @@ jobs:
         run: yarn run test:types
       - name: Build
         run: yarn run build
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_CI_TOKEN }}
       - name: Add TSS server host mappings
         run: |
           echo "127.0.0.1 alice-tss-server bob-tss-server" | sudo tee -a /etc/hosts
