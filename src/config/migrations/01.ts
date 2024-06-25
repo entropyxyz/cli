@@ -5,7 +5,8 @@ export function migrate (data = {}) {
     const migratedData = {
       ...data,
       endpoints: {
-        dev: 'ws://127.0.0.1:9944',
+        // @ts-ignore
+        ...data.endpoints,
         'test-net': 'wss://testnet.entropy.xyz'
       },
       'migration-version': version,
