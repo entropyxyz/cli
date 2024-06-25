@@ -2,7 +2,7 @@ import inquirer from 'inquirer'
 import { randomAsHex } from '@polkadot/util-crypto'
 // @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
-import { importQuestions } from './import-key'
+import { importQuestions } from './helpers/import-key'
 // import * as passwordFlow from '../password'
 import { debug, print } from '../../common/utils'
 
