@@ -6,7 +6,7 @@ import inquirer from "inquirer"
 import { decrypt, encrypt } from "../flows/password"
 import { debug } from "../common/utils"
 import * as config from "../config"
-import { EntropyAccountData } from "../types"
+import { EntropyAccountData } from "../config/types"
 
 // TODO: unused
 // let defaultAccount // have a main account to use
@@ -20,7 +20,7 @@ const keyrings = {
 export function getKeyring (address) {
   if (!address && keyrings.default) return keyrings.default
   if (address && keyrings[address]) return keyrings[address]
-// explicitly return undefined so there is no confusion around what is selected
+  // explicitly return undefined so there is no confusion around what is selected
   return undefined
 }
 
@@ -39,7 +39,7 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint }: Ini
     await wasmGlobalsReady()
 
     const { accountData, password: successfulPassword } = await getAccountDataAndPassword(keyMaterial, password)
-// check if there is no admin account and no seed so that we can throw an error
+    // check if there is no admin account and no seed so that we can throw an error
     if (!accountData.seed && !accountData.admin) {
       throw new Error("Data format is not recognized as either encrypted or unencrypted")
     }
