@@ -1,3 +1,9 @@
+export interface EntropyConfig {
+  accounts: EntropyAccountConfig[]
+  endpoints: { dev: string; 'test-net': string }
+  'migration-version': string
+}
+
 export interface EntropyAccountConfig {
   name: string
   address: string
