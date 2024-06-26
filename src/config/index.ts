@@ -7,7 +7,7 @@ import envPaths from 'env-paths'
 
 import allMigrations from './migrations'
 
-const paths = envPaths('entropy-cryptography', { suffix: '' })
+const paths = envPaths('entropyxyz', { suffix: '' })
 const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
 const OLD_CONFIG_PATH = join(process.env.HOME, '.entropy-cli.config')
 

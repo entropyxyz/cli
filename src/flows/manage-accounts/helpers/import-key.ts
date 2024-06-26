@@ -1,4 +1,4 @@
-import { debug } from '../../common/utils'
+import { debug } from '../../../common/utils'
 // import { mnemonicValidate, mnemonicToMiniSecret } from '@polkadot/util-crypto'
 
 export const importQuestions = [

@@ -1,19 +1,20 @@
 import inquirer from 'inquirer'
+import { debug, print } from '../../common/utils'
 import { newKey } from './new-key'
 import { selectAccount } from './select-account'
-import { debug, print } from '../../common/utils'
+import { listAccounts } from './list'
 
 const actions = {
   'Create/Import Account': newKey,
   'Select Account': selectAccount,
-  'List Accounts': async (config) => {
-    const accountsArray = Array.isArray(config.accounts) ? config.accounts : [config.accounts]
-    accountsArray.forEach((account) => print({
-      name: account.name,
-      address: account.address,
-      verifyingKeys: account?.data?.admin?.verifyingKeys
-    }))
-    if (!accountsArray.length) console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
+  'List Accounts': (config) => {
+    try {
+      const accountsArray = listAccounts(config)
+      accountsArray?.forEach(account => print(account))
+      return
+    } catch (error) {
+      console.error(error.message);
+    }
   },
 }
 
