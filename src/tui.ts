@@ -5,9 +5,11 @@ import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
 import { debug, print } from './common/utils'
 
+
+let shouldInit = true
+
 // tui = text user interface
 export default function tui (options: EntropyTuiOptions) {
-  config.init()
 
   console.clear()
   console.log(logo) // the Entropy logo
@@ -37,6 +39,12 @@ export default function tui (options: EntropyTuiOptions) {
 }
 
 async function main (choices, options) {
+
+  if (shouldInit) {
+    await config.init()
+    shouldInit = false
+  }
+
   let storedConfig = await config.get()
 
   // if there are accounts available and selected account is not set, 
