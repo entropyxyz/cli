@@ -36,7 +36,6 @@ type MaybeKeyMaterial = EntropyAccountData | string
 // This is currently caught earlier in the code
 export const initializeEntropy = async ({ keyMaterial, password, endpoint, configPath }: InitializeEntropyOpts): Promise<Entropy> => {
   try {
-    // if (defaultAccount && defaultAccount.seed === keyMaterial.seed) return entropys[defaultAccount.registering.address]
     await wasmGlobalsReady()
 
     const { accountData, password: successfulPassword } = await getAccountDataAndPassword(keyMaterial, password)
