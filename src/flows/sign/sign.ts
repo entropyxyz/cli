@@ -10,13 +10,13 @@ function stringToHex (str: string): string {
   return Buffer.from(str).toString('hex')
 }
 
-export async function signWithAdapter (entropy, input: SignWithAdapterInput) {
+export async function signWithAdapters (entropy, input: SignWithAdapterInput) {
   return entropy.signWithAdaptersInOrder({
     msg: {
       msg: stringToHex(input.msg)
     },
     // type
-    order: ['deviceKeyProxy'],
+    order: ['deviceKeyProxy', 'noop'],
     signatureVerifyingKey: input.verifyingKey
     // auxillaryData
   })

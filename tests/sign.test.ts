@@ -1,6 +1,6 @@
 import test  from 'tape'
 
-import { signWithAdapter } from '../src/flows/sign/sign'
+import { signWithAdapters } from '../src/flows/sign/sign'
 import { setupTest, charlieStashSeed } from './testing-utils'
 
 test('Sign - signWithAdapter', async (t) => {
@@ -10,7 +10,7 @@ test('Sign - signWithAdapter', async (t) => {
 
   const signature = await run(
     'sign',
-    signWithAdapter(entropy, { msg: "heyo!" })
+    signWithAdapters(entropy, { msg: "heyo!" })
   )
 
   t.true(signature && signature.length > 32, 'signature has some body!')
