@@ -1,6 +1,5 @@
 export interface TransferOptions { 
-  fromAddress?: string
-  fromPair?: any
+  from?: any
   to: string
   amount: number | string | bigint 
 }
