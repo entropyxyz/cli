@@ -8,6 +8,8 @@ export {
   spinNetworkDown,
 }
 
+export * from './setup-test'
+
 /* Helper for wrapping promises which makes it super clear in logging if the promise
  * resolves or threw.
  *
