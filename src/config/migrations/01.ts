@@ -1,4 +1,4 @@
-export const version = '1' // make future versions a number plz
+export const version = 1
 
 export function migrate (data = {}) {
   try {
@@ -8,8 +8,7 @@ export function migrate (data = {}) {
         // @ts-ignore
         ...data.endpoints,
         'test-net': 'wss://testnet.entropy.xyz'
-      },
-      'migration-version': version,
+      }
     }
     return migratedData
   } catch (e) {
