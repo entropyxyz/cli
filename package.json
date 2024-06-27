@@ -10,7 +10,7 @@
     "test": "yarn test:types && yarn test:ts && yarn test:only",
     "lint": "eslint . --ext .ts --fix",
     "test:only": "./dev/bin/test-only.sh",
-    "test:ts": "./dev/bin/test-ts.sh",
+    "test:ts": "yarn removedb && ./dev/bin/test-ts.sh",
     "test:types": "tsc --project tsconfig.json",
     "prepare": "husky",
     "postinstall": "husky",
@@ -18,7 +18,8 @@
     "postpack": "pinst --enable",
     "link:sdk": "yarn link @entropyxyz/sdk",
     "unlink:sdk": "yarn unlink @entropyxyz/sdk",
-    "re-link:sdk": "yarn unlink:sdk && yarn link:sdk"
+    "re-link:sdk": "yarn unlink:sdk && yarn link:sdk",
+    "removedb": "rm -rf .entropy && docker compose --file node_modules/@entropyxyz/sdk/dev/docker-scripts/two-nodes.yaml down 2> /dev/null"
   },
   "files": [
     "dist"

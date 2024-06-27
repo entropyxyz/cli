@@ -1,14 +1,12 @@
 import test from 'tape'
 
 import { getBalance, getBalances } from '../src/flows/balance/balance'
-import { setupTest } from './testing-utils'
+import { setupTest, charlieStashAddress as richAddress } from './testing-utils'
 
 const networkType = 'two-nodes'
-// TODO: export charlieStashSeed
-const richAddress = '5Ck5SLSHYac6WFt5UZRSsdJjwmpSZq85fd5TRNAdZQVzEAPT'
 
 test('getBalance + getBalances', async (t) => {
-  const { run, entropy } = await setupTest(t, networkType)
+  const { run, entropy } = await setupTest(t, { networkType })
 
   const newAddress = entropy.keyring.accounts.registration.address
   
