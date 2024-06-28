@@ -20,26 +20,26 @@ const keyrings = {
 export function getKeyring (address) {
   if (!address && keyrings.default) return keyrings.default
   if (address && keyrings[address]) return keyrings[address]
-// explicitly return undefined so there is no confusion around what is selected
+  // explicitly return undefined so there is no confusion around what is selected
   return undefined
 }
 
 interface InitializeEntropyOpts {
   keyMaterial: MaybeKeyMaterial,
   password?: string,
-  endpoint: string
+  endpoint: string,
+  configPath?: string // for testing
 }
 type MaybeKeyMaterial = EntropyAccountData | string
 
 // WARNING: in programatic cli mode this function should NEVER prompt users, but it will if no password was provided
 // This is currently caught earlier in the code
-export const initializeEntropy = async ({ keyMaterial, password, endpoint }: InitializeEntropyOpts): Promise<Entropy> => {
+export const initializeEntropy = async ({ keyMaterial, password, endpoint, configPath }: InitializeEntropyOpts): Promise<Entropy> => {
   try {
-    // if (defaultAccount && defaultAccount.seed === keyMaterial.seed) return entropys[defaultAccount.registering.address]
     await wasmGlobalsReady()
 
     const { accountData, password: successfulPassword } = await getAccountDataAndPassword(keyMaterial, password)
-// check if there is no admin account and no seed so that we can throw an error
+    // check if there is no admin account and no seed so that we can throw an error
     if (!accountData.seed && !accountData.admin) {
       throw new Error("Data format is not recognized as either encrypted or unencrypted")
     }
@@ -47,7 +47,7 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint }: Ini
     if (accountData && accountData.admin && !accountData.registration) {
       accountData.registration = accountData.admin
       accountData.registration.used = true // TODO: is this even used?
-      const store = await config.get()
+      const store = await config.get(configPath)
       store.accounts = store.accounts.map((account) => {
         if (account.address === accountData.admin.address) {
           let data = accountData
@@ -61,7 +61,7 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint }: Ini
         return account
       })
       // re save the entire config
-      await config.set(store)
+      await config.set(store, configPath)
     }
 
     let selectedAccount
@@ -70,7 +70,7 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint }: Ini
     if(!storedKeyring) {
       const keyring = new Keyring({ ...accountData, debug: true })
       keyring.accounts.on('account-update', async (newAccountData) => {
-        const store = await config.get()
+        const store = await config.get(configPath)
         store.accounts = store.accounts.map((account) => {
           if (account.address === store.selectedAccount) {
             let data = newAccountData
@@ -85,7 +85,7 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint }: Ini
         })
 
         // re save the entire config
-        await config.set(store)
+        await config.set(store, configPath)
 
       })
       keyrings.default = keyring

@@ -1,6 +1,7 @@
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { debug } from "../../common/utils"
 import * as config from '../../config'
+import { signWithAdapters } from './sign'
 
 // TODO: revisit this file, rename as signEthTransaction?
 export async function cliSign ({ address, message, endpoint }) {
@@ -13,12 +14,7 @@ export async function cliSign ({ address, message, endpoint }) {
 
   const entropy = await initializeEntropy({ keyMaterial: account.data, endpoint })
 
-  // TODO: WIP
-  // @ts-ignore ... something here frankie
-  const signature = await entropy.signWithAdapter({
-    type: 'deviceKeyProxy',
-    msg: message,
+  return signWithAdapters(entropy, {
+    msg: message
   })
-
-  return signature
 }
