@@ -55,20 +55,16 @@ test('Transfer', async (t) => {
 
   t.equal(charlieBalance, 1e21, 'charlie got bank')
 
-  try {
-    const transferStatus = await transfer(
-      entropy,
-      {
-        from: charlieEntropy.keyring.accounts.registration.pair,
-        to: recipientAddress,
-        amount: BigInt(1000 * 10e10)
-      }
-    )
-    // @ts-ignore
-    t.true(transferStatus.isFinalized, 'Funds transferred successfully')
-  } catch (error) {
-    console.error('error', error);
-  }
+  const transferStatus = await run(
+    'transfer',
+    transfer(entropy, {
+      from: charlieEntropy.keyring.accounts.registration.pair,
+      to: recipientAddress,
+      amount: BigInt(1000 * 10e10)
+    })
+  )
+  // @ts-ignore
+  t.true(transferStatus?.isFinalized, 'Funds transferred successfully')
 
   // Re-Check Balance of new account
   naynayBalance = await run(
