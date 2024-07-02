@@ -55,6 +55,7 @@
     "mkdirp": "^3.0.1",
     "typescript": "^4.8.4",
     "viem": "^2.7.8",
+    "winston": "^3.13.0",
     "x25519": "^0.1.0"
   },
   "devDependencies": {
