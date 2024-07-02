@@ -1,7 +1,7 @@
 import Entropy from "@entropyxyz/sdk";
 import { TransferOptions } from "./types";
 
-export async function transfer (entropy: Entropy, payload: TransferOptions) {
+export async function transfer (entropy: Entropy, payload: TransferOptions): Promise<any> {
   const { from, to, amount } = payload
 
   return new Promise((resolve, reject) => {
