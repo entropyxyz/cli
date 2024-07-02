@@ -1,7 +1,8 @@
 import test from 'tape'
-import Entropy, { wasmGlobalsReady } from '@entropyxyz/sdk'
+import { wasmGlobalsReady } from '@entropyxyz/sdk'
 // WIP: I'm seeing problems importing this?
-import Keyring from '@entropyxyz/sdk/dist/keys/index'
+// @ts-ignore
+import Keyring from '@entropyxyz/sdk/keys'
 import { 
   makeSeed,
   promiseRunner,
@@ -33,8 +34,11 @@ test('Transfer', async (t) => {
   await sleep(process.env.GITHUB_WORKSPACE ? 30_000 : 5_000)
 
   const naynaySeed = makeSeed()
-  const entropy = await initializeEntropy({ keyMaterial: { seed: naynaySeed, debug: true }, endpoint: 'ws://127.0.0.1:9944', })
-  const charlieEntropy = await initializeEntropy({ keyMaterial: { seed: charlieStashSeed, debug: true }, endpoint: 'ws://127.0.0.1:9944', })
+  const naynayKeyring = new Keyring({ seed: naynaySeed, debug: true })
+  const charlieKeyring = new Keyring({ seed: charlieStashSeed, debug: true })
+  
+  const entropy = await initializeEntropy({ keyMaterial: naynayKeyring.getAccount(), endpoint: 'ws://127.0.0.1:9944', })
+  const charlieEntropy = await initializeEntropy({ keyMaterial: charlieKeyring.getAccount(), endpoint: 'ws://127.0.0.1:9944', })
   await run('entropy ready', entropy.ready)
   await run('charlie ready', charlieEntropy.ready)
   

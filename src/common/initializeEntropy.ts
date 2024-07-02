@@ -17,18 +17,9 @@ const keyrings = {
   default: undefined // this is the "selected account" keyring
 }
 
-export function getKeyring (address?: string, seed?: string) {
+export function getKeyring (address?: string) {
   
-  if (!address && !seed && keyrings.default) return keyrings.default
-  if (!address && seed && keyrings.default && Object.keys(keyrings).length > 1) {
-    const [keyring] = Object.keys(keyrings)
-      .filter(kr => {
-      
-        return keyrings[kr]?.admin?.seed === seed
-      })
-    
-    return keyring
-  }
+  if (!address && keyrings.default) return keyrings.default
   if (address && keyrings[address]) return keyrings[address]
   // explicitly return undefined so there is no confusion around what is selected
   return undefined
@@ -75,7 +66,7 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint, confi
     }
 
     let selectedAccount
-    const storedKeyring = getKeyring(accountData?.admin?.address, accountData.seed)
+    const storedKeyring = getKeyring(accountData.admin.address)
 
     if(!storedKeyring) {
       const keyring = new Keyring({ ...accountData, debug: true })

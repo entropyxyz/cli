@@ -1,5 +1,7 @@
+// @ts-ignore
+import { Pair } from '@entropyxyz/sdk/keys'
 export interface TransferOptions { 
-  from?: any
+  from: Pair
   to: string
-  amount: number | string | bigint 
+  amount: bigint 
 }
