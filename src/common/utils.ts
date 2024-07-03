@@ -2,7 +2,7 @@ import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex } from "@polkadot/util"
 import { Buffer } from 'buffer'
 import Debug from 'debug'
-import { EntropyAccountConfig } from "../types"
+import { EntropyAccountConfig } from "../config/types"
 
 const _debug = Debug('@entropyxyz/cli')
 
