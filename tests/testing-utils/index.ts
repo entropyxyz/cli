@@ -1,4 +1,3 @@
-// @ts-ignore
 import { spinNetworkUp, spinNetworkDown, } from "@entropyxyz/sdk/testing"
 import * as readline from 'readline'
 import { randomBytes } from 'crypto'

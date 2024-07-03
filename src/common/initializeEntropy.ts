@@ -1,6 +1,4 @@
 import Entropy, { wasmGlobalsReady } from "@entropyxyz/sdk"
-// TODO: fix importing of types from @entropy/sdk/keys
-// @ts-ignore
 import Keyring from "@entropyxyz/sdk/keys"
 import inquirer from "inquirer"
 import { decrypt, encrypt } from "../flows/password"

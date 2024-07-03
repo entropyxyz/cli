@@ -1,8 +1,6 @@
 import { Test } from 'tape'
 import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
-// @ts-ignore
 import { spinNetworkUp, spinNetworkDown, } from "@entropyxyz/sdk/testing"
-// @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
 
 import { initializeEntropy } from '../../src/common/initializeEntropy'
