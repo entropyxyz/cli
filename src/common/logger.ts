@@ -44,7 +44,7 @@ export class EntropyLogger {
         format,
         winston.format.colorize({ level: true }),
         winston.format.printf(info => {
-          let message = typeof info.message === 'object' ? JSON.stringify(info.message) : info.message;
+          let message = typeof info.message === 'object' ? JSON.stringify(info.message, null, 2) : info.message;
           if (info.stack) {
             message = `${message}\n${info.stack}`;
           }
