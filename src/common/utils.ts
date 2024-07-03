@@ -13,16 +13,21 @@ export function stripHexPrefix (str: string): string {
 
 export function debug (...args: any[]) {
   _debug(...args.map(arg => {
-    return typeof arg === 'object'
-      ? JSON.stringify(arg, replacer, 2)
-      : arg
+    return stringify(arg, 2)
   }))
 }
-function replacer (key, value) {
-  if(value instanceof Uint8Array ){
-    return Buffer.from(value).toString('base64')
+
+export function stringify (thing, indent) {
+  if (typeof thing === 'string') return thing
+  return JSON.stringify(thing, replacer, indent)
+}
+
+export function replacer (key, value) {
+  if (value instanceof Uint8Array) {
+    return "base64:" + Buffer.from(value).toString("base64");
   }
-  else return value
+
+  return value
 }
 
 export function print (...args) {

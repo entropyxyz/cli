@@ -1,6 +1,6 @@
 import { EntropyLogger } from "src/common/logger";
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { print, getSelectedAccount } from "../../common/utils"
+import { print, getSelectedAccount, replacer } from "../../common/utils"
 import { getBalance } from "./balance";
 
 // TO-DO setup flow method to provide options to allow users to select account,
@@ -11,7 +11,7 @@ export async function checkBalance ({ accounts, selectedAccount: selectedAccount
   logger.debug(`endpoint: ${endpoint}`)
   
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
-  logger.log(`selected account: ${JSON.stringify(selectedAccount)}`)
+  logger.log(`selected account: ${JSON.stringify(selectedAccount, replacer)}`)
   const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint });
   const accountAddress = selectedAccountAddress
   const freeBalance = await getBalance(entropy, accountAddress)

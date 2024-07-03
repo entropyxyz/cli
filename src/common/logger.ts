@@ -2,6 +2,8 @@ import envPaths from 'env-paths'
 import { join } from 'path'
 import * as winston from 'winston'
 
+import { replacer } from './utils'
+
 /**
  * Winston Base Log Levels for NPM
  * {
@@ -14,6 +16,7 @@ import * as winston from 'winston'
  *    silly: 6
  * }
  */
+
 
 export class EntropyLogger {
   protected context: string
@@ -36,7 +39,7 @@ export class EntropyLogger {
       winston.format.splat(),
       // Uses safe-stable-stringify to finalize full object message as string
       // (prevents circular references from crashing)
-      winston.format.json(),
+      winston.format.json({ replacer: replacer }),
     );
 
     if (process.env.NODE_ENV === 'test') {
