@@ -39,7 +39,7 @@ export class EntropyLogger {
       winston.format.splat(),
       // Uses safe-stable-stringify to finalize full object message as string
       // (prevents circular references from crashing)
-      winston.format.json({ replacer: replacer }),
+      winston.format.json({ replacer }),
     );
 
     if (process.env.NODE_ENV === 'test') {
