@@ -1,4 +1,4 @@
-import { EntropyAccountConfig, EntropyConfig } from 'src/types'
+import { EntropyAccountConfig, EntropyConfig } from 'src/config/types'
 import test from 'tape'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
 import { listAccounts } from 'src/flows/manage-accounts/list'

@@ -1,9 +1,8 @@
 import inquirer from "inquirer"
-import cliProgress from 'cli-progress'
-import colors from 'ansi-colors'
-
-import { print, getSelectedAccount } from "../../common/utils"
+import { getSelectedAccount, print } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
+import { transfer } from "./transfer"
+import { setupProgress } from "src/common/progress"
 
 const question = [
   {
@@ -29,17 +28,12 @@ export async function entropyTransfer ({ accounts, selectedAccount: selectedAcco
   const { endpoint } = options
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
 
+  const { start: startProgress, stop: stopProgress } = setupProgress('Transferring Funds')
+
   try {
     const entropy = await initializeEntropy({
       keyMaterial: selectedAccount.data,
       endpoint
-    })
-
-    const b1 = new cliProgress.SingleBar({
-      format: 'Transferring Funds |' + colors.cyan('{bar}') + '| {percentage}%',
-      barCompleteChar: '\u2588',
-      barIncompleteChar: '\u2591',
-      hideCursor: true
     })
 
     const { amount, recipientAddress } = await inquirer.prompt(question)
@@ -48,34 +42,23 @@ export async function entropyTransfer ({ accounts, selectedAccount: selectedAcco
       throw new Error("Signer keypair is undefined or not properly initialized.")
     }
     const formattedAmount = BigInt(parseInt(amount) * 1e10)
-    const tx = await entropy.substrate.tx.balances.transferAllowDeath(
-      recipientAddress,
-      BigInt(formattedAmount),
-    )
-
-    await tx.signAndSend (entropy.keyring.accounts.registration.pair, ({ status }) => {
-      // initialize the bar - defining payload token "speed" with the default value "N/A"
-      b1.start(300, 0, {
-        speed: "N/A"
-      });
-      // update values
-      const interval = setInterval(() => {
-        b1.increment()
-      }, 100)
-      if (status.isFinalized) {
-        b1.stop()
-        clearInterval(interval)
-        print(
-          `\nTransaction successful: Sent ${amount} to ${recipientAddress}`
-        )
-        print('\nPress enter to return to main menu');
+    startProgress()
+    const transferStatus = await transfer(
+      entropy, 
+      {
+        from: entropy.keyring.accounts.registration.pair,
+        to: recipientAddress,
+        amount: formattedAmount
       }
-    })
-    return;
-    
+    )
+    if (transferStatus.isFinalized) stopProgress()
+
+    print(
+      `\nTransaction successful: Sent ${amount} to ${recipientAddress}`
+    )
+    print('\nPress enter to return to main menu')
   } catch (error) {
+    stopProgress()
     console.error('ERR:::', error);
-    
-    
   }
 }
