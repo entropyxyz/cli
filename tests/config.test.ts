@@ -66,10 +66,17 @@ test('config - migrateData', async t => {
   t.end()
 })
 
+const makeKey = () => new Uint8Array(
+  Array(32).fill(0).map((_, i) => i * 2 + 1)
+)
+
 test('config - get', async t => {
   const configPath = makeTmpPath()
-  const config = { boop: 'doop' }
-  await writeFile(configPath, JSON.stringify(config))
+  const config = { 
+    boop: 'doop',
+    secretKey: makeKey()
+  }
+  await writeFile(configPath, JSON.stringify(config, replacer))
 
   const result = await get(configPath)
   t.deepEqual(result, config, 'get works')
@@ -84,11 +91,14 @@ test('config - get', async t => {
 test('config - set', async t => {
   const configPath = makeTmpPath()
 
-  const config = { dog: true }
+  const config = {
+    dog: true,
+    secretKey: makeKey()
+  }
   await set(config, configPath)
   const actual = await get(configPath)
 
-  t.deepEqual(actual, config, 'set works')
+  t.deepEqual(config, actual, 'set works')
   t.end()
 })
 
