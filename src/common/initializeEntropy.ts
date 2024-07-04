@@ -137,9 +137,18 @@ export const initializeEntropy = async ({ keyMaterial }, endpoint: string): Prom
     }
     // Decision was made to force our users to fix their machine before using the CLI in the case
     // of the machine time and network time being out of sync
-    const currentBlockTime = parseInt((await entropy.substrate.query.timestamp.now()).toString())
+    // get the time before query
+    const queryStartTime = Date.now()
+    const currentNetworkTime = parseInt((await entropy.substrate.query.timestamp.now()).toString())
+    const queryEndTime = Date.now()
+
+    // get the time diff of the query
+    const queryTime = queryEndTime - queryStartTime
     const now = Date.now()
-    if (((now - currentBlockTime) / 1000) >= TIME_THRESHOLD) {
+    //  get the diff of the network time vs are time also buffer the time it took to query that data
+    const timeDiff = now - (currentNetworkTime + queryTime)
+    // the time difference between are time locally and the machine time should be less then 25 seconds
+    if ((timeDiff) >= TIME_THRESHOLD) {
       throw new Error('TimeError: This machine\'s time is out of sync with the network time')
     }
     
