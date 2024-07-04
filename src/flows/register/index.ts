@@ -22,7 +22,7 @@ export async function register (storedConfig, options) {
   // }])
   //@ts-ignore:
   debug('about to register selectedAccount.address' +  selectedAccount.address + 'keyring:' + entropy.keyring.getLazyLoadAccountProxy('registration').pair.address)
-  print("Attempting to register the address:", selectedAccount.address, )
+  print("Attempting to register the address:", selectedAccount.address)
   let verifyingKey: string
   try {
     // For now we are forcing users to only register with the default info before having to format the config for them

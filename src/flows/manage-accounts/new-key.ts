@@ -79,7 +79,8 @@ export async function newKey ({ accounts }) {
     data,
   }
 
-  print(`New account:\n{\n\tname: ${newAccount.name}\n\taddress: ${newAccount.address}\n}`)
+  print('New account:')
+  print({ name: newAccount.name, address: newAccount.address })
 
   accounts.push(newAccount)
   return { accounts, selectedAccount: newAccount.address }

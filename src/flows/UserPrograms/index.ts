@@ -56,11 +56,9 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
       } else {
         print("Your Programs:")
         programs.forEach((program, index) => {
-          print(
-            `${index + 1}. Pointer: ${
-              program.program_pointer
-            }, Config: ${JSON.stringify(program.program_config)}`
-          )
+          print(`${index + 1}.`)
+          print('Pointer:', program.program_pointer)
+          print('Config:', parseProgramConfig(program.program_config))
         })
       }
     } catch (error) {
@@ -153,4 +151,13 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
   case 'Exit to Main Menu':
     return 'exit'
   }
+}
+
+function parseProgramConfig (rawConfig: unknown) {
+  if (typeof rawConfig !== 'string') return rawConfig
+  if (!rawConfig.startsWith('0x')) return rawConfig
+
+  const hex = rawConfig.slice(2)
+  const utf8 = Buffer.from(hex, 'hex').toString()
+  return JSON.parse(utf8)
 }
