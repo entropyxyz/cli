@@ -1,30 +1,42 @@
 export const version = 2
 
+const targetKeys = new Set(['secretKey', 'publicKey', 'addressRaw'])
+
 export function migrate (data = {}) {
-  return walk(data, encodeSomeKeys)
-}
+  if (!isObject(data)) return data
+  if (isUI8A(data)) return data
 
+  const initial = isArray(data) ? [] : {}
 
-function walk (obj, replacer) {
-  if (typeof obj !== 'object') return obj
-
-  const initial = Array.isArray(obj) ? [] : {}
-
-  return Object.entries(obj).reduce((acc, [key, value]) => {
-    const newValue = replacer(key, value)
-    acc[key] = walk(newValue, replacer)
+  return Object.entries(data).reduce((acc, [key, value]) => {
+    if (targetKeys.has(key) && !isUI8A(value)) {
+      acc[key] = objToUI8A(value)
+    }
+    else {
+      acc[key] = migrate(value)
+    }
 
     return acc
   }, initial)
 }
 
-const targetKeys = new Set(['secretKey', 'publicKey', 'addressRaw'])
-function encodeSomeKeys (key, value) {
-  if (!targetKeys.has(key)) return value
 
-  const bytes = Object.keys(value)
-    .map(arrayIndex => value[arrayIndex])
+function isObject (thing) {
+  return typeof thing === 'object'
+}
 
-  console.log('BYTES', key, bytes)
+function isArray (thing) {
+  return Array.isArray(thing)
+}
+
+function isUI8A (thing) {
+  return thing instanceof Uint8Array
+}
+
+
+function objToUI8A (obj) {
+  const bytes = Object.keys(obj)
+    .map(arrayIndex => obj[arrayIndex])
+
   return new Uint8Array(bytes)
 }
