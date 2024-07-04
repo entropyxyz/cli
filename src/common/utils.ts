@@ -18,7 +18,7 @@ export function debug (...args: any[]) {
       : arg
   }))
 }
-function replacer (key, value) {
+export function replacer (key, value) {
   if(value instanceof Uint8Array ){
     return Buffer.from(value).toString('base64')
   }
