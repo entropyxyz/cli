@@ -3,9 +3,10 @@ import * as util from "@polkadot/util"
 import inquirer from "inquirer"
 import { readFileSync } from "fs"
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { debug, print, getSelectedAccount } from "../../common/utils"
+import { print, getSelectedAccount } from "../../common/utils"
+import { EntropyTuiOptions } from "src/types"
 
-export async function devPrograms ({ accounts, selectedAccount: selectedAccountAddress }, options) {
+export async function devPrograms ({ accounts, selectedAccount: selectedAccountAddress }, options: EntropyTuiOptions) {
   const { endpoint } = options
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
 
@@ -84,7 +85,6 @@ async function deployProgram (entropy: Entropy, account: any) {
 
 async function getOwnedPrograms (entropy: Entropy, account: any) {
   const userAddress = account.address
-  debug('Account address:',userAddress)
   if (!userAddress) return
 
   try {

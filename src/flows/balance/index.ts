@@ -5,13 +5,13 @@ import { getBalance } from "./balance";
 
 // TO-DO setup flow method to provide options to allow users to select account,
 // use external address, or get balances for all accounts in config
-export async function checkBalance ({ accounts, selectedAccount: selectedAccountAddress }, options) {
+export async function checkBalance ({ accounts, selectedAccount: selectedAccountAddress }, options, logger: EntropyLogger) {
+  const FLOW_CONTEXT = 'CHECK_BALANCE'
   const { endpoint } = options
-  const logger = new EntropyLogger('TUI:: checkBalance', endpoint)
-  logger.debug(`endpoint: ${endpoint}`)
+  logger.debug(`endpoint: ${endpoint}`, FLOW_CONTEXT)
   
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
-  logger.log(`selected account: ${JSON.stringify(selectedAccount)}`)
+  logger.log(selectedAccount, FLOW_CONTEXT)
   const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint });
   const accountAddress = selectedAccountAddress
   const freeBalance = await getBalance(entropy, accountAddress)

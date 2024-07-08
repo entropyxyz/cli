@@ -1,6 +1,7 @@
 import envPaths from 'env-paths'
 import { join } from 'path'
 import * as winston from 'winston'
+import { maskPayload } from './masking'
 
 /**
  * Winston Base Log Levels for NPM
@@ -56,14 +57,12 @@ export class EntropyLogger {
     const DEBUG_PATH = join(paths.log, 'entropy-cli.debug.log')
     const ERROR_PATH = join(paths.log, 'entropy-cli.error.log')
     const INFO_PATH = join(paths.log, 'entropy-cli.info.log')
-    const VERBOSE_PATH = join(paths.log, 'entropy-cli.verbose.log')
 
     this.winstonLogger = winston.createLogger({
       level: process.env.LOG_LEVEL,
       format,
       defaultMeta: { service: 'Entropy CLI' },
       transports: [
-        new winston.transports.File({ filename: VERBOSE_PATH }),
         new winston.transports.File({
           level: 'error',
           filename: ERROR_PATH
@@ -115,7 +114,7 @@ export class EntropyLogger {
   protected writeLogMsg (level: string, message: any, context?: string, description?: string, stack?: string) {
     this.winstonLogger.log({
       level,
-      message,
+      message: maskPayload(message),
       context: context || this.context,
       endpoint: this.endpoint,
       description,
