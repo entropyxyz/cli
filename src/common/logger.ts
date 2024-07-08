@@ -2,6 +2,7 @@ import envPaths from 'env-paths'
 import { join } from 'path'
 import * as winston from 'winston'
 import { maskPayload } from './masking'
+import { EntropyLoggerOptions } from 'src/types'
 
 /**
  * Winston Base Log Levels for NPM
@@ -20,8 +21,8 @@ export class EntropyLogger {
   protected context: string
   protected endpoint: string
   private winstonLogger: winston.Logger
-
-  constructor (context: string, endpoint: string) {
+  // TO-DO: update commander with debug, testing, and level options for both programmatic and textual cli
+  constructor (context: string, endpoint: string, { debug, isTesting, level }: EntropyLoggerOptions = {}) {
     this.context = context
     this.endpoint = endpoint
 
@@ -40,7 +41,7 @@ export class EntropyLogger {
       winston.format.json(),
     );
 
-    if (process.env.NODE_ENV === 'test') {
+    if (isTesting) {
       format = winston.format.combine(
         format,
         winston.format.colorize({ level: true }),
@@ -59,7 +60,7 @@ export class EntropyLogger {
     const INFO_PATH = join(paths.log, 'entropy-cli.info.log')
 
     this.winstonLogger = winston.createLogger({
-      level: process.env.LOG_LEVEL,
+      level: level || 'info',
       format,
       defaultMeta: { service: 'Entropy CLI' },
       transports: [
@@ -79,7 +80,7 @@ export class EntropyLogger {
     })
 
     // If env var is set then stream logs to console as well as a file
-    if (process.env.DEBUG) {
+    if (debug) {
       this.winstonLogger.add(new winston.transports.Console({
         format: winston.format.cli()
       }))
