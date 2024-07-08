@@ -1,12 +1,11 @@
 import inquirer from 'inquirer'
 import { randomAsHex } from '@polkadot/util-crypto'
-// @ts-ignore
-import Keyring from '@entropyxyz/sdk/keys'
-import { importQuestions } from './helpers/import-key'
+import { importQuestions } from './helpers/import-account'
 // import * as passwordFlow from '../password'
-import { debug, print } from '../../common/utils'
+import { print } from '../../common/utils'
+import { createAccount } from './helpers/create-account'
 
-export async function newKey ({ accounts }) {
+export async function newAccount ({ accounts }) {
   accounts = Array.isArray(accounts) ? accounts : []
 
   const questions = [
@@ -62,22 +61,7 @@ export async function newKey ({ accounts }) {
     seed = importKey ? secret : randomAsHex(32)
   }
 
-  const keyring = new Keyring({ seed, path, debug: true })
-  const fullAccount = keyring.getAccount()
-  // TO-DO: sdk should create account on constructor
-  const { admin } = keyring.getAccount()
-  debug('fullAccount:', fullAccount)
-  
-  const data = fullAccount
-  delete admin.pair
-  // const encryptedData = password ? passwordFlow.encrypt(data, password) : data
-
-  const newAccount = {
-    name: name,
-    address: admin.address,
-    // TODO: replace with data: encryptedData once pasword input is added back
-    data,
-  }
+  const newAccount = await createAccount({ name, seed, path })
 
   print(`New account:\n{\n\tname: ${newAccount.name}\n\taddress: ${newAccount.address}\n}`)
 

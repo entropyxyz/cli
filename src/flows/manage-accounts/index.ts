@@ -1,11 +1,11 @@
 import inquirer from 'inquirer'
 import { debug, print } from '../../common/utils'
-import { newKey } from './new-key'
+import { newAccount } from './new-account'
 import { selectAccount } from './select-account'
 import { listAccounts } from './list'
 
 const actions = {
-  'Create/Import Account': newKey,
+  'Create/Import Account': newAccount,
   'Select Account': selectAccount,
   'List Accounts': (config) => {
     try {
