@@ -4,9 +4,9 @@ import Entropy, { wasmGlobalsReady } from "@entropyxyz/sdk"
 import Keyring from "@entropyxyz/sdk/keys"
 import inquirer from "inquirer"
 import { decrypt, encrypt } from "../flows/password"
-import { debug } from "../common/utils"
 import * as config from "../config"
 import { EntropyAccountData } from "../config/types"
+import { EntropyLogger } from "./logger"
 
 // TODO: unused
 // let defaultAccount // have a main account to use
@@ -36,6 +36,7 @@ type MaybeKeyMaterial = EntropyAccountData | string
 // WARNING: in programatic cli mode this function should NEVER prompt users, but it will if no password was provided
 // This is currently caught earlier in the code
 export const initializeEntropy = async ({ keyMaterial, password, endpoint, configPath }: InitializeEntropyOpts): Promise<Entropy> => {
+  const logger = new EntropyLogger('initializeEntropy', endpoint)
   try {
     await wasmGlobalsReady()
 
@@ -90,7 +91,7 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint, confi
 
       })
       keyrings.default = keyring
-      debug(keyring)
+      logger.debug(keyring)
 
       // TO-DO: fix in sdk: admin should be on kering.accounts by default
       // /*WANT*/ keyrings[keyring.admin.address] = keyring
@@ -111,6 +112,7 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint, confi
     
     return entropy
   } catch (error) {
+    logger.error('Error while initializing entropy', error)
     console.error(error.message)
     if (error.message.includes('TimeError')) {
       process.exit(1)

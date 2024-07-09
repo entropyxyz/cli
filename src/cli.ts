@@ -10,7 +10,6 @@ import { cliGetBalance } from './flows/balance/cli'
 import { cliListAccounts } from './flows/manage-accounts/cli'
 import { cliEntropyTransfer } from './flows/entropyTransfer/cli'
 import { cliSign } from './flows/sign/cli'
-// import { debug } from './common/utils'
 
 const program = new Command()
 
@@ -68,7 +67,6 @@ program.command('list')
   .description('List all accounts. Output is JSON of form [{ name, address, data }]')
   .action(async () => {
     // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
-
     const accounts = await cliListAccounts()
     writeOut(accounts)
     process.exit(0)
