@@ -4,8 +4,9 @@ import { importQuestions } from './helpers/import-account'
 // import * as passwordFlow from '../password'
 import { print } from '../../common/utils'
 import { createAccount } from './helpers/create-account'
+import { EntropyLogger } from 'src/common/logger'
 
-export async function newAccount ({ accounts }) {
+export async function newAccount ({ accounts }, logger: EntropyLogger) {
   accounts = Array.isArray(accounts) ? accounts : []
 
   const questions = [
@@ -61,7 +62,7 @@ export async function newAccount ({ accounts }) {
     seed = importKey ? secret : randomAsHex(32)
   }
 
-  const newAccount = await createAccount({ name, seed, path })
+  const newAccount = await createAccount({ name, seed, path }, logger)
 
   print(`New account:\n{\n\tname: ${newAccount.name}\n\taddress: ${newAccount.address}\n}`)
 

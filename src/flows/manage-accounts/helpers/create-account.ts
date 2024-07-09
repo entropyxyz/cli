@@ -1,14 +1,16 @@
 // @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
-import { debug } from 'src/common/utils';
+import { EntropyLogger } from 'src/common/logger';
 import { EntropyAccountConfig } from "src/config/types";
 
-export async function createAccount ({ name, seed, path }: { name: string, seed: string, path?: string }): Promise<EntropyAccountConfig> {
+export async function createAccount ({ name, seed, path }: { name: string, seed: string, path?: string }, logger?: EntropyLogger): Promise<EntropyAccountConfig> {
+  const FLOW_CONTEXT = 'MANAGE_ACCOUNTS::CREATE_ACCOUNT'
   const keyring = new Keyring({ seed, path, debug: true })
   const fullAccount = keyring.getAccount()
   // TO-DO: sdk should create account on constructor
   const { admin } = keyring.getAccount()
-  debug('fullAccount:', fullAccount)
+  logger?.debug('fullAccount:', FLOW_CONTEXT)
+  logger?.debug(fullAccount, FLOW_CONTEXT)
   
   const data = fullAccount
   delete admin.pair

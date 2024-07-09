@@ -1,22 +1,12 @@
 import { Buffer } from 'buffer'
-import Debug from 'debug'
 import { EntropyAccountConfig } from "../config/types"
-
-const _debug = Debug('@entropyxyz/cli')
 
 export function stripHexPrefix (str: string): string {
   if (str.startsWith('0x')) return str.slice(2)
   return str
 }
 
-export function debug (...args: any[]) {
-  _debug(...args.map(arg => {
-    return typeof arg === 'object'
-      ? JSON.stringify(arg, replacer, 2)
-      : arg
-  }))
-}
-function replacer (key, value) {
+export function replacer (key, value) {
   if(value instanceof Uint8Array ){
     return Buffer.from(value).toString('base64')
   }
