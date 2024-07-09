@@ -15,6 +15,9 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 ### Added
 - new: './src/flows/balance/balance.ts' - service file separated out of main flow containing the pure functions to perform balance requests for one or multiple addresses
 - new: './tests/balance.test.ts' - new unit tests file for balance pure functions
+- new: './src/flows/manage-accounts/helpers/create-account.ts' - new helper file to house the pure function used to create a new entropy account
+- update: './tests/manage-accounts.test.ts' - added test for create account pure function
+- update: './src/common/utils.ts' - removed isValidSubstrateAddress and imported the method in from the sdk
 ### Fixed
 - keyring retrieval method was incorrectly returning the default keyring when no keyring was found, which is not the intended flow
 ### Changed
