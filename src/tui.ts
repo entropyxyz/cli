@@ -19,7 +19,7 @@ export default function tui (options: EntropyTuiOptions) {
   const choices = {
     'Manage Accounts': flows.manageAccounts,
     'Balance': flows.checkBalance,
-    'Register': flows.register,
+    'Register': flows.entropyRegister,
     'Sign': flows.sign,
     'Transfer': flows.entropyTransfer,
     'Deploy Program': flows.devPrograms,

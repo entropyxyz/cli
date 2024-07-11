@@ -1,9 +1,12 @@
 // import inquirer from "inquirer"
+// @ts-ignore
+import { ChildKey } from '@entropyxyz/sdk/keys'
 import { getSelectedAccount, print, /*accountChoices*/ } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { EntropyLogger } from "src/common/logger";
+import { register } from "./register";
 
-export async function register (storedConfig, options, logger: EntropyLogger) {
+export async function entropyRegister (storedConfig, options, logger: EntropyLogger) {
   const FLOW_CONTEXT = 'REGISTER'
   const { accounts, selectedAccount: selectedFromConfig } = storedConfig;
   const { endpoint } = options
@@ -22,41 +25,18 @@ export async function register (storedConfig, options, logger: EntropyLogger) {
   //   // Setting default to default key proxy program
   //   default: '0x0000000000000000000000000000000000000000000000000000000000000000'
   // }])
-  //@ts-ignore:
-  logger.debug('about to register selectedAccount.address' +  selectedAccount.address + 'keyring:' + entropy.keyring.getLazyLoadAccountProxy('registration').pair.address, FLOW_CONTEXT)
+
+  logger.debug('about to register selectedAccount.address' +  selectedAccount.address + 'keyring:' + entropy.keyring.getLazyLoadAccountProxy(ChildKey.registration).pair.address, FLOW_CONTEXT)
   print("Attempting to register the address:", selectedAccount.address, )
-  let verifyingKey: string
+
   try {
-    // For now we are forcing users to only register with the default info before having to format the config for them
-    // verifyingKey = await entropy.register({
-    //   programDeployer: entropy.keyring.accounts.registration.address,
-    //   programData: [{
-    //     program_pointer: programPointer,
-    //     program_config: '0x',
-    //   }]
-    // })
-    verifyingKey = await entropy.register()
-    if (verifyingKey) {
-      print("Your address", selectedAccount.address, "has been successfully registered.")
-      selectedAccount?.data?.registration?.verifyingKeys?.push(verifyingKey)
-      const arrIdx = accounts.indexOf(selectedAccount)
-      accounts.splice(arrIdx, 1, selectedAccount)
-      return { accounts, selectedAccount: selectedAccount.address }
-    }
+    const verifyingKey = await register(entropy)
+    print("Your address", selectedAccount.address, "has been successfully registered.")
+    selectedAccount?.data?.registration?.verifyingKeys?.push(verifyingKey)
+    const arrIdx = accounts.indexOf(selectedAccount)
+    accounts.splice(arrIdx, 1, selectedAccount)
+    return { accounts, selectedAccount: selectedAccount.address }
   } catch (error) {
-    console.error('error', error);
-    if (!verifyingKey) {
-      logger.debug('Pruning Registration', FLOW_CONTEXT)
-      try {
-        const tx = await entropy.substrate.tx.registry.pruneRegistration()
-        await tx.signAndSend(entropy.keyring.accounts.registration.pair, ({ status }) => {
-          if (status.isFinalized) {
-            print('Successfully pruned registration');
-          }
-        })
-      } catch (error) {
-        console.error('Unable to prune registration due to:', error.message);
-      }
-    }
+    logger.error('There was a problem registering', error)
   }
 }
