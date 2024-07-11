@@ -1,6 +1,4 @@
 // import inquirer from "inquirer"
-// @ts-ignore
-import { ChildKey } from '@entropyxyz/sdk/keys'
 import { getSelectedAccount, print, /*accountChoices*/ } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { EntropyLogger } from "src/common/logger";
@@ -25,8 +23,9 @@ export async function entropyRegister (storedConfig, options, logger: EntropyLog
   //   // Setting default to default key proxy program
   //   default: '0x0000000000000000000000000000000000000000000000000000000000000000'
   // }])
-
-  logger.debug('about to register selectedAccount.address' +  selectedAccount.address + 'keyring:' + entropy.keyring.getLazyLoadAccountProxy(ChildKey.registration).pair.address, FLOW_CONTEXT)
+  // @ts-expect-error: Expecting error here as method expects typeof ChildKey enum from sdk
+  // export from sdk is not working as intended currently
+  logger.debug('about to register selectedAccount.address' +  selectedAccount.address + 'keyring:' + entropy.keyring.getLazyLoadAccountProxy('registration').pair.address, FLOW_CONTEXT)
   print("Attempting to register the address:", selectedAccount.address, )
 
   try {
