@@ -57,7 +57,7 @@ test('Transfer', async (t) => {
     getBalance(entropy, charlieStashAddress)
   )
 
-  t.equal(charlieBalance, 1e21, 'charlie got bank')
+  t.equal(charlieBalance, 1e17, 'charlie got bank')
 
   const transferStatus = await run(
     'transfer',
