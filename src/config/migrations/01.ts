@@ -1,14 +1,13 @@
-export const version = '0' // make future versions a number plz
+export const version = 1
 
 export function migrate (data = {}) {
   try {
     const migratedData = {
       ...data,
-      accounts: [],
-      selectedAccount: '',
       endpoints: {
-        dev: 'ws://127.0.0.1:9944',
-        'test-net': 'ws://testnet.entropy.xyz:9944/'
+        // @ts-ignore
+        ...data.endpoints,
+        'test-net': 'wss://testnet.entropy.xyz'
       }
     }
     return migratedData

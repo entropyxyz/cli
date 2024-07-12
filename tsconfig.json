@@ -1,28 +1,25 @@
 {
   "compilerOptions": {
+    "baseUrl": "./",
+    "target": "ES6",
     "skipLibCheck": true,
     "noEmit": true,
-    "target": "esnext",
-    "esModuleInterop": true,
-    "moduleResolution": "node",
+    "incremental": true,
     "typeRoots": [
       "node_modules/@types",
-      "@types/",
-      "@entropyxyz/sdk",
-      "@entropyxyz/sdk/keys"
-    ]
-  },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ],
-  "ts-node": {
-    "swc": true,
-    "experimentalSpecifierResolution": "node",
-    "compilerOptions": {
-      "module": "commonjs"
+      "@types/"
+    ],
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "moduleResolution": "node",
+    "module": "Node16",
+    "paths": {
+      "@entropyxyz/sdk/*": ["node_modules/@entropyxyz/sdk/*"]
     }
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "examples"
+  ]
 }

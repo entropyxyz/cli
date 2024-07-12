@@ -1,12 +1,13 @@
 import Entropy from "@entropyxyz/sdk"
 import * as util from "@polkadot/util"
 import inquirer from "inquirer"
-import { initializeEntropy } from "../../common/initializeEntropy"
-import { debug, print, getSelectedAccount } from "../../common/utils"
 import { readFileSync } from "fs"
+import { initializeEntropy } from "../../common/initializeEntropy"
+import { print, getSelectedAccount } from "../../common/utils"
+import { EntropyTuiOptions } from "src/types"
 
-export async function devPrograms ({ accounts, selectedAccount: selectedAccountAddress, endpoints }, options) {
-  const endpoint = endpoints[options.ENDPOINT]
+export async function devPrograms ({ accounts, selectedAccount: selectedAccountAddress }, options: EntropyTuiOptions) {
+  const { endpoint } = options
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
 
   const choices = {
@@ -24,10 +25,10 @@ export async function devPrograms ({ accounts, selectedAccount: selectedAccountA
     },
   ])
 
-  const entropy = await initializeEntropy(
-    { keyMaterial: selectedAccount.data },
+  const entropy = await initializeEntropy({
+    keyMaterial: selectedAccount.data,
     endpoint
-  )
+  })
   
   const flow = choices[actionChoice.action]
   await flow(entropy, selectedAccount)
@@ -84,7 +85,6 @@ async function deployProgram (entropy: Entropy, account: any) {
 
 async function getOwnedPrograms (entropy: Entropy, account: any) {
   const userAddress = account.address
-  debug('Account address:',userAddress)
   if (!userAddress) return
 
   try {

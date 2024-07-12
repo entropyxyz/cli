@@ -1,19 +1,22 @@
 import inquirer from 'inquirer'
+import { print } from '../../common/utils'
 import { newKey } from './new-key'
 import { selectAccount } from './select-account'
-import { debug, print } from '../../common/utils'
+import { listAccounts } from './list'
+import { EntropyTuiOptions } from 'src/types'
+import { EntropyLogger } from 'src/common/logger'
 
 const actions = {
   'Create/Import Account': newKey,
   'Select Account': selectAccount,
-  'List Accounts': async (config) => {
-    const accountsArray = Array.isArray(config.accounts) ? config.accounts : [config.accounts]
-    accountsArray.forEach((account) => print({
-      name: account.name,
-      address: account.address,
-      verifyingKeys: account?.data?.admin?.verifyingKeys
-    }))
-    if (!accountsArray.length) console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
+  'List Accounts': (config) => {
+    try {
+      const accountsArray = listAccounts(config)
+      accountsArray?.forEach(account => print(account))
+      return
+    } catch (error) {
+      console.error(error.message);
+    }
   },
 }
 
@@ -26,9 +29,11 @@ const questions = [{
   choices,
 }]
 
-export async function manageAccounts (config) {
+export async function manageAccounts (config, _options: EntropyTuiOptions, logger: EntropyLogger) {
+  const FLOW_CONTEXT = 'MANAGE_ACCOUNTS'
   const { choice } = await inquirer.prompt(questions)
-  const responses = await actions[choice](config) || {}
-  debug('returned config update:', { accounts: responses.accounts ? responses.accounts : config.accounts, selectedAccount: responses.selectedAccount || config.selectedAccount })
+  const responses = await actions[choice](config, logger) || {}
+  logger.debug('returned config update', FLOW_CONTEXT)
+  logger.debug({ accounts: responses.accounts ? responses.accounts : config.accounts, selectedAccount: responses.selectedAccount || config.selectedAccount }, FLOW_CONTEXT)
   return { accounts: responses.accounts ? responses.accounts : config.accounts, selectedAccount: responses.selectedAccount || config.selectedAccount }
 }

@@ -2,11 +2,13 @@ import inquirer from 'inquirer'
 import { randomAsHex } from '@polkadot/util-crypto'
 // @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
-import { importQuestions } from './import-key'
+import { importQuestions } from './helpers/import-key'
 // import * as passwordFlow from '../password'
-import { debug, print } from '../../common/utils'
+import { print } from '../../common/utils'
+import { EntropyLogger } from 'src/common/logger'
 
-export async function newKey ({ accounts }) {
+export async function newKey ({ accounts }, logger: EntropyLogger) {
+  const FLOW_CONTEXT = 'MANAGE_ACCOUNTS::NEW_KEY'
   accounts = Array.isArray(accounts) ? accounts : []
 
   const questions = [
@@ -66,7 +68,8 @@ export async function newKey ({ accounts }) {
   const fullAccount = keyring.getAccount()
   // TO-DO: sdk should create account on constructor
   const { admin } = keyring.getAccount()
-  debug('fullAccount:', fullAccount)
+  logger.debug('fullAccount:', FLOW_CONTEXT)
+  logger.debug(fullAccount, FLOW_CONTEXT)
   
   const data = fullAccount
   delete admin.pair

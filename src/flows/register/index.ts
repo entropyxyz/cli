@@ -1,15 +1,17 @@
-// TO-DO: what is this from: frankie
-import { debug, getSelectedAccount, print, /*accountChoices*/ } from "../../common/utils"
+// import inquirer from "inquirer"
+import { getSelectedAccount, print, /*accountChoices*/ } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
+import { EntropyLogger } from "src/common/logger";
 
-export async function register (storedConfig, options) {
-  const { accounts, endpoints, selectedAccount: selectedFromConfig } = storedConfig;
-  const endpoint = endpoints[options.ENDPOINT]
+export async function register (storedConfig, options, logger: EntropyLogger) {
+  const FLOW_CONTEXT = 'REGISTER'
+  const { accounts, selectedAccount: selectedFromConfig } = storedConfig;
+  const { endpoint } = options
 
   if (!selectedFromConfig) return
   const selectedAccount = getSelectedAccount(accounts, selectedFromConfig)
 
-  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data }, endpoint)
+  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint })
   // TO-DO: investigate this a little more
   // const filteredAccountChoices = accountChoices(accounts)
   // Not going to ask for a pointer from the user just yet
@@ -21,7 +23,7 @@ export async function register (storedConfig, options) {
   //   default: '0x0000000000000000000000000000000000000000000000000000000000000000'
   // }])
   //@ts-ignore:
-  debug('about to register selectedAccount.address' +  selectedAccount.address + 'keyring:' + entropy.keyring.getLazyLoadAccountProxy('registration').pair.address)
+  logger.debug('about to register selectedAccount.address' +  selectedAccount.address + 'keyring:' + entropy.keyring.getLazyLoadAccountProxy('registration').pair.address, FLOW_CONTEXT)
   print("Attempting to register the address:", selectedAccount.address, )
   let verifyingKey: string
   try {
@@ -44,7 +46,7 @@ export async function register (storedConfig, options) {
   } catch (error) {
     console.error('error', error);
     if (!verifyingKey) {
-      debug('Pruning Registration')
+      logger.debug('Pruning Registration', FLOW_CONTEXT)
       try {
         const tx = await entropy.substrate.tx.registry.pruneRegistration()
         await tx.signAndSend(entropy.keyring.accounts.registration.pair, ({ status }) => {
