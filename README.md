@@ -1,8 +1,14 @@
 # Entropy CLI
 
+A straightforward command-line interface (CLI) tool to showcase how to perform basic Entropy actions.
+
 > :warning: This tool is in early development. As such, a lot of things do not work. Feel free to play around with it and report any issues at [github.com/entropyxyz/cli](https://github.com/entropyxyz/cli).
 
-A straight-forward command-line interface (CLI) tool to showcase how to perform basic Entropy actions.
+- [Install](#install)
+- [Basic usage](#basic-usage)
+- [Support](#support)
+- [Contributions](#contributions)
+- [License](#license)
 
 ## Install
 
@@ -65,12 +71,6 @@ Need help with something? [Head over to the Entropy Community repository for sup
 ## License
 
 This project is licensed under [GNU Affero General Public License v3.0](./LICENSE).
-
-
-To read about programmatic use:
-```bash
-yarn start --help
-```
 
 ## Development
 
