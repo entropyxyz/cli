@@ -1,6 +1,6 @@
 {
   "name": "@entropyxyz/cli",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "cli and tui for interacting with the entropy protocol",
   "type": "module",
   "scripts": {
@@ -43,7 +43,7 @@
   },
   "homepage": "https://github.com/entropyxyz/cli#readme",
   "dependencies": {
-    "@entropyxyz/sdk": "^0.2.2-0",
+    "@entropyxyz/sdk": "^0.2.2",
     "@polkadot/util": "^12.6.2",
     "@types/node": "^20.12.12",
     "ansi-colors": "^4.1.3",

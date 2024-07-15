@@ -31,10 +31,10 @@
   resolved "https://registry.yarnpkg.com/@entropyxyz/entropy-protocol-web/-/entropy-protocol-web-0.2.0.tgz#b9478438386fefb4b821dbac95ec81d251d2dd55"
   integrity sha512-lLa/lLNJnwH1R8fJvLlUn1kw7d4Rbnt9LjhUC69HKxkU69J+bw/EY6fAjBnpVbgNmqCnYpf/DBLtMyOayZeNDQ==
 
-"@entropyxyz/sdk@^0.2.2-0":
-  version "0.2.2-0"
-  resolved "https://registry.yarnpkg.com/@entropyxyz/sdk/-/sdk-0.2.2-0.tgz#6c70b8db69bcd934aab3cc2c4d961e175dfc7ff6"
-  integrity sha512-qQsobti5I9/wEIslVEaLuXe/QalcMbp7bf/QePzN0tUqCzcYXuwz4kTIJEaQq1vdu0peDTJ3BeM2WVBve+iK6w==
+"@entropyxyz/sdk@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@entropyxyz/sdk/-/sdk-0.2.2.tgz#c1602767c2bee5248e6df87c437db302fb246f1d"
+  integrity sha512-144x0Zkbfgc4MY7M7gL6TA8wliZDZn5Qqv4syLuON9x+FThRI1flubOcOstG97HppJJH5XwZQouTLcPPCCYjjg==
   dependencies:
     "@entropyxyz/entropy-protocol-nodejs" "^0.2.0"
     "@entropyxyz/entropy-protocol-web" "^0.2.0"
@@ -43,6 +43,7 @@
     debug "^4.3.4"
     hpke-js "^1.2.7"
     uuid "^9.0.1"
+    xtend "^4.0.2"
 
 "@esbuild/aix-ppc64@0.21.5":
   version "0.21.5"
@@ -4003,7 +4004,7 @@ x25519@^0.1.0:
   resolved "https://registry.yarnpkg.com/x25519/-/x25519-0.1.0.tgz#148cc3a07adc8fbdd7be6b36828b9d6eee1738d8"
   integrity sha512-ySw7TP6e6kBgkakLG1HGOkZIiElg1zZ+7U54xqcaH4Alb7P6dNQy1Mng146iBHK811+oji+mRQiIEl+I/kE2pQ==
 
-xtend@~4.0.1:
+xtend@^4.0.2, xtend@~4.0.1:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/xtend/-/xtend-4.0.2.tgz#bb72779f5fa465186b1f438f674fa347fdb5db54"
   integrity sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==

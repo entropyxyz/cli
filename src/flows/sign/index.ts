@@ -64,9 +64,9 @@ async function signWithAdaptersInOrder (entropy, msg?: string, signingAttempts =
   }
 }
 
-export async function sign ({ accounts, endpoints, selectedAccount: selectedAccountAddress }, options, logger: EntropyLogger) {
+export async function sign ({ accounts, selectedAccount: selectedAccountAddress }, options, logger: EntropyLogger) {
   const FLOW_CONTEXT = 'SIGN'
-  const endpoint = endpoints[options.ENDPOINT]
+  const { endpoint } = options
   const actionChoice = await inquirer.prompt([
     {
       type: "list",
