@@ -1,0 +1,31 @@
+import test from 'tape'
+import { readFileSync } from 'node:fs'
+import { charlieStashSeed, setupTest } from './testing-utils'
+import { AddProgramParams } from 'src/flows/user-program-management/types'
+import { addProgram } from 'src/flows/user-program-management/add'
+
+const networkType = 'two-nodes'
+
+test('User Program Management::Add Programs', async t => {
+  const { run, entropy } = await setupTest(t, { seed: charlieStashSeed, networkType })
+  await run('charlie stash register', entropy.register())
+  const noopProgram: any = readFileSync(
+    'src/programs//program_noop.wasm'
+  )
+  const newPointer = await run(
+    'deploy',
+    entropy.programs.dev.deploy(noopProgram)
+  )
+
+  const noopProgramInstance: AddProgramParams = {
+    programPointer: newPointer,
+    programConfig: '',
+  }
+
+  const programsBeforeAdd = await run('get programs initial', entropy.programs.get(entropy.programs.verifyingKey))
+  t.equal(programsBeforeAdd.length, 1, 'charlie has 1 program')
+  await run('adding program', addProgram(entropy, noopProgramInstance))
+  const programsAfterAdd = await run('get programs after add', entropy.programs.get(entropy.programs.verifyingKey))
+  t.equal(programsBeforeAdd.length, 1, 'charlie has 2 programs')
+  t.end()
+})
