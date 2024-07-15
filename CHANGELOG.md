@@ -10,7 +10,7 @@ The format extends [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Version header format: `[version] Name - year-month-day (entropy-core compatibility: version [range])`
 
-## [UNRELEASED]
+## [0.0.2] AntMan - 2024-07-12 (entropy-core compatibility: 0.2.0)
 
 ### Added
 - new: './src/flows/balance/balance.ts' - service file separated out of main flow containing the pure functions to perform balance requests for one or multiple addresses
