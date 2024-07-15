@@ -13,6 +13,18 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 ## [UNRELEASED]
 
 ### Added
+- new: './tests/user-program-management.test.ts' - unit tests file for user program management flows
+### Fixed
+
+### Changed
+- folder name for user programs to match the kebab-case style for folder namespace
+### Broke
+
+### Meta/Dev
+
+## [0.0.2] AntMan - 2024-07-12 (entropy-core compatibility: 0.2.0)
+
+### Added
 - new: './src/flows/balance/balance.ts' - service file separated out of main flow containing the pure functions to perform balance requests for one or multiple addresses
 - new: './tests/balance.test.ts' - new unit tests file for balance pure functions
 - new: './src/common/logger.ts' - utility file consisting of the logger used throughout the entropy cli
