@@ -4,7 +4,9 @@ import { initializeEntropy } from "../../common/initializeEntropy"
 import { getSelectedAccount, print } from "../../common/utils"
 import { EntropyLogger } from "src/common/logger";
 import { addProgram } from "./add";
-import { addQuestions } from "./helpers/questions";
+import { viewPrograms } from "./view";
+import { addQuestions, verifyingKeyQuestion } from "./helpers/questions";
+import { displayPrograms } from "./helpers/utils";
 
 let verifyingKey: string;
 
@@ -37,35 +39,21 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
     throw new Error("Keys are undefined")
   }
 
-  const verifyingKeyQuestion = [{
-    type: 'list',
-    name: 'verifyingKey',
-    message: 'Select the key to proceeed',
-    choices: entropy.keyring.accounts.registration.verifyingKeys,
-    default: entropy.keyring.accounts.registration.verifyingKeys[0]
-  }]
-
   switch (actionChoice.action) {
   case "View My Programs": {
     try {
       if (!verifyingKey && entropy.keyring.accounts.registration.verifyingKeys.length) {
-        ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion))
+        ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion(entropy)))
       } else {
         print('You currently have no verifying keys, please register this account to generate the keys')
         break
       }
-      const programs = await entropy.programs.get(verifyingKey)
+      const programs = await viewPrograms(entropy, { verifyingKey })
       if (programs.length === 0) {
         print("You currently have no programs set.")
       } else {
         print("Your Programs:")
-        programs.forEach((program, index) => {
-          print(
-            `${index + 1}. Pointer: ${
-              program.program_pointer
-            }, Config: ${JSON.stringify(program.program_config)}`
-          )
-        })
+        displayPrograms(programs)
       }
     } catch (error) {
       console.error(error.message)
@@ -108,7 +96,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
   case "Remove a Program from My List": {
     try {
       if (!verifyingKey) {
-        ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion))
+        ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion(entropy)))
       }
       const { programPointerToRemove } = await inquirer.prompt([
         {

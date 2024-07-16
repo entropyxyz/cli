@@ -15,11 +15,19 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 ### Added
 - new: './tests/user-program-management.test.ts' - unit tests file for user program management flows
   - added test for adding a user program
+  - added test for viewing a user program
 - new: './src/flows/user-program-management/add.ts' - service file for adding user program pure function
+- new: 'src/flows/user-program-management/helpers/questions.ts' - utility helper file for all the different inquirer questions used
+- new: 'src/flows/user-program-management/types.ts' - user program management method types
+- new: 'src/flows/user-program-management/view.ts' - service file for pure functions of viewing user programs
+- new: 'src/flows/user-program-management/helpers/utils.ts' - utility helper file for user program management specific methods
 ### Fixed
 
 ### Changed
 - folder name for user programs to match the kebab-case style for folder namespace
+
+### Fixed
+
 ### Broke
 
 ### Meta/Dev

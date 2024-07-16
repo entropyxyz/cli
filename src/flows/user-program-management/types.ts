@@ -3,3 +3,6 @@ export interface AddProgramParams {
   programConfig: string
   verifyingKey?: string 
 }
+export interface ViewProgramsParams {
+  verifyingKey: string
+}
