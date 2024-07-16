@@ -4,7 +4,8 @@ import { initializeEntropy } from "../../common/initializeEntropy"
 import { getSelectedAccount, print } from "../../common/utils"
 import { EntropyLogger } from "src/common/logger";
 import { addProgram } from "./add";
-import { addQuestions } from "./helpers/questions";
+import { addQuestions, getProgramPointerInput } from "./helpers/questions";
+import { removeProgram } from "./remove";
 
 let verifyingKey: string;
 
@@ -110,21 +111,11 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
       if (!verifyingKey) {
         ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion))
       }
-      const { programPointerToRemove } = await inquirer.prompt([
-        {
-          type: "input",
-          name: "programPointerToRemove",
-          message: "Enter the program pointer you wish to remove:",
-        },
-      ])
-      await entropy.programs.remove(
-        programPointerToRemove,
-        verifyingKey
-      )
+      const { programPointer: programPointerToRemove } = await inquirer.prompt(getProgramPointerInput)
+      await removeProgram(entropy, { programPointer: programPointerToRemove, verifyingKey })
       print("Program removed successfully.")
     } catch (error) {
       console.error(error.message)
-        
     }
     break
   }

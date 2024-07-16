@@ -15,7 +15,9 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 ### Added
 - new: './tests/user-program-management.test.ts' - unit tests file for user program management flows
   - added test for adding a user program
+  - added test for removing a user program
 - new: './src/flows/user-program-management/add.ts' - service file for adding user program pure function
+- new: './src/flows/user-program-management/remove.ts' - service file for removing user program pure function
 ### Fixed
 
 ### Changed

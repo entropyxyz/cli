@@ -3,3 +3,8 @@ export interface AddProgramParams {
   programConfig: string
   verifyingKey?: string 
 }
+
+export interface RemoveProgramParams {
+  programPointer: string
+  verifyingKey: string
+}
