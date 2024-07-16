@@ -36,6 +36,7 @@ function isUI8A (thing) {
 
 function objToUI8A (obj) {
   const bytes = Object.keys(obj)
+    .sort((a, b) => Number(a) > Number(b) ? 1 : -1)
     .map(arrayIndex => obj[arrayIndex])
 
   return new Uint8Array(bytes)
