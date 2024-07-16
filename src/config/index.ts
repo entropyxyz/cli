@@ -6,6 +6,7 @@ import envPaths from 'env-paths'
 
 
 import allMigrations from './migrations'
+import { replacer } from 'src/common/utils'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
 const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
@@ -67,5 +68,5 @@ export function getSync (configPath = CONFIG_PATH) {
 
 export async function set (config = {}, configPath = CONFIG_PATH) {
   await mkdirp(dirname(configPath))
-  await writeFile(configPath, JSON.stringify(config))
+  await writeFile(configPath, JSON.stringify(config, replacer))
 }

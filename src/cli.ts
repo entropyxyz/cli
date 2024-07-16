@@ -68,7 +68,6 @@ program.command('list')
   .description('List all accounts. Output is JSON of form [{ name, address, data }]')
   .action(async () => {
     // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
-
     const accounts = await cliListAccounts()
     writeOut(accounts)
     process.exit(0)

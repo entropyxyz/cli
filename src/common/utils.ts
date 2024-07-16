@@ -1,18 +1,11 @@
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex } from "@polkadot/util"
 import { Buffer } from 'buffer'
-import Debug from 'debug'
 import { EntropyAccountConfig } from "../config/types"
-
-const _debug = Debug('@entropyxyz/cli')
 
 export function stripHexPrefix (str: string): string {
   if (str.startsWith('0x')) return str.slice(2)
   return str
-}
-
-export function debug (...args: any[]) {
-  _debug(...args.map(arg => stringify(arg)))
 }
 
 export function stringify (thing, indent = 2) {
