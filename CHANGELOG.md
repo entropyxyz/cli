@@ -13,10 +13,19 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 ## [UNRELEASED]
 
 ### Added
+- new: 'src/flows/register/register.ts' - service file for register pure function
+- new: './src/flows/manage-accounts/helpers/create-account.ts' - new helper file to house the pure function used to create a new entropy account
+- update: './tests/manage-accounts.test.ts' - added test for create account pure function
+- update: './src/common/utils.ts' - removed isValidSubstrateAddress and imported the method in from the sdk
 - new: './tests/user-program-management.test.ts' - unit tests file for user program management flows
   - added test for adding a user program
+  - added test for viewing a user program
   - added test for removing a user program
 - new: './src/flows/user-program-management/add.ts' - service file for adding user program pure function
+- new: 'src/flows/user-program-management/helpers/questions.ts' - utility helper file for all the different inquirer questions used
+- new: 'src/flows/user-program-management/types.ts' - user program management method types
+- new: 'src/flows/user-program-management/view.ts' - service file for pure functions of viewing user programs
+- new: 'src/flows/user-program-management/helpers/utils.ts' - utility helper file for user program management specific methods
 - new: './src/flows/user-program-management/remove.ts' - service file for removing user program pure function
 ### Fixed
 

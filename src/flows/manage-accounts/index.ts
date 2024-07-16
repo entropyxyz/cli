@@ -1,13 +1,13 @@
 import inquirer from 'inquirer'
 import { print } from '../../common/utils'
-import { newKey } from './new-key'
+import { newAccount } from './new-account'
 import { selectAccount } from './select-account'
 import { listAccounts } from './list'
 import { EntropyTuiOptions } from 'src/types'
 import { EntropyLogger } from 'src/common/logger'
 
 const actions = {
-  'Create/Import Account': newKey,
+  'Create/Import Account': newAccount,
   'Select Account': selectAccount,
   'List Accounts': (config) => {
     try {

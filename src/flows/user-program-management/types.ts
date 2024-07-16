@@ -4,6 +4,10 @@ export interface AddProgramParams {
   verifyingKey?: string 
 }
 
+export interface ViewProgramsParams {
+  verifyingKey: string
+}
+
 export interface RemoveProgramParams {
   programPointer: string
   verifyingKey: string

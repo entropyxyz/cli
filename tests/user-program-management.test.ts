@@ -1,8 +1,9 @@
 import test from 'tape'
 import { readFileSync } from 'node:fs'
-import { charlieStashSeed, promiseRunner, setupTest } from './testing-utils'
+import { promiseRunner, charlieStashSeed, setupTest } from './testing-utils'
 import { AddProgramParams } from 'src/flows/user-program-management/types'
 import { addProgram } from 'src/flows/user-program-management/add'
+import { viewPrograms } from 'src/flows/user-program-management/view'
 import { removeProgram } from 'src/flows/user-program-management/remove'
 
 const networkType = 'two-nodes'
@@ -43,5 +44,13 @@ test('User Program Management', async t => {
     const programsAfterRemove = await runRp('get programs initial', entropy.programs.get(entropy.programs.verifyingKey))
     rp.equal(programsAfterRemove.length, 1, 'charlie has 1 less program')
     rp.end()
+  })
+
+  t.test('View Program', async vp => {
+    const runVp = promiseRunner(vp)
+    const programs = await runVp('get charlie programs', viewPrograms(entropy, { verifyingKey: entropy.programs.verifyingKey }))
+
+    vp.equal(programs.length, 1, 'charlie has 1 program')
+    vp.end()
   })
 })
