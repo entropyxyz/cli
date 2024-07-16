@@ -1,3 +1,5 @@
+import Entropy from "@entropyxyz/sdk";
+
 export const addQuestions = [
   {
     type: "input",
@@ -20,3 +22,11 @@ export const addQuestions = [
     },
   },
 ]
+
+export const verifyingKeyQuestion = (entropy: Entropy) => [{
+  type: 'list',
+  name: 'verifyingKey',
+  message: 'Select the key to proceeed',
+  choices: entropy.keyring.accounts.registration.verifyingKeys,
+  default: entropy.keyring.accounts.registration.verifyingKeys[0]
+}]
