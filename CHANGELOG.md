@@ -13,6 +13,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 ## [UNRELEASED]
 
 ### Added
+- new: 'src/flows/register/register.ts' - service file for register pure function
 - new: './tests/user-program-management.test.ts' - unit tests file for user program management flows
   - added test for adding a user program
 - new: './src/flows/user-program-management/add.ts' - service file for adding user program pure function
