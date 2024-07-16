@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { mkdirp } from 'mkdirp'
 import { join, dirname } from 'path'
 import envPaths from 'env-paths'
-
+import isBase64 from 'is-base64'
 
 import allMigrations from './migrations'
 import { replacer } from 'src/common/utils'
@@ -58,15 +58,35 @@ function noop () {}
 
 export async function get (configPath = CONFIG_PATH) {
   const configBuffer = await readFile(configPath)
-  return JSON.parse(configBuffer.toString())
+  return deserialize(configBuffer.toString())
 }
 
 export function getSync (configPath = CONFIG_PATH) {
   const configBuffer = readFileSync(configPath, 'utf8')
-  return JSON.parse(configBuffer)
+  return deserialize(configBuffer)
 }
 
 export async function set (config = {}, configPath = CONFIG_PATH) {
   await mkdirp(dirname(configPath))
-  await writeFile(configPath, JSON.stringify(config, replacer))
+  await writeFile(configPath, serialize(config))
+}
+
+function serialize (config) {
+  return JSON.stringify(config, replacer, 2)
+}
+
+function deserialize (config) {
+  function reviver (key, value) {
+    if (
+      isBase64(value, { allowEmpty: false }) &&
+      value.length >= 32
+      // NOTE: we have to check length so we don't accidentally transform
+      // user simple string that are valid base64 like "registration"
+    ) {
+      return Uint8Array.from(Buffer.from(value, 'base64'))
+    }
+    else return value
+  }
+
+  return JSON.parse(config, reviver)
 }

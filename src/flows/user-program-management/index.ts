@@ -3,6 +3,8 @@ import * as util from "@polkadot/util"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { getSelectedAccount, print } from "../../common/utils"
 import { EntropyLogger } from "src/common/logger";
+import { addProgram } from "./add";
+import { addQuestions } from "./helpers/questions";
 
 let verifyingKey: string;
 
@@ -89,39 +91,13 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
 
   case "Add a Program to My List": {
     try {
-      const { programPointerToAdd, programConfigJson } = await inquirer.prompt([
-        {
-          type: "input",
-          name: "programPointerToAdd",
-          message: "Enter the program pointer you wish to add:",
-          validate: (input) => (input ? true : "Program pointer is required!"),
-        },
-        {
-          type: "editor",
-          name: "programConfigJson",
-          message:
-                "Enter the program configuration as a JSON string (this will open your default editor):",
-          validate: (input) => {
-            try {
-              JSON.parse(input)
-              return true
-            } catch (e) {
-              return "Please enter a valid JSON string for the configuration."
-            }
-          },
-        },
-      ])
+      const { programPointerToAdd, programConfigJson } = await inquirer.prompt(addQuestions)
     
       const encoder = new TextEncoder()
       const byteArray = encoder.encode(programConfigJson)
       const programConfigHex = util.u8aToHex(byteArray)
     
-      await entropy.programs.add(
-        {
-          program_pointer: programPointerToAdd,
-          program_config: programConfigHex,
-        }
-      )
+      await addProgram(entropy, { programPointer: programPointerToAdd, programConfig: programConfigHex })
     
       print("Program added successfully.")
     } catch (error) {
