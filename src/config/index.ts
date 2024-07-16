@@ -6,6 +6,7 @@ import envPaths from 'env-paths'
 import isBase64 from 'is-base64'
 
 import allMigrations from './migrations'
+import { replacer } from 'src/common/utils'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
 const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
@@ -71,12 +72,6 @@ export async function set (config = {}, configPath = CONFIG_PATH) {
 }
 
 function serialize (config) {
-  function replacer (key, value) {
-    if (value instanceof Uint8Array) {
-      return Buffer.from(value).toString('base64')
-    }
-    else return value
-  }
   return JSON.stringify(config, replacer, 2)
 }
 

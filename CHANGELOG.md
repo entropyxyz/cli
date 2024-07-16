@@ -10,11 +10,13 @@ The format extends [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Version header format: `[version] Name - year-month-day (entropy-core compatibility: version [range])`
 
-## [UNRELEASED]
+## [0.0.2] AntMan - 2024-07-12 (entropy-core compatibility: 0.2.0)
 
 ### Added
 - new: './src/flows/balance/balance.ts' - service file separated out of main flow containing the pure functions to perform balance requests for one or multiple addresses
 - new: './tests/balance.test.ts' - new unit tests file for balance pure functions
+- new: './src/common/logger.ts' - utility file consisting of the logger used throughout the entropy cli
+- new: './src/common/masking.ts' - utility helper file for EntropyLogger, used to mask private data in the payload (message) of the logging method
 ### Fixed
 - keyring retrieval method was incorrectly returning the default keyring when no keyring was found, which is not the intended flow
 ### Changed
