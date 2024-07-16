@@ -23,6 +23,14 @@ export const addQuestions = [
   },
 ]
 
+export const getProgramPointerInput = [
+  {
+    type: "input",
+    name: "programPointer",
+    message: "Enter the program pointer you wish to remove:",
+  },
+]
+
 export const verifyingKeyQuestion = (entropy: Entropy) => [{
   type: 'list',
   name: 'verifyingKey',
