@@ -5,6 +5,8 @@ export function displayPrograms (programs): void {
     print(`${index + 1}.`)
     print('Pointer:', program.program_pointer)
     print('Config:', parseProgramConfig(program.program_config))
+    // WIP here - need to check addresses are not logged out base64
+    console.log('Config:', parseProgramConfig(program.program_config))
   })
 }
 
