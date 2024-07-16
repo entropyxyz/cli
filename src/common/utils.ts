@@ -9,7 +9,7 @@ export function stripHexPrefix (str: string): string {
 }
 
 export function replacer (key, value) {
-  if(value instanceof Uint8Array ){
+  if (value instanceof Uint8Array) {
     return Buffer.from(value).toString('base64')
   }
   else return value
