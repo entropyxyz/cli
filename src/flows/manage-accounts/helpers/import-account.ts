@@ -33,7 +33,7 @@ export const importQuestions = [
   {
     type: 'input',
     name: 'path',
-    meesage: 'derivation path:',
+    message: 'derivation path:',
     default: 'none',
     when: ({ importKey }) => importKey
   },

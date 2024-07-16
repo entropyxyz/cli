@@ -14,6 +14,9 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 
 ### Added
 - new: 'src/flows/register/register.ts' - service file for register pure function
+- new: './src/flows/manage-accounts/helpers/create-account.ts' - new helper file to house the pure function used to create a new entropy account
+- update: './tests/manage-accounts.test.ts' - added test for create account pure function
+- update: './src/common/utils.ts' - removed isValidSubstrateAddress and imported the method in from the sdk
 - new: './tests/user-program-management.test.ts' - unit tests file for user program management flows
   - added test for adding a user program
 - new: './src/flows/user-program-management/add.ts' - service file for adding user program pure function
