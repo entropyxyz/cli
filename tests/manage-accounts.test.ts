@@ -65,14 +65,6 @@ test('Create Account', async t => {
   /* Setup */
   const run = promiseRunner(t)
   await run('wasm', wasmGlobalsReady())
-  await run('network up', spinNetworkUp(networkType))
-  // this gets called after all tests are run
-  t.teardown(async () => {
-    await spinNetworkDown(networkType).catch((error) =>
-      console.error('Error while spinning network down', error.message)
-    )
-  })
-  await sleep(process.env.GITHUB_WORKSPACE ? 30_000 : 5_000)
   await run('config.init', config.init(configPath))
   const testAccountSeed = randomAsHex(32)
   const testAccountName = 'Test Account'
