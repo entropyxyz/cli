@@ -1,5 +1,3 @@
-import { decodeAddress, encodeAddress } from "@polkadot/keyring"
-import { hexToU8a, isHex } from "@polkadot/util"
 import { Buffer } from 'buffer'
 import { EntropyAccountConfig } from "../config/types"
 
@@ -15,7 +13,7 @@ export function stringify (thing, indent = 2) {
 }
 
 export function replacer (key, value) {
-  if(value instanceof Uint8Array ){
+  if (value instanceof Uint8Array) {
     return Buffer.from(value).toString('base64')
   }
   else return value
@@ -52,16 +50,6 @@ export function getActiveOptions (options) {
 
 export function buf2hex (buffer: ArrayBuffer): string {
   return Buffer.from(buffer).toString("hex")
-}
-
-export function isValidSubstrateAddress (address: any) {
-  try {
-    encodeAddress(isHex(address) ? hexToU8a(address) : decodeAddress(address))
-
-    return true
-  } catch (error) {
-    return false
-  }
 }
 
 export function accountChoices (accounts: EntropyAccountConfig[]) {

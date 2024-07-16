@@ -3,6 +3,11 @@ import * as util from "@polkadot/util"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { getSelectedAccount, print } from "../../common/utils"
 import { EntropyLogger } from "src/common/logger";
+import { addProgram } from "./add";
+import { viewPrograms } from "./view";
+import { addQuestions, getProgramPointerInput, verifyingKeyQuestion } from "./helpers/questions";
+import { displayPrograms } from "./helpers/utils";
+import { removeProgram } from "./remove";
 
 let verifyingKey: string;
 
@@ -35,33 +40,21 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
     throw new Error("Keys are undefined")
   }
 
-  const verifyingKeyQuestion = [{
-    type: 'list',
-    name: 'verifyingKey',
-    message: 'Select the key to proceeed',
-    choices: entropy.keyring.accounts.registration.verifyingKeys,
-    default: entropy.keyring.accounts.registration.verifyingKeys[0]
-  }]
-
   switch (actionChoice.action) {
   case "View My Programs": {
     try {
       if (!verifyingKey && entropy.keyring.accounts.registration.verifyingKeys.length) {
-        ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion))
+        ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion(entropy)))
       } else {
         print('You currently have no verifying keys, please register this account to generate the keys')
         break
       }
-      const programs = await entropy.programs.get(verifyingKey)
+      const programs = await viewPrograms(entropy, { verifyingKey })
       if (programs.length === 0) {
         print("You currently have no programs set.")
       } else {
         print("Your Programs:")
-        programs.forEach((program, index) => {
-          print(`${index + 1}.`)
-          print('Pointer:', program.program_pointer)
-          print('Config:', parseProgramConfig(program.program_config))
-        })
+        displayPrograms(programs)
       }
     } catch (error) {
       console.error(error.message)
@@ -87,39 +80,13 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
 
   case "Add a Program to My List": {
     try {
-      const { programPointerToAdd, programConfigJson } = await inquirer.prompt([
-        {
-          type: "input",
-          name: "programPointerToAdd",
-          message: "Enter the program pointer you wish to add:",
-          validate: (input) => (input ? true : "Program pointer is required!"),
-        },
-        {
-          type: "editor",
-          name: "programConfigJson",
-          message:
-                "Enter the program configuration as a JSON string (this will open your default editor):",
-          validate: (input) => {
-            try {
-              JSON.parse(input)
-              return true
-            } catch (e) {
-              return "Please enter a valid JSON string for the configuration."
-            }
-          },
-        },
-      ])
+      const { programPointerToAdd, programConfigJson } = await inquirer.prompt(addQuestions)
     
       const encoder = new TextEncoder()
       const byteArray = encoder.encode(programConfigJson)
       const programConfigHex = util.u8aToHex(byteArray)
     
-      await entropy.programs.add(
-        {
-          program_pointer: programPointerToAdd,
-          program_config: programConfigHex,
-        }
-      )
+      await addProgram(entropy, { programPointer: programPointerToAdd, programConfig: programConfigHex })
     
       print("Program added successfully.")
     } catch (error) {
@@ -130,23 +97,13 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
   case "Remove a Program from My List": {
     try {
       if (!verifyingKey) {
-        ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion))
+        ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion(entropy)))
       }
-      const { programPointerToRemove } = await inquirer.prompt([
-        {
-          type: "input",
-          name: "programPointerToRemove",
-          message: "Enter the program pointer you wish to remove:",
-        },
-      ])
-      await entropy.programs.remove(
-        programPointerToRemove,
-        verifyingKey
-      )
+      const { programPointer: programPointerToRemove } = await inquirer.prompt(getProgramPointerInput)
+      await removeProgram(entropy, { programPointer: programPointerToRemove, verifyingKey })
       print("Program removed successfully.")
     } catch (error) {
       console.error(error.message)
-        
     }
     break
   }
@@ -155,11 +112,3 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
   }
 }
 
-function parseProgramConfig (rawConfig: unknown) {
-  if (typeof rawConfig !== 'string') return rawConfig
-  if (!rawConfig.startsWith('0x')) return rawConfig
-
-  const hex = rawConfig.slice(2)
-  const utf8 = Buffer.from(hex, 'hex').toString()
-  return JSON.parse(utf8)
-}

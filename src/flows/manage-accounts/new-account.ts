@@ -1,14 +1,12 @@
 import inquirer from 'inquirer'
 import { randomAsHex } from '@polkadot/util-crypto'
-// @ts-ignore
-import Keyring from '@entropyxyz/sdk/keys'
-import { importQuestions } from './helpers/import-key'
+import { importQuestions } from './helpers/import-account'
 // import * as passwordFlow from '../password'
 import { print } from '../../common/utils'
+import { createAccount } from './helpers/create-account'
 import { EntropyLogger } from 'src/common/logger'
 
-export async function newKey ({ accounts }, logger: EntropyLogger) {
-  const FLOW_CONTEXT = 'MANAGE_ACCOUNTS::NEW_KEY'
+export async function newAccount ({ accounts }, logger: EntropyLogger) {
   accounts = Array.isArray(accounts) ? accounts : []
 
   const questions = [
@@ -64,23 +62,7 @@ export async function newKey ({ accounts }, logger: EntropyLogger) {
     seed = importKey ? secret : randomAsHex(32)
   }
 
-  const keyring = new Keyring({ seed, path, debug: true })
-  const fullAccount = keyring.getAccount()
-  // TO-DO: sdk should create account on constructor
-  const { admin } = keyring.getAccount()
-  logger.debug('fullAccount:', FLOW_CONTEXT)
-  logger.debug(fullAccount, FLOW_CONTEXT)
-  
-  const data = fullAccount
-  delete admin.pair
-  // const encryptedData = password ? passwordFlow.encrypt(data, password) : data
-
-  const newAccount = {
-    name: name,
-    address: admin.address,
-    // TODO: replace with data: encryptedData once pasword input is added back
-    data,
-  }
+  const newAccount = await createAccount({ name, seed, path }, logger)
 
   print('New account:')
   print({ name: newAccount.name, address: newAccount.address })
