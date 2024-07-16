@@ -1,6 +1,7 @@
 import envPaths from 'env-paths'
 import { join } from 'path'
 import * as winston from 'winston'
+import { replacer } from './utils'
 import { maskPayload } from './masking'
 import { EntropyLoggerOptions } from 'src/types'
 
@@ -38,7 +39,7 @@ export class EntropyLogger {
       winston.format.splat(),
       // Uses safe-stable-stringify to finalize full object message as string
       // (prevents circular references from crashing)
-      winston.format.json(),
+      winston.format.json({ replacer }),
     );
 
     if (isTesting) {
@@ -122,5 +123,4 @@ export class EntropyLogger {
       stack,
     });
   }
-
 }
