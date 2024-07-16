@@ -16,7 +16,7 @@ export function maskPayload (payload: any): any {
 
   // maskJSONFields doesn't handle nested objects very well so we'll
   // need to recursively walk to object and mask them one by one
-  for (const [property, value] of Object.entries(clonedPayload)) {    
+  for (const [property, value] of Object.entries(clonedPayload)) {
     if (value && typeof value === 'object') {
       if (Object.keys(clonedPayload[property]).filter(key => isNaN(parseInt(key))).length === 0) {
         const reconstructedUintArr: number[] = Object.values(clonedPayload[property])
