@@ -10,10 +10,12 @@ The format extends [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Version header format: `[version] Name - year-month-day (entropy-core compatibility: version [range])`
 
-## [0.0.2] AntMan - 2024-07-12 (entropy-core compatibility: 0.2.0)
+## [UNRELEASED]
 
 ### Added
 - new: './tests/user-program-management.test.ts' - unit tests file for user program management flows
+  - added test for adding a user program
+- new: './src/flows/user-program-management/add.ts' - service file for adding user program pure function
 ### Fixed
 
 ### Changed
