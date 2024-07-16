@@ -25,9 +25,6 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 
 ### Changed
 - folder name for user programs to match the kebab-case style for folder namespace
-
-### Fixed
-
 ### Broke
 
 ### Meta/Dev
