@@ -1,8 +1,9 @@
 import envPaths from 'env-paths'
 import { join } from 'path'
 import * as winston from 'winston'
-
 import { replacer } from './utils'
+import { maskPayload } from './masking'
+import { EntropyLoggerOptions } from 'src/types'
 
 /**
  * Winston Base Log Levels for NPM
@@ -17,13 +18,12 @@ import { replacer } from './utils'
  * }
  */
 
-
 export class EntropyLogger {
   protected context: string
   protected endpoint: string
   private winstonLogger: winston.Logger
-
-  constructor (context: string, endpoint: string) {
+  // TO-DO: update commander with debug, testing, and level options for both programmatic and textual cli
+  constructor (context: string, endpoint: string, { debug, isTesting, level }: EntropyLoggerOptions = {}) {
     this.context = context
     this.endpoint = endpoint
 
@@ -42,12 +42,12 @@ export class EntropyLogger {
       winston.format.json({ replacer }),
     );
 
-    if (process.env.NODE_ENV === 'test') {
+    if (isTesting) {
       format = winston.format.combine(
         format,
         winston.format.colorize({ level: true }),
         winston.format.printf(info => {
-          let message = typeof info.message === 'object' ? JSON.stringify(info.message) : info.message;
+          let message = typeof info.message === 'object' ? JSON.stringify(info.message, null, 2) : info.message;
           if (info.stack) {
             message = `${message}\n${info.stack}`;
           }
@@ -59,14 +59,12 @@ export class EntropyLogger {
     const DEBUG_PATH = join(paths.log, 'entropy-cli.debug.log')
     const ERROR_PATH = join(paths.log, 'entropy-cli.error.log')
     const INFO_PATH = join(paths.log, 'entropy-cli.info.log')
-    const VERBOSE_PATH = join(paths.log, 'entropy-cli.verbose.log')
 
     this.winstonLogger = winston.createLogger({
-      level: process.env.LOG_LEVEL,
+      level: level || 'info',
       format,
       defaultMeta: { service: 'Entropy CLI' },
       transports: [
-        new winston.transports.File({ filename: VERBOSE_PATH }),
         new winston.transports.File({
           level: 'error',
           filename: ERROR_PATH
@@ -83,7 +81,7 @@ export class EntropyLogger {
     })
 
     // If env var is set then stream logs to console as well as a file
-    if (process.env.DEBUG) {
+    if (debug) {
       this.winstonLogger.add(new winston.transports.Console({
         format: winston.format.cli()
       }))
@@ -92,7 +90,7 @@ export class EntropyLogger {
 
   // maps to winston:error
   public error (description: string, error: Error): void {
-    this.writeLogMsg('error', error?.message, this.context, description, error.stack);
+    this.writeLogMsg('error', error?.message || error, this.context, description, error.stack);
   }
 
   // maps to winston:info
@@ -118,12 +116,11 @@ export class EntropyLogger {
   protected writeLogMsg (level: string, message: any, context?: string, description?: string, stack?: string) {
     this.winstonLogger.log({
       level,
-      message,
+      message: maskPayload(message),
       context: context || this.context,
       endpoint: this.endpoint,
       description,
       stack,
     });
   }
-
 }

@@ -1,11 +1,13 @@
 import inquirer from "inquirer"
 import * as util from "@polkadot/util"
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { debug, getSelectedAccount, print } from "../../common/utils"
+import { getSelectedAccount, print } from "../../common/utils"
+import { EntropyLogger } from "src/common/logger";
 
 let verifyingKey: string;
 
-export async function userPrograms ({ accounts, selectedAccount: selectedAccountAddress }, options) {
+export async function userPrograms ({ accounts, selectedAccount: selectedAccountAddress }, options, logger: EntropyLogger) {
+  const FLOW_CONTEXT = 'USER_PROGRAMS'
   const { endpoint } = options
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
 
@@ -76,7 +78,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
         message: "Enter the program pointer you wish to check:",
         validate: (input) => (input ? true : "Program pointer is required!"),
       }])
-      debug('program pointer', programPointer);
+      logger.debug(`program pointer: ${programPointer}`, `${FLOW_CONTEXT}::PROGRAM_PRESENCE_CHECK`);
       const program = await entropy.programs.dev.get(programPointer);
       print(program);
     } catch (error) {

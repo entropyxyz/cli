@@ -1,8 +1,9 @@
 import inquirer from "inquirer"
 import { u8aToHex } from '@polkadot/util'
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { debug, getSelectedAccount, print } from "../../common/utils"
+import { getSelectedAccount, print } from "../../common/utils"
 import { signWithAdapters } from './sign'
+import { EntropyLogger } from "src/common/logger"
 
 async function signWithAdaptersInOrder (entropy, msg?: string, signingAttempts = 0) {
   try {
@@ -63,8 +64,9 @@ async function signWithAdaptersInOrder (entropy, msg?: string, signingAttempts =
   }
 }
 
-export async function sign ({ accounts, endpoints, selectedAccount: selectedAccountAddress }, options) {
-  const endpoint = endpoints[options.ENDPOINT]
+export async function sign ({ accounts, selectedAccount: selectedAccountAddress }, options, logger: EntropyLogger) {
+  const FLOW_CONTEXT = 'SIGN'
+  const { endpoint } = options
   const actionChoice = await inquirer.prompt([
     {
       type: "list",
@@ -81,12 +83,14 @@ export async function sign ({ accounts, endpoints, selectedAccount: selectedAcco
   ])
 
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
-  debug("selectedAccount:", selectedAccount)
+  logger.debug("selectedAccount:", FLOW_CONTEXT)
+  logger.debug(selectedAccount, FLOW_CONTEXT)
   const keyMaterial = selectedAccount?.data;
 
   const entropy = await initializeEntropy({ keyMaterial, endpoint })
   const { address } = entropy.keyring.accounts.registration
-  debug("address:", address)
+  logger.debug("address:", FLOW_CONTEXT)
+  logger.debug(address, FLOW_CONTEXT)
   if (address == undefined) {
     throw new Error("address issue")
   }

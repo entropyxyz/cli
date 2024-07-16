@@ -6,6 +6,7 @@ export async function cliListAccounts () {
   return storedConfig.accounts
     .map(account => ({
       name: account.name,
-      address: account.address
+      address: account.address,
+      verifyingKeys: account?.data?.admin?.verifyingKeys
     }))
 }

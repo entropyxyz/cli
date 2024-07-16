@@ -1,8 +1,10 @@
 // import inquirer from "inquirer"
-import { debug, getSelectedAccount, print, /*accountChoices*/ } from "../../common/utils"
+import { getSelectedAccount, print, /*accountChoices*/ } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
+import { EntropyLogger } from "src/common/logger";
 
-export async function register (storedConfig, options) {
+export async function register (storedConfig, options, logger: EntropyLogger) {
+  const FLOW_CONTEXT = 'REGISTER'
   const { accounts, selectedAccount: selectedFromConfig } = storedConfig;
   const { endpoint } = options
 
@@ -21,7 +23,7 @@ export async function register (storedConfig, options) {
   //   default: '0x0000000000000000000000000000000000000000000000000000000000000000'
   // }])
   //@ts-ignore:
-  debug('about to register selectedAccount.address' +  selectedAccount.address + 'keyring:' + entropy.keyring.getLazyLoadAccountProxy('registration').pair.address)
+  logger.debug('about to register selectedAccount.address' +  selectedAccount.address + 'keyring:' + entropy.keyring.getLazyLoadAccountProxy('registration').pair.address, FLOW_CONTEXT)
   print("Attempting to register the address:", selectedAccount.address, )
   let verifyingKey: string
   try {
@@ -44,7 +46,7 @@ export async function register (storedConfig, options) {
   } catch (error) {
     console.error('error', error);
     if (!verifyingKey) {
-      debug('Pruning Registration')
+      logger.debug('Pruning Registration', FLOW_CONTEXT)
       try {
         const tx = await entropy.substrate.tx.registry.pruneRegistration()
         await tx.signAndSend(entropy.keyring.accounts.registration.pair, ({ status }) => {
