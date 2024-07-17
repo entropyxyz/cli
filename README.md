@@ -5,9 +5,12 @@ A straightforward command-line interface (CLI) tool to showcase how to perform b
 > :warning: This tool is in early development. As such, a lot of things do not work. Feel free to play around with it and report any issues at [github.com/entropyxyz/cli](https://github.com/entropyxyz/cli).
 
 - [Install](#install)
-- [Basic usage](#basic-usage)
+- [Usage](#usage)
+    - [Text-based user interface](#text-based-user-interface)
+    - [Programmatic mode](#programmatic-mode)
+- [Available functions](#available-functions)
+- [Development](#development)
 - [Support](#support)
-- [Contributions](#contributions)
 - [License](#license)
 
 ## Install
@@ -130,14 +133,6 @@ Options:
 
 For more CLI instructions, check out [docs.entropy.xyz/reference/cli](https://docs.entropy.xyz/reference/cli).
 
-## Support
-
-Need help with something? [Head over to the Entropy Community repository for support or to raise a ticket →](https://github.com/entropyxyz/community#support)
-
-## License
-
-This project is licensed under [GNU Affero General Public License v3.0](./LICENSE).
-
 ## Development
 
 If you want to make changes to this CLI tool, you should install it by following these steps:
@@ -235,3 +230,11 @@ If you want to make changes to this CLI tool, you should install it by following
 
    Done in 3.07s.
    ```
+
+## Support
+
+Need help with something? [Head over to the Entropy Community repository for support or to raise a ticket →](https://github.com/entropyxyz/community#support)
+
+## License
+
+This project is licensed under [GNU Affero General Public License v3.0](./LICENSE).
