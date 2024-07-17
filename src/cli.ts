@@ -112,8 +112,6 @@ program.command('sign')
     process.exit(0)
   })
 
-
-
 function writeOut (result) {
   const prettyResult = stringify(result)
   process.stdout.write(prettyResult)

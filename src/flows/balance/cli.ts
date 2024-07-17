@@ -18,7 +18,7 @@ export async function cliGetBalance ({ address, password, endpoint }) {
 
   const entropy = await initializeEntropy({ keyMaterial: account.data, password, endpoint })
   const balance = await getBalance(entropy, address)
-
-  return balance
+  
+  return `${balance.toLocaleString('en-US')} BITS`
 }
 
