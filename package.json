@@ -1,6 +1,6 @@
 {
   "name": "@entropyxyz/cli",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "cli and tui for interacting with the entropy protocol",
   "type": "module",
   "scripts": {
