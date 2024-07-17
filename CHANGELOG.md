@@ -10,6 +10,11 @@ The format extends [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Version header format: `[version] Name - year-month-day (entropy-core compatibility: version [range])`
 
+## [0.0.3] Blade - 2024-07-17 (entropy-core compatibility: 0.2.0)
+
+### Fixed
+- HOT-FIX programmatic balance error [183](https://github.com/entropyxyz/cli/pull/183)
+
 ## [0.0.2] AntMan - 2024-07-12 (entropy-core compatibility: 0.2.0)
 
 ### Added
