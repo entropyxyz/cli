@@ -10,7 +10,7 @@ The format extends [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Version header format: `[version] Name - year-month-day (entropy-core compatibility: version [range])`
 
-## [0.0.2] AntMan - 2024-07-12 (entropy-core compatibility: 0.2.0)
+## [UNRELEASED]
 
 ### Added
 - new: 'src/flows/register/register.ts' - service file for register pure function
@@ -27,13 +27,14 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - new: 'src/flows/user-program-management/view.ts' - service file for pure functions of viewing user programs
 - new: 'src/flows/user-program-management/helpers/utils.ts' - utility helper file for user program management specific methods
 - new: './src/flows/user-program-management/remove.ts' - service file for removing user program pure function
-### Fixed
 
 ### Changed
 - folder name for user programs to match the kebab-case style for folder namespace
-### Broke
 
-### Meta/Dev
+## [0.0.3] Blade - 2024-07-17 (entropy-core compatibility: 0.2.0)
+
+### Fixed
+- HOT-FIX programmatic balance error [183](https://github.com/entropyxyz/cli/pull/183)
 
 ## [0.0.2] AntMan - 2024-07-12 (entropy-core compatibility: 0.2.0)
 
