@@ -9,7 +9,7 @@ A straightforward command-line interface (CLI) tool to showcase how to perform b
     - [Text-based user interface](#text-based-user-interface)
     - [Programmatic mode](#programmatic-mode)
 - [Available functions](#available-functions)
-- [Development](#development)
+- [Development contributions](#development-contributions)
 - [Support](#support)
 - [License](#license)
 
