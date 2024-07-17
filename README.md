@@ -133,7 +133,13 @@ Options:
 
 For more CLI instructions, check out [docs.entropy.xyz/reference/cli](https://docs.entropy.xyz/reference/cli).
 
-## Development
+## Development contributions
+
+All changes to this repo should be based off the `dev` branch. The `main` branch should not be directly edited, unless a hotfix is necessary. All PRs should follow this workflow:
+
+```plaintext
+feature_branch -> dev -> main
+```
 
 If you want to make changes to this CLI tool, you should install it by following these steps:
 
