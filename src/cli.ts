@@ -111,8 +111,6 @@ program.command('sign')
     process.exit(0)
   })
 
-
-
 function writeOut (result) {
   const prettyResult = typeof result === 'object'
     ? JSON.stringify(result, null, 2)
