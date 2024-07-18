@@ -71,12 +71,18 @@ async function main (choices, options, logger: EntropyLogger) {
     const newConfigUpdates = await choices[answers.choice](storedConfig, options, logger)
     // TODO: choices should return type EntropyConfig | String
 
-    if (newConfigUpdates !== RETURN_TO_MAIN) {
+    if (isConfig(newConfigUpdates)) {
       await config.set({ ...storedConfig, ...newConfigUpdates })
     }
   }
 
   main(choices, options, logger)
+}
+
+function isConfig (config) {
+  if (config !== RETURN_TO_MAIN) return false
+  if (typeof config !== 'object') return false
+  return true
 }
 
 function exit () {
