@@ -3,10 +3,9 @@ import { readFileSync } from 'node:fs'
 import { mkdirp } from 'mkdirp'
 import { join, dirname } from 'path'
 import envPaths from 'env-paths'
-import isBase64 from 'is-base64'
 
 import allMigrations from './migrations'
-import { replacer } from 'src/common/utils'
+import { serialize, deserialize } from './encoding'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
 const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
@@ -71,22 +70,3 @@ export async function set (config = {}, configPath = CONFIG_PATH) {
   await writeFile(configPath, serialize(config))
 }
 
-function serialize (config) {
-  return JSON.stringify(config, replacer, 2)
-}
-
-function deserialize (config) {
-  function reviver (key, value) {
-    if (
-      isBase64(value, { allowEmpty: false }) &&
-      value.length >= 32
-      // NOTE: we have to check length so we don't accidentally transform
-      // user simple string that are valid base64 like "registration"
-    ) {
-      return Uint8Array.from(Buffer.from(value, 'base64'))
-    }
-    else return value
-  }
-
-  return JSON.parse(config, reviver)
-}
