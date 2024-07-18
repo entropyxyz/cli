@@ -5,6 +5,52 @@ import { getSelectedAccount, print } from "../../common/utils"
 import { signWithAdapters } from './sign'
 import { EntropyLogger } from "src/common/logger"
 
+async function signWithAdaptersInOrder (entropy) {
+  let msg
+  const { messageAction } = await inquirer.prompt([{
+    type: 'list',
+    name: 'messageAction',
+    message: 'Please choose how you would like to input your message to sign:',
+    choices: [
+      'Text Input',
+      /* DO NOT DELETE THIS */
+      // 'From a File',
+    ],
+  }])
+  switch (messageAction) {
+  case 'Text Input': {
+    const { userInput } = await inquirer.prompt([{
+      type: "editor",
+      name: "userInput",
+      message: "Enter the message you wish to sign (this will open your default editor):",
+    }])
+    msg = userInput
+    break
+  }
+  /* DO NOT DELETE THIS */
+  // case 'From a File': {
+  //   const { pathToFile } = await inquirer.prompt([{
+  //     type: 'input',
+  //     name: 'pathToFile',
+  //     message: 'Enter the path to the file you wish to sign:',
+  //   }])
+  //   // TODO: relative/absolute path? encoding?
+  //   msg = readFileSync(pathToFile, 'utf-8')
+  //   break
+  // }
+  default: {
+    console.error('Unsupported Action')
+    return
+  }
+  }
+
+  print('msg to be signed:', msg)
+  print('verifying key:', entropy.signingManager.verifyingKey)
+  const signature = await signWithAdapters(entropy, { msg })
+  const signatureHexString = u8aToHex(signature)
+  print('signature:', signatureHexString)
+}
+
 export async function sign ({ accounts, selectedAccount: selectedAccountAddress }, options, logger: EntropyLogger) {
   const FLOW_CONTEXT = 'SIGN'
   const { endpoint } = options
@@ -66,50 +112,3 @@ export async function sign ({ accounts, selectedAccount: selectedAccountAddress 
     throw new Error('Unrecognizable action')
   }
 }
-
-async function signWithAdaptersInOrder (entropy) {
-  let msg
-  const { messageAction } = await inquirer.prompt([{
-    type: 'list',
-    name: 'messageAction',
-    message: 'Please choose how you would like to input your message to sign:',
-    choices: [
-      'Text Input',
-      /* DO NOT DELETE THIS */
-      // 'From a File',
-    ],
-  }])
-  switch (messageAction) {
-  case 'Text Input': {
-    const { userInput } = await inquirer.prompt([{
-      type: "editor",
-      name: "userInput",
-      message: "Enter the message you wish to sign (this will open your default editor):",
-    }])
-    msg = userInput
-    break
-  }
-  /* DO NOT DELETE THIS */
-  // case 'From a File': {
-  //   const { pathToFile } = await inquirer.prompt([{
-  //     type: 'input',
-  //     name: 'pathToFile',
-  //     message: 'Enter the path to the file you wish to sign:',
-  //   }])
-  //   // TODO: relative/absolute path? encoding?
-  //   msg = readFileSync(pathToFile, 'utf-8')
-  //   break
-  // }
-  default: {
-    console.error('Unsupported Action')
-    return
-  }
-  }
-
-  print('msg to be signed:', msg)
-  print('verifying key:', entropy.signingManager.verifyingKey)
-  const signature = await signWithAdapters(entropy, { msg })
-  const signatureHexString = u8aToHex(signature)
-  print('signature:', signatureHexString)
-}
-
