@@ -2,7 +2,7 @@ import test from 'tape'
 import { writeFile } from 'node:fs/promises'
 import migrations from '../src/config/migrations'
 import { migrateData, init, get, set } from '../src/config'
-import { replacer } from '../src/common/utils'
+import * as encoding  from '../src/config/encoding'
 
 // used to ensure unique test ids
 let id = Date.now()
@@ -76,7 +76,7 @@ test('config - get', async t => {
     boop: 'doop',
     secretKey: makeKey()
   }
-  await writeFile(configPath, JSON.stringify(config, replacer))
+  await writeFile(configPath, encoding.serialize(config))
 
   const result = await get(configPath)
   t.deepEqual(result, config, 'get works')
@@ -166,8 +166,8 @@ test('config/migrattions/02', t => {
 
   const migrated = migrations[2].migrate(initial)
 
-  // console.log(JSON.stringify(migrated, replacer, 2))
-  // => {
+  // console.log(encoding.serialize(migrated))
+  // {
   //   "accounts": [
   //     {
   //       "name": "Mix",
@@ -186,12 +186,12 @@ test('config/migrattions/02', t => {
   //           "path": "",
   //           "pair": {
   //             "address": "5GCaN3fcL6vAQQKamHzVSorwv2XqtM3WcxosCLd9JqGVrtS8",
-  //             "addressRaw": "tvGr9u9kwCkxIApU8eG3mKS2sPQn7Urh+vS7gWHeIXQ=",
+  //             "addressRaw": "data:application/UI8A;base64,tvGr9u9kwCkxIApU8eG3mKS2sPQn7Urh+vS7gWHeIXQ=",
   //             "isLocked": false,
   //             "meta": {},
-  //             "publicKey": "tvGr9u9kwCkxIApU8eG3mKS2sPQn7Urh+vS7gWHeIXQ=",
+  //             "publicKey": "data:application/UI8A;base64,tvGr9u9kwCkxIApU8eG3mKS2sPQn7Urh+vS7gWHeIXQ=",
   //             "type": "sr25519",
-  //             "secretKey": "ePcBJvbDADFU8OKQQqyCqO1KefMx2dBGoNx9cuYR/keeRIUYdyIumlU+skXO2YS4CNtZpb1qBjNwTCqdkoLL8Q=="
+  //             "secretKey": "data:application/UI8A;base64,ePcBJvbDADFU8OKQQqyCqO1KefMx2dBGoNx9cuYR/keeRIUYdyIumlU+skXO2YS4CNtZpb1qBjNwTCqdkoLL8Q=="
   //           },
   //           "used": true
   //         },
@@ -206,12 +206,12 @@ test('config/migrattions/02', t => {
   //           "path": "",
   //           "pair": {
   //             "address": "5GCaN3fcL6vAQQKamHzVSorwv2XqtM3WcxosCLd9JqGVrtS8",
-  //             "addressRaw": "tvGr9u9kwCkxIApU8eG3mKS2sPQn7Urh+vS7gWHeIXQ=",
+  //             "addressRaw": "data:application/UI8A;base64,tvGr9u9kwCkxIApU8eG3mKS2sPQn7Urh+vS7gWHeIXQ=",
   //             "isLocked": false,
   //             "meta": {},
-  //             "publicKey": "tvGr9u9kwCkxIApU8eG3mKS2sPQn7Urh+vS7gWHeIXQ=",
+  //             "publicKey": "data:application/UI8A;base64,tvGr9u9kwCkxIApU8eG3mKS2sPQn7Urh+vS7gWHeIXQ=",
   //             "type": "sr25519",
-  //             "secretKey": "ePcBJvbDADFU8OKQQqyCqO1KefMx2dBGoNx9cuYR/keeRIUYdyIumlU+skXO2YS4CNtZpb1qBjNwTCqdkoLL8Q=="
+  //             "secretKey": "data:application/UI8A;base64,ePcBJvbDADFU8OKQQqyCqO1KefMx2dBGoNx9cuYR/keeRIUYdyIumlU+skXO2YS4CNtZpb1qBjNwTCqdkoLL8Q=="
   //           },
   //           "used": true
   //         },
@@ -226,12 +226,12 @@ test('config/migrattions/02', t => {
   //           "path": "",
   //           "pair": {
   //             "address": "5GCaN3fcL6vAQQKamHzVSorwv2XqtM3WcxosCLd9JqGVrtS8",
-  //             "addressRaw": "tvGr9u9kwCkxIApU8eG3mKS2sPQn7Urh+vS7gWHeIXQ=",
+  //             "addressRaw": "data:application/UI8A;base64,tvGr9u9kwCkxIApU8eG3mKS2sPQn7Urh+vS7gWHeIXQ=",
   //             "isLocked": false,
   //             "meta": {},
-  //             "publicKey": "tvGr9u9kwCkxIApU8eG3mKS2sPQn7Urh+vS7gWHeIXQ=",
+  //             "publicKey": "data:application/UI8A;base64,tvGr9u9kwCkxIApU8eG3mKS2sPQn7Urh+vS7gWHeIXQ=",
   //             "type": "sr25519",
-  //             "secretKey": "ePcBJvbDADFU8OKQQqyCqO1KefMx2dBGoNx9cuYR/keeRIUYdyIumlU+skXO2YS4CNtZpb1qBjNwTCqdkoLL8Q=="
+  //             "secretKey": "data:application/UI8A;base64,ePcBJvbDADFU8OKQQqyCqO1KefMx2dBGoNx9cuYR/keeRIUYdyIumlU+skXO2YS4CNtZpb1qBjNwTCqdkoLL8Q=="
   //           },
   //           "used": true
   //         }
