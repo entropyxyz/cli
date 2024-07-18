@@ -1,4 +1,5 @@
 import inquirer from "inquirer"
+import { u8aToHex } from '@polkadot/util'
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { getSelectedAccount, print } from "../../common/utils"
 import { signWithAdapters } from './sign'
@@ -49,7 +50,7 @@ async function signWithAdaptersInOrder (entropy, msg?: string, signingAttempts =
     print('msg to be signed:', msg)
     print('verifying key:', entropy.signingManager.verifyingKey)
     const signature = await signWithAdapters(entropy, { msg })
-    print('signature:', signature)
+    print('signature:', u8aToHex(signature))
   } catch (error) {
     const { message } = error
     // See https://github.com/entropyxyz/sdk/issues/367 for reasoning behind adding this retry mechanism

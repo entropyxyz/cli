@@ -3,10 +3,11 @@ import { print } from "src/common/utils"
 export function displayPrograms (programs): void {
   programs.forEach((program, index) => {
     print(`${index + 1}.`)
-    print('Pointer:', program.program_pointer)
-    print('Config:', parseProgramConfig(program.program_config))
-    // WIP here - need to check addresses are not logged out base64
-    console.log('Config:', parseProgramConfig(program.program_config))
+    print({
+      pointer: program.program_pointer,
+      config: parseProgramConfig(program.program_config)
+    })
+    print('')
   })
 }
 
@@ -16,5 +17,14 @@ function parseProgramConfig (rawConfig: unknown) {
 
   const hex = rawConfig.slice(2)
   const utf8 = Buffer.from(hex, 'hex').toString()
-  return JSON.parse(utf8)
+  const output = JSON.parse(utf8)
+  Object.keys(output).forEach(key => {
+    output[key] = output[key].map(base64toHex)
+  })
+
+  return output
+}
+
+function base64toHex (base64: string): string {
+  return Buffer.from(base64, 'base64').toString('hex')
 }
