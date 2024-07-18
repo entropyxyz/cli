@@ -1,5 +1,5 @@
 import inquirer from "inquirer"
-import { print, debug, accountChoices } from "../../common/utils"
+import { print, accountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 export async function entropyFaucet ({ accounts }, options) {
@@ -14,7 +14,6 @@ export async function entropyFaucet ({ accounts }, options) {
 
   const answers = await inquirer.prompt([accountQuestion])
   const selectedAccount = answers.selectedAccount
-  debug('selectedAccount', selectedAccount)
 
   const recipientAddress = selectedAccount.address
   const aliceAccount = {

@@ -3,22 +3,23 @@ import * as config from './config'
 import * as flows from './flows'
 import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
-import { debug, print } from './common/utils'
+import { print } from './common/utils'
+import { EntropyLogger } from './common/logger'
 
 
 let shouldInit = true
 
 // tui = text user interface
 export default function tui (options: EntropyTuiOptions) {
-
+  const logger = new EntropyLogger('TUI', options.endpoint)
   console.clear()
   console.log(logo) // the Entropy logo
-  debug(options)
+  logger.debug(options)
 
   const choices = {
     'Manage Accounts': flows.manageAccounts,
     'Balance': flows.checkBalance,
-    'Register': flows.register,
+    'Register': flows.entropyRegister,
     'Sign': flows.sign,
     'Transfer': flows.entropyTransfer,
     'Deploy Program': flows.devPrograms,
@@ -26,20 +27,19 @@ export default function tui (options: EntropyTuiOptions) {
     // 'Construct an Ethereum Tx': flows.ethTransaction,
   }
 
-  const devChoices = {
-    // 'Entropy Faucet': flows.entropyFaucet,
-  }
+  // const devChoices = {
+  //   // 'Entropy Faucet': flows.entropyFaucet,
+  // }
 
-  if (options.dev) Object.assign(choices, devChoices)
+  // if (options.dev) Object.assign(choices, devChoices)
 
   // assign exit so its last
   Object.assign(choices, { 'Exit': async () => {} })
 
-  main(choices, options)
+  main(choices, options, logger)
 }
 
-async function main (choices, options) {
-
+async function main (choices, options, logger: EntropyLogger) {
   if (shouldInit) {
     await config.init()
     shouldInit = false
@@ -72,8 +72,8 @@ async function main (choices, options) {
   if (!storedConfig.selectedAccount && answers.choice !== 'Manage Accounts') {
     console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
   } else {
-    debug(answers)
-    const newConfigUpdates = await choices[answers.choice](storedConfig, options)
+    logger.debug(answers)
+    const newConfigUpdates = await choices[answers.choice](storedConfig, options, logger)
     if (typeof newConfigUpdates === 'string' && newConfigUpdates === 'exit') {
       returnToMain = true
     } else {
@@ -90,7 +90,7 @@ async function main (choices, options) {
     }]))
   }
 
-  if (returnToMain) main(choices, options)
+  if (returnToMain) main(choices, options, logger)
   else {
     print('Have a nice day')
     process.exit()

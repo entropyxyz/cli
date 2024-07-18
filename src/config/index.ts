@@ -4,8 +4,8 @@ import { mkdirp } from 'mkdirp'
 import { join, dirname } from 'path'
 import envPaths from 'env-paths'
 
-
 import allMigrations from './migrations'
+import { serialize, deserialize } from './encoding'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
 const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
@@ -57,15 +57,16 @@ function noop () {}
 
 export async function get (configPath = CONFIG_PATH) {
   const configBuffer = await readFile(configPath)
-  return JSON.parse(configBuffer.toString())
+  return deserialize(configBuffer.toString())
 }
 
 export function getSync (configPath = CONFIG_PATH) {
   const configBuffer = readFileSync(configPath, 'utf8')
-  return JSON.parse(configBuffer)
+  return deserialize(configBuffer)
 }
 
 export async function set (config = {}, configPath = CONFIG_PATH) {
   await mkdirp(dirname(configPath))
-  await writeFile(configPath, JSON.stringify(config))
+  await writeFile(configPath, serialize(config))
 }
+
