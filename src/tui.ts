@@ -6,6 +6,7 @@ import { logo } from './common/ascii'
 import { print } from './common/utils'
 import { EntropyLogger } from './common/logger'
 
+export const RETURN_TO_MAIN = 'returnToMainMenu'
 
 let shouldInit = true
 
@@ -61,38 +62,24 @@ async function main (choices, options, logger: EntropyLogger) {
     pageSize: Object.keys(choices).length,
     choices: Object.keys(choices),
   }])
-
-  if (answers.choice === 'Exit')  {
-    print('Have a nice day')
-    process.exit()
-  }
-
-  let returnToMain: boolean | undefined = undefined;
+  if (answers.choice === 'Exit') exit()
 
   if (!storedConfig.selectedAccount && answers.choice !== 'Manage Accounts') {
     console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
   } else {
     logger.debug(answers)
     const newConfigUpdates = await choices[answers.choice](storedConfig, options, logger)
-    if (typeof newConfigUpdates === 'string' && newConfigUpdates === 'exit') {
-      returnToMain = true
-    } else {
+    // TODO: choices should return type EntropyConfig | String
+
+    if (newConfigUpdates !== RETURN_TO_MAIN) {
       await config.set({ ...storedConfig, ...newConfigUpdates })
     }
-    storedConfig = await config.get()
   }
 
-  if (!returnToMain) {
-    ({ returnToMain } = await inquirer.prompt([{
-      type: 'confirm',
-      name: 'returnToMain',
-      message: 'Return to main menu?'
-    }]))
-  }
+  main(choices, options, logger)
+}
 
-  if (returnToMain) main(choices, options, logger)
-  else {
-    print('Have a nice day')
-    process.exit()
-  }
+function exit () {
+  print('Have a nice day')
+  process.exit()
 }

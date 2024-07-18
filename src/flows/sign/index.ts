@@ -3,6 +3,7 @@ import { u8aToHex } from '@polkadot/util'
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { getSelectedAccount, print } from "../../common/utils"
 import { signWithAdapters } from './sign'
+import { RETURN_TO_MAIN } from '../../tui'
 import { EntropyLogger } from "src/common/logger"
 
 async function signWithAdaptersInOrder (entropy, msg?: string, signingAttempts = 0) {
@@ -120,7 +121,7 @@ export async function sign ({ accounts, selectedAccount: selectedAccountAddress 
     return
   }
   case 'Exit to Main Menu': 
-    return 'exit'
+    return RETURN_TO_MAIN
   default: 
     throw new Error('Unrecognizable action')
   }

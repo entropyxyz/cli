@@ -8,6 +8,7 @@ import { viewPrograms } from "./view";
 import { addQuestions, getProgramPointerInput, verifyingKeyQuestion } from "./helpers/questions";
 import { displayPrograms } from "./helpers/utils";
 import { removeProgram } from "./remove";
+import { RETURN_TO_MAIN } from "../../tui";
 
 let verifyingKey: string;
 
@@ -108,6 +109,6 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
     break
   }
   case 'Exit to Main Menu':
-    return 'exit'
+    return RETURN_TO_MAIN
   }
 }
