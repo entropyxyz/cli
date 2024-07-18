@@ -80,7 +80,7 @@ async function main (choices, options, logger: EntropyLogger) {
 }
 
 function isConfig (config) {
-  if (config !== RETURN_TO_MAIN) return false
+  if (config === RETURN_TO_MAIN) return false
   if (typeof config !== 'object') return false
   return true
 }
