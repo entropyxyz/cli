@@ -1,8 +1,8 @@
 import Entropy from "@entropyxyz/sdk";
-import { RegsiterParams } from "./types";
+import { RegisterParams } from "./types";
 import { print } from "src/common/utils";
 
-export async function register (entropy: Entropy, params?: RegsiterParams): Promise<string> {
+export async function register (entropy: Entropy, params?: RegisterParams): Promise<string> {
   let verifyingKey: string
   try {
     const registerParams = params?.programModAddress && params?.programData ? { programDeployer: params.programModAddress, programData: params.programData } : undefined
