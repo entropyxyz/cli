@@ -1,6 +1,6 @@
 {
   "name": "@entropyxyz/cli",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "cli and tui for interacting with the entropy protocol",
   "type": "module",
   "scripts": {
@@ -10,7 +10,7 @@
     "test": "yarn test:types && yarn test:ts && yarn test:only",
     "lint": "eslint . --ext .ts --fix",
     "test:only": "./dev/bin/test-only.sh",
-    "test:ts": "./dev/bin/test-ts.sh",
+    "test:ts": "yarn removedb && ./dev/bin/test-ts.sh",
     "test:types": "tsc --project tsconfig.json",
     "prepare": "husky",
     "postinstall": "husky",
@@ -18,7 +18,8 @@
     "postpack": "pinst --enable",
     "link:sdk": "yarn link @entropyxyz/sdk",
     "unlink:sdk": "yarn unlink @entropyxyz/sdk",
-    "re-link:sdk": "yarn unlink:sdk && yarn link:sdk"
+    "re-link:sdk": "yarn unlink:sdk && yarn link:sdk",
+    "removedb": "rm -rf .entropy && docker compose --file node_modules/@entropyxyz/sdk/dev/docker-scripts/two-nodes.yaml down 2> /dev/null"
   },
   "files": [
     "dist"
@@ -42,7 +43,7 @@
   },
   "homepage": "https://github.com/entropyxyz/cli#readme",
   "dependencies": {
-    "@entropyxyz/sdk": "^0.2.1",
+    "@entropyxyz/sdk": "^0.2.2",
     "@polkadot/util": "^12.6.2",
     "@polkadot/util-crypto": "^12.6.2",
     "@substrate/txwrapper-polkadot": "^7.5.0",
@@ -50,10 +51,13 @@
     "ansi-colors": "^4.1.3",
     "cli-progress": "^3.12.0",
     "commander": "^12.0.0",
-    "debug": "^4.3.4",
+    "env-paths": "^3.0.0",
     "inquirer": "8.0.0",
+    "lodash.clonedeep": "^4.5.0",
     "mkdirp": "^3.0.1",
     "typescript": "^4.8.4",
+    "viem": "^2.7.8",
+    "winston": "^3.13.0",
     "x25519": "^0.1.0"
   },
   "devDependencies": {
@@ -68,6 +72,7 @@
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "pinst": "^3.0.0",
+    "readline": "^1.3.0",
     "regenerator-runtime": "^0.14.1",
     "tap-spec": "^5.0.0",
     "tape": "^5.7.5",

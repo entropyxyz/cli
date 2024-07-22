@@ -1,11 +1,8 @@
 import * as config from '../../config'
+import { listAccounts } from './list'
 
 export async function cliListAccounts () {
   const storedConfig = await config.get()
 
-  return storedConfig.accounts
-    .map(account => ({
-      name: account.name,
-      address: account.address
-    }))
+  return listAccounts(storedConfig)
 }

@@ -1,25 +1,13 @@
-import { decodeAddress, encodeAddress } from "@polkadot/keyring"
-import { hexToU8a, isHex } from "@polkadot/util"
 import { Buffer } from 'buffer'
-import Debug from 'debug'
-import { EntropyAccountConfig } from "../types"
-
-const _debug = Debug('@entropyxyz/cli')
+import { EntropyAccountConfig } from "../config/types"
 
 export function stripHexPrefix (str: string): string {
   if (str.startsWith('0x')) return str.slice(2)
   return str
 }
 
-export function debug (...args: any[]) {
-  _debug(...args.map(arg => {
-    return typeof arg === 'object'
-      ? JSON.stringify(arg, replacer, 2)
-      : arg
-  }))
-}
-function replacer (key, value) {
-  if(value instanceof Uint8Array ){
+export function replacer (key, value) {
+  if (value instanceof Uint8Array) {
     return Buffer.from(value).toString('base64')
   }
   else return value
@@ -56,16 +44,6 @@ export function getActiveOptions (options) {
 
 export function buf2hex (buffer: ArrayBuffer): string {
   return Buffer.from(buffer).toString("hex")
-}
-
-export function isValidSubstrateAddress (address: any) {
-  try {
-    encodeAddress(isHex(address) ? hexToU8a(address) : decodeAddress(address))
-
-    return true
-  } catch (error) {
-    return false
-  }
 }
 
 export function accountChoices (accounts: EntropyAccountConfig[]) {

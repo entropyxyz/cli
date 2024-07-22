@@ -2,7 +2,7 @@ import Entropy from "@entropyxyz/sdk";
 import type { Signer, SignerResult } from "@polkadot/api/types";
 import { Registry, SignerPayloadJSON } from "@polkadot/types/types";
 import { u8aToHex } from "@polkadot/util";
-import { debug, stripHexPrefix } from "../../common/utils";
+import { stripHexPrefix } from "../../common/utils";
 import { blake2AsHex, decodeAddress, encodeAddress, signatureVerify } from "@polkadot/util-crypto";
 
 let id = 0
@@ -62,7 +62,7 @@ export default class FaucetSigner implements Signer {
 
     const isSignatureValid = signatureVerify(u8aToHex(raw), sigHex, hexPublicKey)
 
-    debug({ isSignatureValid })
+    console.debug({ isSignatureValid })
     return { id: id++, signature: sigHex };
   }
 }

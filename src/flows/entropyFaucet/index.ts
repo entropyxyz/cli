@@ -1,5 +1,5 @@
 import { blake2AsHex, encodeAddress } from '@polkadot/util-crypto'
-import { debug, getSelectedAccount } from "../../common/utils"
+import { getSelectedAccount } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import Entropy from "@entropyxyz/sdk"
 import FaucetSigner from "./signer"
@@ -40,7 +40,6 @@ async function faucetSignAndSend (call: any, api: any, entropy: Entropy, amount:
 export async function entropyFaucet ({ accounts, selectedAccount: selectedAccountAddress }, options) {
   const { endpoint } = options
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
-  debug('selectedAccount', selectedAccount)
 
   // @ts-ignore (see TODO on aliceAccount)
   const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint })
@@ -49,7 +48,7 @@ export async function entropyFaucet ({ accounts, selectedAccount: selectedAccoun
     throw new Error("Keys are undefined")
   }
 
-  const amount = "10000000000000"
+  const amount = "10_000_000_000_000"
   const modifiableKeys = await entropy.substrate.query.registry.modifiableKeys(faucetProgramModKey)
   const verifyingKeys = modifiableKeys.toHuman()
   // Choosing one of the 5 verifiying keys at random to be used as the faucet sender
