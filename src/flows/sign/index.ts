@@ -5,63 +5,50 @@ import { getSelectedAccount, print } from "../../common/utils"
 import { signWithAdapters } from './sign'
 import { EntropyLogger } from "src/common/logger"
 
-async function signWithAdaptersInOrder (entropy, msg?: string, signingAttempts = 0) {
-  try {
-    const messageQuestion = {
-      type: 'list',
-      name: 'messageAction',
-      message: 'Please choose how you would like to input your message to sign:',
-      choices: [
-        'Text Input',
-        /* DO NOT DELETE THIS */
-        // 'From a File',
-      ],
-    }
-    const userInputQuestion = {
+async function signWithAdaptersInOrder (entropy) {
+  let msg
+  const { messageAction } = await inquirer.prompt([{
+    type: 'list',
+    name: 'messageAction',
+    message: 'Please choose how you would like to input your message to sign:',
+    choices: [
+      'Text Input',
+      /* DO NOT DELETE THIS */
+      // 'From a File',
+    ],
+  }])
+  switch (messageAction) {
+  case 'Text Input': {
+    const { userInput } = await inquirer.prompt([{
       type: "editor",
       name: "userInput",
       message: "Enter the message you wish to sign (this will open your default editor):",
-    }
-    /* DO NOT DELETE THIS */
-    // const pathToFileQuestion = {
-    //   type: 'input',
-    //   name: 'pathToFile',
-    //   message: 'Enter the path to the file you wish to sign:',
-    // }
-    if (!msg) {
-      const { messageAction } = await inquirer.prompt([messageQuestion])
-      switch (messageAction) {
-      case 'Text Input': {
-        const { userInput } = await inquirer.prompt([userInputQuestion])
-        msg = userInput
-        break
-      }
-      /* DO NOT DELETE THIS */
-      // case 'From a File': {
-      //   break
-      // }
-      default: {
-        console.error('Unsupported Action')
-        return
-      }
-      }
-    }
-
-    print('msg to be signed:', msg)
-    print('verifying key:', entropy.signingManager.verifyingKey)
-    const signature = await signWithAdapters(entropy, { msg })
-    const signatureHexString = u8aToHex(signature)
-    print('signature:', signatureHexString)
-  } catch (error) {
-    const { message } = error
-    // See https://github.com/entropyxyz/sdk/issues/367 for reasoning behind adding this retry mechanism
-    if ((message.includes('Invalid Signer') || message.includes('Invalid Signer in Signing group')) && signingAttempts <= 1) {
-      // Recursively retries signing with a reverse order in the subgroups list
-      await signWithAdaptersInOrder(entropy, msg, signingAttempts + 1)
-    }
-    console.error(message)
+    }])
+    msg = userInput
+    break
+  }
+  /* DO NOT DELETE THIS */
+  // case 'From a File': {
+  //   const { pathToFile } = await inquirer.prompt([{
+  //     type: 'input',
+  //     name: 'pathToFile',
+  //     message: 'Enter the path to the file you wish to sign:',
+  //   }])
+  //   // TODO: relative/absolute path? encoding?
+  //   msg = readFileSync(pathToFile, 'utf-8')
+  //   break
+  // }
+  default: {
+    console.error('Unsupported Action')
     return
   }
+  }
+
+  print('msg to be signed:', msg)
+  print('verifying key:', entropy.signingManager.verifyingKey)
+  const signature = await signWithAdapters(entropy, { msg })
+  const signatureHexString = u8aToHex(signature)
+  print('signature:', signatureHexString)
 }
 
 export async function sign ({ accounts, selectedAccount: selectedAccountAddress }, options, logger: EntropyLogger) {
