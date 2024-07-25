@@ -8,7 +8,7 @@ import FaucetSigner from "./signer";
 import { FAUCET_PROGRAM_MOD_KEY, PROGRAM_HASH } from "./constants";
 
 // only the faucet program should be on the key
-export async function faucetSignAndSend (call: any, api: any, entropy: Entropy, amount: number, senderAddress: string, chosenVerifyingKey: any): Promise<any> {
+async function faucetSignAndSend (call: any, api: any, entropy: Entropy, amount: number, senderAddress: string, chosenVerifyingKey: any): Promise<any> {
   const faucetSigner = new FaucetSigner(api.registry, entropy, amount, chosenVerifyingKey)
 
   const sig = await call.signAsync(senderAddress, {
