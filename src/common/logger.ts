@@ -89,8 +89,8 @@ export class EntropyLogger {
   }
 
   // maps to winston:error
-  public error (description: string, error: Error): void {
-    this.writeLogMsg('error', error?.message || error, this.context, description, error.stack);
+  public error (description: string, error: Error, context?: string): void {
+    this.writeLogMsg('error', error?.message || error, context, description, error.stack);
   }
 
   // maps to winston:info

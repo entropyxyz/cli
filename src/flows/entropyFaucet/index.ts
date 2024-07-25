@@ -30,7 +30,7 @@ export async function entropyFaucet ({ accounts, selectedAccount: selectedAccoun
     chosenVerifyingKeys = []
     print(`Account: ${selectedAccountAddress} has been successfully funded with ${parseInt(amount).toLocaleString('en-US')} BITS`)
   } catch (error) {
-    logger.error('Error issuing funds through faucet', error)
+    logger.error('Error issuing funds through faucet', error, FLOW_CONTEXT)
     chosenVerifyingKeys.push(chosenVerifyingKey)
     // Check for funds or program errors and retry faucet
     if (error.message.includes('FundsError') || error.message.includes('ProgramsError')) {
