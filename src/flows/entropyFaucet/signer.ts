@@ -32,7 +32,6 @@ export default class FaucetSigner implements Signer {
     const raw = this.#registry.createType('ExtrinsicPayload', payload, {
       version: payload.version,
     }).toU8a(true);
-    console.log({ payload: payload });
 
     const auxData = {
       spec_version: 100,
@@ -40,7 +39,7 @@ export default class FaucetSigner implements Signer {
       string_account_id: this.#entropy.keyring.accounts.registration.address,
       amount: this.amount
     }
-    console.log({auxData, vk: this.chosenVerifyingKey})
+    
     const signature = await this.#entropy.sign({
       sigRequestHash: u8aToHex(raw),
       // @ts-ignore
@@ -48,7 +47,7 @@ export default class FaucetSigner implements Signer {
       auxiliaryData: [auxData],
       signatureVerifyingKey: this.chosenVerifyingKey
     })
-    // const sig = 
+
     let sigHex = u8aToHex(signature);
     // the 02 prefix is needed for signature type edcsa (00 = ed25519, 01 = sr25519, 02 = ecdsa)
     // ref: https://github.com/polkadot-js/tools/issues/175#issuecomment-767496439
@@ -60,9 +59,12 @@ export default class FaucetSigner implements Signer {
 
     const hexPublicKey = u8aToHex(publicKey);
 
-    const isSignatureValid = signatureVerify(u8aToHex(raw), sigHex, hexPublicKey)
+    const signatureValidation = signatureVerify(u8aToHex(raw), sigHex, hexPublicKey)
 
-    console.debug({ isSignatureValid })
-    return { id: id++, signature: sigHex };
+    if (signatureValidation.isValid) {
+      return { id: id++, signature: sigHex }
+    } else {
+      throw new Error('FaucetSignerError: Signature is not valid')
+    }
   }
 }
