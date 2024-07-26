@@ -30,6 +30,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 
 ### Changed
 - folder name for user programs to match the kebab-case style for folder namespace
+- updated SDK version to v0.2.3
 
 ## [0.0.3] Blade - 2024-07-17 (entropy-core compatibility: 0.2.0)
 
