@@ -13,7 +13,7 @@ test('Regsiter - Default Program', async (t) => {
 
   const fullAccount = entropy.keyring.getAccount()
 
-  t.equal(verifyingKey, fullAccount.registration.verifyingKeys[0], 'verifying key matches key added to regsitration account')
+  t.equal(verifyingKey, fullAccount.registration.verifyingKeys[0], 'verifying key matches key added to registration account')
 
   t.end()
 })
@@ -29,16 +29,16 @@ test('Register - Barebones Program', async t => {
   )
 
   const verifyingKey = await run(
-    'register',
-    entropy.register({
-      programDeployer: entropy.keyring.accounts.registration.address,
+    'register - using custom params',
+    register(entropy, {
+      programModAddress: entropy.keyring.accounts.registration.address,
       programData: [{ program_pointer: pointer, program_config: '0x' }],
     })
   )
 
   const fullAccount = entropy.keyring.getAccount()
   
-  t.equal(verifyingKey, fullAccount.registration.verifyingKeys[1], 'verifying key matches key added to regsitration account')
+  t.equal(verifyingKey, fullAccount.registration.verifyingKeys[1], 'verifying key matches key added to registration account')
 
   t.end()
 })
