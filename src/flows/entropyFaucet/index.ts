@@ -10,6 +10,7 @@ export async function entropyFaucet ({ accounts, selectedAccount: selectedAccoun
   let faucetAddress
   let chosenVerifyingKey
   let entropy: Entropy
+  let verifyingKeys: string[] = []
   const amount = "10000000000"
   const { endpoint } = options
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
@@ -23,7 +24,7 @@ export async function entropyFaucet ({ accounts, selectedAccount: selectedAccoun
       throw new Error("Keys are undefined")
     }
 
-    ({ chosenVerifyingKey, faucetAddress } = await getRandomFaucet(entropy, chosenVerifyingKeys))
+    ({ chosenVerifyingKey, faucetAddress, verifyingKeys } = await getRandomFaucet(entropy, chosenVerifyingKeys))
 
     await sendMoney(entropy, { amount, addressToSendTo: selectedAccountAddress, faucetAddress, chosenVerifyingKey })
     // reset chosen keys after successful transfer
@@ -32,11 +33,12 @@ export async function entropyFaucet ({ accounts, selectedAccount: selectedAccoun
   } catch (error) {
     logger.error('Error issuing funds through faucet', error, FLOW_CONTEXT)
     chosenVerifyingKeys.push(chosenVerifyingKey)
-    // Check for funds or program errors and retry faucet
-    if (error.message.includes('FundsError') || error.message.includes('ProgramsError')) {
-      await entropyFaucet({ accounts, selectedAccount: selectedAccountAddress }, options, logger)
+    if (error.message.includes('FaucetError') || chosenVerifyingKeys.length === verifyingKeys.length) {
+      console.error('ERR::', error.message)
+      return
     } else {
-      console.error('ERR::', error.message, chosenVerifyingKeys)
+      // Check for non faucet errors (FaucetError) and retry faucet
+      await entropyFaucet({ accounts, selectedAccount: selectedAccountAddress }, options, logger)
     }
   }
 }

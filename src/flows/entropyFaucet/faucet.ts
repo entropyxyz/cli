@@ -41,7 +41,10 @@ export async function getRandomFaucet (entropy: Entropy, previousVerifyingKeys: 
   const modifiableKeys = await entropy.substrate.query.registry.modifiableKeys(FAUCET_PROGRAM_MOD_KEY)
   const verifyingKeys = JSON.parse(JSON.stringify(modifiableKeys.toJSON()))
   // Choosing one of the 5 verifiying keys at random to be used as the faucet sender
-  let chosenVerifyingKey = verifyingKeys[Math.floor(Math.random() * (verifyingKeys as Array<string>).length)]
+  if (verifyingKeys.length === previousVerifyingKeys.length) {
+    throw new Error('FaucetError: There are no more faucets to choose from')
+  }
+  let chosenVerifyingKey = verifyingKeys[Math.floor(Math.random() * verifyingKeys.length)]
   if (previousVerifyingKeys.length && previousVerifyingKeys.includes(chosenVerifyingKey)) {
     const filteredVerifyingKeys = verifyingKeys.filter((key: string) => !previousVerifyingKeys.includes(key))
     chosenVerifyingKey = filteredVerifyingKeys[Math.floor(Math.random() * filteredVerifyingKeys.length)]
@@ -49,7 +52,7 @@ export async function getRandomFaucet (entropy: Entropy, previousVerifyingKeys: 
   const hashedKey = blake2AsHex(chosenVerifyingKey)
   const faucetAddress = encodeAddress(hashedKey, 42).toString()
 
-  return { chosenVerifyingKey, faucetAddress } 
+  return { chosenVerifyingKey, faucetAddress, verifyingKeys } 
 }
 
 export async function sendMoney (
@@ -65,7 +68,7 @@ export async function sendMoney (
     faucetAddress: string,
     chosenVerifyingKey: string
   }
-) {
+): Promise<any> {
   // check balance of faucet address
   const balance = await getBalance(entropy, faucetAddress)
   if (balance <= 0) throw new Error('FundsError: Faucet Account does not have funds')
@@ -82,5 +85,5 @@ export async function sendMoney (
 
   const transfer = entropy.substrate.tx.balances.transferAllowDeath(addressToSendTo, BigInt(amount));
   const transferStatus = await faucetSignAndSend(transfer, entropy.substrate, entropy, parseInt(amount), faucetAddress, chosenVerifyingKey )
-  if (transferStatus.isFinalized) return
+  if (transferStatus.isFinalized) return transferStatus
 }
