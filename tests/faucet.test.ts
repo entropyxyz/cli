@@ -27,7 +27,8 @@ test('Faucet Tests', async t => {
 
   // Deploy faucet program
   const faucetProgramPointer = await run('Deploy faucet program', entropy.programs.dev.deploy(faucetProgram, programConfig))
-
+  console.log('pointer', faucetProgramPointer);
+  
   // register with faucet program
   await run('Register faucet program for charlie stash', register(
     entropy,
