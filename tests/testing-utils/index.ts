@@ -39,6 +39,7 @@ export function promiseRunner(t: any, keepThrowing = false) {
         return result
       })
       .catch((err) => {
+        console.log('error', err);
         t.error(err, message)
         if (keepThrowing) throw err
       })

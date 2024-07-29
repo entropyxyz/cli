@@ -19,36 +19,43 @@ test('Faucet Tests', async t => {
     max_transfer_amount: 10_000_000_000,
     genesis_hash: stripHexPrefix(genesisHash.toString())
   }
-
+  console.log('userconfig', userConfig);
+  
   // Convert JSON string to bytes and then to hex
   const encoder = new TextEncoder()
   const byteArray = encoder.encode(JSON.stringify(userConfig))
+  console.log('byte array', JSON.stringify(byteArray));
+  // console.log('byte array', byteArray);
   const programConfig = util.u8aToHex(new Uint8Array(byteArray))
-
+  
+  console.log('program config', programConfig);
+  
   // Deploy faucet program
   const faucetProgramPointer = await run('Deploy faucet program', entropy.programs.dev.deploy(faucetProgram, programConfig))
   console.log('pointer', faucetProgramPointer);
-  
+
+  let naynayBalance = await getBalance(naynayEntropy, naynayEntropy.keyring.accounts.registration.address)
+  t.equal(naynayBalance, 0, 'Naynay is broke af')
   // register with faucet program
   await run('Register faucet program for charlie stash', register(
     entropy,
     { 
-      programModAddress: entropy.keyring.accounts.programDev.address,
+      programModAddress: entropy.keyring.accounts.registration.address,
       programData: [{ program_pointer: faucetProgramPointer, program_config: programConfig }]
     }
   ))
 
-  console.log('entropy program', entropy.keyring.accounts.programDev);
-  console.log('entropy register', entropy.keyring.accounts.registration);
+  console.log('entropy program', { program: entropy.keyring.accounts.programDev });
+  console.log('entropy register', { registration: entropy.keyring.accounts.registration });
   
 
-  const transferStatus = await sendMoney(naynayEntropy, { amount: "10000000000", addressToSendTo: naynayEntropy.keyring.accounts.registration.address, faucetAddress: entropy.keyring.accounts.programDev.address, chosenVerifyingKey: entropy.keyring.accounts.programDev.verifyingKeys[0] })
+  const transferStatus = await sendMoney(naynayEntropy, { amount: "10000000000", addressToSendTo: naynayEntropy.keyring.accounts.registration.address, faucetAddress: entropy.keyring.accounts.registration.address, chosenVerifyingKey: entropy.keyring.accounts.registration.verifyingKeys[0] })
 
   t.ok(transferStatus.isFinalized, 'Transfer is good')
 
-  const naynayBalance = await getBalance(naynayEntropy, naynayEntropy.keyring.accounts.registration.address)
+  naynayBalance = await getBalance(naynayEntropy, naynayEntropy.keyring.accounts.registration.address)
 
-  t.ok(naynayBalance > 0, 'Naynay got balance from the faucet')
+  t.ok(naynayBalance > 0, 'Naynay is drippin in faucet tokens')
 
   t.end()
 })
