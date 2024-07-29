@@ -53,10 +53,10 @@ export async function entropyTransfer ({ accounts, selectedAccount: selectedAcco
     )
     if (transferStatus.isFinalized) stopProgress()
 
-    print(
-      `\nTransaction successful: Sent ${amount} to ${recipientAddress}`
-    )
-    print('\nPress enter to return to main menu')
+    print('')
+    print(`Transaction successful: Sent ${amount} to ${recipientAddress}`)
+    print('')
+    print('Press enter to return to main menu')
   } catch (error) {
     stopProgress()
     console.error('ERR:::', error);

@@ -6,6 +6,12 @@ export function stripHexPrefix (str: string): string {
   return str
 }
 
+export function stringify (thing, indent = 2) {
+  return (typeof thing === 'object')
+    ? JSON.stringify(thing, replacer, indent)
+    : thing
+}
+
 export function replacer (key, value) {
   if (value instanceof Uint8Array) {
     return Buffer.from(value).toString('base64')
@@ -14,7 +20,7 @@ export function replacer (key, value) {
 }
 
 export function print (...args) {
-  console.log(...args)
+  console.log(...args.map(arg => stringify(arg)))
 }
 
 // hardcoding for now instead of querying chain

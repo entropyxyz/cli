@@ -10,6 +10,7 @@ import { cliGetBalance } from './flows/balance/cli'
 import { cliListAccounts } from './flows/manage-accounts/cli'
 import { cliEntropyTransfer } from './flows/entropyTransfer/cli'
 import { cliSign } from './flows/sign/cli'
+import { stringify } from './common/utils'
 
 const program = new Command()
 
@@ -112,9 +113,7 @@ program.command('sign')
   })
 
 function writeOut (result) {
-  const prettyResult = typeof result === 'object'
-    ? JSON.stringify(result, null, 2)
-    : result
+  const prettyResult = stringify(result)
   process.stdout.write(prettyResult)
 }
 
