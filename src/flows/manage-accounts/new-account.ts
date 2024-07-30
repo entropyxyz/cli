@@ -1,9 +1,9 @@
 import inquirer from 'inquirer'
 import { randomAsHex } from '@polkadot/util-crypto'
-import { importQuestions } from './helpers/import-account'
+import { importQuestions } from './utils/import-account'
 // import * as passwordFlow from '../password'
 import { print } from '../../common/utils'
-import { createAccount } from './helpers/create-account'
+import { createAccount } from './utils/create-account'
 import { EntropyLogger } from 'src/common/logger'
 
 export async function newAccount ({ accounts }, logger: EntropyLogger) {

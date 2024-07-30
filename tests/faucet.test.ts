@@ -19,6 +19,16 @@ test('Faucet Tests', async t => {
     max_transfer_amount: 10_000_000_000,
     genesis_hash: stripHexPrefix(genesisHash.toString())
   }
+  const configurationSchema = {
+    max_transfer_amount: "number",
+    genesis_hash: "string"
+  }
+  const auxDataSchema = {
+    amount: "number",
+    string_account_id: "string",
+    spec_version: "number",
+    transaction_version: "number",
+  }
   console.log('userconfig', userConfig);
   
   // Convert JSON string to bytes and then to hex
@@ -31,17 +41,17 @@ test('Faucet Tests', async t => {
   console.log('program config', programConfig);
   
   // Deploy faucet program
-  const faucetProgramPointer = await run('Deploy faucet program', entropy.programs.dev.deploy(faucetProgram, programConfig))
+  const faucetProgramPointer = await run('Deploy faucet program', entropy.programs.dev.deploy(faucetProgram, configurationSchema, auxDataSchema))
   console.log('pointer', faucetProgramPointer);
 
   let naynayBalance = await getBalance(naynayEntropy, naynayEntropy.keyring.accounts.registration.address)
   t.equal(naynayBalance, 0, 'Naynay is broke af')
   // register with faucet program
-  await run('Register faucet program for charlie stash', register(
+  await run('Register Faucet Program for charlie stash', register(
     entropy,
     { 
       programModAddress: entropy.keyring.accounts.registration.address,
-      programData: [{ program_pointer: faucetProgramPointer, program_config: programConfig }]
+      programData: [{ program_pointer: faucetProgramPointer, program_config: userConfig }]
     }
   ))
 
