@@ -15,8 +15,8 @@ export async function checkBalance ({ accounts, selectedAccount: selectedAccount
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
   logger.log(selectedAccount, FLOW_CONTEXT)
   const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint });
-  const balanceController = new BalanceCommand(entropy, endpoint)
+  const balanceCommand = new BalanceCommand(entropy, endpoint)
   const accountAddress = selectedAccountAddress
-  const freeBalanceString = await balanceController.getBalance(accountAddress)
+  const freeBalanceString = await balanceCommand.getBalance(accountAddress)
   print(`Address ${accountAddress} has a balance of: ${freeBalanceString}`)
 }

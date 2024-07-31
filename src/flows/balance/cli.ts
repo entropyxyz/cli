@@ -19,8 +19,8 @@ export async function cliGetBalance ({ address, password, endpoint }) {
   }
 
   const entropy = await initializeEntropy({ keyMaterial: account.data, password, endpoint })
-  const balanceController = new BalanceCommand(entropy, endpoint)
-  const balance = await balanceController.getBalance(address)
+  const balanceCommand = new BalanceCommand(entropy, endpoint)
+  const balance = await balanceCommand.getBalance(address)
   
   return balance
 }
