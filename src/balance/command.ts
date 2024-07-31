@@ -1,20 +1,20 @@
 import Entropy from "@entropyxyz/sdk"
-import { EntropyBase } from "../common/entropy-base"
-import { BalanceService } from "./utils"
+import { Base } from "../common/base"
+import { BalanceUtils } from "./utils"
 import { FLOW_CONTEXT } from "./constants"
 
-export class BalanceController extends EntropyBase {
-  private readonly balanceService: BalanceService
+export class BalanceCommand extends Base {
+  private readonly balanceService: BalanceUtils
 
   constructor (entropy: Entropy, endpoint: string) {
     super(entropy, endpoint, FLOW_CONTEXT)
-    this.balanceService = new BalanceService(this.entropy, endpoint)
+    this.balanceService = new BalanceUtils(this.entropy, endpoint)
   }
 
   public async getBalance (address: string) {
     const balance = await this.balanceService.getBalance(address)
 
-    this.logger.log(`Current balance of ${address}: ${balance}`, `${BalanceController.name}`)
+    this.logger.log(`Current balance of ${address}: ${balance}`, `${BalanceCommand.name}`)
     
     return `${balance.toLocaleString('en-US')} BITS`
   }

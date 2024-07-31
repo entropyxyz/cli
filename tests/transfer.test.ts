@@ -14,7 +14,7 @@ import {
 import { initializeEntropy } from 'src/common/initializeEntropy'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
 import { transfer } from 'src/flows/entropyTransfer/transfer'
-import { BalanceService } from 'src/balance/utils'
+import { BalanceUtils } from 'src/balance/utils'
 
 const networkType = 'two-nodes'
 const endpoint = 'ws://127.0.0.1:9944'
@@ -40,7 +40,7 @@ test('Transfer', async (t) => {
   
   const entropy = await initializeEntropy({ keyMaterial: naynayKeyring.getAccount(), endpoint, })
   const charlieEntropy = await initializeEntropy({ keyMaterial: charlieKeyring.getAccount(), endpoint, })
-  const balanceService = new BalanceService(entropy, endpoint)
+  const balanceService = new BalanceUtils(entropy, endpoint)
   await run('entropy ready', entropy.ready)
   await run('charlie ready', charlieEntropy.ready)
   

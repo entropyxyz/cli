@@ -1,11 +1,11 @@
 import Entropy from "@entropyxyz/sdk";
-import { EntropyBase } from "../common/entropy-base";
+import { Base } from "../common/base";
 import { BalanceInfo } from "./types";
 import { FLOW_CONTEXT } from "./constants";
 
 const hexToBigInt = (hexString: string) => BigInt(hexString)
 
-export class BalanceService extends EntropyBase {
+export class BalanceUtils extends Base {
   constructor (entropy: Entropy, endpoint: string) {
     super(entropy, endpoint, FLOW_CONTEXT)
   }

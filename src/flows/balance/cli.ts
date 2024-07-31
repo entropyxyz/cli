@@ -1,4 +1,4 @@
-import { BalanceController } from 'src/balance/command'
+import { BalanceCommand } from 'src/balance/command'
 import { initializeEntropy } from '../../common/initializeEntropy'
 import * as config from '../../config'
 import { EntropyLogger } from 'src/common/logger'
@@ -19,7 +19,7 @@ export async function cliGetBalance ({ address, password, endpoint }) {
   }
 
   const entropy = await initializeEntropy({ keyMaterial: account.data, password, endpoint })
-  const balanceController = new BalanceController(entropy, endpoint)
+  const balanceController = new BalanceCommand(entropy, endpoint)
   const balance = await balanceController.getBalance(address)
   
   return balance

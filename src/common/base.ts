@@ -1,7 +1,7 @@
 import Entropy from "@entropyxyz/sdk";
 import { EntropyLogger } from "./logger";
 
-export abstract class EntropyBase {
+export abstract class Base {
   protected logger: EntropyLogger
   protected entropy: Entropy
 

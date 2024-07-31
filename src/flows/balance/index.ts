@@ -1,7 +1,7 @@
 import { EntropyLogger } from "src/common/logger";
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { print, getSelectedAccount } from "../../common/utils"
-import { BalanceController } from "src/balance/command";
+import { BalanceCommand } from "src/balance/command";
 
 // TO-DO: setup flow method to provide options to allow users to select account,
 // use external address, or get balances for all accounts in config
@@ -15,7 +15,7 @@ export async function checkBalance ({ accounts, selectedAccount: selectedAccount
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
   logger.log(selectedAccount, FLOW_CONTEXT)
   const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint });
-  const balanceController = new BalanceController(entropy, endpoint)
+  const balanceController = new BalanceCommand(entropy, endpoint)
   const accountAddress = selectedAccountAddress
   const freeBalanceString = await balanceController.getBalance(accountAddress)
   print(`Address ${accountAddress} has a balance of: ${freeBalanceString}`)
