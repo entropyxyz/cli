@@ -1,7 +1,7 @@
 import test from 'tape'
 
 import { charlieStashSeed, setupTest } from './testing-utils'
-import { register } from 'src/flows/register/register'
+import { register } from '../src/flows/register/register'
 import { readFileSync } from 'node:fs'
 
 const networkType = 'two-nodes'
@@ -21,7 +21,7 @@ test('Regsiter - Default Program', async (t) => {
 test('Register - Barebones Program', async t => {
   const { run, entropy } = await setupTest(t, { networkType, seed: charlieStashSeed })
   const dummyProgram: any = readFileSync(
-    './programs/template_barebones.wasm'
+    new URL('./programs/template_barebones.wasm', import.meta.url)
   )
   const pointer = await run(
     'deploy program',

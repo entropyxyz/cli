@@ -12,9 +12,9 @@ import {
 } from './testing-utils'
 
 import { getBalance } from '../src/flows/balance/balance'
-import { initializeEntropy } from 'src/common/initializeEntropy'
+import { initializeEntropy } from '../src/common/initializeEntropy'
+import { transfer } from '../src/flows/entropyTransfer/transfer'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
-import { transfer } from 'src/flows/entropyTransfer/transfer'
 
 const networkType = 'two-nodes'
 
