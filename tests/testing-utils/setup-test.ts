@@ -12,16 +12,18 @@ import { makeSeed, promiseRunner, sleep } from './'
 interface SetupTestOpts {
   configPath?: string
   networkType?: string
-  seed?: string,
+  seed?: string
+  endpoint?: string
 }
 const NETWORK_TYPE_DEFAULT = 'two-nodes'
 let counter = 0
 
-export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entropy: Entropy; run: any }> {
+export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entropy: Entropy; run: any; endpoint: string }> {
   const {
     configPath = `/tmp/entropy-cli-${Date.now()}_${counter++}.json`,
     networkType = NETWORK_TYPE_DEFAULT,
-    seed = makeSeed()
+    seed = makeSeed(),
+    endpoint = 'ws://127.0.0.1:9944',
   } = opts || {}
 
   const run = promiseRunner(t)
@@ -45,11 +47,11 @@ export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entro
   const keyring = new Keyring({ seed, debug: true })
   const entropy = await initializeEntropy({
     keyMaterial: keyring.getAccount(),
-    endpoint: 'ws://127.0.0.1:9944',
+    endpoint,
     configPath
   })
 
   await run('entropy ready', entropy.ready)
 
-  return { entropy, run }
+  return { entropy, run, endpoint }
 }

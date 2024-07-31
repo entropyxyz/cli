@@ -1,8 +1,10 @@
+import { BalanceController } from 'src/balance/command'
 import { initializeEntropy } from '../../common/initializeEntropy'
 import * as config from '../../config'
-import { getBalance } from './balance'
 import { EntropyLogger } from 'src/common/logger'
 
+// TO-DO: move entropy initialization and account retrieval to a shared container
+// should remove the need to initialize entropy every time
 export async function cliGetBalance ({ address, password, endpoint }) {
   const logger = new EntropyLogger('CLI::CHECK_BALANCE', endpoint)
   const storedConfig = await config.get()
@@ -17,8 +19,9 @@ export async function cliGetBalance ({ address, password, endpoint }) {
   }
 
   const entropy = await initializeEntropy({ keyMaterial: account.data, password, endpoint })
-  const balance = await getBalance(entropy, address)
+  const balanceController = new BalanceController(entropy, endpoint)
+  const balance = await balanceController.getBalance(address)
   
-  return `${balance.toLocaleString('en-US')} BITS`
+  return balance
 }
 
