@@ -21,7 +21,7 @@ test('Regsiter - Default Program', async (t) => {
 test('Register - Barebones Program', async t => {
   const { run, entropy } = await setupTest(t, { networkType, seed: charlieStashSeed })
   const dummyProgram: any = readFileSync(
-    'src/programs/template_barebones.wasm'
+    './programs/template_barebones.wasm'
   )
   const pointer = await run(
     'deploy program',

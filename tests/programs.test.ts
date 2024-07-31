@@ -1,18 +1,18 @@
 import test from 'tape'
 import { readFileSync } from 'node:fs'
 import { promiseRunner, charlieStashSeed, setupTest } from './testing-utils'
-import { AddProgramParams } from 'src/flows/user-program-management/types'
-import { addProgram } from 'src/flows/user-program-management/add'
-import { viewPrograms } from 'src/flows/user-program-management/view'
-import { removeProgram } from 'src/flows/user-program-management/remove'
+import { AddProgramParams } from 'src/flows/programs/types'
+import { addProgram } from 'src/flows/programs/add'
+import { viewPrograms } from 'src/flows/programs/view'
+import { removeProgram } from 'src/flows/programs/remove'
 
 const networkType = 'two-nodes'
 
-test('User Program Management', async t => {
+test('programs', async t => {
   const { run, entropy } = await setupTest(t, { seed: charlieStashSeed, networkType })
   await run('charlie stash register', entropy.register())
   const noopProgram: any = readFileSync(
-    'src/programs//program_noop.wasm'
+    './programs/program_noop.wasm'
   )
   const newPointer = await run(
     'deploy',
