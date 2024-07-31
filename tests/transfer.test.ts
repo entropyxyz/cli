@@ -40,7 +40,7 @@ test('Transfer', async (t) => {
   
   const entropy = await initializeEntropy({ keyMaterial: naynayKeyring.getAccount(), endpoint, })
   const charlieEntropy = await initializeEntropy({ keyMaterial: charlieKeyring.getAccount(), endpoint, })
-  const balanceService = new BalanceUtils(entropy, endpoint)
+  const balanceUtils = new BalanceUtils(entropy, endpoint)
   await run('entropy ready', entropy.ready)
   await run('charlie ready', charlieEntropy.ready)
   
@@ -49,14 +49,14 @@ test('Transfer', async (t) => {
   // Check Balance of new account
   let naynayBalance = await run(
     'getBalance (naynay)',
-    balanceService.getBalance(recipientAddress)
+    balanceUtils.getBalance(recipientAddress)
   )
 
   t.equal(naynayBalance, 0, 'naynay is broke')
 
   let charlieBalance = await run(
     'getBalance (charlieStash)',
-    balanceService.getBalance(charlieStashAddress)
+    balanceUtils.getBalance(charlieStashAddress)
   )
 
   t.equal(charlieBalance, 1e17, 'charlie got bank')
@@ -75,7 +75,7 @@ test('Transfer', async (t) => {
   // Re-Check Balance of new account
   naynayBalance = await run(
     'getBalance (naynay)',
-    balanceService.getBalance(recipientAddress)
+    balanceUtils.getBalance(recipientAddress)
   )
 
   t.equal(naynayBalance, 1000 * 10e10, 'naynay is rolling in it!')
