@@ -1,8 +1,8 @@
 import Entropy from "@entropyxyz/sdk"
-import { readFileSync } from "fs"
 import inquirer from "inquirer"
-import * as util from "@polkadot/util"
+import { u8aToHex } from "@polkadot/util"
 
+import { deployProgram } from "./deploy";
 import { addProgram } from "./add";
 import { viewPrograms } from "./view";
 import { removeProgram } from "./remove";
@@ -35,11 +35,11 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
     },
   ])
 
-  const entropy = await initializeEntropy({ 
+  const entropy = await initializeEntropy({
     keyMaterial: selectedAccount.data,
     endpoint
   })
-  
+
   if (!entropy.registrationManager?.signer?.pair) {
     throw new Error("Keys are undefined")
   }
@@ -85,13 +85,13 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
   case "Add a Program to My List": {
     try {
       const { programPointerToAdd, programConfigJson } = await inquirer.prompt(addQuestions)
-    
+
       const encoder = new TextEncoder()
       const byteArray = encoder.encode(programConfigJson)
-      const programConfigHex = util.u8aToHex(byteArray)
-    
+      const programConfigHex = u8aToHex(byteArray)
+
       await addProgram(entropy, { programPointer: programPointerToAdd, programConfig: programConfigHex })
-    
+
       print("Program added successfully.")
     } catch (error) {
       console.error(error.message)
@@ -123,8 +123,8 @@ export async function devPrograms ({ accounts, selectedAccount: selectedAccountA
   const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
 
   const choices = {
-    "Deploy": deployProgram,
-    "Get Owned Programs": getOwnedPrograms,
+    "Deploy": deployProgramTUI,
+    "Get Owned Programs": getOwnedProgramsTUI,
     "Exit to Main Menu": () => 'exit'
   }
 
@@ -146,47 +146,43 @@ export async function devPrograms ({ accounts, selectedAccount: selectedAccountA
   await flow(entropy, selectedAccount)
 }
 
-async function deployProgram (entropy: Entropy, account: any) {
-  const deployQuestions = [
+async function deployProgramTUI (entropy: Entropy, account: any) {
+  const answers = await inquirer.prompt([
     {
       type: "input",
-      name: "programPath",
-      message: "Please provide the path to your program:",
+      name: "bytecodePath",
+      message: "Please provide the path to your program binary:",
+      validate (input: string) {
+        return input.endsWith('.wasm')
+          ? true
+          : 'program binary must be .wasm file'
+      }
     },
     {
-      type: "confirm",
-      name: "hasConfig",
-      message: "Does your program have a configuration file?",
-      default: false,
+      type: "input",
+      name: "configurationSchemaPath",
+      message: "Please provide the path to your configuration schema:",
+      validate (input: string) {
+        return input.endsWith('.json')
+          ? true
+          : 'configuration schema must be a .json file'
+      }
     },
-  ]
-
-  const deployAnswers = await inquirer.prompt(deployQuestions)
-  const userProgram = readFileSync(deployAnswers.programPath)
-
-  let programConfig = ""
-
-  if (deployAnswers.hasConfig) {
-    const configAnswers = await inquirer.prompt([
-      {
-        type: "input",
-        name: "config",
-        message: "Please provide your program configuration as a JSON string:",
-      },
-    ])
-
-    // Convert JSON string to bytes and then to hex
-    const encoder = new TextEncoder()
-    const byteArray = encoder.encode(configAnswers.config)
-    programConfig = util.u8aToHex(new Uint8Array(byteArray))
-  }
+    {
+      type: "input",
+      name: "auxillaryDataSchemaPath",
+      message: "Please provide the path to your auxillary data schema:",
+      validate (input: string) {
+        return input.endsWith('.json')
+          ? true
+          : 'configuration schema must be a .json file'
+      }
+    },
+  ])
 
   try {
-    // Deploy the program with config
-    const pointer = await entropy.programs.dev.deploy(
-      userProgram,
-      programConfig
-    )
+    const pointer = await deployProgram(entropy, answers)
+
     print("Program deployed successfully with pointer:", pointer)
   } catch (deployError) {
     console.error("Deployment failed:", deployError)
@@ -195,7 +191,7 @@ async function deployProgram (entropy: Entropy, account: any) {
   print("Deploying from account:", account.address)
 }
 
-async function getOwnedPrograms (entropy: Entropy, account: any) {
+async function getOwnedProgramsTUI (entropy: Entropy, account: any) {
   const userAddress = account.address
   if (!userAddress) return
 
