@@ -6,7 +6,6 @@ import Keyring from '@entropyxyz/sdk/keys'
 import { 
   makeSeed,
   promiseRunner,
-  sleep,
   spinNetworkUp,
   spinNetworkDown
 } from './testing-utils'
@@ -31,7 +30,6 @@ test('Transfer', async (t) => {
       console.error('Error while spinning network down', error.message)
     )
   })
-  await sleep(process.env.GITHUB_WORKSPACE ? 30_000 : 5_000)
 
   const naynaySeed = makeSeed()
   const naynayKeyring = new Keyring({ seed: naynaySeed, debug: true })
