@@ -27,7 +27,7 @@ test('programs', async t => {
     t.end()
   })
 
-  const getPrograms = () => entropy.programs.get(entropy.programs.verifyingKey)
+  const getPrograms = () => viewPrograms(entropy, { verifyingKey: entropy.programs.verifyingKey })
   const verifyingKey = entropy.programs.verifyingKey
 
   t.test('programs - add', async t => {
