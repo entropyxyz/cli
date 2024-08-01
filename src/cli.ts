@@ -6,13 +6,13 @@ import launchTui from './tui'
 import * as config from './config'
 import { EntropyTuiOptions } from './types'
 
-import { cliGetBalance } from './flows/balance/cli'
 import { cliListAccounts } from './flows/manage-accounts/cli'
 import { cliEntropyTransfer } from './flows/entropyTransfer/cli'
 import { cliSign } from './flows/sign/cli'
 import { getSelectedAccount, stringify } from './common/utils'
 import Entropy from '@entropyxyz/sdk'
 import { initializeEntropy } from './common/initializeEntropy'
+import { BalanceCommand } from './balance/command'
 
 const program = new Command()
 
@@ -72,6 +72,13 @@ async function loadEntropy (address: string, endpoint: string, password: string)
   const storedConfig = config.getSync()
   const selectedAccount = getSelectedAccount(storedConfig.accounts, address)
 
+  if (!selectedAccount) throw Error(`No account with address ${address}`)
+
+  // check if data is encrypted + we have a password
+  if (typeof selectedAccount.data === 'string' && !password) {
+    throw Error('This account requires a password, add --password <password>')
+  }
+
   entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint, password })
 }
 
@@ -92,7 +99,7 @@ program
   .hook('preAction', async (_thisCommand, actionCommand) => {
     if (!entropy || (entropy.keyring.accounts.registration.address !== actionCommand.args[0] || entropy.keyring.accounts.registration.address !== actionCommand.opts().account)) {
       // balance includes an address argument, use that address to instantiate entropy
-      if (actionCommand.name() === 'balance') {
+      if (actionCommand.name() === 'balance' && actionCommand.args.length) {
         await loadEntropy(actionCommand.args[0], actionCommand.opts().endpoint, actionCommand.opts().password)
       } else {
         // if address is not an argument, use the address from the option
@@ -122,7 +129,8 @@ program.command('balance')
   .addOption(passwordOption())
   .addOption(endpointOption())
   .action(async (address, opts) => {
-    const balance = await cliGetBalance({ address, ...opts })
+    const balanceCommand = new BalanceCommand(entropy, opts.endpoint)
+    const balance = await balanceCommand.getBalance(address)
     writeOut(balance)
     process.exit(0)
   })

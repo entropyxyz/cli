@@ -6,6 +6,7 @@ import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
 import { print } from './common/utils'
 import { EntropyLogger } from './common/logger'
+import { BalanceCommand } from './balance/command'
 
 let shouldInit = true
 
@@ -18,7 +19,8 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
 
   const choices = {
     'Manage Accounts': flows.manageAccounts,
-    'Balance': flows.checkBalance,
+    // leaving as a noop function until all flows are restructured
+    'Balance': () => {},
     'Register': flows.entropyRegister,
     'Sign': flows.sign,
     'Transfer': flows.entropyTransfer,
@@ -74,13 +76,24 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
   } else {
     logger.debug(answers)
-    const newConfigUpdates = await choices[answers.choice](storedConfig, options, logger)
-    if (typeof newConfigUpdates === 'string' && newConfigUpdates === 'exit') {
-      returnToMain = true
-    } else {
-      await config.set({ ...storedConfig, ...newConfigUpdates })
+    switch (answers.choice) {
+    case "Balance": {
+      const balanceCommand = new BalanceCommand(entropy, options.endpoint)
+      const balanceString = await balanceCommand.getBalance(storedConfig.selectedAccount)
+      print(`Address ${storedConfig.selectedAccount} has a balance of: ${balanceString}`)
+      break;
     }
-    storedConfig = await config.get()
+    default: {
+      const newConfigUpdates = await choices[answers.choice](storedConfig, options, logger)
+      if (typeof newConfigUpdates === 'string' && newConfigUpdates === 'exit') {
+        returnToMain = true
+      } else {
+        await config.set({ ...storedConfig, ...newConfigUpdates })
+      }
+      storedConfig = await config.get()
+      break;
+    }
+    }
   }
 
   if (!returnToMain) {
