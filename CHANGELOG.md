@@ -38,6 +38,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - updated SDK version to v0.2.3
 - logger to handle nested contexts for better organization of logs
 - merged user + dev program folders + tests
+- removed flows/balance/*.ts directory with file restructure
 
 
 ### Broke
