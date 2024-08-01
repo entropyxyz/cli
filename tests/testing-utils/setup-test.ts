@@ -7,7 +7,7 @@ import Keyring from '@entropyxyz/sdk/keys'
 
 import { initializeEntropy } from '../../src/common/initializeEntropy'
 import * as config from '../../src/config'
-import { makeSeed, promiseRunner, sleep } from './'
+import { makeSeed, promiseRunner } from './'
 
 interface SetupTestOpts {
   configPath?: string
@@ -40,8 +40,6 @@ export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entro
 
   await run('config.init', config.init(configPath))
 
-  // TODO: remove this after new SDK is published
-  await sleep(process.env.GITHUB_WORKSPACE ? 30_000 : 5_000)
   // To follow the same way we initiate entropy within the cli we must go through the same process of creating an initial keyring
   // as done in src/flows/manage-accounts/new-key.ts
   const keyring = new Keyring({ seed, debug: true })

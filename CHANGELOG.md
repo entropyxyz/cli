@@ -33,9 +33,20 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
   - new: './src/balance/utils.ts' - utilities and helper methods for all things balance
 
 ### Changed
+
 - folder name for user programs to match the kebab-case style for folder namespace
 - updated SDK version to v0.2.3
 - logger to handle nested contexts for better organization of logs
+- merged user + dev program folders + tests
+
+
+### Broke
+
+- deploying programs with TUI
+    - now requires a `*.wasm` file for `bytecode`
+    - now requires a `*.json` file path for `configurationSchema`
+    - now requires a `*.json` file path for `auxillaryDataSchema`
+
 
 ## [0.0.3] Blade - 2024-07-17 (entropy-core compatibility: 0.2.0)
 

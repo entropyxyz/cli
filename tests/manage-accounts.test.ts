@@ -1,16 +1,14 @@
+import test from 'tape'
 import { wasmGlobalsReady } from '@entropyxyz/sdk'
 // @ts-ignore
 import { isValidSubstrateAddress } from '@entropyxyz/sdk/utils'
 // @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
 import { randomAsHex } from '@polkadot/util-crypto'
-import test from 'tape'
-// @ts-ignore
-import { spinNetworkUp, spinNetworkDown, } from "@entropyxyz/sdk/testing"
-import { EntropyAccountConfig, EntropyConfig } from 'src/config/types'
-import { listAccounts } from 'src/flows/manage-accounts/list'
-import { createAccount } from 'src/flows/manage-accounts/helpers/create-account'
-import * as config from 'src/config'
+import { EntropyAccountConfig, EntropyConfig } from '../src/config/types'
+import { listAccounts } from '../src/flows/manage-accounts/list'
+import { createAccount } from '../src/flows/manage-accounts/helpers/create-account'
+import * as config from '../src/config'
 import { promiseRunner, sleep } from './testing-utils'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
 

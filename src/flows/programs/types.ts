@@ -12,3 +12,10 @@ export interface RemoveProgramParams {
   programPointer: string
   verifyingKey: string
 }
+
+export interface DeployProgramParams {
+  bytecodePath: string,
+  configurationSchemaPath?: string
+  auxillaryDataSchemaPath?: string
+  // TODO: confirm which of these are optional
+}

@@ -6,15 +6,14 @@ import Keyring from '@entropyxyz/sdk/keys'
 import { 
   makeSeed,
   promiseRunner,
-  sleep,
   spinNetworkUp,
   spinNetworkDown
 } from './testing-utils'
 
-import { initializeEntropy } from 'src/common/initializeEntropy'
+import { initializeEntropy } from '../src/common/initializeEntropy'
+import { transfer } from '../src/flows/entropyTransfer/transfer'
+import * as BalanceUtils from '../src/balance/utils'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
-import { transfer } from 'src/flows/entropyTransfer/transfer'
-import * as BalanceUtils from 'src/balance/utils'
 
 const networkType = 'two-nodes'
 const endpoint = 'ws://127.0.0.1:9944'
@@ -32,13 +31,14 @@ test('Transfer', async (t) => {
       console.error('Error while spinning network down', error.message)
     )
   })
-  await sleep(process.env.GITHUB_WORKSPACE ? 30_000 : 5_000)
 
   const naynaySeed = makeSeed()
   const naynayKeyring = new Keyring({ seed: naynaySeed, debug: true })
   const charlieKeyring = new Keyring({ seed: charlieStashSeed, debug: true })
-  
+  // Below expect errors are in place until we fix types export from sdk
+  // @ts-expect-error
   const entropy = await initializeEntropy({ keyMaterial: naynayKeyring.getAccount(), endpoint, })
+  // @ts-expect-error
   const charlieEntropy = await initializeEntropy({ keyMaterial: charlieKeyring.getAccount(), endpoint, })
   await run('entropy ready', entropy.ready)
   await run('charlie ready', charlieEntropy.ready)
