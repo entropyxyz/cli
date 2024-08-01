@@ -1,7 +1,7 @@
-export interface AddProgramParams {
+export interface AddProgramParams { 
   programPointer: string
   programConfig: string
-  verifyingKey?: string
+  verifyingKey?: string 
 }
 
 export interface ViewProgramsParams {
