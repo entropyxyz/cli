@@ -13,7 +13,7 @@ let shouldInit = true
 // tui = text user interface
 export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
   const logger = new EntropyLogger('TUI', options.endpoint)
-  // console.clear()
+  console.clear()
   console.log(logo) // the Entropy logo
   logger.debug(options)
 
