@@ -44,6 +44,7 @@ export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entro
   // as done in src/flows/manage-accounts/new-key.ts
   const keyring = new Keyring({ seed, debug: true })
   const entropy = await initializeEntropy({
+    // @ts-expect-error
     keyMaterial: keyring.getAccount(),
     endpoint,
     configPath

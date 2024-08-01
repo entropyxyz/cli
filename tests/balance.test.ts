@@ -1,7 +1,7 @@
 import test from 'tape'
 
 import { setupTest, charlieStashAddress as richAddress } from './testing-utils'
-import * as BalanceUtils from 'src/balance/utils'
+import * as BalanceUtils from '../src/balance/utils'
 
 const networkType = 'two-nodes'
 
