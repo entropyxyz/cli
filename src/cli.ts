@@ -10,7 +10,9 @@ import { cliGetBalance } from './flows/balance/cli'
 import { cliListAccounts } from './flows/manage-accounts/cli'
 import { cliEntropyTransfer } from './flows/entropyTransfer/cli'
 import { cliSign } from './flows/sign/cli'
-import { stringify } from './common/utils'
+import { getSelectedAccount, stringify } from './common/utils'
+import Entropy from '@entropyxyz/sdk'
+import { initializeEntropy } from './common/initializeEntropy'
 
 const program = new Command()
 
@@ -45,11 +47,40 @@ function passwordOption (description?: string) {
   )
 }
 
+function currentAccountAddressOption () {
+  const storedConfig = config.getSync()
+  return new Option(
+    '-a, --account <accountAddress>',
+    'Sets the current account for the session or defaults to the account stored in the config'
+  )
+    .env('ACCOUNT_ADDRESS')
+    .argParser(async (address) => {
+      if (address === storedConfig.selectedAccount) return address
+      // Updated selected account in config with new address from this option
+      const newConfigUpdates = { selectedAccount: address }
+      await config.set({ ...storedConfig, ...newConfigUpdates })
+
+      return address
+    })
+    .hideHelp()
+    .default(storedConfig.selectedAccount)
+}
+
+let entropy: Entropy
+
+async function loadEntropy (address: string, endpoint: string, password: string) {
+  const storedConfig = config.getSync()
+  const selectedAccount = getSelectedAccount(storedConfig.accounts, address)
+
+  entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint, password })
+}
+
 /* no command */
 program
   .name('entropy')
   .description('CLI interface for interacting with entropy.xyz. Running without commands starts an interactive ui')
   .addOption(endpointOption())
+  .addOption(currentAccountAddressOption())
   .addOption(
     new Option(
       '-d, --dev',
@@ -58,8 +89,19 @@ program
       .env('DEV_MODE')
       .hideHelp()
   )
+  .hook('preAction', async (_thisCommand, actionCommand) => {
+    if (!entropy || (entropy.keyring.accounts.registration.address !== actionCommand.args[0] || entropy.keyring.accounts.registration.address !== actionCommand.opts().account)) {
+      // balance includes an address argument, use that address to instantiate entropy
+      if (actionCommand.name() === 'balance') {
+        await loadEntropy(actionCommand.args[0], actionCommand.opts().endpoint, actionCommand.opts().password)
+      } else {
+        // if address is not an argument, use the address from the option
+        await loadEntropy(actionCommand.opts().account, actionCommand.opts().endpoint, actionCommand.opts().password)
+      }
+    }
+  })
   .action((options: EntropyTuiOptions) => {
-    launchTui(options)
+    launchTui(entropy, options)
   })
 
 /* list */
@@ -93,6 +135,7 @@ program.command('transfer')
   .argument('amount', 'Amount of funds to be moved')
   .addOption(passwordOption('Password for the source account (if required)'))
   .addOption(endpointOption())
+  .addOption(currentAccountAddressOption())
   .action(async (source, destination, amount, opts) => {
     await cliEntropyTransfer({ source, destination, amount, ...opts })
     // writeOut(??) // TODO: write the output
@@ -106,6 +149,7 @@ program.command('sign')
   .argument('message', 'Message you would like to sign')
   .addOption(passwordOption('Password for the source account (if required)'))
   .addOption(endpointOption())
+  .addOption(currentAccountAddressOption())
   .action(async (address, message, opts) => {
     const signature = await cliSign({ address, message, ...opts })
     writeOut(signature)
@@ -117,4 +161,4 @@ function writeOut (result) {
   process.stdout.write(prettyResult)
 }
 
-program.parse()
+program.parseAsync().then(() => {})

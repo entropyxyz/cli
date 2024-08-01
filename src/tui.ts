@@ -1,4 +1,5 @@
 import inquirer from 'inquirer'
+import Entropy from '@entropyxyz/sdk'
 import * as config from './config'
 import * as flows from './flows'
 import { EntropyTuiOptions } from './types'
@@ -9,9 +10,9 @@ import { EntropyLogger } from './common/logger'
 let shouldInit = true
 
 // tui = text user interface
-export default function tui (options: EntropyTuiOptions) {
+export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
   const logger = new EntropyLogger('TUI', options.endpoint)
-  console.clear()
+  // console.clear()
   console.log(logo) // the Entropy logo
   logger.debug(options)
 
@@ -36,10 +37,10 @@ export default function tui (options: EntropyTuiOptions) {
   // assign exit so its last
   Object.assign(choices, { 'Exit': async () => {} })
 
-  main(choices, options, logger)
+  main(entropy, choices, options, logger)
 }
 
-async function main (choices, options, logger: EntropyLogger) {
+async function main (entropy: Entropy, choices, options, logger: EntropyLogger) {
   if (shouldInit) {
     await config.init()
     shouldInit = false
@@ -90,7 +91,7 @@ async function main (choices, options, logger: EntropyLogger) {
     }]))
   }
 
-  if (returnToMain) main(choices, options, logger)
+  if (returnToMain) main(entropy, choices, options, logger)
   else {
     print('Have a nice day')
     process.exit()
