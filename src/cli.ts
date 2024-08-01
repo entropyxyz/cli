@@ -3,47 +3,17 @@
 /* NOTE: calling this file entropy.ts helps commander parse process.argv */
 import { Command, Option } from 'commander'
 import launchTui from './tui'
-import * as config from './config'
 import { EntropyTuiOptions } from './types'
 
 import { cliGetBalance } from './flows/balance/cli'
 import { cliListAccounts } from './flows/manage-accounts/cli'
 import { cliEntropyTransfer } from './flows/entropyTransfer/cli'
 import { cliSign } from './flows/sign/cli'
-import { stringify } from './common/utils'
+
+import { cliWrite, passwordOption, endpointOption } from './cli/util'
+import { entropyProgram } from './cli/commands'
 
 const program = new Command()
-
-function endpointOption (){
-  return new Option(
-    '-e, --endpoint <endpoint>',
-    [
-      'Runs entropy with the given endpoint and ignores network endpoints in config.',
-      'Can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`.'
-    ].join(' ')
-  )
-    .env('ENDPOINT')
-    .argParser(aliasOrEndpoint => {
-      /* see if it's a raw endpoint */
-      if (aliasOrEndpoint.match(/^wss?:\/\//)) return aliasOrEndpoint
-
-      /* look up endpoint-alias */
-      const storedConfig = config.getSync()
-      const endpoint = storedConfig.endpoints[aliasOrEndpoint]
-      if (!endpoint) throw Error('unknown endpoint alias: ' + aliasOrEndpoint)
-
-      return endpoint
-    })
-    .default('ws://testnet.entropy.xyz:9944/')
-    // NOTE: argParser is only run IF an option is provided, so this cannot be 'test-net'
-}
-
-function passwordOption (description?: string) {
-  return new Option(
-    '-p, --password <password>',
-    description || 'Password for the account'
-  )
-}
 
 /* no command */
 program
@@ -62,6 +32,14 @@ program
     launchTui(options)
   })
 
+/* Install commands */
+// entropyAccount(program)
+// entropyBalance(program)
+// entropySession(program)
+// entropySign(program)
+entropyProgram(program)
+// entropyTransfar(program)
+
 /* list */
 program.command('list')
   .alias('ls')
@@ -69,7 +47,7 @@ program.command('list')
   .action(async () => {
     // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
     const accounts = await cliListAccounts()
-    writeOut(accounts)
+    cliWrite(accounts)
     process.exit(0)
   })
 
@@ -81,7 +59,7 @@ program.command('balance')
   .addOption(endpointOption())
   .action(async (address, opts) => {
     const balance = await cliGetBalance({ address, ...opts })
-    writeOut(balance)
+    cliWrite(balance)
     process.exit(0)
   })
 
@@ -108,13 +86,8 @@ program.command('sign')
   .addOption(endpointOption())
   .action(async (address, message, opts) => {
     const signature = await cliSign({ address, message, ...opts })
-    writeOut(signature)
+    cliWrite(signature)
     process.exit(0)
   })
-
-function writeOut (result) {
-  const prettyResult = stringify(result)
-  process.stdout.write(prettyResult)
-}
 
 program.parse()
