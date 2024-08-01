@@ -15,6 +15,8 @@ import { initializeEntropy } from './common/initializeEntropy'
 import { BalanceCommand } from './balance/command'
 
 const program = new Command()
+// Array of restructured commands to make it easier to migrate them to the new "flow"
+const RESTRUCTURED_COMMANDS = ['balance']
 
 function endpointOption (){
   return new Option(
@@ -99,7 +101,8 @@ program
   .hook('preAction', async (_thisCommand, actionCommand) => {
     if (!entropy || (entropy.keyring.accounts.registration.address !== actionCommand.args[0] || entropy.keyring.accounts.registration.address !== actionCommand.opts().account)) {
       // balance includes an address argument, use that address to instantiate entropy
-      if (actionCommand.name() === 'balance' && actionCommand.args.length) {
+      // can keep the conditional to check for length of args, and use the first index since it is our pattern to have the address as the first argument
+      if (RESTRUCTURED_COMMANDS.includes(actionCommand.name()) && actionCommand.args.length) {
         await loadEntropy(actionCommand.args[0], actionCommand.opts().endpoint, actionCommand.opts().password)
       } else {
         // if address is not an argument, use the address from the option
