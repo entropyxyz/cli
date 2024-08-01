@@ -14,7 +14,7 @@ import {
 import { initializeEntropy } from 'src/common/initializeEntropy'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
 import { transfer } from 'src/flows/entropyTransfer/transfer'
-import { BalanceUtils } from 'src/balance/utils'
+import * as BalanceUtils from 'src/balance/utils'
 
 const networkType = 'two-nodes'
 const endpoint = 'ws://127.0.0.1:9944'
@@ -40,7 +40,6 @@ test('Transfer', async (t) => {
   
   const entropy = await initializeEntropy({ keyMaterial: naynayKeyring.getAccount(), endpoint, })
   const charlieEntropy = await initializeEntropy({ keyMaterial: charlieKeyring.getAccount(), endpoint, })
-  const balanceUtils = new BalanceUtils(entropy, endpoint)
   await run('entropy ready', entropy.ready)
   await run('charlie ready', charlieEntropy.ready)
   
@@ -49,14 +48,14 @@ test('Transfer', async (t) => {
   // Check Balance of new account
   let naynayBalance = await run(
     'getBalance (naynay)',
-    balanceUtils.getBalance(recipientAddress)
+    BalanceUtils.getBalance(entropy, recipientAddress)
   )
 
   t.equal(naynayBalance, 0, 'naynay is broke')
 
   let charlieBalance = await run(
     'getBalance (charlieStash)',
-    balanceUtils.getBalance(charlieStashAddress)
+    BalanceUtils.getBalance(entropy, charlieStashAddress)
   )
 
   t.equal(charlieBalance, 1e17, 'charlie got bank')
@@ -75,7 +74,7 @@ test('Transfer', async (t) => {
   // Re-Check Balance of new account
   naynayBalance = await run(
     'getBalance (naynay)',
-    balanceUtils.getBalance(recipientAddress)
+    BalanceUtils.getBalance(entropy, recipientAddress)
   )
 
   t.equal(naynayBalance, 1000 * 10e10, 'naynay is rolling in it!')

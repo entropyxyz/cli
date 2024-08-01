@@ -1,44 +1,24 @@
 import Entropy from "@entropyxyz/sdk";
-import { Base } from "../common/base";
 import { BalanceInfo } from "./types";
-import { FLOW_CONTEXT } from "./constants";
 
 const hexToBigInt = (hexString: string) => BigInt(hexString)
 
-export class BalanceUtils extends Base {
-  constructor (entropy: Entropy, endpoint: string) {
-    super(entropy, endpoint, FLOW_CONTEXT)
-  }
+export async function getBalance (entropy: Entropy, address: string): Promise<number> {
+  const accountInfo = (await entropy.substrate.query.system.account(address)) as any
+  return parseInt(hexToBigInt(accountInfo.data.free).toString())
+}
 
-  public async getBalance (address: string): Promise<number> {
+export async function getBalances (entropy: Entropy, addresses: string[]): Promise<BalanceInfo> {
+  const balanceInfo: BalanceInfo = {}
+  await Promise.all(addresses.map(async address => {
     try {
-      const accountInfo = (await this.entropy.substrate.query.system.account(address)) as any
+      const balance = await getBalance(entropy, address)
       
-      return parseInt(hexToBigInt(accountInfo.data.free).toString())
+      balanceInfo[address] = { balance }
     } catch (error) {
-      this.logger.error(`There was an error getting balance for [acct = ${address}]`, error);
-      throw new Error(error.message)
+      balanceInfo[address] = { error: error.message }
     }
-  }
-
-  public async getBalances (addresses: string[]): Promise<BalanceInfo> {
-    const balanceInfo: BalanceInfo = {}
-    try {
-      await Promise.all(addresses.map(async address => {
-        try {
-          const balance = await this.getBalance(address)
-          
-          balanceInfo[address] = { balance }
-        } catch (error) {
-          this.logger.error(`Error retrieving balance for ${address}`, error);
-          balanceInfo[address] = { error: error.message }
-        }
-      }))
-      
-      return balanceInfo
-    } catch (error) {
-      this.logger.error(`There was an error getting balances for [${addresses}]`, error);
-      throw new Error(error.message)
-    }
-  }
+  }))
+  
+  return balanceInfo
 }
