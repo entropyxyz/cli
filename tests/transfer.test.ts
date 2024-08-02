@@ -11,8 +11,8 @@ import {
 } from './testing-utils'
 
 import { initializeEntropy } from '../src/common/initializeEntropy'
-import { transfer } from '../src/flows/entropyTransfer/transfer'
 import * as BalanceUtils from '../src/balance/utils'
+import * as TransferUtils from '../src/transfer/utils'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
 
 const networkType = 'two-nodes'
@@ -62,7 +62,7 @@ test('Transfer', async (t) => {
 
   const transferStatus = await run(
     'transfer',
-    transfer(entropy, {
+    TransferUtils.transfer(entropy, {
       from: charlieEntropy.keyring.accounts.registration.pair,
       to: recipientAddress,
       amount: BigInt(1000 * 10e10)
