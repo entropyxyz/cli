@@ -1,1 +1,0 @@
-export const FLOW_CONTEXT = 'ENTROPY-BALANCE'
