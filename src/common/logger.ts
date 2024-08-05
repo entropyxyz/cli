@@ -117,7 +117,7 @@ export class EntropyLogger {
     this.winstonLogger.log({
       level,
       message: maskPayload(message),
-      context: context || this.context,
+      context: context ? `${this.context}:${context}` : this.context,
       endpoint: this.endpoint,
       description,
       stack,
