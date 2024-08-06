@@ -1,3 +1,5 @@
+This is a test for the CLA Assistant. Please do not merge actually. :)
+
 # Entropy CLI
 
 A straightforward command-line interface (CLI) tool to showcase how to perform basic Entropy actions.
