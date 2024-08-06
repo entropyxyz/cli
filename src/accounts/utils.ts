@@ -1,9 +1,10 @@
 // @ts-expect-error
 import Keyring from '@entropyxyz/sdk/keys'
 import { EntropyAccountConfig, EntropyConfig } from "../config/types";
-import { CreateAccountParams, ListedAccount } from './types';
+import { CreateAccountParams, ListedAccount, RegisterParams } from './types';
 import { ACCOUNTS_CONTENT } from './constants';
-import { generateAccountChoices } from 'src/common/utils';
+import { generateAccountChoices, print } from 'src/common/utils';
+import Entropy from '@entropyxyz/sdk';
 
 const validateSeedInput = (seed) => {
   if (seed.includes('#debug')) return true
@@ -93,4 +94,29 @@ export function listAccounts ({ accounts }: Partial<EntropyConfig>) {
       'There are currently no accounts available, please create or import your new account using the Manage Accounts feature'
     )
   return formatAccountsList(accountsArray)
+}
+
+export async function registerAccount (entropy: Entropy, params?: RegisterParams): Promise<string> {
+  let verifyingKey: string
+  try {
+    const registerParams = params?.programModAddress && params?.programData ? { programDeployer: params.programModAddress, programData: params.programData } : undefined
+    
+    verifyingKey = await entropy.register(registerParams)
+    return verifyingKey
+  } catch (error) {
+    if (!verifyingKey) {
+      try {
+        const tx = entropy.substrate.tx.registry.pruneRegistration()
+        await tx.signAndSend(entropy.keyring.accounts.registration.pair, ({ status }) => {
+          if (status.isFinalized) {
+            print('Successfully pruned registration');
+          }
+        })
+      } catch (error) {
+        console.error('Unable to prune registration due to:', error.message);
+        throw error
+      }
+    }
+    throw error
+  }
 }

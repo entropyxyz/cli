@@ -10,6 +10,7 @@ import {
   listAccounts,
   manageAccountsQuestions,
   newAccountQuestions,
+  registerAccount,
   selectAccountQuestions
 } from "./utils";
 import { CreateAccountParams } from "./types";
@@ -65,6 +66,26 @@ export class AccountsCommand extends BaseCommand {
     }
   
     return { seed, name, path }
+  }
+
+  public async registerAccount (account: EntropyAccountConfig): Promise<EntropyAccountConfig> {
+    this.logger.debug(
+      'about to register selectedAccount.address' + 
+      account.address + 'keyring:' +
+      // @ts-expect-error Type export of ChildKey still not available from SDK
+      this.entropy.keyring.getLazyLoadAccountProxy('registration').pair.address,
+      'REGISTER'
+    )
+
+    try {
+      const verifyingKey = await registerAccount(this.entropy)
+      
+      account?.data?.registration?.verifyingKeys?.push(verifyingKey)
+      return account
+    } catch (error) {
+      this.logger.error('There was a problem registering', error)
+      throw error
+    }
   }
 
   public async runInteraction (config): Promise<any> {

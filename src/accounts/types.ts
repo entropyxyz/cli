@@ -5,3 +5,9 @@ export type ListedAccount = {
   address: string
   verifyingKeys: string[]
 }
+
+export interface RegisterParams {
+  programModAddress?: string
+  // TODO: Export ProgramInstance type from sdk
+  programData?: any
+}
