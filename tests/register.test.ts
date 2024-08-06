@@ -1,15 +1,14 @@
 import test from 'tape'
-
+import { registerAccount } from '../src/accounts/utils'
 import { charlieStashSeed, setupTest } from './testing-utils'
-import { register } from '../src/flows/register/register'
 import { readFileSync } from 'node:fs'
 
 const networkType = 'two-nodes'
 
-test('Regsiter - Default Program', async (t) => {
+test('Register - Default Program', async (t) => {
   const { run, entropy } = await setupTest(t, { networkType, seed: charlieStashSeed })
 
-  const verifyingKey = await run('register account', register(entropy))
+  const verifyingKey = await run('register account', registerAccount(entropy))
 
   const fullAccount = entropy.keyring.getAccount()
 
@@ -30,7 +29,7 @@ test('Register - Barebones Program', async t => {
 
   const verifyingKey = await run(
     'register - using custom params',
-    register(entropy, {
+    registerAccount(entropy, {
       programModAddress: entropy.keyring.accounts.registration.address,
       programData: [{ program_pointer: pointer, program_config: '0x' }],
     })
