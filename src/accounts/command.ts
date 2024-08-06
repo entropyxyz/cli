@@ -43,7 +43,7 @@ export class AccountsCommand extends BaseCommand {
   }
 
   public async selectAccount (accounts: EntropyAccountConfig[]) {
-    const answers = await inquirer.prompt([selectAccountQuestions(accounts)])
+    const answers = await inquirer.prompt(selectAccountQuestions(accounts))
   
     return { selectedAccount: answers.selectedAccount.address }
   }
@@ -91,7 +91,7 @@ export class AccountsCommand extends BaseCommand {
   public async runInteraction (config): Promise<any> {
     const { accounts } = config
     const { interactionChoice } = await inquirer.prompt(manageAccountsQuestions)
-
+    
     switch (interactionChoice) {
     case 'create-account': {
       const createAccountParams = await this.getUserInput()

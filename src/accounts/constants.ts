@@ -25,7 +25,7 @@ export const ACCOUNTS_CONTENT = {
     message: "Choose account:",
   },
   interactionChoice: {
-    name: 'choice',
+    name: 'interactionChoice',
     choices: [
       { name: 'Create/Import Account', value: 'create-import' },
       { name: 'Select Account', value: 'select-account' },

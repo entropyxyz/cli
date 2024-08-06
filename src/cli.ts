@@ -9,7 +9,7 @@ import { EntropyTuiOptions } from './types'
 
 import { cliEntropyTransfer } from './flows/entropyTransfer/cli'
 import { cliSign } from './flows/sign/cli'
-import { getSelectedAccount, stringify } from './common/utils'
+import { getSelectedAccount, stringify, updateConfig } from './common/utils'
 import Entropy from '@entropyxyz/sdk'
 import { initializeEntropy } from './common/initializeEntropy'
 import { BalanceCommand } from './balance/command'
@@ -150,7 +150,7 @@ program.command('new-account')
   )
   .addOption(
     new Option(
-      '-p, --path',
+      '-pa, --path',
       'Derivation path'
     ).default(ACCOUNTS_CONTENT.path.default)
   )
@@ -162,6 +162,41 @@ program.command('new-account')
     const newAccount = await accountsCommand.newAccount({ seed, name, path })
     await accountsCommand.updateConfig(storedConfig, newAccount)
     writeOut({ name: newAccount.name, address: newAccount.address })
+    process.exit(0)
+  })
+
+/* register */
+program.command('register')
+  .description('Register an entropy account with a program')
+  .argument('address', 'Address of existing entropy account')
+  .addOption(passwordOption())
+  .addOption(endpointOption())
+  .addOption(
+    new Option(
+      '-pointer, --pointer',
+      'Program pointer of program to be used for registering'
+    )
+  )
+  .addOption(
+    new Option(
+      '-data, --program-data',
+      'Path to file containing program data in JSON format'
+    )
+  )
+  .action(async (address, opts) => {
+    const storedConfig = await config.get()
+    const { accounts } = storedConfig
+    const accountsCommand = new AccountsCommand(entropy, opts.endpoint)
+    writeOut('Attempting to register account with addtess: ' + address)
+    const accountToRegister = getSelectedAccount(accounts, address)
+    if (!accountToRegister) {
+      throw new Error('AccountError: Unable to register non-existent account')
+    }
+    const updatedAccount = await accountsCommand.registerAccount(accountToRegister)
+    const arrIdx = accounts.indexOf(accountToRegister)
+    accounts.splice(arrIdx, 1, updatedAccount)
+    await updateConfig(storedConfig, { accounts, selectedAccount: updatedAccount.address })
+    writeOut("Your address" + updatedAccount.address + "has been successfully registered.")
     process.exit(0)
   })
 
