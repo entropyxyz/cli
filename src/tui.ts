@@ -4,9 +4,10 @@ import * as config from './config'
 import * as flows from './flows'
 import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
-import { print } from './common/utils'
+import { print, updateConfig } from './common/utils'
 import { EntropyLogger } from './common/logger'
 import { BalanceCommand } from './balance/command'
+import { AccountsCommand } from './accounts/command'
 
 let shouldInit = true
 
@@ -18,7 +19,7 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
   logger.debug(options)
 
   const choices = {
-    'Manage Accounts': flows.manageAccounts,
+    'Manage Accounts': () => {},
     // leaving as a noop function until all flows are restructured
     'Balance': () => {},
     'Register': flows.entropyRegister,
@@ -81,6 +82,13 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
       const balanceCommand = new BalanceCommand(entropy, options.endpoint)
       const balanceString = await balanceCommand.getBalance(storedConfig.selectedAccount)
       print(`Address ${storedConfig.selectedAccount} has a balance of: ${balanceString}`)
+      break;
+    }
+    case 'Manage Accounts': {
+      const accountsCommand = new AccountsCommand(entropy, options.endpoint)
+      const response = await accountsCommand.runInteraction(storedConfig)
+      returnToMain = await updateConfig(storedConfig, response)
+      storedConfig = await config.get()
       break;
     }
     default: {

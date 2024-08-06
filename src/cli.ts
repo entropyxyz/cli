@@ -2,21 +2,22 @@
 
 /* NOTE: calling this file entropy.ts helps commander parse process.argv */
 import { Command, Option } from 'commander'
+import { randomAsHex } from '@polkadot/util-crypto'
 import launchTui from './tui'
 import * as config from './config'
 import { EntropyTuiOptions } from './types'
 
-import { cliListAccounts } from './flows/manage-accounts/cli'
 import { cliEntropyTransfer } from './flows/entropyTransfer/cli'
 import { cliSign } from './flows/sign/cli'
 import { getSelectedAccount, stringify } from './common/utils'
 import Entropy from '@entropyxyz/sdk'
 import { initializeEntropy } from './common/initializeEntropy'
 import { BalanceCommand } from './balance/command'
+import { AccountsCommand } from './accounts/command'
 
 const program = new Command()
 // Array of restructured commands to make it easier to migrate them to the new "flow"
-const RESTRUCTURED_COMMANDS = ['balance']
+const RESTRUCTURED_COMMANDS = ['balance', 'new-account']
 
 function endpointOption (){
   return new Option(
@@ -71,7 +72,7 @@ function currentAccountAddressOption () {
 let entropy: Entropy
 
 async function loadEntropy (address: string, endpoint: string, password: string) {
-  const storedConfig = config.getSync()
+  const storedConfig = await config.get()
   const selectedAccount = getSelectedAccount(storedConfig.accounts, address)
 
   if (!selectedAccount) throw Error(`No account with address ${address}`)
@@ -117,11 +118,52 @@ program
 /* list */
 program.command('list')
   .alias('ls')
-  .description('List all accounts. Output is JSON of form [{ name, address, data }]')
-  .action(async () => {
+  .description('List all accounts. Output is JSON of form [{ name, address, verifyingKeys }]')
+  .addOption(endpointOption())
+  .action(async (options) => {
     // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
-    const accounts = await cliListAccounts()
+    const storedConfig = await config.get()
+    const accountsCommand = new AccountsCommand(entropy, options.endpoint)
+    const accounts = accountsCommand.listAccounts(storedConfig.accounts)
     writeOut(accounts)
+    process.exit(0)
+  })
+
+/* new account */
+program.command('new-account')
+  .alias('new')
+  .description('Create new entropy account from imported seed or from scratch. Output is JSON of form [{name, address}]')
+  .addOption(endpointOption())
+  .addOption(passwordOption())
+  .addOption(
+    new Option(
+      '-s, --seed',
+      'Seed used to create entropy account'
+    )
+      .makeOptionMandatory(true)
+      .default(randomAsHex(32))
+  )
+  .addOption(
+    new Option(
+      '-n, --name',
+      'Name of entropy account'
+    )
+      .makeOptionMandatory(true)
+  )
+  .addOption(
+    new Option(
+      '-p, --path',
+      'Derivation path'
+    )
+      .makeOptionMandatory(true)
+  )
+  .action(async (opts) => {
+    const { seed, name, path, endpoint } = opts
+    const accountsCommand = new AccountsCommand(entropy, endpoint)
+
+    const newAccount = await accountsCommand.newAccount({ seed, name, path })
+    await accountsCommand.updateConfig(newAccount)
+    writeOut(newAccount)
     process.exit(0)
   })
 

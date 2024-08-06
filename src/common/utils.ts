@@ -1,5 +1,6 @@
+import * as config from '../config'
 import { Buffer } from 'buffer'
-import { EntropyAccountConfig } from "../config/types"
+import { EntropyAccountConfig, EntropyConfig } from "../config/types"
 
 export function stripHexPrefix (str: string): string {
   if (str.startsWith('0x')) return str.slice(2)
@@ -52,7 +53,7 @@ export function buf2hex (buffer: ArrayBuffer): string {
   return Buffer.from(buffer).toString("hex")
 }
 
-export function accountChoices (accounts: EntropyAccountConfig[]) {
+export function generateAccountChoices (accounts: EntropyAccountConfig[]) {
   return accounts
     .map((account) => ({
       name: `${account.name} (${account.address})`,
@@ -61,10 +62,19 @@ export function accountChoices (accounts: EntropyAccountConfig[]) {
 }
 
 export function accountChoicesWithOther (accounts: EntropyAccountConfig[]) {
-  return accountChoices(accounts)
+  return generateAccountChoices(accounts)
     .concat([{ name: "Other", value: null }])
 }
 
 export function getSelectedAccount (accounts: EntropyAccountConfig[], address: string) {
   return accounts.find(account => account.address === address)
+}
+
+export async function updateConfig (storedConfig: EntropyConfig, newUpdates: any) {
+  if (typeof newUpdates === 'string' && newUpdates === 'exit') {
+    return true
+  } else if (newUpdates) {
+    await config.set({ ...storedConfig, ...newUpdates })
+  }
+  return false
 }

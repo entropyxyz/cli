@@ -1,5 +1,5 @@
 // import inquirer from "inquirer"
-import { getSelectedAccount, print, /*accountChoices*/ } from "../../common/utils"
+import { getSelectedAccount, print } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { EntropyLogger } from "src/common/logger";
 import { register } from "./register";
@@ -14,7 +14,7 @@ export async function entropyRegister (storedConfig, options, logger: EntropyLog
 
   const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint })
   // TO-DO: investigate this a little more
-  // const filteredAccountChoices = accountChoices(accounts)
+  // const filteredAccountChoices = generateAccountChoices(accounts)
   // Not going to ask for a pointer from the user just yet
   // const { programPointer } = await inquirer.prompt([{
   //   type: 'input',

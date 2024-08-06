@@ -1,5 +1,5 @@
 import inquirer from "inquirer"
-import { print, accountChoices } from "../../common/utils"
+import { print, generateAccountChoices } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 
 export async function entropyFaucet ({ accounts }, options) {
@@ -9,7 +9,7 @@ export async function entropyFaucet ({ accounts }, options) {
     type: "list",
     name: "selectedAccount",
     message: "Choose account:",
-    choices: accountChoices(accounts),
+    choices: generateAccountChoices(accounts),
   }
 
   const answers = await inquirer.prompt([accountQuestion])
