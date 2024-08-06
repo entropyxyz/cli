@@ -14,6 +14,7 @@ import Entropy from '@entropyxyz/sdk'
 import { initializeEntropy } from './common/initializeEntropy'
 import { BalanceCommand } from './balance/command'
 import { AccountsCommand } from './accounts/command'
+import { ACCOUNTS_CONTENT } from './accounts/constants'
 
 const program = new Command()
 // Array of restructured commands to make it easier to migrate them to the new "flow"
@@ -139,31 +140,28 @@ program.command('new-account')
     new Option(
       '-s, --seed',
       'Seed used to create entropy account'
-    )
-      .makeOptionMandatory(true)
-      .default(randomAsHex(32))
+    ).default(randomAsHex(32))
   )
   .addOption(
     new Option(
       '-n, --name',
       'Name of entropy account'
-    )
-      .makeOptionMandatory(true)
+    ).makeOptionMandatory(true)
   )
   .addOption(
     new Option(
       '-p, --path',
       'Derivation path'
-    )
-      .makeOptionMandatory(true)
+    ).default(ACCOUNTS_CONTENT.path.default)
   )
   .action(async (opts) => {
+    const storedConfig = await config.get()
     const { seed, name, path, endpoint } = opts
     const accountsCommand = new AccountsCommand(entropy, endpoint)
 
     const newAccount = await accountsCommand.newAccount({ seed, name, path })
-    await accountsCommand.updateConfig(newAccount)
-    writeOut(newAccount)
+    await accountsCommand.updateConfig(storedConfig, newAccount)
+    writeOut({ name: newAccount.name, address: newAccount.address })
     process.exit(0)
   })
 

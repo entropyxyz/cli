@@ -1,6 +1,6 @@
 // @ts-expect-error
 import Keyring from '@entropyxyz/sdk/keys'
-import { EntropyAccountConfig } from "../config/types";
+import { EntropyAccountConfig, EntropyConfig } from "../config/types";
 import { CreateAccountParams, ListedAccount } from './types';
 import { ACCOUNTS_CONTENT } from './constants';
 import { generateAccountChoices } from 'src/common/utils';
@@ -78,10 +78,19 @@ export async function createAccount ({ name, seed, path }: CreateAccountParams):
   }
 }
 
-export function formatAccountsList (accounts: EntropyAccountConfig[]): ListedAccount[] {
+function formatAccountsList (accounts: EntropyAccountConfig[]): ListedAccount[] {
   return accounts.map((account: EntropyAccountConfig) => ({
     name: account.name,
     address: account.address,
     verifyingKeys: account?.data?.admin?.verifyingKeys
   }))
+}
+
+export function listAccounts ({ accounts }: Partial<EntropyConfig>) {
+  const accountsArray = Array.isArray(accounts) && accounts.length ? accounts : []
+  if (!accountsArray.length)
+    throw new Error(
+      'There are currently no accounts available, please create or import your new account using the Manage Accounts feature'
+    )
+  return formatAccountsList(accountsArray)
 }

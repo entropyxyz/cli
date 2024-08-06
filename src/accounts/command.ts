@@ -2,13 +2,12 @@ import inquirer from "inquirer";
 import Entropy from "@entropyxyz/sdk";
 import { randomAsHex } from '@polkadot/util-crypto'
 import { BaseCommand } from "../common/base-command";
-import { print } from "../common/utils";
-import { EntropyAccountConfig } from "../config/types";
-import * as config from '../config'
+import { print, updateConfig } from "../common/utils";
+import { EntropyAccountConfig, EntropyConfig } from "../config/types";
 import { FLOW_CONTEXT } from "./constants";
 import { 
   createAccount,
-  formatAccountsList,
+  listAccounts,
   manageAccountsQuestions,
   newAccountQuestions,
   selectAccountQuestions
@@ -35,15 +34,11 @@ export class AccountsCommand extends BaseCommand {
     return createAccount({ name, seed, path })
   }
 
-  public async updateConfig (newAccount: EntropyAccountConfig): Promise<void> {
-    const storedConfig = await config.get()
+  public async updateConfig (storedConfig: EntropyConfig, newAccount: EntropyAccountConfig): Promise<any> {
     const { accounts } = storedConfig
     accounts.push(newAccount)
-    await config.set({
-      ...storedConfig,
-      accounts,
-      selectedAccount: newAccount.address 
-    })
+    
+    return updateConfig(storedConfig, { accounts, selectedAccount: newAccount.address })
   }
 
   public async selectAccount (accounts: EntropyAccountConfig[]) {
@@ -52,13 +47,8 @@ export class AccountsCommand extends BaseCommand {
     return { selectedAccount: answers.selectedAccount.address }
   }
 
-  public listAccounts (accounts) {
-    const accountsArray = Array.isArray(accounts) && accounts.length ? accounts : []
-    if (!accountsArray.length)
-      throw new Error(
-        'There are currently no accounts available, please create or import your new account using the Manage Accounts feature'
-      )
-    return formatAccountsList(accountsArray)
+  public listAccounts (accounts: EntropyAccountConfig[]) {
+    return listAccounts({ accounts })
   }
 
   public async getUserInput (): Promise<CreateAccountParams> {
