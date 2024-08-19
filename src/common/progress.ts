@@ -11,10 +11,10 @@ export function setupProgress (label: string): { start: () => void; stop: () => 
   })
 
   const start = () => {
-    // 160 was found through trial and error, don't believe there is a formula to
+    // 150 was found through trial and error, don't believe there is a formula to
     // determine the exact time it takes for the transaction to be processed and finalized
     // TO-DO: Change progress bar to loading animation?
-    b1.start(160, 0, {
+    b1.start(150, 0, {
       speed: "N/A"
     })
     // update values

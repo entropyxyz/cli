@@ -7,6 +7,8 @@ import { logo } from './common/ascii'
 import { print } from './common/utils'
 import { EntropyLogger } from './common/logger'
 import { BalanceCommand } from './balance/command'
+import { TransferCommand } from './transfer/command'
+import { loadEntropy } from './cli'
 
 let shouldInit = true
 
@@ -23,7 +25,7 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
     'Balance': () => {},
     'Register': flows.entropyRegister,
     'Sign': flows.sign,
-    'Transfer': flows.entropyTransfer,
+    'Transfer': () => {},
     // TODO: design programs in TUI (merge deploy+user programs)
     'Deploy Program': flows.devPrograms,
     'User Programs': flows.userPrograms,
@@ -57,6 +59,11 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     storedConfig = await config.get()
   }
 
+  // If the selected account changes within the TUI we need to reset the entropy instance being used
+  if (storedConfig.selectedAccount !== entropy.keyring.accounts.registration.address) {
+    entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint)
+  }
+
   const answers = await inquirer.prompt([{
     type: 'list',
     name: 'choice',
@@ -78,10 +85,28 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     logger.debug(answers)
     switch (answers.choice) {
     case "Balance": {
-      const balanceCommand = new BalanceCommand(entropy, options.endpoint)
-      const balanceString = await balanceCommand.getBalance(storedConfig.selectedAccount)
-      print(`Address ${storedConfig.selectedAccount} has a balance of: ${balanceString}`)
+      try {
+        const balanceCommand = new BalanceCommand(entropy, options.endpoint)
+        const balanceString = await balanceCommand.getBalance(storedConfig.selectedAccount)
+        print(`Address ${storedConfig.selectedAccount} has a balance of: ${balanceString}`)
+      } catch (error) {
+        console.error('There was an error retrieving balance', error)
+      }
       break;
+    }
+    case "Transfer": {
+      try {
+        const transferCommand = new TransferCommand(entropy, options.endpoint)
+        const { amount, recipientAddress } = await transferCommand.askQuestions()
+        await transferCommand.sendTransfer(recipientAddress, amount)
+        print('')
+        print(`Transaction successful: Sent ${amount} to ${recipientAddress}`)
+        print('')
+        print('Press enter to return to main menu')
+      } catch (error) {
+        console.error('There was an error sending the transfer', error)
+      }
+      break
     }
     default: {
       const newConfigUpdates = await choices[answers.choice](storedConfig, options, logger)
