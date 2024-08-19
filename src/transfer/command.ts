@@ -28,7 +28,32 @@ const question = [
 export class TransferCommand extends BaseCommand {
   constructor (entropy: Entropy, endpoint: string) {
     super(entropy, endpoint, FLOW_CONTEXT)
+    this.arguments = {
+      source: {
+      // cli grabs description for --help
+      description: 'Account address funds will be sent to',
+      // tui grabs message for interface
+      message: "Input recipient's address:" }
+    }
   }
+
+  // decorateProgram (program) {
+  //   program.command('transfer')
+  // .description('Transfer funds between two Entropy accounts.') // TODO: name the output
+  // .argument('source', 'Account address funds will be drawn from')
+  // .argument('destination', 'Account address funds will be sent to')
+  // .argument('amount', 'Amount of funds to be moved')
+  // .addOption(passwordOption('Password for the source account (if required)'))
+  // .addOption(endpointOption())
+  // .addOption(currentAccountAddressOption())
+  // .action(async (_source, destination, amount, opts) => {
+  //   const transferCommand = new TransferCommand(entropy, opts.endpoint)
+  //   await transferCommand.sendTransfer(destination, amount)
+  //   // writeOut(??) // TODO: write the output
+  //   process.exit(0)
+  // })
+  // return program
+  // }
 
   public async askQuestions () {
     return inquirer.prompt(question)
