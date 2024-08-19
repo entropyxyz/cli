@@ -7,7 +7,6 @@ import launchTui from './tui'
 import * as config from './config'
 import { EntropyTuiOptions } from './types'
 
-import { cliEntropyTransfer } from './flows/entropyTransfer/cli'
 import { cliSign } from './flows/sign/cli'
 import { getSelectedAccount, stringify, updateConfig } from './common/utils'
 import Entropy from '@entropyxyz/sdk'
@@ -15,6 +14,7 @@ import { initializeEntropy } from './common/initializeEntropy'
 import { BalanceCommand } from './balance/command'
 import { AccountsCommand } from './accounts/command'
 import { ACCOUNTS_CONTENT } from './accounts/constants'
+import { TransferCommand } from './transfer/command'
 
 const program = new Command()
 // Array of restructured commands to make it easier to migrate them to the new "flow"
@@ -72,8 +72,8 @@ function currentAccountAddressOption () {
 
 let entropy: Entropy
 
-async function loadEntropy (address: string, endpoint: string, password: string) {
-  const storedConfig = await config.get()
+export async function loadEntropy (address: string, endpoint: string, password?: string): Promise<Entropy> {
+  const storedConfig = config.getSync()
   const selectedAccount = getSelectedAccount(storedConfig.accounts, address)
 
   if (!selectedAccount) throw Error(`No account with address ${address}`)
@@ -84,6 +84,12 @@ async function loadEntropy (address: string, endpoint: string, password: string)
   }
 
   entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint, password })
+
+  if (!entropy?.keyring?.accounts?.registration?.pair) {
+    throw new Error("Signer keypair is undefined or not properly initialized.")
+  }
+
+  return entropy
 }
 
 /* no command */
@@ -222,8 +228,9 @@ program.command('transfer')
   .addOption(passwordOption('Password for the source account (if required)'))
   .addOption(endpointOption())
   .addOption(currentAccountAddressOption())
-  .action(async (source, destination, amount, opts) => {
-    await cliEntropyTransfer({ source, destination, amount, ...opts })
+  .action(async (_source, destination, amount, opts) => {
+    const transferCommand = new TransferCommand(entropy, opts.endpoint)
+    await transferCommand.sendTransfer(destination, amount)
     // writeOut(??) // TODO: write the output
     process.exit(0)
   })
