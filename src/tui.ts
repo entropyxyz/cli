@@ -9,6 +9,7 @@ import { EntropyLogger } from './common/logger'
 import { BalanceCommand } from './balance/command'
 import { TransferCommand } from './transfer/command'
 import { loadEntropy } from './cli'
+import { SigningCommand } from './signing/command'
 
 let shouldInit = true
 
@@ -24,7 +25,7 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
     // leaving as a noop function until all flows are restructured
     'Balance': () => {},
     'Register': flows.entropyRegister,
-    'Sign': flows.sign,
+    'Sign': () => {},
     'Transfer': () => {},
     // TODO: design programs in TUI (merge deploy+user programs)
     'Deploy Program': flows.devPrograms,
@@ -105,6 +106,15 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
         print('Press enter to return to main menu')
       } catch (error) {
         console.error('There was an error sending the transfer', error)
+      }
+      break
+    }
+    case "Sign": {
+      try {
+        const signingCommand = new SigningCommand(entropy, options.endpoint)
+        await signingCommand.runInteraction()
+      } catch (error) {
+        console.error('There was an issue with signing', error)
       }
       break
     }

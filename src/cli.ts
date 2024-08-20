@@ -7,12 +7,12 @@ import * as config from './config'
 import { EntropyTuiOptions } from './types'
 
 import { cliListAccounts } from './flows/manage-accounts/cli'
-import { cliSign } from './flows/sign/cli'
 import { getSelectedAccount, stringify } from './common/utils'
 import Entropy from '@entropyxyz/sdk'
 import { initializeEntropy } from './common/initializeEntropy'
 import { BalanceCommand } from './balance/command'
 import { TransferCommand } from './transfer/command'
+import { SigningCommand } from './signing/command'
 
 const program = new Command()
 // Array of restructured commands to make it easier to migrate them to the new "flow"
@@ -168,8 +168,9 @@ program.command('sign')
   .addOption(passwordOption('Password for the source account (if required)'))
   .addOption(endpointOption())
   .addOption(currentAccountAddressOption())
-  .action(async (address, message, opts) => {
-    const signature = await cliSign({ address, message, ...opts })
+  .action(async (_address, message, opts) => {
+    const signingCommand = new SigningCommand(entropy, opts.endpoint)
+    const signature = await signingCommand.signMessage({ msg: message })
     writeOut(signature)
     process.exit(0)
   })

@@ -5,25 +5,6 @@ import * as TransferUtils from './utils'
 import inquirer from "inquirer";
 
 const FLOW_CONTEXT = 'ENTROPY_TRANSFER'
-const question = [
-  {
-    type: "input",
-    name: "amount",
-    message: "Input amount to transfer:",
-    default: "1",
-    validate: (amount) => {
-      if (isNaN(amount) || parseInt(amount) <= 0) {
-        return 'Please enter a value greater than 0'
-      }
-      return true
-    }
-  },
-  {
-    type: "input",
-    name: "recipientAddress",
-    message: "Input recipient's address:",
-  },
-]
 
 export class TransferCommand extends BaseCommand {
   constructor (entropy: Entropy, endpoint: string) {
@@ -31,7 +12,7 @@ export class TransferCommand extends BaseCommand {
   }
 
   public async askQuestions () {
-    return inquirer.prompt(question)
+    return inquirer.prompt(TransferUtils.transferInputQuestions)
   }
 
   public async sendTransfer (toAddress: string, amount: string) {
