@@ -3,8 +3,8 @@ import { u8aToHex } from '@polkadot/util'
 import { readFileSync } from "fs";
 import { BaseCommand } from "../common/base-command";
 import { print } from "../common/utils";
-import { interactionChoiceQuestions, messageActionQuestions, signWithAdapters, userInputQuestions } from "./utils";
-import { SignWithAdapterResult } from "./types";
+import { getMsgFromInputOrFile, interactionChoiceQuestions, messageActionQuestions, rawSign, signWithAdapters, userInputQuestions } from "./utils";
+import { SignResult } from "./types";
 import { FLOW_CONTEXT } from "./constants";
 
 export class SigningCommand extends BaseCommand {
@@ -12,17 +12,37 @@ export class SigningCommand extends BaseCommand {
     super(entropy, endpoint, FLOW_CONTEXT)
   }
 
-  public async signMessage ({ msg, msgPath }: { msg?: string, msgPath?: string }): Promise<SignWithAdapterResult> {
-    if (!msg && msgPath) {
-      msg = readFileSync(msgPath, 'utf-8')
-    }
-    if (!msg && !msgPath) {
-      throw new Error('SigningError: You must provide a message or path to a file')
-    }
+  public async rawSignMessage ({ msg, msgPath, auxiliaryData, hashingAlgorithm }): Promise<SignResult> {
+    const message = getMsgFromInputOrFile(msg, msgPath)
+
     try {
       this.logger.log(`Msg to be signed: ${msg}`, 'SIGN_MSG')
       this.logger.log( `Verifying Key used: ${this.entropy.signingManager.verifyingKey}`)
-      const signature = await signWithAdapters(this.entropy, { msg })
+      const signature = await rawSign(
+        this.entropy,
+        {
+          sigRequestHash: Buffer.from(message).toString('hex'),
+          hash: hashingAlgorithm,
+          auxiliaryData
+        }
+      )
+      const signatureHexString = u8aToHex(signature)
+      this.logger.log(`Signature: ${signatureHexString}`)
+
+      return { signature: signatureHexString, verifyingKey: this.entropy.signingManager.verifyingKey }
+    } catch (error) {
+      this.logger.error('Error signing message', error)
+      throw error
+    }
+  }
+
+  public async signMessage ({ msg, msgPath }: { msg?: string, msgPath?: string }): Promise<SignResult> {
+    const message = getMsgFromInputOrFile(msg, msgPath)
+
+    try {
+      this.logger.log(`Msg to be signed: ${msg}`, 'SIGN_MSG')
+      this.logger.log( `Verifying Key used: ${this.entropy.signingManager.verifyingKey}`)
+      const signature = await signWithAdapters(this.entropy, { msg: message })
       const signatureHexString = u8aToHex(signature)
       this.logger.log(`Signature: ${signatureHexString}`)
 

@@ -181,6 +181,12 @@ program.command('sign')
   .addOption(passwordOption('Password for the source account (if required)'))
   .addOption(endpointOption())
   .addOption(currentAccountAddressOption())
+  .addOption(
+    new Option(
+      '-r, --raw',
+      'Signs the provided message using the Raw Signing method. Output is a signature (string)'
+    )
+  )
   .action(async (address, message, msgPath, opts) => {
     if (address) {
       await reloadEntropy(
@@ -189,6 +195,12 @@ program.command('sign')
       )
     }
     const signingCommand = new SigningCommand(entropy, opts.endpoint)
+    // TO-DO: Add ability for raw signing here, maybe? new raw option can be used for the conditional
+    /**
+     * if (opts.raw) {
+     *   implement raw sign here
+     * }
+     */
     const signature = await signingCommand.signMessage({ msg: message, msgPath })
     writeOut(signature)
     process.exit(0)

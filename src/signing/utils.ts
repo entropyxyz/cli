@@ -1,5 +1,6 @@
+import { readFileSync } from "fs"
 import { SIGNING_CONTENT } from "./constants"
-import { SignWithAdapterInput } from "./types"
+import { RawSignPayload, SignWithAdapterInput } from "./types"
 
 function stringToHex (str: string): string {
   return Buffer.from(str).toString('hex')
@@ -24,6 +25,22 @@ export const userInputQuestions = [{
   name: SIGNING_CONTENT.textInput.name,
   message: SIGNING_CONTENT.textInput.message,
 }]
+
+export function getMsgFromInputOrFile (msg?: string, msgPath?: string) {
+  let result: string = msg
+  if (!msg && msgPath) {
+    result = readFileSync(msgPath, 'utf-8')
+  }
+  if (!msg && !msgPath) {
+    throw new Error('SigningError: You must provide a message or path to a file')
+  }
+
+  return result
+}
+
+export async function rawSign (entropy, payload: RawSignPayload) {
+  return entropy.sign(payload)
+}
 
 export async function signWithAdapters (entropy, input: SignWithAdapterInput) {
   return entropy.signWithAdaptersInOrder({
