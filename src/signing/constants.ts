@@ -6,8 +6,7 @@ export const SIGNING_CONTENT = {
     message: 'Please choose how you would like to input your message to sign:',
     choices: [
       'Text Input',
-      /* DO NOT DELETE THIS */
-      // 'From a File',
+      'From a File',
     ],
   },
   textInput: {

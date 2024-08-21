@@ -74,11 +74,11 @@ export async function loadEntropy (address: string, endpoint: string, password?:
   const storedConfig = config.getSync()
   const selectedAccount = getSelectedAccount(storedConfig.accounts, address)
 
-  if (!selectedAccount) throw Error(`No account with address ${address}`)
+  if (!selectedAccount) throw new Error(`AddressError: No account with address ${address}`)
 
   // check if data is encrypted + we have a password
   if (typeof selectedAccount.data === 'string' && !password) {
-    throw Error('This account requires a password, add --password <password>')
+    throw new Error('AuthError: This account requires a password, add --password <password>')
   }
 
   entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint, password })
@@ -88,6 +88,18 @@ export async function loadEntropy (address: string, endpoint: string, password?:
   }
 
   return entropy
+}
+
+async function reloadEntropy (newAddress: string, oldAddress: string, endpoint: string): Promise<void> {
+  try {
+    entropy = await loadEntropy(newAddress, endpoint)
+  } catch (error) {
+    if (error.message.includes('AddressError')) {
+      entropy = await loadEntropy(oldAddress, endpoint)
+      return
+    }
+    throw error
+  }
 }
 
 /* no command */
@@ -163,14 +175,21 @@ program.command('transfer')
 /* Sign */
 program.command('sign')
   .description('Sign a message using the Entropy network. Output is a signature (string)')
-  .argument('address', 'Account address to use to sign')
-  .argument('message', 'Message you would like to sign')
+  .argument('[address]', 'Entropy Account address to be used to sign')
+  .argument('[message]', 'Message you would like to sign')
+  .argument('[msgPath]', 'Path to file of content you would like to sign')
   .addOption(passwordOption('Password for the source account (if required)'))
   .addOption(endpointOption())
   .addOption(currentAccountAddressOption())
-  .action(async (_address, message, opts) => {
+  .action(async (address, message, msgPath, opts) => {
+    if (address) {
+      await reloadEntropy(
+        address,
+        entropy.keyring.accounts.registration.address, opts.endpoint
+      )
+    }
     const signingCommand = new SigningCommand(entropy, opts.endpoint)
-    const signature = await signingCommand.signMessage({ msg: message })
+    const signature = await signingCommand.signMessage({ msg: message, msgPath })
     writeOut(signature)
     process.exit(0)
   })

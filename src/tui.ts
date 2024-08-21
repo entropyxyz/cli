@@ -112,7 +112,7 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     case "Sign": {
       try {
         const signingCommand = new SigningCommand(entropy, options.endpoint)
-        await signingCommand.runInteraction()
+        await signingCommand.runInteraction(inquirer)
       } catch (error) {
         console.error('There was an issue with signing', error)
       }
