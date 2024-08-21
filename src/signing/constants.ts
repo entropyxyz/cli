@@ -13,15 +13,25 @@ export const SIGNING_CONTENT = {
     name: "userInput",
     message: "Enter the message you wish to sign (this will open your default editor):",
   },
+  pathToFile: {
+    name: 'pathToFile',
+    message: 'Enter the path to the file you wish to sign:',
+  },
   interactionChoice: {
     name: "interactionChoice",
     message: "What would you like to do?",
     choices: [
-      // Removing the option to select Raw Sign until we fully release signing.
-      // We will need to update the flow to ask the user to input the auxilary data for the signature request
-      // "Raw Sign",
+      "Raw Sign",
       "Sign With Adapter",
       "Exit to Main Menu",
     ],
-  }
+  },
+  hashingAlgorithmInput: {
+    name: 'hashingAlgorithm',
+    message: 'Enter the hashing algorigthm to be used:',
+  },
+  auxiliaryDataInput: {
+    name: 'auxiliaryDataFile',
+    message: 'Enter path to file containing auxiliary data for signing:'
+  },
 }
