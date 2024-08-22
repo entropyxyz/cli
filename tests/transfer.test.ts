@@ -10,12 +10,13 @@ import {
   spinNetworkDown
 } from './testing-utils'
 
-import { getBalance } from '../src/flows/balance/balance'
 import { initializeEntropy } from '../src/common/initializeEntropy'
-import { transfer } from '../src/flows/entropyTransfer/transfer'
+import * as BalanceUtils from '../src/balance/utils'
+import * as TransferUtils from '../src/transfer/utils'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
 
 const networkType = 'two-nodes'
+const endpoint = 'ws://127.0.0.1:9944'
 
 test('Transfer', async (t) => {
   /* Setup */
@@ -34,9 +35,11 @@ test('Transfer', async (t) => {
   const naynaySeed = makeSeed()
   const naynayKeyring = new Keyring({ seed: naynaySeed, debug: true })
   const charlieKeyring = new Keyring({ seed: charlieStashSeed, debug: true })
-  
-  const entropy = await initializeEntropy({ keyMaterial: naynayKeyring.getAccount(), endpoint: 'ws://127.0.0.1:9944', })
-  const charlieEntropy = await initializeEntropy({ keyMaterial: charlieKeyring.getAccount(), endpoint: 'ws://127.0.0.1:9944', })
+  // Below expect errors are in place until we fix types export from sdk
+  // @ts-expect-error
+  const entropy = await initializeEntropy({ keyMaterial: naynayKeyring.getAccount(), endpoint, })
+  // @ts-expect-error
+  const charlieEntropy = await initializeEntropy({ keyMaterial: charlieKeyring.getAccount(), endpoint, })
   await run('entropy ready', entropy.ready)
   await run('charlie ready', charlieEntropy.ready)
   
@@ -45,21 +48,21 @@ test('Transfer', async (t) => {
   // Check Balance of new account
   let naynayBalance = await run(
     'getBalance (naynay)',
-    getBalance(entropy, recipientAddress)
+    BalanceUtils.getBalance(entropy, recipientAddress)
   )
 
   t.equal(naynayBalance, 0, 'naynay is broke')
 
   let charlieBalance = await run(
     'getBalance (charlieStash)',
-    getBalance(entropy, charlieStashAddress)
+    BalanceUtils.getBalance(entropy, charlieStashAddress)
   )
 
   t.equal(charlieBalance, 1e17, 'charlie got bank')
 
   const transferStatus = await run(
     'transfer',
-    transfer(entropy, {
+    TransferUtils.transfer(entropy, {
       from: charlieEntropy.keyring.accounts.registration.pair,
       to: recipientAddress,
       amount: BigInt(1000 * 10e10)
@@ -71,7 +74,7 @@ test('Transfer', async (t) => {
   // Re-Check Balance of new account
   naynayBalance = await run(
     'getBalance (naynay)',
-    getBalance(entropy, recipientAddress)
+    BalanceUtils.getBalance(entropy, recipientAddress)
   )
 
   t.equal(naynayBalance, 1000 * 10e10, 'naynay is rolling in it!')

@@ -4,22 +4,51 @@
 import { Command, Option } from 'commander'
 import launchTui from './tui'
 import { EntropyTuiOptions } from './types'
+import * as config from './config'
 
-import { cliGetBalance } from './flows/balance/cli'
 import { cliListAccounts } from './flows/manage-accounts/cli'
-import { cliEntropyTransfer } from './flows/entropyTransfer/cli'
 import { cliSign } from './flows/sign/cli'
 
-import { cliWrite, passwordOption, endpointOption } from './cli/util'
-import { entropyProgram } from './cli/commands'
+import { cliWrite, passwordOption, endpointOption, currentAccountAddressOption } from './cli/util'
+import { entropyProgram } from './cli/commands' // TODO move
+import { getSelectedAccount, stringify } from './common/utils'
+import Entropy from '@entropyxyz/sdk'
+import { initializeEntropy } from './common/initializeEntropy'
+import { BalanceCommand } from './balance/command'
+import { TransferCommand } from './transfer/command'
 
 const program = new Command()
+// Array of restructured commands to make it easier to migrate them to the new "flow"
+const RESTRUCTURED_COMMANDS = ['balance']
+
+let entropy: Entropy
+
+export async function loadEntropy (address: string, endpoint: string, password?: string): Promise<Entropy> {
+  const storedConfig = config.getSync()
+  const selectedAccount = getSelectedAccount(storedConfig.accounts, address)
+
+  if (!selectedAccount) throw Error(`No account with address ${address}`)
+
+  // check if data is encrypted + we have a password
+  if (typeof selectedAccount.data === 'string' && !password) {
+    throw Error('This account requires a password, add --password <password>')
+  }
+
+  entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint, password })
+
+  if (!entropy?.keyring?.accounts?.registration?.pair) {
+    throw new Error("Signer keypair is undefined or not properly initialized.")
+  }
+
+  return entropy
+}
 
 /* no command */
 program
   .name('entropy')
   .description('CLI interface for interacting with entropy.xyz. Running without commands starts an interactive ui')
   .addOption(endpointOption())
+  .addOption(currentAccountAddressOption())
   .addOption(
     new Option(
       '-d, --dev',
@@ -28,8 +57,20 @@ program
       .env('DEV_MODE')
       .hideHelp()
   )
+  .hook('preAction', async (_thisCommand, actionCommand) => {
+    if (!entropy || (entropy.keyring.accounts.registration.address !== actionCommand.args[0] || entropy.keyring.accounts.registration.address !== actionCommand.opts().account)) {
+      // balance includes an address argument, use that address to instantiate entropy
+      // can keep the conditional to check for length of args, and use the first index since it is our pattern to have the address as the first argument
+      if (RESTRUCTURED_COMMANDS.includes(actionCommand.name()) && actionCommand.args.length) {
+        await loadEntropy(actionCommand.args[0], actionCommand.opts().endpoint, actionCommand.opts().password)
+      } else {
+        // if address is not an argument, use the address from the option
+        await loadEntropy(actionCommand.opts().account, actionCommand.opts().endpoint, actionCommand.opts().password)
+      }
+    }
+  })
   .action((options: EntropyTuiOptions) => {
-    launchTui(options)
+    launchTui(entropy, options)
   })
 
 /* Install commands */
@@ -58,8 +99,9 @@ program.command('balance')
   .addOption(passwordOption())
   .addOption(endpointOption())
   .action(async (address, opts) => {
-    const balance = await cliGetBalance({ address, ...opts })
-    cliWrite(balance)
+    const balanceCommand = new BalanceCommand(entropy, opts.endpoint)
+    const balance = await balanceCommand.getBalance(address)
+    writeOut(balance)
     process.exit(0)
   })
 
@@ -71,8 +113,10 @@ program.command('transfer')
   .argument('amount', 'Amount of funds to be moved')
   .addOption(passwordOption('Password for the source account (if required)'))
   .addOption(endpointOption())
-  .action(async (source, destination, amount, opts) => {
-    await cliEntropyTransfer({ source, destination, amount, ...opts })
+  .addOption(currentAccountAddressOption())
+  .action(async (_source, destination, amount, opts) => {
+    const transferCommand = new TransferCommand(entropy, opts.endpoint)
+    await transferCommand.sendTransfer(destination, amount)
     // writeOut(??) // TODO: write the output
     process.exit(0)
   })
@@ -84,10 +128,16 @@ program.command('sign')
   .argument('message', 'Message you would like to sign')
   .addOption(passwordOption('Password for the source account (if required)'))
   .addOption(endpointOption())
+  .addOption(currentAccountAddressOption())
   .action(async (address, message, opts) => {
     const signature = await cliSign({ address, message, ...opts })
     cliWrite(signature)
     process.exit(0)
   })
 
-program.parse()
+program.parseAsync().then(() => {})
+
+function writeOut (result) {
+  const prettyResult = stringify(result)
+  process.stdout.write(prettyResult)
+}

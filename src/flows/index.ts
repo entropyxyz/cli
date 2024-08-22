@@ -1,7 +1,5 @@
 export { entropyFaucet } from './entropyFaucet'
-export { checkBalance } from './balance'
 export { entropyRegister } from './register'
 export { userPrograms, devPrograms } from './programs'
 export { sign } from './sign'
-export { entropyTransfer } from './entropyTransfer'
 export { manageAccounts } from './manage-accounts'

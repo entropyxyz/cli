@@ -27,12 +27,22 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - new: 'src/flows/user-program-management/view.ts' - service file for pure functions of viewing user programs
 - new: 'src/flows/user-program-management/helpers/utils.ts' - utility helper file for user program management specific methods
 - new: './src/flows/user-program-management/remove.ts' - service file for removing user program pure function
+- new: './src/common/base-commands.ts' - base abstract class for new command classes
+- new: './src/balance' - new file structure for our CLI/TUI flows
+  - new: './src/balance/command.ts' - main entry file for balance command for tui/cli
+  - new: './src/balance/utils.ts' - utilities and helper methods for all things balance
+- new: './src/transfer' - new file structure for our CLI/TUI flows
+  - new: './src/transfer/command.ts' - main entry file for transfer command for tui/cli
+  - new: './src/transfer/utils.ts' - utilities and helper methods for all things transfer
 
 ### Changed
 
 - folder name for user programs to match the kebab-case style for folder namespace
 - updated SDK version to v0.2.3
+- logger to handle nested contexts for better organization of logs
 - merged user + dev program folders + tests
+- removed flows/balance/*.ts directory with file restructure
+- removed flows/entropyTransfer/*.ts directory with file restructure
 
 
 ### Broke
