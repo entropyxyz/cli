@@ -73,3 +73,4 @@ export function getSelectedAccount (accounts: EntropyAccountConfig[], aliasOrAdd
     accounts.find(account => account.name === aliasOrAddress)
   )
 }
+

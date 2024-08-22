@@ -9,9 +9,9 @@ import * as config from './config'
 import { cliListAccounts } from './flows/manage-accounts/cli'
 import { cliSign } from './flows/sign/cli'
 
-import { cliWrite, passwordOption, endpointOption, currentAccountAddressOption } from './cli/util'
-import { entropyProgram } from './cli/commands' // TODO move
-import { getSelectedAccount, stringify } from './common/utils'
+import { cliWrite, passwordOption, endpointOption, currentAccountAddressOption } from './common/utils-cli'
+import { entropyProgramCommand } from './program/command'
+import { getSelectedAccount, stringify, } from './common/utils'
 import Entropy from '@entropyxyz/sdk'
 import { initializeEntropy } from './common/initializeEntropy'
 import { BalanceCommand } from './balance/command'
@@ -57,6 +57,8 @@ program
       .env('DEV_MODE')
       .hideHelp()
   )
+  // NOTE: I think this hook is gonna need to be on every command? TO BE TESTED
+  // If it is, then extract the hook fn, and loadEntropy out into src/common/utils-cli.ts
   .hook('preAction', async (_thisCommand, actionCommand) => {
     if (!entropy || (entropy.keyring.accounts.registration.address !== actionCommand.args[0] || entropy.keyring.accounts.registration.address !== actionCommand.opts().account)) {
       // balance includes an address argument, use that address to instantiate entropy
@@ -78,7 +80,7 @@ program
 // entropyBalance(program)
 // entropySession(program)
 // entropySign(program)
-entropyProgram(program)
+entropyProgramCommand(entropy, program) // WARNING this has been written to need access to entropy... but that's not defined yet?
 // entropyTransfar(program)
 
 /* list */
@@ -135,9 +137,9 @@ program.command('sign')
     process.exit(0)
   })
 
-program.parseAsync().then(() => {})
-
 function writeOut (result) {
   const prettyResult = stringify(result)
   process.stdout.write(prettyResult)
 }
+
+program.parseAsync().then(() => {})

@@ -1,11 +1,12 @@
 import { Option } from 'commander'
+import { stringify } from './utils'
 import * as config from '../config'
-import { stringify } from '../common/utils'
 
 export function cliWrite (result) {
   const prettyResult = stringify(result)
   process.stdout.write(prettyResult)
 }
+
 
 export function endpointOption () {
   return new Option(
@@ -67,4 +68,3 @@ export function aliasOrAddressOption () {
   // QUESTION: as this is a function, this could be a viable way to set the VK?
   // .default(process.env.ENTROPY_SESSION)
 }
-

@@ -1,31 +1,19 @@
 import { Command } from 'commander'
-import { aliasOrAddressOption, cliWrite, endpointOption } from '../util'
-import { initializeEntropy } from "../../common/initializeEntropy"
-import { getSelectedAccount } from "../../common/utils"
-import * as config from "../../config"
+import { Entropy } from '@entropyxyz/sdk'
+import { aliasOrAddressOption, cliWrite, endpointOption } from '../common/utils-cli'
 
-import { deployProgram } from '../../flows/programs/deploy'
+import { deployProgram } from '../flows/programs/deploy'
 
-async function getEntropy ({ address, endpoint }) {
-  const storedConfig = await config.get()
-  const selectedAccount = getSelectedAccount(storedConfig.accounts, address)
-
-  return initializeEntropy({
-    keyMaterial: selectedAccount.data,
-    endpoint
-  })
-}
-
-export function entropyProgram (rootCommand: Command) {
+export function entropyProgramCommand (entropy: Entropy, rootCommand: Command) {
   const programCommand = rootCommand.command('program')
     .description('Commands for working with programs deployed to the Entropy Network')
 
-  entropyProgramDeploy(programCommand)
+  entropyProgramDeploy(entropy, programCommand)
   // entropyProgramGet(program)
   // entropyProgramRemove(program)
 }
 
-function entropyProgramDeploy (programCommand: Command) {
+function entropyProgramDeploy (entropy: Entropy, programCommand: Command) {
   programCommand.command('deploy')
     .description([
       'Deploys a program to the Entropy network.',
@@ -55,9 +43,7 @@ function entropyProgramDeploy (programCommand: Command) {
     .addOption(aliasOrAddressOption())
     .addOption(endpointOption())
 
-    .action(async (bytecodePath, configurationSchemaPath, auxillaryDataSchemaPath, opts) => {
-      const entropy = await getEntropy(opts)
-
+    .action(async (bytecodePath, configurationSchemaPath, auxillaryDataSchemaPath, opts) => { // eslint-disable-line
       const pointer = await deployProgram(entropy, {
         bytecodePath,
         configurationSchemaPath,
