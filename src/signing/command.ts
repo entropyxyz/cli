@@ -2,9 +2,10 @@ import Entropy from "@entropyxyz/sdk"
 import { u8aToHex } from '@polkadot/util'
 import { BaseCommand } from "../common/base-command";
 import { print } from "../common/utils";
-import { filePathInputQuestions, getMsgFromInputOrFile, getMsgFromUser, interactionChoiceQuestions, messageActionQuestions, rawSign, signWithAdapters, userInputQuestions } from "./utils";
+import { getMsgFromInputOrFile, getMsgFromUser, interactionChoiceQuestions, rawSign, rawSignParamsQuestions, signWithAdapters } from "./utils";
 import { SignResult } from "./types";
 import { FLOW_CONTEXT } from "./constants";
+import { readFileSync } from "node:fs";
 
 export class SigningCommand extends BaseCommand {
   constructor (entropy: Entropy, endpoint: string) {
@@ -56,7 +57,19 @@ export class SigningCommand extends BaseCommand {
     const { interactionChoice } = await inquirer.prompt(interactionChoiceQuestions)
     switch (interactionChoice) {
     case 'Raw Sign': {
-      const msg = await getMsgFromUser(inquirer)
+      const { msg, msgPath } = await getMsgFromUser(inquirer)
+      const { hashingAlgorithm, auxiliaryDataFile } = await inquirer.prompt(rawSignParamsQuestions)
+      let hash = hashingAlgorithm
+      const auxiliaryData = JSON.parse(readFileSync(auxiliaryDataFile).toString())
+      if (JSON.parse(hashingAlgorithm)) {
+        hash = JSON.parse(hashingAlgorithm)
+      }
+
+      const { signature, verifyingKey } = await this.rawSignMessage({ msg, msgPath, hashingAlgorithm: hash, auxiliaryData })
+      print('msg to be signed:', msg)
+      print('verifying key:', verifyingKey)
+      print('signature:', signature)
+      return
     }
     case 'Sign With Adapter': {
       const { msg, msgPath } = await getMsgFromUser(inquirer)

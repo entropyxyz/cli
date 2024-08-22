@@ -44,29 +44,34 @@ export const auxiliaryDataQuestions = [{
   message: SIGNING_CONTENT.auxiliaryDataInput.message,
 }]
 
+export const rawSignParamsQuestions = [
+  ...hashingAlgorithmQuestions,
+  ...auxiliaryDataQuestions
+]
+
 export async function getMsgFromUser (inquirer) {
   let msg: string
   let msgPath: string
   const { messageAction } = await inquirer.prompt(messageActionQuestions)
   switch (messageAction) {
-    case 'Text Input': {
-      const { userInput } = await inquirer.prompt(userInputQuestions)
-      msg = userInput
-      break
-    }
-    case 'From a File': {
-      const { pathToFile } = await inquirer.prompt(filePathInputQuestions)
-      // TODO: relative/absolute path? encoding?
-      msgPath = pathToFile
-      break
-    }
-    default: {
-      const error = new Error('SigningError: Unsupported User Input Action')
-      this.logger.error('Error signing with adapter', error)
-      return
-    }
+  case 'Text Input': {
+    const { userInput } = await inquirer.prompt(userInputQuestions)
+    msg = userInput
+    break
   }
-  return {msg, msgPath};
+  case 'From a File': {
+    const { pathToFile } = await inquirer.prompt(filePathInputQuestions)
+    // TODO: relative/absolute path? encoding?
+    msgPath = pathToFile
+    break
+  }
+  default: {
+    const error = new Error('SigningError: Unsupported User Input Action')
+    this.logger.error('Error signing with adapter', error)
+    return
+  }
+  }
+  return { msg, msgPath };
 }
 
 export function getMsgFromInputOrFile (msg?: string, msgPath?: string) {
