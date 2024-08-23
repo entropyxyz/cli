@@ -6,15 +6,14 @@ import Keyring from '@entropyxyz/sdk/keys'
 import { 
   makeSeed,
   promiseRunner,
-  sleep,
   spinNetworkUp,
   spinNetworkDown
 } from './testing-utils'
 
 import { getBalance } from '../src/flows/balance/balance'
-import { initializeEntropy } from 'src/common/initializeEntropy'
+import { initializeEntropy } from '../src/common/initializeEntropy'
+import { transfer } from '../src/flows/entropyTransfer/transfer'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
-import { transfer } from 'src/flows/entropyTransfer/transfer'
 
 const networkType = 'two-nodes'
 
@@ -31,7 +30,6 @@ test('Transfer', async (t) => {
       console.error('Error while spinning network down', error.message)
     )
   })
-  await sleep(process.env.GITHUB_WORKSPACE ? 30_000 : 5_000)
 
   const naynaySeed = makeSeed()
   const naynayKeyring = new Keyring({ seed: naynaySeed, debug: true })

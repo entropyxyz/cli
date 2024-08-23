@@ -6,7 +6,6 @@ import { logo } from './common/ascii'
 import { print } from './common/utils'
 import { EntropyLogger } from './common/logger'
 
-
 let shouldInit = true
 
 // tui = text user interface
@@ -22,6 +21,7 @@ export default function tui (options: EntropyTuiOptions) {
     'Register': flows.entropyRegister,
     'Sign': flows.sign,
     'Transfer': flows.entropyTransfer,
+    // TODO: design programs in TUI (merge deploy+user programs)
     'Deploy Program': flows.devPrograms,
     'User Programs': flows.userPrograms,
     'Entropy Faucet': flows.entropyFaucet,

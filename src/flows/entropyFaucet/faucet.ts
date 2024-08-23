@@ -3,7 +3,7 @@
 import Entropy from "@entropyxyz/sdk";
 import { blake2AsHex, encodeAddress } from "@polkadot/util-crypto";
 import { getBalance } from "../balance/balance";
-import { viewPrograms } from "../user-program-management/view";
+import { viewPrograms } from "../programs/view";
 import FaucetSigner from "./signer";
 import { FAUCET_PROGRAM_MOD_KEY, PROGRAM_HASH } from "./constants";
 

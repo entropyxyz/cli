@@ -29,8 +29,19 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - new: './src/flows/user-program-management/remove.ts' - service file for removing user program pure function
 
 ### Changed
+
 - folder name for user programs to match the kebab-case style for folder namespace
 - updated SDK version to v0.2.3
+- merged user + dev program folders + tests
+
+
+### Broke
+
+- deploying programs with TUI
+    - now requires a `*.wasm` file for `bytecode`
+    - now requires a `*.json` file path for `configurationSchema`
+    - now requires a `*.json` file path for `auxillaryDataSchema`
+
 
 ## [0.0.3] Blade - 2024-07-17 (entropy-core compatibility: 0.2.0)
 
