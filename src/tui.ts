@@ -6,10 +6,10 @@ import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
 import { print } from './common/utils'
 import { EntropyLogger } from './common/logger'
-import { TransferCommand } from './transfer/command'
-import { entropySign } from './signing/interaction'
 import { loadEntropy } from './common/utils-cli'
+import { entropySign } from './signing/interaction'
 import { entropyBalance } from './balance/interaction'
+import { entropyTransfer } from './transfer/interaction'
 
 let shouldInit = true
 
@@ -95,13 +95,7 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     }
     case "Transfer": {
       try {
-        const transferCommand = new TransferCommand(entropy, options.endpoint)
-        const { amount, recipientAddress } = await transferCommand.askQuestions()
-        await transferCommand.sendTransfer(recipientAddress, amount)
-        print('')
-        print(`Transaction successful: Sent ${amount} to ${recipientAddress}`)
-        print('')
-        print('Press enter to return to main menu')
+        await entropyTransfer(entropy, options.endpoint)
       } catch (error) {
         console.error('There was an error sending the transfer', error)
       }

@@ -1,32 +1,21 @@
-import Entropy from "@entropyxyz/sdk";
-import { EntropyBase } from "../common/entropy-base";
-import { setupProgress } from "../common/progress";
-import * as TransferUtils from './utils'
-import inquirer from "inquirer";
+import Entropy from "@entropyxyz/sdk"
+import { Command } from "commander"
+import { currentAccountAddressOption, endpointOption, passwordOption } from "src/common/utils-cli"
+import { EntropyTransfer } from "./main"
 
-const FLOW_CONTEXT = 'ENTROPY_TRANSFER'
-
-export class TransferCommand extends EntropyBase {
-  constructor (entropy: Entropy, endpoint: string) {
-    super(entropy, endpoint, FLOW_CONTEXT)
-  }
-
-  public async askQuestions () {
-    return inquirer.prompt(TransferUtils.transferInputQuestions)
-  }
-
-  public async sendTransfer (toAddress: string, amount: string) {
-    const { start: startProgress, stop: stopProgress } = setupProgress('Transferring Funds')
-
-    const formattedAmount = BigInt(parseInt(amount) * 1e10)
-    startProgress()
-    try {
-      const transferStatus = await TransferUtils.transfer(this.entropy, { from: this.entropy.keyring.accounts.registration.pair, to: toAddress, amount: formattedAmount })
-      if (transferStatus.isFinalized) return stopProgress()
-    } catch (error) {
-      this.logger.error('There was an issue sending this transfer', error)
-      stopProgress()
-      throw error
-    }
-  }
+export async function entropyTransferCommand (entropy: Entropy, rootCommand: Command) {
+  rootCommand.command('transfer')
+    .description('Transfer funds between two Entropy accounts.') // TODO: name the output
+    .argument('source', 'Account address funds will be drawn from')
+    .argument('destination', 'Account address funds will be sent to')
+    .argument('amount', 'Amount of funds to be moved')
+    .addOption(passwordOption('Password for the source account (if required)'))
+    .addOption(endpointOption())
+    .addOption(currentAccountAddressOption())
+    .action(async (_source, destination, amount, opts) => {
+      const transferCommand = new EntropyTransfer(entropy, opts.endpoint)
+      await transferCommand.sendTransfer(destination, amount)
+      // cliWrite(??) // TODO: write the output
+      process.exit(0)
+    })
 }

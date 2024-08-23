@@ -2,15 +2,14 @@
 
 /* NOTE: calling this file entropy.ts helps commander parse process.argv */
 import { Command, Option } from 'commander'
-import launchTui from './tui'
-import { EntropyTuiOptions } from './types'
-
-import { cliListAccounts } from './flows/manage-accounts/cli'
 import Entropy from '@entropyxyz/sdk'
-import { TransferCommand } from './transfer/command'
+import { cliListAccounts } from './flows/manage-accounts/cli'
+import { currentAccountAddressOption, endpointOption, loadEntropy, cliWrite } from './common/utils-cli'
+import { entropyTransferCommand } from './transfer/command'
 import { entropySignCommand } from './signing/command'
-import { currentAccountAddressOption, endpointOption, loadEntropy, passwordOption, cliWrite } from './common/utils-cli'
 import { entropyBalanceCommand } from './balance/command'
+import { EntropyTuiOptions } from './types'
+import launchTui from './tui'
 
 const program = new Command()
 // Array of restructured commands to make it easier to migrate them to the new "flow"
@@ -63,20 +62,7 @@ program.command('list')
 entropyBalanceCommand(entropy, program)
 
 /* Transfer */
-program.command('transfer')
-  .description('Transfer funds between two Entropy accounts.') // TODO: name the output
-  .argument('source', 'Account address funds will be drawn from')
-  .argument('destination', 'Account address funds will be sent to')
-  .argument('amount', 'Amount of funds to be moved')
-  .addOption(passwordOption('Password for the source account (if required)'))
-  .addOption(endpointOption())
-  .addOption(currentAccountAddressOption())
-  .action(async (_source, destination, amount, opts) => {
-    const transferCommand = new TransferCommand(entropy, opts.endpoint)
-    await transferCommand.sendTransfer(destination, amount)
-    // cliWrite(??) // TODO: write the output
-    process.exit(0)
-  })
+entropyTransferCommand(entropy, program)
 
 /* Sign */
 entropySignCommand(entropy, program)
