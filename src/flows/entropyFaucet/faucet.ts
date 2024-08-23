@@ -37,9 +37,10 @@ async function faucetSignAndSend (call: any, api: any, entropy: Entropy, amount:
   })
 }
 
-export async function getRandomFaucet (entropy: Entropy, previousVerifyingKeys: string[] = []) {
-  const modifiableKeys = await entropy.substrate.query.registry.modifiableKeys(FAUCET_PROGRAM_MOD_KEY)
+export async function getRandomFaucet (entropy: Entropy, previousVerifyingKeys: string[] = [], programModKey = FAUCET_PROGRAM_MOD_KEY) {
+  const modifiableKeys = await entropy.substrate.query.registry.modifiableKeys(programModKey)
   const verifyingKeys = JSON.parse(JSON.stringify(modifiableKeys.toJSON()))
+
   // Choosing one of the 5 verifiying keys at random to be used as the faucet sender
   if (verifyingKeys.length === previousVerifyingKeys.length) {
     throw new Error('FaucetError: There are no more faucets to choose from')
