@@ -35,18 +35,20 @@ test.only('Eth Transaction', async (t) => {
     const provider = await new ethers.JsonRpcProvider(
         "http://127.0.0.1:8545"
     );
+    const feeData = await provider.getFeeData()
+    console.log({feeData})
     const privateKey = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
     const signer = new ethers.Wallet(privateKey, provider)
     const network = await provider.getNetwork()
-    // const nullSigner = new ethers.Wallet()
+
     const tx_data ={
         to: "0x5661cC82b8e6EE0850Ba7829eb3E994b76A2E437",
         value: ethers.toBigInt('1'),
         chainId: network.chainId,
         nonce: 0,
-        gasPrice: 30000000,
         gasLimit: 30000000,
-        maxFeePerGas: 875000000,
+        maxPriorityFeePerGas: 30000000,
+        maxFeePerGas: 30000000,
         type: 2
 
     }
@@ -62,11 +64,11 @@ test.only('Eth Transaction', async (t) => {
 
     const tx = ethers.Transaction.from(tx_data)
     const serializedTx = tx.unsignedSerialized
-
+    console.log({serializedTx})
 
     const signature: any = await entropy.sign({
         hash: 'keccak',
-        sigRequestHash: serializedTx,
+        sigRequestHash: serializedTx//`${serializedTx.replace('02', '')}`,
     })
 
     console.log('signature', signature);
@@ -80,12 +82,15 @@ test.only('Eth Transaction', async (t) => {
     tx.signature = signature_split
     const serialized = tx.serialized
     console.log({from: tx.from})
+    const populate = await signer.populateTransaction(ethers.Transaction.from({chainId: network.chainId, type: 2}))
+    console.log({populate})
 
-    await signer.sendTransaction({
+    console.log({serialized})
+    const tets = await signer.sendTransaction({
         to: tx.from,
         value: ethers.getBigInt("96250000000000001")
       });
-
+    console.log({tets, test: await tets.getTransaction()})
     try {
         const tx_send = await provider.broadcastTransaction(serialized);
         console.log("transaction sent successfully", { tx_send });
@@ -99,19 +104,18 @@ test.only('Eth Transaction', async (t) => {
         value: ethers.toBigInt('1'),
         chainId: network.chainId,
         nonce: 1,
-        gasPrice: 30000000,
         gasLimit: 30000000,
-        maxFeePerGas: 875000000,
+        maxPriorityFeePerGas: 30000000,
+        maxFeePerGas: 30000000,
         type: 2
-
     }
 
     const tx_2 = ethers.Transaction.from(tx_data_2)
-    const serializedTx_2 = tx.unsignedSerialized
+    const serializedTx_2 = tx_2.unsignedSerialized
 
     const signature_2: any = await entropy.sign({
         hash: 'keccak',
-        sigRequestHash: serializedTx_2,
+        sigRequestHash:  serializedTx_2//`${serializedTx_2.replace('02', '')}`,
     })
 
     const r_2 = ethers.hexlify(signature_2.slice(0, 32));
@@ -125,7 +129,7 @@ test.only('Eth Transaction', async (t) => {
     const serialized_2 = tx_2.serialized
     console.log({from2: tx_2.from, from: tx.from})
 
-
+    
 
 
     try {
