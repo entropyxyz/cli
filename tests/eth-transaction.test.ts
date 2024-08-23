@@ -2,6 +2,9 @@ import test from "tape";
 import { charlieStashSeed, setupTest } from "./testing-utils";
 import { readFileSync } from "fs";
 import { register } from "../src/flows/register/register";
+import { keccak256 } from "ethereum-cryptography/keccak";
+import { hexToBytes, toHex } from "ethereum-cryptography/utils";
+import { encode } from "eip55";
 
 test.only('Eth Transaction', async (t) => {
     const { run, entropy } = await setupTest(t, { networkType: "two-nodes", seed: charlieStashSeed })
@@ -21,6 +24,10 @@ test.only('Eth Transaction', async (t) => {
         })
     )
 
+    const ethAddress = keccak256(hexToBytes(verifyingKey)).slice(-20);
+    console.log('address            :', '0x' + toHex(ethAddress));  
+    const addressEip55 = encode('0x' + toHex(ethAddress));
+    console.log('address (EIP-55)   :', addressEip55);
     const signature = await entropy.sign({
         hash: 'keccak',
         sigRequestHash: Buffer.from('this is a message').toString('hex'),
