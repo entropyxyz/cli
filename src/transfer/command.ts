@@ -1,12 +1,12 @@
 import Entropy from "@entropyxyz/sdk";
-import { BaseCommand } from "../common/entropy-base";
+import { EntropyBase } from "../common/entropy-base";
 import { setupProgress } from "../common/progress";
 import * as TransferUtils from './utils'
 import inquirer from "inquirer";
 
 const FLOW_CONTEXT = 'ENTROPY_TRANSFER'
 
-export class TransferCommand extends BaseCommand {
+export class TransferCommand extends EntropyBase {
   constructor (entropy: Entropy, endpoint: string) {
     super(entropy, endpoint, FLOW_CONTEXT)
   }

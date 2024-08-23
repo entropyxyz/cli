@@ -38,7 +38,7 @@ export class EntropySign extends EntropyBase {
     const message = getMsgFromInputOrFile(msg, msgPath)
 
     try {
-      this.logger.log(`Msg to be signed: ${msg}`, 'SIGN_MSG')
+      this.logger.log(`Msg to be signed: ${message}`, 'SIGN_MSG')
       this.logger.log( `Verifying Key used: ${this.entropy.signingManager.verifyingKey}`)
       const signature = await signWithAdapters(this.entropy, { msg: message })
       const signatureHexString = u8aToHex(signature)

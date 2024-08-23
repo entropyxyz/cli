@@ -76,11 +76,15 @@ export async function getMsgFromUser (inquirer) {
 
 export function getMsgFromInputOrFile (msg?: string, msgPath?: string) {
   let result: string = msg
-  if (!msg && msgPath) {
-    result = readFileSync(msgPath, 'utf-8')
-  }
   if (!msg && !msgPath) {
     throw new Error('SigningError: You must provide a message or path to a file')
+  }
+  if (!msg && msgPath) {
+    try {
+      result = readFileSync(msgPath, 'utf-8')
+    } catch (error) {
+      // noop
+    }
   }
 
   return result

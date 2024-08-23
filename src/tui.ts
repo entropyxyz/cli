@@ -8,8 +8,8 @@ import { print } from './common/utils'
 import { EntropyLogger } from './common/logger'
 import { BalanceCommand } from './balance/command'
 import { TransferCommand } from './transfer/command'
-import { loadEntropy } from './cli'
-import { SigningCommand } from './signing/command'
+import { entropySign } from './signing/interaction'
+import { loadEntropy } from './common/utils-cli'
 
 let shouldInit = true
 
@@ -62,7 +62,7 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
 
   // If the selected account changes within the TUI we need to reset the entropy instance being used
   if (storedConfig.selectedAccount !== entropy.keyring.accounts.registration.address) {
-    entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint)
+    entropy = await loadEntropy(entropy, storedConfig.selectedAccount, options.endpoint)
   }
 
   const answers = await inquirer.prompt([{
@@ -111,8 +111,7 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     }
     case "Sign": {
       try {
-        const signingCommand = new SigningCommand(entropy, options.endpoint)
-        await signingCommand.runInteraction(inquirer)
+        await entropySign(entropy, options.endpoint)
       } catch (error) {
         console.error('There was an issue with signing', error)
       }
