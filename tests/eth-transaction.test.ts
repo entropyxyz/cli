@@ -27,11 +27,7 @@ test.only('Eth Transaction', async (t) => {
         })
     )
 
-    const ethAddress = keccak256(hexToBytes(verifyingKey)).slice(-20);
-    console.log('address            :', '0x' + toHex(ethAddress));  
-    const addressEip55 = encode('0x' + toHex(ethAddress));
-    console.log('address (EIP-55)   :', addressEip55);
-    
+    const ethAddress = ethers.computeAddress(verifyingKey)
     const provider = await new ethers.JsonRpcProvider(
         "http://127.0.0.1:8545"
     );
@@ -127,7 +123,7 @@ test.only('Eth Transaction', async (t) => {
     const signature_split_s = ethers.Signature.from({r: r_2, s: s_2, yParity: yParity_2})
     tx_2.signature = signature_split_s
     const serialized_2 = tx_2.serialized
-    console.log({from2: tx_2.from, from: tx.from})
+    console.log({from2: tx_2.from, from: tx.from, ethAddress})
 
     
 
