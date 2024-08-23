@@ -1,5 +1,5 @@
 import Entropy from "@entropyxyz/sdk";
-import { BaseCommand } from "../common/base-command";
+import { BaseCommand } from "../common/entropy-base";
 import { setupProgress } from "../common/progress";
 import * as TransferUtils from './utils'
 import inquirer from "inquirer";
