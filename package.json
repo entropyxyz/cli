@@ -50,6 +50,8 @@
     "eip55": "^2.1.1",
     "env-paths": "^3.0.0",
     "ethereum-cryptography": "^2.2.1",
+    "ethereumjs-tx": "^2.1.2",
+    "ethers": "^6.13.2",
     "inquirer": "8.0.0",
     "lodash.clonedeep": "^4.5.0",
     "mkdirp": "^3.0.1",
