@@ -6,10 +6,10 @@ import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
 import { print } from './common/utils'
 import { EntropyLogger } from './common/logger'
-import { BalanceCommand } from './balance/command'
 import { TransferCommand } from './transfer/command'
 import { entropySign } from './signing/interaction'
 import { loadEntropy } from './common/utils-cli'
+import { entropyBalance } from './balance/interaction'
 
 let shouldInit = true
 
@@ -87,9 +87,7 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     switch (answers.choice) {
     case "Balance": {
       try {
-        const balanceCommand = new BalanceCommand(entropy, options.endpoint)
-        const balanceString = await balanceCommand.getBalance(storedConfig.selectedAccount)
-        print(`Address ${storedConfig.selectedAccount} has a balance of: ${balanceString}`)
+        await entropyBalance(entropy, options.endpoint, storedConfig)
       } catch (error) {
         console.error('There was an error retrieving balance', error)
       }

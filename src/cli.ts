@@ -7,10 +7,10 @@ import { EntropyTuiOptions } from './types'
 
 import { cliListAccounts } from './flows/manage-accounts/cli'
 import Entropy from '@entropyxyz/sdk'
-import { BalanceCommand } from './balance/command'
 import { TransferCommand } from './transfer/command'
 import { entropySignCommand } from './signing/command'
 import { currentAccountAddressOption, endpointOption, loadEntropy, passwordOption, cliWrite } from './common/utils-cli'
+import { entropyBalanceCommand } from './balance/command'
 
 const program = new Command()
 // Array of restructured commands to make it easier to migrate them to the new "flow"
@@ -60,17 +60,7 @@ program.command('list')
   })
 
 /* balance */
-program.command('balance')
-  .description('Get the balance of an Entropy account. Output is a number')
-  .argument('address', 'Account address whose balance you want to query')
-  .addOption(passwordOption())
-  .addOption(endpointOption())
-  .action(async (address, opts) => {
-    const balanceCommand = new BalanceCommand(entropy, opts.endpoint)
-    const balance = await balanceCommand.getBalance(address)
-    cliWrite(balance)
-    process.exit(0)
-  })
+entropyBalanceCommand(entropy, program)
 
 /* Transfer */
 program.command('transfer')
