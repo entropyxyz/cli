@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs'
 
 const networkType = 'two-nodes'
 
-test('Regsiter - Default Program', async (t) => {
+test('Register - Default Program', async (t) => {
   const { run, entropy } = await setupTest(t, { networkType, seed: charlieStashSeed })
 
   const verifyingKey = await run('register account', register(entropy))
