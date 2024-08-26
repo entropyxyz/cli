@@ -25,7 +25,7 @@ export default class FaucetSigner implements Signer {
     this.chosenVerifyingKey = chosenVerifyingKey
   }
 
-  public async signPayload (payload: SignerPayloadJSON): Promise<SignerResult> {
+  async signPayload (payload: SignerPayloadJSON): Promise<SignerResult> {
     // toU8a(true) is important as it strips the scale encoding length prefix from the payload
     // without it transactions will fail
     // ref: https://github.com/polkadot-js/api/issues/4446#issuecomment-1013213962
