@@ -1,8 +1,9 @@
+import Entropy from "@entropyxyz/sdk"
 import { getSelectedAccount, print } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
-import Entropy from "@entropyxyz/sdk"
-import { EntropyLogger } from 'src/common/logger'
+import { EntropyLogger } from '../../common/logger'
 import { getRandomFaucet, sendMoney } from "./faucet"
+import { TESTNET_PROGRAM_HASH } from "./constants"
 
 let chosenVerifyingKeys = []
 export async function entropyFaucet ({ accounts, selectedAccount: selectedAccountAddress }, options, logger: EntropyLogger) {
@@ -26,7 +27,7 @@ export async function entropyFaucet ({ accounts, selectedAccount: selectedAccoun
 
     ({ chosenVerifyingKey, faucetAddress, verifyingKeys } = await getRandomFaucet(entropy, chosenVerifyingKeys))
 
-    await sendMoney(entropy, { amount, addressToSendTo: selectedAccountAddress, faucetAddress, chosenVerifyingKey })
+    await sendMoney(entropy, { amount, addressToSendTo: selectedAccountAddress, faucetAddress, chosenVerifyingKey, faucetProgramPointer: TESTNET_PROGRAM_HASH })
     // reset chosen keys after successful transfer
     chosenVerifyingKeys = []
     print(`Account: ${selectedAccountAddress} has been successfully funded with ${parseInt(amount).toLocaleString('en-US')} BITS`)

@@ -5,7 +5,7 @@ import { blake2AsHex, encodeAddress } from "@polkadot/util-crypto";
 import { getBalance } from "../balance/balance";
 import { viewPrograms } from "../programs/view";
 import FaucetSigner from "./signer";
-import { FAUCET_PROGRAM_MOD_KEY, PROGRAM_HASH } from "./constants";
+import { FAUCET_PROGRAM_MOD_KEY, TESTNET_PROGRAM_HASH } from "./constants";
 
 // only the faucet program should be on the key
 async function faucetSignAndSend (call: any, api: any, entropy: Entropy, amount: number, senderAddress: string, chosenVerifyingKey: any): Promise<any> {
@@ -62,12 +62,14 @@ export async function sendMoney (
     amount,
     addressToSendTo,
     faucetAddress,
-    chosenVerifyingKey 
+    chosenVerifyingKey,
+    faucetProgramPointer = TESTNET_PROGRAM_HASH
   }: { 
     amount: string,
     addressToSendTo: string,
     faucetAddress: string,
-    chosenVerifyingKey: string
+    chosenVerifyingKey: string,
+    faucetProgramPointer: string
   }
 ): Promise<any> {
   // check balance of faucet address
@@ -77,7 +79,7 @@ export async function sendMoney (
   const programs = await viewPrograms(entropy, { verifyingKey: chosenVerifyingKey })
   if (programs.length) {
     if (programs.length > 1) throw new Error('ProgramsError: Faucet Account has too many programs attached, expected less')
-    if (programs.length === 1 && programs[0].program_pointer !== PROGRAM_HASH) {
+    if (programs.length === 1 && programs[0].program_pointer !== faucetProgramPointer) {
       throw new Error('ProgramsError: Faucet Account does not possess Faucet program')
     }
   } else {

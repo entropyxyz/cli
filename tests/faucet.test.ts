@@ -7,6 +7,7 @@ import { getRandomFaucet, sendMoney } from '../src/flows/entropyFaucet/faucet'
 import { getBalance } from '../src/flows/balance/balance'
 import { register } from '../src/flows/register/register'
 import { transfer } from '../src/flows/entropyTransfer/transfer'
+import { LOCAL_PROGRAM_HASH } from '../src/flows/entropyFaucet/constants'
 
 test('Faucet Tests', async t => {
   const { run, entropy } = await setupTest(t, { seed: charlieStashSeed })
@@ -20,24 +21,22 @@ test('Faucet Tests', async t => {
     max_transfer_amount: 10_000_000_000,
     genesis_hash: stripHexPrefix(genesisHash.toString())
   }
-  // const configurationSchema = {
-  //   max_transfer_amount: "number",
-  //   genesis_hash: "string"
-  // }
-  // const auxDataSchema = {
-  //   amount: "number",
-  //   string_account_id: "string",
-  //   spec_version: "number",
-  //   transaction_version: "number",
-  // }
-  
-  // Convert JSON string to bytes and then to hex
-  const encoder = new TextEncoder()
-  const byteArray = encoder.encode(JSON.stringify(userConfig))
-  const programConfig = util.u8aToHex(new Uint8Array(byteArray))
+  const configurationSchema = {
+    max_transfer_amount: "number",
+    genesis_hash: "string"
+  }
+  const auxDataSchema = {
+    amount: "number",
+    string_account_id: "string",
+    spec_version: "number",
+    transaction_version: "number",
+  }
   
   // Deploy faucet program
-  const faucetProgramPointer = await run('Deploy faucet program', entropy.programs.dev.deploy(faucetProgram))
+  const faucetProgramPointer = await run('Deploy faucet program', entropy.programs.dev.deploy(faucetProgram, configurationSchema, auxDataSchema))
+  
+  // Confirm faucetPointer matches deployed program pointer
+  t.equal(faucetProgramPointer, LOCAL_PROGRAM_HASH, 'Program pointer matches')
 
   let naynayBalance = await getBalance(naynayEntropy, naynayEntropy.keyring.accounts.registration.address)
   t.equal(naynayBalance, 0, 'Naynay is broke af')
@@ -61,7 +60,8 @@ test('Faucet Tests', async t => {
       amount: "10000000000",
       addressToSendTo: naynayEntropy.keyring.accounts.registration.address,
       faucetAddress,
-      chosenVerifyingKey
+      chosenVerifyingKey,
+      faucetProgramPointer
     }
   )
 
