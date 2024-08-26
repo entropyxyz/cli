@@ -44,3 +44,13 @@ git push origin main --tags
 ```
 
 go create a release on github if possible.
+
+
+## Deploying new faucet
+<!-- TO-DO: Cleanup requirements -->
+#### Requirements
+- faucet program from repo or tests/programs
+- configuration and aux data schema
+- program mod account with funds to deploy
+- child funded accounts to be used as issuers of funds for faucet
+  - child accounts must be registered with deployed faucet program
