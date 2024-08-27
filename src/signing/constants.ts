@@ -6,7 +6,8 @@ export const SIGNING_CONTENT = {
     message: 'Please choose how you would like to input your message to sign:',
     choices: [
       'Text Input',
-      'From a File',
+      // Input from file requires more design
+      // 'From a File',
     ],
   },
   textInput: {
@@ -21,7 +22,7 @@ export const SIGNING_CONTENT = {
     name: "interactionChoice",
     message: "What would you like to do?",
     choices: [
-      "Raw Sign",
+      // "Raw Sign",
       "Sign With Adapter",
       "Exit to Main Menu",
     ],

@@ -59,17 +59,6 @@ export function currentAccountAddressOption () {
     .default(storedConfig.selectedAccount)
 }
 
-
-export function aliasOrAddressOption () {
-  return new Option(
-    '-a, --address <aliasOrAddress>',
-    'The alias or address of the verifying key to use for this command. Can be an alias or hex address.'
-    // TODO: describe default behaviour when "sessions" are introduced?
-  )
-  // QUESTION: as this is a function, this could be a viable way to set the VK?
-  // .default(process.env.ENTROPY_SESSION)
-}
-
 export async function loadEntropy (entropy: Entropy | undefined, address: string, endpoint: string, password?: string): Promise<Entropy> {
   const storedConfig = config.getSync()
   const selectedAccount = getSelectedAccount(storedConfig.accounts, address)

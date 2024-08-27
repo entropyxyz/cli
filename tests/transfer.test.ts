@@ -11,8 +11,8 @@ import {
 } from './testing-utils'
 
 import { initializeEntropy } from '../src/common/initializeEntropy'
-import * as BalanceUtils from '../src/balance/utils'
-import * as TransferUtils from '../src/transfer/utils'
+import { EntropyTransfer } from '../src/transfer/main'
+import { EntropyBalance } from '../src/balance/main'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
 
 const networkType = 'two-nodes'
@@ -42,27 +42,29 @@ test('Transfer', async (t) => {
   const charlieEntropy = await initializeEntropy({ keyMaterial: charlieKeyring.getAccount(), endpoint, })
   await run('entropy ready', entropy.ready)
   await run('charlie ready', charlieEntropy.ready)
+  const TransferService = new EntropyTransfer(entropy, endpoint)
+  const BalanceService = new EntropyBalance(entropy, endpoint)
   
   const recipientAddress = entropy.keyring.accounts.registration.address
 
   // Check Balance of new account
   let naynayBalance = await run(
     'getBalance (naynay)',
-    BalanceUtils.getBalance(entropy, recipientAddress)
+    BalanceService.getBalance(recipientAddress)
   )
 
   t.equal(naynayBalance, 0, 'naynay is broke')
 
   let charlieBalance = await run(
     'getBalance (charlieStash)',
-    BalanceUtils.getBalance(entropy, charlieStashAddress)
+    BalanceService.getBalance(charlieStashAddress)
   )
 
   t.equal(charlieBalance, 1e17, 'charlie got bank')
 
   const transferStatus = await run(
     'transfer',
-    TransferUtils.transfer(entropy, {
+    TransferService.transfer({
       from: charlieEntropy.keyring.accounts.registration.pair,
       to: recipientAddress,
       amount: BigInt(1000 * 10e10)
@@ -74,7 +76,7 @@ test('Transfer', async (t) => {
   // Re-Check Balance of new account
   naynayBalance = await run(
     'getBalance (naynay)',
-    BalanceUtils.getBalance(entropy, recipientAddress)
+    BalanceService.getBalance(recipientAddress)
   )
 
   t.equal(naynayBalance, 1000 * 10e10, 'naynay is rolling in it!')

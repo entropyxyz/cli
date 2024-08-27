@@ -4,14 +4,14 @@ import { cliWrite, currentAccountAddressOption, endpointOption, passwordOption, 
 import { EntropySign } from './main'
 
 export async function entropySignCommand (entropy: Entropy, rootCommand: Command) {
-  const programCommand = rootCommand.command('sign')
+  const signCommand = rootCommand.command('sign')
     .description('Commands for working with signing with the Entropy Network')
 
-  entropySign(entropy, programCommand)
+  entropySign(entropy, signCommand)
 }
 
-function entropySign (entropy: Entropy, programCommand: Command) {
-  programCommand.command('sign')
+function entropySign (entropy: Entropy, signCommand: Command) {
+  signCommand.command('sign')
     .description('Sign a message using the Entropy network. Output is a signature (string)')
     .argument('msg', 'Message or Path to Message you would like to sign')
     .addOption(passwordOption('Password for the source account (if required)'))
@@ -31,14 +31,14 @@ function entropySign (entropy: Entropy, programCommand: Command) {
           entropy.keyring.accounts.registration.address, opts.endpoint
         )
       }
-      const signingCommand = new EntropySign(entropy, opts.endpoint)
+      const SigningService = new EntropySign(entropy, opts.endpoint)
       // TO-DO: Add ability for raw signing here, maybe? new raw option can be used for the conditional
       /**
        * if (opts.raw) {
        *   implement raw sign here
        * }
        */
-      const signature = await signingCommand.signMessageWithAdapters({ msg, msgPath: msg })
+      const signature = await SigningService.signMessageWithAdapters({ msg, msgPath: msg })
       cliWrite(signature)
       process.exit(0)
     })

@@ -1,8 +1,9 @@
 import { readFileSync } from "fs"
 import { SIGNING_CONTENT } from "./constants"
-import { RawSignPayload, SignWithAdapterInput } from "./types"
+import { isHex } from '@polkadot/util'
 
-function stringToHex (str: string): string {
+export function stringToHex (str: string): string {
+  if (isHex(str)) return str;
   return Buffer.from(str).toString('hex')
 }
 
@@ -59,12 +60,13 @@ export async function getMsgFromUser (inquirer) {
     msg = userInput
     break
   }
-  case 'From a File': {
-    const { pathToFile } = await inquirer.prompt(filePathInputQuestions)
-    // TODO: relative/absolute path? encoding?
-    msgPath = pathToFile
-    break
-  }
+  // Msg input from a file requires more design
+  // case 'From a File': {
+  //   const { pathToFile } = await inquirer.prompt(filePathInputQuestions)
+  //   // TODO: relative/absolute path? encoding?
+  //   msgPath = pathToFile
+  //   break
+  // }
   default: {
     const error = new Error('SigningError: Unsupported User Input Action')
     this.logger.error('Error signing with adapter', error)
@@ -88,20 +90,4 @@ export function getMsgFromInputOrFile (msg?: string, msgPath?: string) {
   }
 
   return result
-}
-
-export async function rawSign (entropy, payload: RawSignPayload) {
-  return entropy.sign(payload)
-}
-
-export async function signWithAdapters (entropy, input: SignWithAdapterInput) {
-  return entropy.signWithAdaptersInOrder({
-    msg: {
-      msg: stringToHex(input.msg)
-    },
-    // type
-    order: ['deviceKeyProxy', 'noop'],
-    signatureVerifyingKey: input.verifyingKey
-    // auxillaryData
-  })
 }

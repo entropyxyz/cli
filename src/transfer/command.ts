@@ -6,15 +6,14 @@ import { EntropyTransfer } from "./main"
 export async function entropyTransferCommand (entropy: Entropy, rootCommand: Command) {
   rootCommand.command('transfer')
     .description('Transfer funds between two Entropy accounts.') // TODO: name the output
-    .argument('source', 'Account address funds will be drawn from')
     .argument('destination', 'Account address funds will be sent to')
     .argument('amount', 'Amount of funds to be moved')
     .addOption(passwordOption('Password for the source account (if required)'))
     .addOption(endpointOption())
     .addOption(currentAccountAddressOption())
-    .action(async (_source, destination, amount, opts) => {
-      const transferCommand = new EntropyTransfer(entropy, opts.endpoint)
-      await transferCommand.sendTransfer(destination, amount)
+    .action(async (destination, amount, opts) => {
+      const TransferService = new EntropyTransfer(entropy, opts.endpoint)
+      await TransferService.sendTransfer(destination, amount)
       // cliWrite(??) // TODO: write the output
       process.exit(0)
     })
