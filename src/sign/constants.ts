@@ -1,4 +1,4 @@
-export const FLOW_CONTEXT = 'ENTROPY_SIGNING'
+export const FLOW_CONTEXT = 'ENTROPY_SIGN'
 
 export const SIGNING_CONTENT = {
   messageAction: {

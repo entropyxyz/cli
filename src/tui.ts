@@ -7,7 +7,7 @@ import { logo } from './common/ascii'
 import { print } from './common/utils'
 import { EntropyLogger } from './common/logger'
 import { loadEntropy } from './common/utils-cli'
-import { entropySign } from './signing/interaction'
+import { entropySign } from './sign/interaction'
 import { entropyBalance } from './balance/interaction'
 import { entropyTransfer } from './transfer/interaction'
 

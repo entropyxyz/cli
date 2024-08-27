@@ -1,5 +1,5 @@
 import test from 'tape'
-import { EntropySign } from '../src/signing/main'
+import { EntropySign } from '../src/sign/main'
 
 
 import { setupTest, charlieStashSeed } from './testing-utils'
