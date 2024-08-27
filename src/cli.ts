@@ -2,73 +2,23 @@
 
 /* NOTE: calling this file entropy.ts helps commander parse process.argv */
 import { Command, Option } from 'commander'
-import { randomAsHex } from '@polkadot/util-crypto'
 import launchTui from './tui'
 import * as config from './config'
 import { EntropyTuiOptions } from './types'
 
 import { cliSign } from './flows/sign/cli'
 import { getSelectedAccount, stringify, updateConfig } from './common/utils'
+import { endpointOption, currentAccountAddressOption, passwordOption } from './common/utils-cli'
 import Entropy from '@entropyxyz/sdk'
 import { initializeEntropy } from './common/initializeEntropy'
+import { entropyAccountCommand } from './account/command'
+import { EntropyAccount } from './account/main'
 import { BalanceCommand } from './balance/command'
-import { AccountsCommand } from './accounts/command'
-import { ACCOUNTS_CONTENT } from './accounts/constants'
 import { TransferCommand } from './transfer/command'
 
 const program = new Command()
 // Array of restructured commands to make it easier to migrate them to the new "flow"
 const RESTRUCTURED_COMMANDS = ['balance', 'new-account']
-
-function endpointOption (){
-  return new Option(
-    '-e, --endpoint <endpoint>',
-    [
-      'Runs entropy with the given endpoint and ignores network endpoints in config.',
-      'Can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`.'
-    ].join(' ')
-  )
-    .env('ENDPOINT')
-    .argParser(aliasOrEndpoint => {
-      /* see if it's a raw endpoint */
-      if (aliasOrEndpoint.match(/^wss?:\/\//)) return aliasOrEndpoint
-
-      /* look up endpoint-alias */
-      const storedConfig = config.getSync()
-      const endpoint = storedConfig.endpoints[aliasOrEndpoint]
-      if (!endpoint) throw Error('unknown endpoint alias: ' + aliasOrEndpoint)
-
-      return endpoint
-    })
-    .default('ws://testnet.entropy.xyz:9944/')
-    // NOTE: argParser is only run IF an option is provided, so this cannot be 'test-net'
-}
-
-function passwordOption (description?: string) {
-  return new Option(
-    '-p, --password <password>',
-    description || 'Password for the account'
-  )
-}
-
-function currentAccountAddressOption () {
-  const storedConfig = config.getSync()
-  return new Option(
-    '-a, --account <accountAddress>',
-    'Sets the current account for the session or defaults to the account stored in the config'
-  )
-    .env('ACCOUNT_ADDRESS')
-    .argParser(async (address) => {
-      if (address === storedConfig.selectedAccount) return address
-      // Updated selected account in config with new address from this option
-      const newConfigUpdates = { selectedAccount: address }
-      await config.set({ ...storedConfig, ...newConfigUpdates })
-
-      return address
-    })
-    .hideHelp()
-    .default(storedConfig.selectedAccount)
-}
 
 let entropy: Entropy
 
@@ -122,54 +72,7 @@ program
     launchTui(entropy, options)
   })
 
-/* list */
-program.command('list')
-  .alias('ls')
-  .description('List all accounts. Output is JSON of form [{ name, address, verifyingKeys }]')
-  .addOption(endpointOption())
-  .action(async (options) => {
-    // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
-    const storedConfig = await config.get()
-    const accountsCommand = new AccountsCommand(entropy, options.endpoint)
-    const accounts = accountsCommand.listAccounts(storedConfig.accounts)
-    writeOut(accounts)
-    process.exit(0)
-  })
-
-/* new account */
-program.command('new-account')
-  .alias('new')
-  .description('Create new entropy account from imported seed or from scratch. Output is JSON of form [{name, address}]')
-  .addOption(endpointOption())
-  .addOption(passwordOption())
-  .addOption(
-    new Option(
-      '-s, --seed',
-      'Seed used to create entropy account'
-    ).default(randomAsHex(32))
-  )
-  .addOption(
-    new Option(
-      '-n, --name',
-      'Name of entropy account'
-    ).makeOptionMandatory(true)
-  )
-  .addOption(
-    new Option(
-      '-pa, --path',
-      'Derivation path'
-    ).default(ACCOUNTS_CONTENT.path.default)
-  )
-  .action(async (opts) => {
-    const storedConfig = await config.get()
-    const { seed, name, path, endpoint } = opts
-    const accountsCommand = new AccountsCommand(entropy, endpoint)
-
-    const newAccount = await accountsCommand.newAccount({ seed, name, path })
-    await accountsCommand.updateConfig(storedConfig, newAccount)
-    writeOut({ name: newAccount.name, address: newAccount.address })
-    process.exit(0)
-  })
+entropyAccountCommand(entropy, program)
 
 /* register */
 program.command('register')
@@ -192,7 +95,7 @@ program.command('register')
   .action(async (address, opts) => {
     const storedConfig = await config.get()
     const { accounts } = storedConfig
-    const accountsCommand = new AccountsCommand(entropy, opts.endpoint)
+    const accountsCommand = new EntropyAccount(entropy, opts.endpoint)
     writeOut('Attempting to register account with addtess: ' + address)
     const accountToRegister = getSelectedAccount(accounts, address)
     if (!accountToRegister) {

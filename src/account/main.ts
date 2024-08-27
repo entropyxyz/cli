@@ -15,7 +15,7 @@ import {
 } from "./utils";
 import { CreateAccountParams } from "./types";
 
-export class AccountsCommand extends BaseCommand {
+export class EntropyAccount extends BaseCommand {
   constructor (entropy: Entropy, endpoint: string) {
     super(entropy, endpoint, FLOW_CONTEXT)
   }

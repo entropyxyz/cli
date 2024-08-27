@@ -7,7 +7,7 @@ import { logo } from './common/ascii'
 import { getSelectedAccount, print, updateConfig } from './common/utils'
 import { EntropyLogger } from './common/logger'
 import { BalanceCommand } from './balance/command'
-import { AccountsCommand } from './accounts/command'
+import { EntropyAccount } from './account/main'
 import { TransferCommand } from './transfer/command'
 import { loadEntropy } from './cli'
 
@@ -51,7 +51,7 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     shouldInit = false
   }
   const balanceCommand = new BalanceCommand(entropy, options.endpoint)
-  const accountsCommand = new AccountsCommand(entropy, options.endpoint)
+  const accountsCommand = new EntropyAccount(entropy, options.endpoint)
   const transferCommand = new TransferCommand(entropy, options.endpoint)
 
   let storedConfig = await config.get()
