@@ -18,8 +18,6 @@ import { BalanceCommand } from './balance/command'
 import { TransferCommand } from './transfer/command'
 
 const program = new Command()
-// Array of restructured commands to make it easier to migrate them to the new "flow"
-const RESTRUCTURED_COMMANDS = ['balance']
 
 let entropy: Entropy
 
@@ -57,18 +55,21 @@ program
       .env('DEV_MODE')
       .hideHelp()
   )
-  // NOTE: I think this hook is gonna need to be on every command? TO BE TESTED
-  // If it is, then extract the hook fn, and loadEntropy out into src/common/utils-cli.ts
   .hook('preAction', async (_thisCommand, actionCommand) => {
-    if (!entropy || (entropy.keyring.accounts.registration.address !== actionCommand.args[0] || entropy.keyring.accounts.registration.address !== actionCommand.opts().account)) {
-      // balance includes an address argument, use that address to instantiate entropy
-      // can keep the conditional to check for length of args, and use the first index since it is our pattern to have the address as the first argument
-      if (RESTRUCTURED_COMMANDS.includes(actionCommand.name()) && actionCommand.args.length) {
-        await loadEntropy(actionCommand.args[0], actionCommand.opts().endpoint, actionCommand.opts().password)
-      } else {
-        // if address is not an argument, use the address from the option
-        await loadEntropy(actionCommand.opts().account, actionCommand.opts().endpoint, actionCommand.opts().password)
+    const { account, endpoint, password } = actionCommand.opts()
+    const address = actionCommand.name() === 'balance'
+      ? actionCommand.args[0]
+      : account
+
+    if (entropy) {
+      const currentAddress = entropy?.keyring?.accounts?.registration?.address
+      if (currentAddress !== address) {
+        entropy.close()
+        entropy = await loadEntropy(address, endpoint, password)
       }
+    }
+    else {
+      entropy = await loadEntropy(address, endpoint, password)
     }
   })
   .action((options: EntropyTuiOptions) => {
@@ -80,7 +81,7 @@ program
 // entropyBalance(program)
 // entropySession(program)
 // entropySign(program)
-entropyProgramCommand(entropy, program) // WARNING this has been written to need access to entropy... but that's not defined yet?
+entropyProgramCommand(entropy, program)
 // entropyTransfar(program)
 
 /* list */

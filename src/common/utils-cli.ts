@@ -42,8 +42,8 @@ export function passwordOption (description?: string) {
 export function currentAccountAddressOption () {
   const storedConfig = config.getSync()
   return new Option(
-    '-a, --account <accountAddress>',
-    'Sets the current account for the session or defaults to the account stored in the config'
+    '-a, --account <accountAddressOrAlias>',
+    'Sets the current account for the session and sets the default account for all future calls'
   )
     .env('ACCOUNT_ADDRESS')
     .argParser(async (address) => {
@@ -56,15 +56,4 @@ export function currentAccountAddressOption () {
     })
     .hideHelp()
     .default(storedConfig.selectedAccount)
-}
-
-
-export function aliasOrAddressOption () {
-  return new Option(
-    '-a, --address <aliasOrAddress>',
-    'The alias or address of the verifying key to use for this command. Can be an alias or hex address.'
-    // TODO: describe default behaviour when "sessions" are introduced?
-  )
-  // QUESTION: as this is a function, this could be a viable way to set the VK?
-  // .default(process.env.ENTROPY_SESSION)
 }
