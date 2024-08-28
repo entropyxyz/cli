@@ -31,8 +31,10 @@ function entropySign (entropy: Entropy, signCommand: Command) {
        *   implement raw sign here
        * }
        */
-      const result = await SigningService.signMessageWithAdapters({ msg })
-      cliWrite(result.signature)
+      const { verifyingKey, signature } = await SigningService.signMessageWithAdapters({ msg })
+      cliWrite(`Message Signed: ${msg}`)
+      cliWrite(`Verifying Key: ${verifyingKey}`)
+      cliWrite(`Signature: ${signature}`)
       process.exit(0)
     })
 }

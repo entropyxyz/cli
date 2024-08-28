@@ -12,7 +12,7 @@ export async function entropyBalanceCommand (entropy: Entropy, rootCommand: Comm
     .action(async (address, opts) => {
       const BalanceService = new EntropyBalance(entropy, opts.endpoint)
       const balance = await BalanceService.getBalance(address)
-      cliWrite(balance)
+      cliWrite(`${balance.toLocaleString('en-US')} BITS`)
       process.exit(0)
     })
 
