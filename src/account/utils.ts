@@ -1,7 +1,5 @@
-// @ts-expect-error
-import Keyring from '@entropyxyz/sdk/keys'
 import { EntropyAccountConfig, EntropyConfig } from "../config/types";
-import { CreateAccountParams, ListedAccount, RegisterParams } from './types';
+import { RegisterParams } from './types';
 import { ACCOUNTS_CONTENT } from './constants';
 import { generateAccountChoices, print } from 'src/common/utils';
 import Entropy from '@entropyxyz/sdk';
@@ -60,41 +58,6 @@ export const manageAccountsQuestions = [
     choices: ACCOUNTS_CONTENT.interactionChoice.choices
   }
 ]
-
-export async function createAccount ({ name, seed, path }: CreateAccountParams): Promise<EntropyAccountConfig> {
-  const keyring = new Keyring({ seed, path, debug: true })
-  const fullAccount = keyring.getAccount()
-  // TO-DO: sdk should create account on constructor
-  const { admin } = keyring.getAccount()
-  
-  const data = fullAccount
-  delete admin.pair
-  // const encryptedData = password ? passwordFlow.encrypt(data, password) : data
-
-  return {
-    name: name,
-    address: admin.address,
-    // TODO: replace with data: encryptedData once pasword input is added back
-    data,
-  }
-}
-
-function formatAccountsList (accounts: EntropyAccountConfig[]): ListedAccount[] {
-  return accounts.map((account: EntropyAccountConfig) => ({
-    name: account.name,
-    address: account.address,
-    verifyingKeys: account?.data?.admin?.verifyingKeys
-  }))
-}
-
-export function listAccounts ({ accounts }: Partial<EntropyConfig>) {
-  const accountsArray = Array.isArray(accounts) && accounts.length ? accounts : []
-  if (!accountsArray.length)
-    throw new Error(
-      'There are currently no accounts available, please create or import your new account using the Manage Accounts feature'
-    )
-  return formatAccountsList(accountsArray)
-}
 
 export async function registerAccount (entropy: Entropy, params?: RegisterParams): Promise<string> {
   let verifyingKey: string

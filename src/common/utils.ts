@@ -66,6 +66,7 @@ export function accountChoicesWithOther (accounts: EntropyAccountConfig[]) {
     .concat([{ name: "Other", value: null }])
 }
 
+// TODO: rename => findAccountByNameAddress
 export function getSelectedAccount (accounts: EntropyAccountConfig[], address: string) {
   return accounts.find(account => account.address === address)
 }

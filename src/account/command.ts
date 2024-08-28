@@ -1,6 +1,5 @@
 import Entropy from "@entropyxyz/sdk";
 import { Command, Option } from 'commander'
-import { randomAsHex } from '@polkadot/util-crypto'
 import { EntropyAccount } from "./main";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
@@ -14,6 +13,41 @@ export async function entropyAccountCommand (entropy: Entropy, rootCommand: Comm
   entropyAccountNew(entropy, accountCommand)
 }
 
+function entropyAccountNew (entropy: Entropy, accountCommand: Command) {
+  accountCommand.command('create')
+    .alias('new')
+    .description('Create a new entropy account from scratch. Output is JSON of form {name, address}')
+    .addOption(endpointOption())
+    .addOption(passwordOption())
+    .argument('<name>', 'A user friendly name for your nem account.')
+    .addOption(
+      new Option(
+        '-p, --path',
+        'Derivation path'
+      ).default(ACCOUNTS_CONTENT.path.default)
+    )
+    .action(async (name, opts) => {
+      const { endpoint, path } = opts
+
+      const service = new EntropyAccount(entropy, endpoint)
+      const newAccount = await service.create({
+        name,
+        path
+      })
+
+      const storedConfig = await config.get()
+      // WIP - sort out the updateConfig stuff
+      await service.updateConfig(storedConfig, newAccount)
+
+      cliWrite({
+        name: newAccount.name,
+        address: newAccount.address
+      })
+      process.exit(0)
+    })
+
+}
+
 function entropyAccountList (entropy: Entropy, accountCommand: Command) {
   accountCommand.command('list')
     .alias('ls')
@@ -22,47 +56,9 @@ function entropyAccountList (entropy: Entropy, accountCommand: Command) {
     .action(async (options) => {
       // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
       const storedConfig = await config.get()
-      const accountsCommand = new EntropyAccount(entropy, options.endpoint)
-      const accounts = accountsCommand.listAccounts(storedConfig.accounts)
+      const service = new EntropyAccount(entropy, options.endpoint)
+      const accounts = service.list(storedConfig.accounts)
       cliWrite(accounts)
       process.exit(0)
     })
-}
-
-function entropyAccountNew (entropy: Entropy, accountCommand: Command) {
-  accountCommand.command('new')
-    .alias('new-account')
-    .alias('create')
-    .description('Create new entropy account from imported seed or from scratch. Output is JSON of form [{name, address}]')
-    .addOption(endpointOption())
-    .addOption(passwordOption())
-    .addOption(
-      new Option(
-        '-s, --seed',
-        'Seed used to create entropy account'
-      ).default(randomAsHex(32))
-    )
-    .addOption(
-      new Option(
-        '-n, --name',
-        'Name of entropy account'
-      ).makeOptionMandatory(true)
-    )
-    .addOption(
-      new Option(
-        '-pa, --path',
-        'Derivation path'
-      ).default(ACCOUNTS_CONTENT.path.default)
-    )
-    .action(async (opts) => {
-      const storedConfig = await config.get()
-      const { seed, name, path, endpoint } = opts
-      const accountsCommand = new EntropyAccount(entropy, endpoint)
-
-      const newAccount = await accountsCommand.newAccount({ seed, name, path })
-      await accountsCommand.updateConfig(storedConfig, newAccount)
-      cliWrite({ name: newAccount.name, address: newAccount.address })
-      process.exit(0)
-    })
-
 }

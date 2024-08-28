@@ -5,11 +5,11 @@ import * as flows from './flows'
 import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
 import { getSelectedAccount, print, updateConfig } from './common/utils'
+import { loadEntropy } from './common/utils-cli'
 import { EntropyLogger } from './common/logger'
 import { BalanceCommand } from './balance/command'
 import { EntropyAccount } from './account/main'
 import { TransferCommand } from './transfer/command'
-import { loadEntropy } from './cli'
 
 let shouldInit = true
 
