@@ -43,17 +43,17 @@ export function passwordOption (description?: string) {
 export function currentAccountAddressOption () {
   const storedConfig = config.getSync()
   return new Option(
-    '-a, --account <accountAddress>',
+    '-a, --account <address>',
     'Sets the current account for the session or defaults to the account stored in the config'
   )
     .env('ACCOUNT_ADDRESS')
-    .argParser(async (address) => {
-      if (address === storedConfig.selectedAccount) return address
+    .argParser(async (account) => {
+      if (account === storedConfig.selectedAccount) return account
       // Updated selected account in config with new address from this option
-      const newConfigUpdates = { selectedAccount: address }
+      const newConfigUpdates = { selectedAccount: account }
       await config.set({ ...storedConfig, ...newConfigUpdates })
 
-      return address
+      return account
     })
     .hideHelp()
     .default(storedConfig.selectedAccount)
