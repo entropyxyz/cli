@@ -18,13 +18,11 @@ export async function entropyManageAccounts (entropy: Entropy, endpoint: string,
   switch (interactionChoice) {
     case 'create-import': {
       let { seed, name, path, importKey } = await inquirer.prompt(newAccountQuestions)
-      if (importKey && secret.includes('#debug')) {
+      if (importKey && seed.includes('#debug')) {
         // isDebugMode = true
-        seed = secret.split('#debug')[0]
-      } else {
-        seed = importKey ? secret : randomAsHex(32)
+        seed = seed.split('#debug')[0]
       }
-
+      const newAccount = await AccountService.create({ seed, name, path })
     }
     case 'list-account': {
 
