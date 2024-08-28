@@ -4,7 +4,7 @@ import { EntropySign } from '../src/sign/main'
 import { setupTest, charlieStashSeed } from './testing-utils'
 const endpoint = 'ws://127.0.0.1:9944'
 
-test('Sign - signWithAdapter', async (t) => {
+test('Sign - signMessageWithAdapters', async (t) => {
   const { run, entropy } = await setupTest(t, { seed: charlieStashSeed })
   const SigningService = new EntropySign(entropy, endpoint)
 
