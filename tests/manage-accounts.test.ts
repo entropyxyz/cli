@@ -52,7 +52,7 @@ test('List Accounts', async t => {
     AccountService.list(config)
   } catch (error) {
     const msg = error.message
-    t.equal(msg, 'AccountsError: There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
+    t.equal(msg, 'AccountsError: There are currently no accounts available, please create or import a new account using the Manage Accounts feature')
   }
 
   t.end()
