@@ -13,6 +13,7 @@ interface SetupTestOpts {
   configPath?: string
   networkType?: string
   seed?: string,
+  createAccountOnly?: boolean
 }
 const NETWORK_TYPE_DEFAULT = 'two-nodes'
 let counter = 0
@@ -21,7 +22,8 @@ export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entro
   const {
     configPath = `/tmp/entropy-cli-${Date.now()}_${counter++}.json`,
     networkType = NETWORK_TYPE_DEFAULT,
-    seed = makeSeed()
+    seed = makeSeed(),
+    createAccountOnly = false
   } = opts || {}
 
   const run = promiseRunner(t)

@@ -44,3 +44,14 @@ git push origin main --tags
 ```
 
 go create a release on github if possible.
+
+
+## Deploying new faucet
+<!-- TO-DO: Cleanup requirements -->
+#### Requirements
+- faucet program
+  - build from repo or use binary in tests/programs/faucet_program.wasm
+- configuration and aux data schema
+- program mod account with funds to deploy
+- child funded accounts to be used as issuers of funds for faucet
+  - child accounts must be registered with deployed faucet program

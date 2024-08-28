@@ -24,7 +24,7 @@ export default function tui (options: EntropyTuiOptions) {
     // TODO: design programs in TUI (merge deploy+user programs)
     'Deploy Program': flows.devPrograms,
     'User Programs': flows.userPrograms,
-    // 'Construct an Ethereum Tx': flows.ethTransaction,
+    'Entropy Faucet': flows.entropyFaucet,
   }
 
   // const devChoices = {
