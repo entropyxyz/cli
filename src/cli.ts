@@ -3,15 +3,13 @@
 /* NOTE: calling this file entropy.ts helps commander parse process.argv */
 import { Command, Option } from 'commander'
 import launchTui from './tui'
-import * as config from './config'
 import { EntropyTuiOptions } from './types'
 
 import { cliSign } from './flows/sign/cli'
-import { getSelectedAccount, stringify, updateConfig } from './common/utils'
+import { stringify } from './common/utils'
 import { endpointOption, currentAccountAddressOption, loadEntropy, passwordOption } from './common/utils-cli'
 import Entropy from '@entropyxyz/sdk'
 import { entropyAccountCommand } from './account/command'
-import { EntropyAccount } from './account/main'
 import { BalanceCommand } from './balance/command'
 import { TransferCommand } from './transfer/command'
 
@@ -62,41 +60,6 @@ program
   })
 
 entropyAccountCommand(entropy, program)
-
-/* register */
-program.command('register')
-  .description('Register an entropy account with a program')
-  .argument('address', 'Address of existing entropy account')
-  .addOption(passwordOption())
-  .addOption(endpointOption())
-  .addOption(
-    new Option(
-      '-pointer, --pointer',
-      'Program pointer of program to be used for registering'
-    )
-  )
-  .addOption(
-    new Option(
-      '-data, --program-data',
-      'Path to file containing program data in JSON format'
-    )
-  )
-  .action(async (address, opts) => {
-    const storedConfig = await config.get()
-    const { accounts } = storedConfig
-    const accountsCommand = new EntropyAccount(entropy, opts.endpoint)
-    writeOut('Attempting to register account with addtess: ' + address)
-    const accountToRegister = getSelectedAccount(accounts, address)
-    if (!accountToRegister) {
-      throw new Error('AccountError: Unable to register non-existent account')
-    }
-    const updatedAccount = await accountsCommand.registerAccount(accountToRegister)
-    const arrIdx = accounts.indexOf(accountToRegister)
-    accounts.splice(arrIdx, 1, updatedAccount)
-    await updateConfig(storedConfig, { accounts, selectedAccount: updatedAccount.address })
-    writeOut("Your address" + updatedAccount.address + "has been successfully registered.")
-    process.exit(0)
-  })
 
 /* balance */
 program.command('balance')

@@ -1,6 +1,6 @@
 export interface AccountCreateParams {
   name: string
-  seed: string
+  seed?: string
   path?: string
 }
 

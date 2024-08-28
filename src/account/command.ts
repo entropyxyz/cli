@@ -4,16 +4,17 @@ import { EntropyAccount } from "./main";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
 import { cliWrite, endpointOption, passwordOption } from "../common/utils-cli";
+import { updateConfig } from "src/common/utils";
 
 export async function entropyAccountCommand (entropy: Entropy, rootCommand: Command) {
   const accountCommand = rootCommand.command('account')
     .description('Commands to work with accounts on the Entropy Network')
 
-  entropyAccountList(entropy, accountCommand)
-  entropyAccountNew(entropy, accountCommand)
+  entropyAccountList(accountCommand)
+  entropyAccountNew(accountCommand)
 }
 
-function entropyAccountNew (entropy: Entropy, accountCommand: Command) {
+function entropyAccountNew (accountCommand: Command) {
   accountCommand.command('create')
     .alias('new')
     .description('Create a new entropy account from scratch. Output is JSON of form {name, address}')
@@ -29,15 +30,20 @@ function entropyAccountNew (entropy: Entropy, accountCommand: Command) {
     .action(async (name, opts) => {
       const { endpoint, path } = opts
 
-      const service = new EntropyAccount(entropy, endpoint)
+      const service = new EntropyAccount({ endpoint })
       const newAccount = await service.create({
         name,
         path
       })
 
       const storedConfig = await config.get()
+      const { accounts } = storedConfig
+      accounts.push(newAccount) 
       // WIP - sort out the updateConfig stuff
-      await service.updateConfig(storedConfig, newAccount)
+      await updateConfig(storedConfig, {
+        accounts,
+        selectedAccount: newAccount.address
+      })
 
       cliWrite({
         name: newAccount.name,
@@ -48,7 +54,7 @@ function entropyAccountNew (entropy: Entropy, accountCommand: Command) {
 
 }
 
-function entropyAccountList (entropy: Entropy, accountCommand: Command) {
+function entropyAccountList (accountCommand: Command) {
   accountCommand.command('list')
     .alias('ls')
     .description('List all accounts. Output is JSON of form [{ name, address, verifyingKeys }]')
@@ -56,9 +62,44 @@ function entropyAccountList (entropy: Entropy, accountCommand: Command) {
     .action(async (options) => {
       // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
       const storedConfig = await config.get()
-      const service = new EntropyAccount(entropy, options.endpoint)
+      const service = new EntropyAccount({ endpoint: options.endpoint })
       const accounts = service.list(storedConfig.accounts)
       cliWrite(accounts)
       process.exit(0)
     })
 }
+
+/* register */
+// program.command('register')
+//   .description('Register an entropy account with a program')
+//   .argument('address', 'Address of existing entropy account')
+//   .addOption(passwordOption())
+//   .addOption(endpointOption())
+//   .addOption(
+//     new Option(
+//       '-pointer, --pointer',
+//       'Program pointer of program to be used for registering'
+//     )
+//   )
+//   .addOption(
+//     new Option(
+//       '-data, --program-data',
+//       'Path to file containing program data in JSON format'
+//     )
+//   )
+//   .action(async (address, opts) => {
+//     const storedConfig = await config.get()
+//     const { accounts } = storedConfig
+//     const accountsCommand = new EntropyAccount(entropy, opts.endpoint)
+//     writeOut('Attempting to register account with addtess: ' + address)
+//     const accountToRegister = getSelectedAccount(accounts, address)
+//     if (!accountToRegister) {
+//       throw new Error('AccountError: Unable to register non-existent account')
+//     }
+//     const updatedAccount = await accountsCommand.registerAccount(accountToRegister)
+//     const arrIdx = accounts.indexOf(accountToRegister)
+//     accounts.splice(arrIdx, 1, updatedAccount)
+//     await updateConfig(storedConfig, { accounts, selectedAccount: updatedAccount.address })
+//     writeOut("Your address" + updatedAccount.address + "has been successfully registered.")
+//     process.exit(0)
+//   })

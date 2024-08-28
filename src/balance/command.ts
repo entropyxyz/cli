@@ -1,11 +1,11 @@
 import Entropy from "@entropyxyz/sdk"
-import { BaseCommand } from "../common/entropy-base"
+import { EntropyBase } from "../common/entropy-base"
 import * as BalanceUtils from "./utils"
 
 const FLOW_CONTEXT = 'ENTROPY-BALANCE'
-export class BalanceCommand extends BaseCommand {
+export class BalanceCommand extends EntropyBase {
   constructor (entropy: Entropy, endpoint: string) {
-    super(entropy, endpoint, FLOW_CONTEXT)
+    super({ entropy, endpoint, flowContext: FLOW_CONTEXT })
   }
 
   public async getBalance (address: string) {

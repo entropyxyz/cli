@@ -4,12 +4,12 @@ import * as config from './config'
 import * as flows from './flows'
 import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
-import { getSelectedAccount, print, updateConfig } from './common/utils'
+import { print, updateConfig } from './common/utils'
 import { loadEntropy } from './common/utils-cli'
 import { EntropyLogger } from './common/logger'
 import { BalanceCommand } from './balance/command'
-import { EntropyAccount } from './account/main'
 import { TransferCommand } from './transfer/command'
+import { entropyManageAccounts, entropyRegister } from './account/interaction'
 
 let shouldInit = true
 
@@ -51,7 +51,6 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     shouldInit = false
   }
   const balanceCommand = new BalanceCommand(entropy, options.endpoint)
-  const accountsCommand = new EntropyAccount(entropy, options.endpoint)
   const transferCommand = new TransferCommand(entropy, options.endpoint)
 
   let storedConfig = await config.get()
@@ -94,24 +93,14 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
       break;
     }
     case 'Manage Accounts': {
-      const response = await accountsCommand.runInteraction(storedConfig)
+      const response = await entropyManageAccounts(options.endpoint, storedConfig)
       returnToMain = await updateConfig(storedConfig, response)
       storedConfig = await config.get()
       break;
     }
     case 'Register': {
-      const { accounts, selectedAccount } = storedConfig
-      const currentAccount = getSelectedAccount(accounts, selectedAccount)
-      if (!currentAccount) {
-        print("No account selected to register")
-        break;
-      }
-      print("Attempting to register the address:", currentAccount.address)
-      const updatedAccount = await accountsCommand.registerAccount(currentAccount)
-      const arrIdx = accounts.indexOf(currentAccount)
-      accounts.splice(arrIdx, 1, updatedAccount)
-      print("Your address", updatedAccount.address, "has been successfully registered.")
-      returnToMain = await updateConfig(storedConfig, { accounts, selectedAccount: updatedAccount.address })
+      const { accounts, selectedAccount } = await entropyRegister(entropy, options.endpoint, storedConfig)
+      returnToMain = await updateConfig(storedConfig, { accounts, selectedAccount })
       storedConfig = await config.get()
       break;
     }

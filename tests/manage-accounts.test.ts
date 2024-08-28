@@ -5,11 +5,14 @@ import { isValidSubstrateAddress } from '@entropyxyz/sdk/utils'
 // @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
 import { randomAsHex } from '@polkadot/util-crypto'
+import { EntropyAccount } from '../src/account/main'
 import { EntropyAccountConfig, EntropyConfig } from '../src/config/types'
-import { createAccount, listAccounts } from '../src/accounts/utils'
 import * as config from '../src/config'
 import { promiseRunner, sleep } from './testing-utils'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
+
+const endpoint = "ws://127.0.0.1:9944"
+const AccountService = new EntropyAccount({ endpoint });
 
 test('List Accounts', async t => {
   const account: EntropyAccountConfig = {
@@ -31,10 +34,11 @@ test('List Accounts', async t => {
       dev: 'ws://127.0.0.1:9944',
       'test-net': 'wss://testnet.entropy.xyz',
     },
+    selectedAccount: account.address,
     'migration-version': '0'
   }
 
-  const accountsArray = listAccounts(config)
+  const accountsArray = AccountService.list(config)
 
   t.deepEqual(accountsArray, [{
     name: account.name,
@@ -45,10 +49,10 @@ test('List Accounts', async t => {
   // Resetting accounts on config to test for empty list
   config.accounts = []
   try {
-    listAccounts(config)
+    AccountService.list(config)
   } catch (error) {
     const msg = error.message
-    t.equal(msg, 'There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
+    t.equal(msg, 'AccountsError: There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
   }
 
   t.end()
@@ -63,7 +67,7 @@ test('Create Account', async t => {
   await run('config.init', config.init(configPath))
   const testAccountSeed = randomAsHex(32)
   const testAccountName = 'Test Account'
-  const newAccount = await createAccount({ name: testAccountName, seed: testAccountSeed })
+  const newAccount = await AccountService.create({ name: testAccountName, seed: testAccountSeed })
 
   const testKeyring = new Keyring({ seed: testAccountSeed, path: 'none', debug: true })
   const { admin } = testKeyring.getAccount()

@@ -1,8 +1,7 @@
-import { EntropyAccountConfig, EntropyConfig } from "../config/types";
-import { RegisterParams } from './types';
+import { EntropyAccountConfig } from "../config/types";
+import { AccountListResults } from './types';
 import { ACCOUNTS_CONTENT } from './constants';
-import { generateAccountChoices, print } from 'src/common/utils';
-import Entropy from '@entropyxyz/sdk';
+import { generateAccountChoices } from 'src/common/utils';
 
 const validateSeedInput = (seed) => {
   if (seed.includes('#debug')) return true
@@ -59,27 +58,10 @@ export const manageAccountsQuestions = [
   }
 ]
 
-export async function registerAccount (entropy: Entropy, params?: RegisterParams): Promise<string> {
-  let verifyingKey: string
-  try {
-    const registerParams = params?.programModAddress && params?.programData ? { programDeployer: params.programModAddress, programData: params.programData } : undefined
-    
-    verifyingKey = await entropy.register(registerParams)
-    return verifyingKey
-  } catch (error) {
-    if (!verifyingKey) {
-      try {
-        const tx = entropy.substrate.tx.registry.pruneRegistration()
-        await tx.signAndSend(entropy.keyring.accounts.registration.pair, ({ status }) => {
-          if (status.isFinalized) {
-            print('Successfully pruned registration');
-          }
-        })
-      } catch (error) {
-        console.error('Unable to prune registration due to:', error.message);
-        throw error
-      }
-    }
-    throw error
-  }
+export function formatAccountsList (accounts: EntropyAccountConfig[]): AccountListResults[] {
+  return accounts.map((account: EntropyAccountConfig) => ({
+    name: account.name,
+    address: account.address,
+    verifyingKeys: account?.data?.admin?.verifyingKeys
+  }))
 }
