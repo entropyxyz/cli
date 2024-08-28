@@ -13,7 +13,7 @@ export async function entropyTransferCommand (entropy: Entropy, rootCommand: Com
     .addOption(currentAccountAddressOption())
     .action(async (destination, amount, opts) => {
       const TransferService = new EntropyTransfer(entropy, opts.endpoint)
-      await TransferService.sendTransfer(destination, amount)
+      await TransferService.transfer(destination, amount)
       // cliWrite(??) // TODO: write the output
       process.exit(0)
     })

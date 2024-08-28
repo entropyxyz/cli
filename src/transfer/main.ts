@@ -9,9 +9,34 @@ export class EntropyTransfer extends EntropyBase {
     super(entropy, endpoint, FLOW_CONTEXT)
   }
 
-  async transfer (payload: TransferOptions): Promise<any> {
+  // NOTE: a more accessible function which handles
+  // - setting `from`
+  // - converting `amount` (string => BigInt)
+  // - progress callbacks (optional)
+
+  async transfer (toAddress: string, amount: string, progress?: { start: ()=>void, stop: ()=>void }) {
+    const formattedAmount = BigInt(parseInt(amount) * 1e10)
+
+    if (progress) progress.start()
+    try {
+      const transferStatus = await this.rawTransfer({
+        from: this.entropy.keyring.accounts.registration.pair,
+        to: toAddress,
+        amount: formattedAmount
+      })
+      if (transferStatus.isFinalized) {
+        if (progress) return progress.stop()
+        return
+      }
+    } catch (error) {
+      if (progress) return progress.stop()
+      throw error
+    }
+  }
+
+  private async rawTransfer (payload: TransferOptions): Promise<any> {
     const { from, to, amount } = payload
-  
+
     return new Promise((resolve, reject) => {
       // WARN: await signAndSend is dangerous as it does not resolve
       // after transaction is complete :melt:
@@ -33,27 +58,14 @@ export class EntropyTransfer extends EntropyBase {
               // Other, CannotLookup, BadOrigin, no extra info
               msg = dispatchError.toString()
             }
-            return reject(Error(msg))
+            const error = Error(msg)
+            this.logger.error('There was an issue sending this transfer', error)
+            return reject(error)
           }
-  
+
           if (status.isFinalized) resolve(status)
         })
     })
   }
 
-  public async sendTransfer (toAddress: string, amount: string, startProgress?: ()=>void, stopProgress?: ()=>void) {
-    const formattedAmount = BigInt(parseInt(amount) * 1e10)
-    if (startProgress) startProgress()
-    try {
-      const transferStatus = await this.transfer({ from: this.entropy.keyring.accounts.registration.pair, to: toAddress, amount: formattedAmount })
-      if (transferStatus.isFinalized) {
-        if (stopProgress) return stopProgress()
-        return
-      }
-    } catch (error) {
-      this.logger.error('There was an issue sending this transfer', error)
-      if (stopProgress) return stopProgress()
-      throw error
-    }
-  }
 }
