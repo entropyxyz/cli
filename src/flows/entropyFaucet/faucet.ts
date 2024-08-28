@@ -8,7 +8,8 @@ import FaucetSigner from "./signer";
 import { FAUCET_PROGRAM_MOD_KEY, TESTNET_PROGRAM_HASH } from "./constants";
 
 // only the faucet program should be on the key
-async function faucetSignAndSend (call: any, api: any, entropy: Entropy, amount: number, senderAddress: string, chosenVerifyingKey: any): Promise<any> {
+async function faucetSignAndSend (call: any, entropy: Entropy, amount: number, senderAddress: string, chosenVerifyingKey: any): Promise<any> {
+  const api = entropy.substrate
   const faucetSigner = new FaucetSigner(api.registry, entropy, amount, chosenVerifyingKey)
 
   const sig = await call.signAsync(senderAddress, {
@@ -23,6 +24,7 @@ async function faucetSignAndSend (call: any, api: any, entropy: Entropy, amount:
         if (dispatchError.isModule) {
           // for module errors, we have the section indexed, lookup
           const decoded = api.registry.findMetaError(dispatchError.asModule);
+          // @ts-ignore
           const { documentation, method, section } = decoded;
 
           msg = `${section}.${method}: ${documentation.join(' ')}`
@@ -87,6 +89,6 @@ export async function sendMoney (
   }
 
   const transfer = entropy.substrate.tx.balances.transferAllowDeath(addressToSendTo, BigInt(amount));
-  const transferStatus = await faucetSignAndSend(transfer, entropy.substrate, entropy, parseInt(amount), faucetAddress, chosenVerifyingKey )
+  const transferStatus = await faucetSignAndSend(transfer, entropy, parseInt(amount), faucetAddress, chosenVerifyingKey )
   if (transferStatus.isFinalized) return transferStatus
 }
