@@ -15,19 +15,17 @@ export class EntropyTransfer extends EntropyBase {
   // - progress callbacks (optional)
 
   async transfer (toAddress: string, amount: string, progress?: { start: ()=>void, stop: ()=>void }) {
-    const formattedAmount = BigInt(parseInt(amount) * 1e10)
+    const formattedAmount = BigInt(Number(amount) * 1e10)
+    // TODO: name this multiplier 1e10 somewhere
 
     if (progress) progress.start()
     try {
-      const transferStatus = await this.rawTransfer({
+      await this.rawTransfer({
         from: this.entropy.keyring.accounts.registration.pair,
         to: toAddress,
         amount: formattedAmount
       })
-      if (transferStatus.isFinalized) {
-        if (progress) return progress.stop()
-        return
-      }
+      if (progress) return progress.stop()
     } catch (error) {
       if (progress) return progress.stop()
       throw error
