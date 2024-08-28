@@ -1,6 +1,7 @@
 import inquirer from "inquirer";
 import { EntropyAccount } from './main'
 import { print } from "src/common/utils"
+import * as config from '../config'
 
 import { 
   manageAccountsQuestions,
@@ -8,28 +9,32 @@ import {
   registerAccount,
   selectAccountQuestions
 } from "./utils";
+import Entropy from "@entropyxyz/sdk";
+import { EntropyConfig } from "src/config/types";
 
+export async function entropyManageAccounts (entropy: Entropy, endpoint: string, storedConfig: EntropyConfig) {
+  const AccountService = new EntropyAccount(entropy, endpoint)
+  const { interactionChoice } = await inquirer.prompt(manageAccountsQuestions)
+  switch (interactionChoice) {
+    case 'create-import': {
+      let { seed, name, path, importKey } = await inquirer.prompt(newAccountQuestions)
+      if (importKey && secret.includes('#debug')) {
+        // isDebugMode = true
+        seed = secret.split('#debug')[0]
+      } else {
+        seed = importKey ? secret : randomAsHex(32)
+      }
 
-export async function entropyAccountCreate (entropy, endpoint) {
-  const { name, path } = await inquirer.prompt(newAccountQuestions)
+    }
+    case 'list-account': {
 
-  const service = new EntropyAccount(entropy, endpoint)
-  const account = await service.create({ name, path })
+    }
+    case 'select-account': {
 
-  print(({
-    name: account.name,
-    address: account.address
-  }))
-}
+    }
+    case 'exit': {
 
-export async function entropyAccountCreate (entropy, endpoint) {
-  const { name, path } = await inquirer.prompt(newAccountQuestions)
-
-  const service = new EntropyAccount(entropy, endpoint)
-  const account = await service.create({ name, path })
-
-  print(({
-    name: account.name,
-    address: account.address
-  }))
+    }
+  }
+  return { accounts: responses.accounts ? responses.accounts : storedConfig.accounts, selectedAccount: responses.selectedAccount || storedConfig.selectedAccount }
 }

@@ -3,20 +3,19 @@ import Entropy from "@entropyxyz/sdk";
 import Keyring from '@entropyxyz/sdk/keys'
 import { randomAsHex } from '@polkadot/util-crypto'
 
-import { BaseCommand } from "../common/base-command";
+import { EntropyBase } from "../common/entropy-base";
 import { print, updateConfig } from "../common/utils";
 import { EntropyAccountConfig, EntropyConfig } from "../config/types";
 import { FLOW_CONTEXT } from "./constants";
 import { AccountCreateParams, AccountListResults } from "./types";
 
-export class EntropyAccount extends BaseCommand {
+export class EntropyAccount extends EntropyBase {
   // NOTE: this class is different - it doesn't need an entropy instance
   constructor (entropy: Entropy | null, endpoint: string) {
     super(entropy, endpoint, FLOW_CONTEXT)
   }
 
-  async create ({ name, path }: AccountCreateParams): Promise<EntropyAccountConfig> {
-    const seed = randomAsHex(32)
+  async create ({ seed = randomAsHex(32), name, path }: AccountCreateParams): Promise<EntropyAccountConfig> {
     const keyring = new Keyring({ seed, path, debug: true })
     const fullAccount = keyring.getAccount()
     // TODO: sdk should create account on constructor
@@ -40,7 +39,7 @@ export class EntropyAccount extends BaseCommand {
       : []
     if (!accountsArray.length)
       throw new Error(
-        'There are currently no accounts available, please create or import a new account'
+        'Accounts Error: There are currently no accounts available, please create or import a new account'
       )
     return formatAccountsList(accountsArray)
   }

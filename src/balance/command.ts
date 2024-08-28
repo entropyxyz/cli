@@ -1,5 +1,5 @@
 import Entropy from "@entropyxyz/sdk"
-import { BaseCommand } from "../common/base-command"
+import { BaseCommand } from "../common/entropy-base"
 import * as BalanceUtils from "./utils"
 
 const FLOW_CONTEXT = 'ENTROPY-BALANCE'
