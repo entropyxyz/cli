@@ -29,7 +29,7 @@ export class EntropyBalance extends EntropyBase {
     return balanceInfo
   }
 
-  public async getAccountBalance (address: string) {
+  async getAccountBalance (address: string) {
     const balance = await this.getBalance(address)
 
     this.logger.log(`Current balance of ${address}: ${balance}`, EntropyBalance.name)

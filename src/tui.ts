@@ -62,7 +62,7 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
 
   // If the selected account changes within the TUI we need to reset the entropy instance being used
   if (storedConfig.selectedAccount !== entropy.keyring.accounts.registration.address) {
-    entropy = await loadEntropy(entropy, storedConfig.selectedAccount, options.endpoint)
+    entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint);
   }
 
   const answers = await inquirer.prompt([{

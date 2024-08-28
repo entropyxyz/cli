@@ -24,8 +24,8 @@ export async function entropySign (entropy: Entropy, endpoint: string) {
   //   return
   // }
   case 'Sign With Adapter': {
-    const { msg, msgPath } = await getMsgFromUser(inquirer)
-    const { signature, verifyingKey } = await SigningService.signMessageWithAdapters({ msg, msgPath })
+    const { msg } = await getMsgFromUser(inquirer)
+    const { signature, verifyingKey } = await SigningService.signMessageWithAdapters({ msg })
     print('msg to be signed:', msg)
     print('verifying key:', verifyingKey)
     print('signature:', signature)

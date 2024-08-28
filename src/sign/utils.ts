@@ -51,15 +51,15 @@ export const rawSignParamsQuestions = [
 ]
 
 export async function getMsgFromUser (inquirer) {
-  let msg: string
-  let msgPath: string
-  const { messageAction } = await inquirer.prompt(messageActionQuestions)
-  switch (messageAction) {
-  case 'Text Input': {
-    const { userInput } = await inquirer.prompt(userInputQuestions)
-    msg = userInput
-    break
-  }
+  // let msg: string
+  // let msgPath: string
+  // const { messageAction } = await inquirer.prompt(messageActionQuestions)
+  // switch (messageAction) {
+  // case 'Text Input': {
+  const { userInput } = await inquirer.prompt(userInputQuestions)
+  const msg = userInput
+  // break
+  // }
   // Msg input from a file requires more design
   // case 'From a File': {
   //   const { pathToFile } = await inquirer.prompt(filePathInputQuestions)
@@ -67,13 +67,16 @@ export async function getMsgFromUser (inquirer) {
   //   msgPath = pathToFile
   //   break
   // }
-  default: {
-    const error = new Error('SigningError: Unsupported User Input Action')
-    this.logger.error('Error signing with adapter', error)
-    return
-  }
-  }
-  return { msg, msgPath };
+  // default: {
+  //   const error = new Error('SigningError: Unsupported User Input Action')
+  //   this.logger.error('Error signing with adapter', error)
+  //   return
+  // }
+  // }
+  return {
+    msg,
+    // msgPath
+  };
 }
 
 export function getMsgFromInputOrFile (msg?: string, msgPath?: string) {

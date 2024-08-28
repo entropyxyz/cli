@@ -16,7 +16,7 @@ async function entropyAccountBalance (entropy: Entropy, balanceCommand: Command)
     .addOption(endpointOption())
     .action(async (address, opts) => {
       const BalanceService = new EntropyBalance(entropy, opts.endpoint)
-      const balance = await BalanceService.getAccountBalance(address)
+      const balance = await BalanceService.getBalance(address)
       cliWrite(balance)
       process.exit(0)
     })

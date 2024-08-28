@@ -59,7 +59,7 @@ export function currentAccountAddressOption () {
     .default(storedConfig.selectedAccount)
 }
 
-export async function loadEntropy (entropy: Entropy | undefined, address: string, endpoint: string, password?: string): Promise<Entropy> {
+export async function loadEntropy (address: string, endpoint: string, password?: string): Promise<Entropy> {
   const storedConfig = config.getSync()
   const selectedAccount = getSelectedAccount(storedConfig.accounts, address)
 
@@ -70,24 +70,9 @@ export async function loadEntropy (entropy: Entropy | undefined, address: string
     throw new Error('AuthError: This account requires a password, add --password <password>')
   }
 
-  entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint, password })
-
+  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint, password })
   if (!entropy?.keyring?.accounts?.registration?.pair) {
     throw new Error("Signer keypair is undefined or not properly initialized.")
-  }
-
-  return entropy
-}
-
-export async function reloadEntropy (entropy: Entropy, newAddress: string, oldAddress: string, endpoint: string): Promise<Entropy> {
-  try {
-    entropy = await loadEntropy(entropy, newAddress, endpoint)
-  } catch (error) {
-    if (error.message.includes('AddressError')) {
-      entropy = await loadEntropy(entropy, oldAddress, endpoint)
-      return entropy
-    }
-    throw error
   }
 
   return entropy
