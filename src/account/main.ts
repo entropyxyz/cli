@@ -44,7 +44,7 @@ export class EntropyAccount extends EntropyBase {
       : []
     if (!accountsArray.length)
       throw new Error(
-        'Accounts Error: There are currently no accounts available, please create or import a new account'
+        'AccountsError: There are currently no accounts available, please create or import a new account using the Manage Accounts feature'
       )
     return formatAccountsList(accountsArray)
   }
