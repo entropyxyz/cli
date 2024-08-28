@@ -9,13 +9,13 @@ test('Sign - signMessageWithAdapters', async (t) => {
   const SigningService = new EntropySign(entropy, endpoint)
 
   await run('register', entropy.register())
-  const signature = await run(
+  const result = await run(
     'sign',
     SigningService.signMessageWithAdapters({ msg: "heyo!" })
   )
 
-  t.true(signature && signature.length > 32, 'signature has some body!')
-  signature && console.log(signature)
+  t.true(result?.signature?.length > 32, 'signature has some body!')
+  console.log(result)
 
   t.end()
 })
