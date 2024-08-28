@@ -43,23 +43,23 @@ export function passwordOption (description?: string) {
 export function currentAccountAddressOption () {
   const storedConfig = config.getSync()
   return new Option(
-    '-a, --account <accountAddress>',
+    '-a, --account <address>',
     'Sets the current account for the session or defaults to the account stored in the config'
   )
     .env('ACCOUNT_ADDRESS')
-    .argParser(async (address) => {
-      if (address === storedConfig.selectedAccount) return address
+    .argParser(async (account) => {
+      if (account === storedConfig.selectedAccount) return account
       // Updated selected account in config with new address from this option
-      const newConfigUpdates = { selectedAccount: address }
+      const newConfigUpdates = { selectedAccount: account }
       await config.set({ ...storedConfig, ...newConfigUpdates })
 
-      return address
+      return account
     })
     .hideHelp()
     .default(storedConfig.selectedAccount)
 }
 
-export async function loadEntropy (entropy: Entropy | undefined, address: string, endpoint: string, password?: string): Promise<Entropy> {
+export async function loadEntropy (address: string, endpoint: string, password?: string): Promise<Entropy> {
   const storedConfig = config.getSync()
   const selectedAccount = getSelectedAccount(storedConfig.accounts, address)
 
@@ -70,24 +70,9 @@ export async function loadEntropy (entropy: Entropy | undefined, address: string
     throw new Error('AuthError: This account requires a password, add --password <password>')
   }
 
-  entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint, password })
-
+  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint, password })
   if (!entropy?.keyring?.accounts?.registration?.pair) {
     throw new Error("Signer keypair is undefined or not properly initialized.")
-  }
-
-  return entropy
-}
-
-export async function reloadEntropy (entropy: Entropy, newAddress: string, oldAddress: string, endpoint: string): Promise<Entropy> {
-  try {
-    entropy = await loadEntropy(entropy, newAddress, endpoint)
-  } catch (error) {
-    if (error.message.includes('AddressError')) {
-      entropy = await loadEntropy(entropy, oldAddress, endpoint)
-      return entropy
-    }
-    throw error
   }
 
   return entropy

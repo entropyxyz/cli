@@ -11,7 +11,26 @@ import { entropySign } from './sign/interaction'
 import { entropyBalance } from './balance/interaction'
 import { entropyTransfer } from './transfer/interaction'
 
-let shouldInit = true
+let hasConfigInit = false
+async function setupConfig () {
+  if (!hasConfigInit) {
+    await config.init()
+    hasConfigInit = true
+  }
+
+  let storedConfig = await config.get()
+
+  // set selectedAccount if we can
+  if (!storedConfig.selectedAccount && storedConfig.accounts.length) {
+    await config.set({ 
+      selectedAccount: storedConfig.accounts[0].address,
+      ...storedConfig
+    })
+    storedConfig = await config.get()
+  }
+
+  return storedConfig
+}
 
 // tui = text user interface
 export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
@@ -46,23 +65,13 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
 }
 
 async function main (entropy: Entropy, choices, options, logger: EntropyLogger) {
-  if (shouldInit) {
-    await config.init()
-    shouldInit = false
-  }
-
-  let storedConfig = await config.get()
-
-  // if there are accounts available and selected account is not set, 
-  // first account in list is set as the selected account
-  if (!storedConfig.selectedAccount && storedConfig.accounts.length) {
-    await config.set({ ...storedConfig, ...{ selectedAccount: storedConfig.accounts[0].address } })
-    storedConfig = await config.get()
-  }
+  let storedConfig = await setupConfig()
 
   // If the selected account changes within the TUI we need to reset the entropy instance being used
-  if (storedConfig.selectedAccount !== entropy.keyring.accounts.registration.address) {
-    entropy = await loadEntropy(entropy, storedConfig.selectedAccount, options.endpoint)
+  const currentAccount = entropy.keyring.accounts.registration.address
+  if (currentAccount !== storedConfig.selectedAccount) {
+    await entropy.close()
+    entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint);
   }
 
   const answers = await inquirer.prompt([{

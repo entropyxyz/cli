@@ -1,7 +1,7 @@
 import Entropy from "@entropyxyz/sdk"
 import { u8aToHex } from '@polkadot/util'
 import { EntropyBase } from "../common/entropy-base";
-import { SignResult, SignWithAdapterInput } from "./types";
+import { SignResult } from "./types";
 import { FLOW_CONTEXT } from "./constants";
 import { stringToHex } from "./utils";
 
@@ -13,18 +13,6 @@ export class EntropySign extends EntropyBase {
   // async rawSign (entropy: Entropy, payload: RawSignPayload) {
   //   return entropy.sign(payload)
   // }
-
-  async signWithAdapters (input: SignWithAdapterInput): Promise<any> {
-    return this.entropy.signWithAdaptersInOrder({
-      msg: {
-        msg: stringToHex(input.msg)
-      },
-      // type
-      order: ['deviceKeyProxy', 'noop'],
-      signatureVerifyingKey: input.verifyingKey
-      // auxillaryData
-    })
-  }
 
   // async rawSignMessage ({ msg, msgPath, auxiliaryData, hashingAlgorithm }): Promise<SignResult> {
   //   const message = getMsgFromInputOrFile(msg, msgPath)
@@ -50,13 +38,20 @@ export class EntropySign extends EntropyBase {
   //   }
   // }
 
-  async signMessageWithAdapters ({ msg }: { msg?: string, msgPath?: string }): Promise<SignResult> {
-    // const message = getMsgFromInputOrFile(msg, msgPath)
-
+  async signMessageWithAdapters ({ msg }: { msg: string }): Promise<SignResult> {
     try {
       this.logger.log(`Msg to be signed: ${msg}`, 'SIGN_MSG')
       this.logger.log( `Verifying Key used: ${this.entropy.signingManager.verifyingKey}`)
-      const signature = await this.signWithAdapters({ msg })
+      const signature: any = await this.entropy.signWithAdaptersInOrder({
+        msg: {
+          msg: stringToHex(msg)
+        },
+        // type
+        order: ['deviceKeyProxy', 'noop'],
+        // signatureVerifyingKey: verifyingKey
+        // auxillaryData
+      })
+
       const signatureHexString = u8aToHex(signature)
       this.logger.log(`Signature: ${signatureHexString}`)
 

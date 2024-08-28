@@ -12,10 +12,24 @@ import { EntropyTuiOptions } from './types'
 import launchTui from './tui'
 
 const program = new Command()
-// Array of restructured commands to make it easier to migrate them to the new "flow"
-const RESTRUCTURED_COMMANDS = ['balance']
 
 let entropy: Entropy
+async function setEntropyGlobal (address: string, endpoint: string, password?: string) {
+  if (entropy) {
+    const currentAddress = entropy?.keyring?.accounts?.registration?.address
+    if (address !== currentAddress) {
+      // Is it possible to hit this?
+      // - programmatic usage kills process after function call
+      // - tui usage manages mutation of entropy instance itself
+      await entropy.close()
+      entropy = await loadEntropy(address, endpoint, password)
+    }
+  }
+  else {
+    entropy = await loadEntropy(address, endpoint, password)
+  }
+
+}
 
 /* no command */
 program
@@ -32,16 +46,12 @@ program
       .hideHelp()
   )
   .hook('preAction', async (_thisCommand, actionCommand) => {
-    if (!entropy || (entropy.keyring.accounts.registration.address !== actionCommand.args[0] || entropy.keyring.accounts.registration.address !== actionCommand.opts().account)) {
-      // balance includes an address argument, use that address to instantiate entropy
-      // can keep the conditional to check for length of args, and use the first index since it is our pattern to have the address as the first argument
-      if (RESTRUCTURED_COMMANDS.includes(actionCommand.name()) && actionCommand.args.length) {
-        entropy = await loadEntropy(entropy, actionCommand.args[0], actionCommand.opts().endpoint, actionCommand.opts().password)
-      } else {
-        // if address is not an argument, use the address from the option
-        entropy = await loadEntropy(entropy, actionCommand.opts().account, actionCommand.opts().endpoint, actionCommand.opts().password)
-      }
-    }
+    const { account, endpoint, password } = actionCommand.opts()
+    const address = actionCommand.name() === 'balance'
+      ? actionCommand.args[0]
+      : account
+
+    await setEntropyGlobal(address, endpoint, password)
   })
   .action((options: EntropyTuiOptions) => {
     launchTui(entropy, options)
