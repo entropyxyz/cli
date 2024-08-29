@@ -57,11 +57,3 @@ export const manageAccountsQuestions = [
     choices: ACCOUNTS_CONTENT.interactionChoice.choices
   }
 ]
-
-export function formatAccountsList (accounts: EntropyAccountConfig[]): AccountListResults[] {
-  return accounts.map((account: EntropyAccountConfig) => ({
-    name: account.name,
-    address: account.address,
-    verifyingKeys: account?.data?.admin?.verifyingKeys
-  }))
-}

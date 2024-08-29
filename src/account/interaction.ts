@@ -29,6 +29,7 @@ export async function entropyManageAccounts (endpoint: string, storedConfig: Ent
       : EntropyAccount.create({ name, path })
     accounts.push(newAccount) 
 
+    // WIP HERE
     return {
       accounts,
       selectedAccount: newAccount.address

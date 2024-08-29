@@ -1,4 +1,4 @@
-import Entropy from "@entropyxyz/sdk";
+import Entropy, { wasmGlobalsReady } from "@entropyxyz/sdk";
 // @ts-expect-error
 import Keyring from '@entropyxyz/sdk/keys'
 import { randomAsHex } from '@polkadot/util-crypto'
@@ -6,7 +6,6 @@ import { randomAsHex } from '@polkadot/util-crypto'
 import { FLOW_CONTEXT } from "./constants";
 import { AccountCreateParams, AccountImportParams, AccountRegisterParams } from "./types";
 import { print } from "src/common/utils";
-import { formatAccountsList } from "./utils";
 
 import { EntropyBase } from "../common/entropy-base";
 import { EntropyAccountConfig } from "../config/types";
@@ -16,12 +15,15 @@ export class EntropyAccount extends EntropyBase {
     super({ entropy, endpoint, flowContext: FLOW_CONTEXT })
   }
 
-  static create ({ name, path }: AccountCreateParams): EntropyAccountConfig {
+  static async create ({ name, path }: AccountCreateParams): Promise<EntropyAccountConfig> {
     const seed = randomAsHex(32)
     return EntropyAccount.import({ name, seed, path })
   }
 
-  static import ({ name, seed, path }: AccountImportParams ): EntropyAccountConfig {
+  static async import ({ name, seed, path }: AccountImportParams ): Promise<EntropyAccountConfig> {
+    // WARNING: #create currently depends on this => be careful modifying this function
+
+    await wasmGlobalsReady()
     const keyring = new Keyring({ seed, path, debug: true })
     const fullAccount = keyring.getAccount()
     // TODO: sdk should create account on constructor
@@ -30,7 +32,7 @@ export class EntropyAccount extends EntropyBase {
     const data = fullAccount
     delete admin.pair
     // const encryptedData = password ? passwordFlow.encrypt(data, password) : data
-
+    
     return {
       name,
       address: admin.address,
@@ -40,14 +42,16 @@ export class EntropyAccount extends EntropyBase {
   }
 
   static list (accounts: EntropyAccountConfig[]) {
-    const accountsArray = Array.isArray(accounts) && accounts.length
-      ? accounts
-      : []
-    if (!accountsArray.length)
+    if (!accounts.length)
       throw new Error(
         'AccountsError: There are currently no accounts available, please create or import a new account using the Manage Accounts feature'
       )
-    return formatAccountsList(accountsArray)
+
+    return accounts.map((account: EntropyAccountConfig) => ({
+      name: account.name,
+      address: account.address,
+      verifyingKeys: account?.data?.admin?.verifyingKeys
+    }))
   }
 
   async register (params?: AccountRegisterParams): Promise<string> {

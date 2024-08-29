@@ -16,7 +16,7 @@ async function setEntropyGlobal (address: string, endpoint: string, password?: s
   if (entropy) {
     const currentAddress = entropy?.keyring?.accounts?.registration?.address
     if (address !== currentAddress) {
-      // Is it possible to hit this?
+      // QUESTION: Is it possible to hit this?
       // - programmatic usage kills process after function call
       // - tui usage manages mutation of entropy instance itself
       await entropy.close()
@@ -29,6 +29,7 @@ async function setEntropyGlobal (address: string, endpoint: string, password?: s
 }
 
 const program = new Command()
+let commandName: string // the top level command
 
 /* no command */
 program
@@ -44,9 +45,15 @@ program
       .env('DEV_MODE')
       .hideHelp()
   )
+  .hook('preSubcommand', async (_thisCommand, subCommand) => {
+    commandName = subCommand.name()
+  })
   .hook('preAction', async (_thisCommand, actionCommand) => {
+    if (commandName === 'account') return
+    // entropy not required for any account commands
+
     const { account, endpoint, password } = actionCommand.opts()
-    const address = actionCommand.name() === 'balance'
+    const address = commandName === 'balance'
       ? actionCommand.args[0]
       : account
 

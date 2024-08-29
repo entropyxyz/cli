@@ -10,6 +10,7 @@ export function deserialize (config) {
 }
 
 function replacer (key, value) {
+  console.log(key, typeof value, value instanceof Uint8Array)
   if (value instanceof Uint8Array) {
     return PREFIX + Buffer.from(value).toString('base64')
   }

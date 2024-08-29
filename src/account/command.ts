@@ -1,4 +1,4 @@
-import Entropy from "@entropyxyz/sdk";
+import Entropy from "@entropyxyz/sdk"
 import { Command, Option } from 'commander'
 import { EntropyAccount } from "./main";
 import { ACCOUNTS_CONTENT } from './constants'
@@ -10,16 +10,17 @@ export async function entropyAccountCommand (entropy: Entropy, rootCommand: Comm
   const accountCommand = rootCommand.command('account')
     .description('Commands to work with accounts on the Entropy Network')
 
+  entropyAccountCreate(accountCommand)
+  entropyAccountImport(accountCommand)
   entropyAccountList(accountCommand)
-  entropyAccountNew(accountCommand)
 }
 
-function entropyAccountNew (accountCommand: Command) {
+function entropyAccountCreate (accountCommand: Command) {
   accountCommand.command('create')
     .alias('new')
     .description('Create a new entropy account from scratch. Output is JSON of form {name, address}')
     .addOption(passwordOption())
-    .argument('<name>', 'A user friendly name for your nem account.')
+    .argument('<name>', 'A user friendly name for your new account.')
     .addOption(
       new Option(
         '--path',
@@ -28,16 +29,9 @@ function entropyAccountNew (accountCommand: Command) {
     )
     .action(async (name, opts) => {
       const { path } = opts
-      const newAccount = EntropyAccount.create({ name, path })
+      const newAccount = await EntropyAccount.create({ name, path })
 
-      const storedConfig = await config.get()
-      const { accounts } = storedConfig
-      accounts.push(newAccount) 
-      // WIP - sort out the updateConfig stuff
-      await updateConfig(storedConfig, {
-        accounts,
-        selectedAccount: newAccount.address
-      })
+      await persistAndSelectNewAccount(newAccount)
 
       cliWrite({
         name: newAccount.name,
@@ -45,7 +39,48 @@ function entropyAccountNew (accountCommand: Command) {
       })
       process.exit(0)
     })
+}
 
+function entropyAccountImport (accountCommand: Command) {
+  accountCommand.command('import')
+    .description('Import an existing entropy account from seed. Output is JSON of form {name, address}')
+    .addOption(passwordOption())
+    .argument('<name>', 'A user friendly name for your new account.')
+    .argument('<seed>', 'The seed for the account you are importing')
+    .addOption(
+      new Option(
+        '--path',
+        'Derivation path'
+      ).default(ACCOUNTS_CONTENT.path.default)
+    )
+    .action(async (name, seed, opts) => {
+      const { path } = opts
+      const newAccount = await EntropyAccount.import({ name, seed, path })
+
+      await persistAndSelectNewAccount(newAccount)
+
+      cliWrite({
+        name: newAccount.name,
+        address: newAccount.address
+      })
+      process.exit(0)
+    })
+}
+
+async function persistAndSelectNewAccount (newAccount) {
+  const storedConfig = await config.get()
+  const { accounts } = storedConfig
+
+  const isExistingName = accounts.find(account => account.name === newAccount.name)
+  if (isExistingName) {
+    throw Error(`An account with name "${newAccount.name}" already exists. Choose a different name`)
+  }
+
+  accounts.push(newAccount) 
+  await updateConfig(storedConfig, {
+    accounts,
+    selectedAccount: newAccount.address
+  })
 }
 
 function entropyAccountList (accountCommand: Command) {
