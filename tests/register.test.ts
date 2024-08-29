@@ -1,14 +1,16 @@
 import test from 'tape'
-import { registerAccount } from '../src/accounts/utils'
+import { EntropyAccount } from '../src/account/main'
 import { charlieStashSeed, setupTest } from './testing-utils'
 import { readFileSync } from 'node:fs'
 
 const networkType = 'two-nodes'
+const endpoint = 'ws://127.0.0.1:9944'
 
 test('Register - Default Program', async (t) => {
   const { run, entropy } = await setupTest(t, { networkType, seed: charlieStashSeed })
+  const accountService = new EntropyAccount(entropy, endpoint)
 
-  const verifyingKey = await run('register account', registerAccount(entropy))
+  const verifyingKey = await run('register account', accountService.register())
 
   const fullAccount = entropy.keyring.getAccount()
 
@@ -27,9 +29,10 @@ test('Register - Barebones Program', async t => {
     entropy.programs.dev.deploy(dummyProgram)
   )
 
+  const accountService = new EntropyAccount(entropy, endpoint)
   const verifyingKey = await run(
     'register - using custom params',
-    registerAccount(entropy, {
+    accountService.register({
       programModAddress: entropy.keyring.accounts.registration.address,
       programData: [{ program_pointer: pointer, program_config: '0x' }],
     })

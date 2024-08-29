@@ -13,7 +13,6 @@ import {
 
 
 export async function entropyManageAccounts (endpoint: string, storedConfig: EntropyConfig) {
-  const AccountService = new EntropyAccount({ endpoint })
   const { accounts } = storedConfig
   const { interactionChoice } = await inquirer.prompt(manageAccountsQuestions)
   switch (interactionChoice) {
@@ -25,8 +24,11 @@ export async function entropyManageAccounts (endpoint: string, storedConfig: Ent
       // isDebugMode = true
       seed = seed.split('#debug')[0]
     }
-    const newAccount = await AccountService.create({ seed, name, path })
+    const newAccount = seed
+      ? EntropyAccount.import({ seed, name, path })
+      : EntropyAccount.create({ name, path })
     accounts.push(newAccount) 
+
     return {
       accounts,
       selectedAccount: newAccount.address
@@ -55,7 +57,7 @@ export async function entropyManageAccounts (endpoint: string, storedConfig: Ent
 }
 
 export async function entropyRegister (entropy: Entropy, endpoint: string, storedConfig: EntropyConfig): Promise<Partial<EntropyConfig>> {
-  const AccountService = new EntropyAccount({ entropy, endpoint })
+  const AccountService = new EntropyAccount(entropy, endpoint)
 
   const { accounts, selectedAccount } = storedConfig
   const currentAccount = getSelectedAccount(accounts, selectedAccount)
