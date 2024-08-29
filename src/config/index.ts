@@ -35,6 +35,7 @@ function hasRunMigration (config: any, version: number) {
 export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG_PATH) {
   const currentConfig = await get(configPath)
     .catch(async (err) => {
+      console.log("error", err.code)
       if (err && err.code !== 'ENOENT') throw err
 
       const oldConfig = await get(oldConfigPath).catch(noop) // drop errors

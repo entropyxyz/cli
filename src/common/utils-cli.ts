@@ -42,6 +42,8 @@ export function passwordOption (description?: string) {
 
 export function currentAccountAddressOption () {
   const storedConfig = config.getSync()
+  // WIP: this needs a try-catch which runs config.init if it's missing ... which may need a sync version
+  // TODO
   return new Option(
     '-a, --account <address>',
     'Sets the current account for the session or defaults to the account stored in the config'

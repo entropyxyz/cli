@@ -3,13 +3,16 @@
 /* NOTE: calling this file entropy.ts helps commander parse process.argv */
 import { Command, Option } from 'commander'
 import Entropy from '@entropyxyz/sdk'
+
+import * as config from './config'
+import { EntropyTuiOptions } from './types'
 import { currentAccountAddressOption, endpointOption, loadEntropy } from './common/utils-cli'
+
+import launchTui from './tui'
 import { entropyAccountCommand } from './account/command'
 import { entropyTransferCommand } from './transfer/command'
 import { entropySignCommand } from './sign/command'
 import { entropyBalanceCommand } from './balance/command'
-import { EntropyTuiOptions } from './types'
-import launchTui from './tui'
 
 let entropy: Entropy
 async function setEntropyGlobal (address: string, endpoint: string, password?: string) {
@@ -49,6 +52,8 @@ program
     commandName = subCommand.name()
   })
   .hook('preAction', async (_thisCommand, actionCommand) => {
+    await config.init()
+    console.log({ commandName })
     if (commandName === 'account') return
     // entropy not required for any account commands
 

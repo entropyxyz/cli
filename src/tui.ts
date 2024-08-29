@@ -12,13 +12,7 @@ import { entropySign } from './sign/interaction'
 import { entropyBalance } from './balance/interaction'
 import { entropyTransfer } from './transfer/interaction'
 
-let hasConfigInit = false
 async function setupConfig () {
-  if (!hasConfigInit) {
-    await config.init()
-    hasConfigInit = true
-  }
-
   let storedConfig = await config.get()
 
   // set selectedAccount if we can
