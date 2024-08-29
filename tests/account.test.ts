@@ -64,8 +64,8 @@ test('Account - create', async t => {
   await run('wasm', wasmGlobalsReady())
   await run('config.init', config.init(configPath))
   const testAccountSeed = randomAsHex(32)
-  const newAccount = await EntropyAccount.import({ name: testAccountName, seed: testAccountSeed })
   const testAccountName = 'Test Account'
+  const newAccount = await EntropyAccount.import({ name: testAccountName, seed: testAccountSeed })
 
   const testKeyring = new Keyring({ seed: testAccountSeed, path: 'none', debug: true })
   const { admin } = testKeyring.getAccount()

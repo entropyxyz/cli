@@ -26,8 +26,10 @@ async function setEntropyGlobal (address: string, endpoint: string, password?: s
       entropy = await loadEntropy(address, endpoint, password)
     }
   }
-  else {
+  else if (address && endpoint) {
     entropy = await loadEntropy(address, endpoint, password)
+  } else {
+    return
   }
 }
 
@@ -53,7 +55,6 @@ program
   })
   .hook('preAction', async (_thisCommand, actionCommand) => {
     await config.init()
-    console.log({ commandName })
     if (commandName === 'account') return
     // entropy not required for any account commands
 

@@ -55,7 +55,11 @@ export class EntropyAccount extends EntropyBase {
   }
 
   async register (params?: AccountRegisterParams): Promise<string> {
-    const { programModAddress, programData } = params
+    let programModAddress: string
+    let programData: any
+    if (params) {
+      ({ programModAddress, programData } = params)
+    }
     const registerParams = programModAddress && programData
       ? {
         programDeployer: programModAddress,

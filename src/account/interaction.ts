@@ -38,6 +38,10 @@ export async function entropyManageAccounts (endpoint: string, storedConfig: Ent
   }
 
   case 'select-account': {
+    if (!accounts.length) {
+      console.error('There are currently no accounts available, please create or import a new account using the Manage Accounts feature')
+      return
+    }
     const { selectedAccount } = await inquirer.prompt(selectAccountQuestions(accounts))
     print('Current selected account is ' + selectedAccount)
 
@@ -48,8 +52,12 @@ export async function entropyManageAccounts (endpoint: string, storedConfig: Ent
   }
 
   case 'list-account': {
-    EntropyAccount.list({ accounts })
-      .forEach((account) => print(account))
+    try {
+      EntropyAccount.list({ accounts })
+        .forEach((account) => print(account))
+    } catch (error) {
+      console.error(error.message.split('AccountsError: ')[1])
+    }
     return
   }
 

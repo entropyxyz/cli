@@ -61,10 +61,10 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
 
 async function main (entropy: Entropy, choices, options, logger: EntropyLogger) {
   let storedConfig = await setupConfig()
-
+  
   // If the selected account changes within the TUI we need to reset the entropy instance being used
-  const currentAccount = entropy.keyring.accounts.registration.address
-  if (currentAccount !== storedConfig.selectedAccount) {
+  const currentAccount = entropy?.keyring?.accounts?.registration?.address
+  if (currentAccount && currentAccount !== storedConfig.selectedAccount) {
     await entropy.close()
     entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint);
   }

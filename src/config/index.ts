@@ -1,5 +1,5 @@
 import { readFile, writeFile, rm } from 'node:fs/promises'
-import { readFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { mkdirp } from 'mkdirp'
 import { join, dirname } from 'path'
 import envPaths from 'env-paths'
@@ -63,7 +63,13 @@ export async function get (configPath = CONFIG_PATH) {
 }
 
 export function getSync (configPath = CONFIG_PATH) {
-  const configBuffer = readFileSync(configPath, 'utf8')
+  let configBuffer
+  try {
+    configBuffer = readFileSync(configPath, 'utf8')
+  } catch (error) {
+    writeFileSync(configPath, '{}')
+    configBuffer = readFileSync(configPath, 'utf8')
+  }
   return deserialize(configBuffer)
 }
 
