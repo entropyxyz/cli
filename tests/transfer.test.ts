@@ -1,6 +1,5 @@
 import test from 'tape'
 import { wasmGlobalsReady } from '@entropyxyz/sdk'
-// WIP: I'm seeing problems importing this?
 // @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
 import { 

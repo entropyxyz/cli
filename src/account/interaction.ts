@@ -25,11 +25,10 @@ export async function entropyManageAccounts (endpoint: string, storedConfig: Ent
       seed = seed.split('#debug')[0]
     }
     const newAccount = seed
-      ? EntropyAccount.import({ seed, name, path })
-      : EntropyAccount.create({ name, path })
+      ? await EntropyAccount.import({ seed, name, path })
+      : await EntropyAccount.create({ name, path })
     accounts.push(newAccount) 
 
-    // WIP HERE
     return {
       accounts,
       selectedAccount: newAccount.address
