@@ -1,20 +1,21 @@
-import test  from 'tape'
+import test from 'tape'
+import { EntropySign } from '../src/sign/main'
 
-import { signWithAdapters } from '../src/flows/sign/sign'
 import { setupTest, charlieStashSeed } from './testing-utils'
+const endpoint = 'ws://127.0.0.1:9944'
 
-test('Sign - signWithAdapter', async (t) => {
+test('Sign - signMessageWithAdapters', async (t) => {
   const { run, entropy } = await setupTest(t, { seed: charlieStashSeed })
+  const SigningService = new EntropySign(entropy, endpoint)
 
   await run('register', entropy.register())
-
-  const signature = await run(
+  const result = await run(
     'sign',
-    signWithAdapters(entropy, { msg: "heyo!" })
+    SigningService.signMessageWithAdapters({ msg: "heyo!" })
   )
 
-  t.true(signature && signature.length > 32, 'signature has some body!')
-  signature && console.log(signature)
+  t.true(result?.signature?.length > 32, 'signature has some body!')
+  console.log(result)
 
   t.end()
 })

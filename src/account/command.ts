@@ -23,7 +23,7 @@ function entropyAccountNew (accountCommand: Command) {
     .argument('<name>', 'A user friendly name for your nem account.')
     .addOption(
       new Option(
-        '-p, --path',
+        '--path',
         'Derivation path'
       ).default(ACCOUNTS_CONTENT.path.default)
     )

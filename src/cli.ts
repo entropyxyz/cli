@@ -2,16 +2,14 @@
 
 /* NOTE: calling this file entropy.ts helps commander parse process.argv */
 import { Command, Option } from 'commander'
-import launchTui from './tui'
-import { EntropyTuiOptions } from './types'
-
-import { cliSign } from './flows/sign/cli'
-import { stringify } from './common/utils'
-import { endpointOption, currentAccountAddressOption, loadEntropy, passwordOption } from './common/utils-cli'
 import Entropy from '@entropyxyz/sdk'
+import { currentAccountAddressOption, endpointOption, loadEntropy } from './common/utils-cli'
 import { entropyAccountCommand } from './account/command'
-import { BalanceCommand } from './balance/command'
-import { TransferCommand } from './transfer/command'
+import { entropyTransferCommand } from './transfer/command'
+import { entropySignCommand } from './sign/command'
+import { entropyBalanceCommand } from './balance/command'
+import { EntropyTuiOptions } from './types'
+import launchTui from './tui'
 
 let entropy: Entropy
 async function setEntropyGlobal (address: string, endpoint: string, password?: string) {
@@ -52,7 +50,6 @@ program
       ? actionCommand.args[0]
       : account
 
-    console.log(_thisCommand.name(), actionCommand.name())
     await setEntropyGlobal(address, endpoint, password)
   })
   .action((options: EntropyTuiOptions) => {
@@ -60,53 +57,8 @@ program
   })
 
 entropyAccountCommand(entropy, program)
-
-/* balance */
-program.command('balance')
-  .description('Get the balance of an Entropy account. Output is a number')
-  .argument('address', 'Account address whose balance you want to query')
-  .addOption(passwordOption())
-  .addOption(endpointOption())
-  .action(async (address, opts) => {
-    const balanceCommand = new BalanceCommand(entropy, opts.endpoint)
-    const balance = await balanceCommand.getBalance(address)
-    writeOut(balance)
-    process.exit(0)
-  })
-
-/* Transfer */
-program.command('transfer')
-  .description('Transfer funds between two Entropy accounts.') // TODO: name the output
-  .argument('source', 'Account address funds will be drawn from')
-  .argument('destination', 'Account address funds will be sent to')
-  .argument('amount', 'Amount of funds to be moved')
-  .addOption(passwordOption('Password for the source account (if required)'))
-  .addOption(endpointOption())
-  .addOption(currentAccountAddressOption())
-  .action(async (_source, destination, amount, opts) => {
-    const transferCommand = new TransferCommand(entropy, opts.endpoint)
-    await transferCommand.sendTransfer(destination, amount)
-    // writeOut(??) // TODO: write the output
-    process.exit(0)
-  })
-
-/* Sign */
-program.command('sign')
-  .description('Sign a message using the Entropy network. Output is a signature (string)')
-  .argument('address', 'Account address to use to sign')
-  .argument('message', 'Message you would like to sign')
-  .addOption(passwordOption('Password for the source account (if required)'))
-  .addOption(endpointOption())
-  .addOption(currentAccountAddressOption())
-  .action(async (address, message, opts) => {
-    const signature = await cliSign({ address, message, ...opts })
-    writeOut(signature)
-    process.exit(0)
-  })
-
-function writeOut (result) {
-  const prettyResult = stringify(result)
-  process.stdout.write(prettyResult)
-}
+entropyBalanceCommand(entropy, program)
+entropyTransferCommand(entropy, program)
+entropySignCommand(entropy, program)
 
 program.parseAsync().then(() => {})

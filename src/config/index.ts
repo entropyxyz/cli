@@ -57,6 +57,7 @@ function noop () {}
 
 export async function get (configPath = CONFIG_PATH) {
   const configBuffer = await readFile(configPath)
+  
   return deserialize(configBuffer.toString())
 }
 

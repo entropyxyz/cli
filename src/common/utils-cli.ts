@@ -5,7 +5,7 @@ import Entropy from '@entropyxyz/sdk'
 import { initializeEntropy } from './initializeEntropy'
 
 export function cliWrite (result) {
-  const prettyResult = stringify(result)
+  const prettyResult = stringify(result, 0)
   process.stdout.write(prettyResult)
 }
 

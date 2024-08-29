@@ -1,18 +1,18 @@
-import Entropy from "@entropyxyz/sdk"
-import { EntropyBase } from "../common/entropy-base"
-import * as BalanceUtils from "./utils"
+import Entropy from "@entropyxyz/sdk";
+import { Command } from "commander";
+import { cliWrite, endpointOption, passwordOption } from "src/common/utils-cli";
+import { EntropyBalance } from "./main";
 
-const FLOW_CONTEXT = 'ENTROPY-BALANCE'
-export class BalanceCommand extends EntropyBase {
-  constructor (entropy: Entropy, endpoint: string) {
-    super({ entropy, endpoint, flowContext: FLOW_CONTEXT })
-  }
-
-  public async getBalance (address: string) {
-    const balance = await BalanceUtils.getBalance(this.entropy, address)
-
-    this.logger.log(`Current balance of ${address}: ${balance}`, `${BalanceCommand.name}`)
-    
-    return `${balance.toLocaleString('en-US')} BITS`
-  }
+export async function entropyBalanceCommand (entropy: Entropy, rootCommand: Command) {
+  rootCommand.command('balance')
+    .description('Command to retrieive the balance of an account on the Entropy Network')
+    .argument('address', 'Account address whose balance you want to query')
+    .addOption(passwordOption())
+    .addOption(endpointOption())
+    .action(async (address, opts) => {
+      const BalanceService = new EntropyBalance(entropy, opts.endpoint)
+      const balance = await BalanceService.getBalance(address)
+      cliWrite(`${balance.toLocaleString('en-US')} BITS`)
+      process.exit(0)
+    })
 }

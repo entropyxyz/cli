@@ -1,7 +1,7 @@
 import { EntropyAccountConfig } from "../config/types";
 import { AccountListResults } from './types';
 import { ACCOUNTS_CONTENT } from './constants';
-import { generateAccountChoices } from 'src/common/utils';
+import { generateAccountChoices } from '../common/utils';
 
 const validateSeedInput = (seed) => {
   if (seed.includes('#debug')) return true
