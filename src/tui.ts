@@ -6,11 +6,31 @@ import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
 import { print } from './common/utils'
 import { EntropyLogger } from './common/logger'
-import { BalanceCommand } from './balance/command'
-import { TransferCommand } from './transfer/command'
-import { loadEntropy } from './cli'
+import { loadEntropy } from './common/utils-cli'
+import { entropySign } from './sign/interaction'
+import { entropyBalance } from './balance/interaction'
+import { entropyTransfer } from './transfer/interaction'
 
-let shouldInit = true
+let hasConfigInit = false
+async function setupConfig () {
+  if (!hasConfigInit) {
+    await config.init()
+    hasConfigInit = true
+  }
+
+  let storedConfig = await config.get()
+
+  // set selectedAccount if we can
+  if (!storedConfig.selectedAccount && storedConfig.accounts.length) {
+    await config.set({ 
+      selectedAccount: storedConfig.accounts[0].address,
+      ...storedConfig
+    })
+    storedConfig = await config.get()
+  }
+
+  return storedConfig
+}
 
 // tui = text user interface
 export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
@@ -24,7 +44,7 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
     // leaving as a noop function until all flows are restructured
     'Balance': () => {},
     'Register': flows.entropyRegister,
-    'Sign': flows.sign,
+    'Sign': () => {},
     'Transfer': () => {},
     // TODO: design programs in TUI (merge deploy+user programs)
     'Deploy Program': flows.devPrograms,
@@ -45,23 +65,13 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
 }
 
 async function main (entropy: Entropy, choices, options, logger: EntropyLogger) {
-  if (shouldInit) {
-    await config.init()
-    shouldInit = false
-  }
-
-  let storedConfig = await config.get()
-
-  // if there are accounts available and selected account is not set, 
-  // first account in list is set as the selected account
-  if (!storedConfig.selectedAccount && storedConfig.accounts.length) {
-    await config.set({ ...storedConfig, ...{ selectedAccount: storedConfig.accounts[0].address } })
-    storedConfig = await config.get()
-  }
+  let storedConfig = await setupConfig()
 
   // If the selected account changes within the TUI we need to reset the entropy instance being used
-  if (storedConfig.selectedAccount !== entropy.keyring.accounts.registration.address) {
-    entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint)
+  const currentAccount = entropy.keyring.accounts.registration.address
+  if (currentAccount !== storedConfig.selectedAccount) {
+    await entropy.close()
+    entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint);
   }
 
   const answers = await inquirer.prompt([{
@@ -86,9 +96,7 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     switch (answers.choice) {
     case "Balance": {
       try {
-        const balanceCommand = new BalanceCommand(entropy, options.endpoint)
-        const balanceString = await balanceCommand.getBalance(storedConfig.selectedAccount)
-        print(`Address ${storedConfig.selectedAccount} has a balance of: ${balanceString}`)
+        await entropyBalance(entropy, options.endpoint, storedConfig)
       } catch (error) {
         console.error('There was an error retrieving balance', error)
       }
@@ -96,15 +104,17 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     }
     case "Transfer": {
       try {
-        const transferCommand = new TransferCommand(entropy, options.endpoint)
-        const { amount, recipientAddress } = await transferCommand.askQuestions()
-        await transferCommand.sendTransfer(recipientAddress, amount)
-        print('')
-        print(`Transaction successful: Sent ${amount} to ${recipientAddress}`)
-        print('')
-        print('Press enter to return to main menu')
+        await entropyTransfer(entropy, options.endpoint)
       } catch (error) {
         console.error('There was an error sending the transfer', error)
+      }
+      break
+    }
+    case "Sign": {
+      try {
+        await entropySign(entropy, options.endpoint)
+      } catch (error) {
+        console.error('There was an issue with signing', error)
       }
       break
     }

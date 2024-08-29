@@ -65,6 +65,11 @@ export function accountChoicesWithOther (accounts: EntropyAccountConfig[]) {
     .concat([{ name: "Other", value: null }])
 }
 
-export function getSelectedAccount (accounts: EntropyAccountConfig[], address: string) {
-  return accounts.find(account => account.address === address)
+export function getSelectedAccount (accounts: EntropyAccountConfig[], aliasOrAddress: string) {
+  if (!aliasOrAddress || !aliasOrAddress.length) throw Error('aliasOrAddress required')
+
+  return (
+    accounts.find(account => account.address === aliasOrAddress) ||
+    accounts.find(account => account.name === aliasOrAddress)
+  )
 }
