@@ -41,7 +41,7 @@ export class EntropyAccount extends EntropyBase {
     }
   }
 
-  static list (accounts: EntropyAccountConfig[]) {
+  static list ({ accounts }: { accounts: EntropyAccountConfig[] }) {
     if (!accounts.length)
       throw new Error(
         'AccountsError: There are currently no accounts available, please create or import a new account using the Manage Accounts feature'

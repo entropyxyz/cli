@@ -11,10 +11,7 @@ import * as config from '../src/config'
 import { promiseRunner, sleep } from './testing-utils'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
 
-const endpoint = "ws://127.0.0.1:9944"
-const AccountService = new EntropyAccount({ endpoint });
-
-test('List Accounts', async t => {
+test('Account - list', async t => {
   const account: EntropyAccountConfig = {
     name: 'Test Config',
     address: charlieStashAddress,
@@ -38,7 +35,7 @@ test('List Accounts', async t => {
     'migration-version': '0'
   }
 
-  const accountsArray = AccountService.list(config)
+  const accountsArray = EntropyAccount.list(config)
 
   t.deepEqual(accountsArray, [{
     name: account.name,
@@ -49,7 +46,7 @@ test('List Accounts', async t => {
   // Resetting accounts on config to test for empty list
   config.accounts = []
   try {
-    AccountService.list(config)
+    EntropyAccount.list(config)
   } catch (error) {
     const msg = error.message
     t.equal(msg, 'AccountsError: There are currently no accounts available, please create or import a new account using the Manage Accounts feature')
@@ -59,15 +56,16 @@ test('List Accounts', async t => {
 })
 
 let counter = 0
-test('Create Account', async t => {
+
+test('Account - create', async t => {
   const configPath = `/tmp/entropy-cli-${Date.now()}_${counter++}.json`
   /* Setup */
   const run = promiseRunner(t)
   await run('wasm', wasmGlobalsReady())
   await run('config.init', config.init(configPath))
   const testAccountSeed = randomAsHex(32)
+  const newAccount = await EntropyAccount.import({ name: testAccountName, seed: testAccountSeed })
   const testAccountName = 'Test Account'
-  const newAccount = await AccountService.create({ name: testAccountName, seed: testAccountSeed })
 
   const testKeyring = new Keyring({ seed: testAccountSeed, path: 'none', debug: true })
   const { admin } = testKeyring.getAccount()

@@ -90,7 +90,7 @@ function entropyAccountList (accountCommand: Command) {
     .action(async () => {
       // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
       const storedConfig = await config.get()
-      const accounts = EntropyAccount.list(storedConfig.accounts)
+      const accounts = EntropyAccount.list(storedConfig)
       cliWrite(accounts)
       process.exit(0)
     })

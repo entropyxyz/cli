@@ -2,7 +2,7 @@ import inquirer from "inquirer";
 import Entropy from "@entropyxyz/sdk";
 
 import { getSelectedAccount, print } from "../common/utils"
-import { EntropyAccountConfig, EntropyConfig } from "../config/types";
+import { EntropyConfig } from "../config/types";
 import { EntropyAccount } from './main'
 
 import { 
@@ -15,7 +15,9 @@ import {
 export async function entropyManageAccounts (endpoint: string, storedConfig: EntropyConfig) {
   const { accounts } = storedConfig
   const { interactionChoice } = await inquirer.prompt(manageAccountsQuestions)
+
   switch (interactionChoice) {
+
   case 'create-import': {
     const answers = await inquirer.prompt(newAccountQuestions)
     const { name, path, importKey } = answers
@@ -34,23 +36,27 @@ export async function entropyManageAccounts (endpoint: string, storedConfig: Ent
       selectedAccount: newAccount.address
     }
   }
+
   case 'select-account': {
     const { selectedAccount } = await inquirer.prompt(selectAccountQuestions(accounts))
-  
     print('Current selected account is ' + selectedAccount)
+
     return {
       accounts: storedConfig.accounts,
       selectedAccount: selectedAccount.address
     }
   }
+
   case 'list-account': {
-    const list = this.list(accounts)
-    list?.forEach((account: EntropyAccountConfig)=> print(account))
+    EntropyAccount.list({ accounts })
+      .forEach((account) => print(account))
     return
   }
+
   case 'exit': {
     return 'exit'
   }
+
   default:
     throw new Error('AccountsError: Unknown interaction action')
   }
