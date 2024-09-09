@@ -14,8 +14,11 @@ import { entropyTransferCommand } from './transfer/command'
 import { entropySignCommand } from './sign/command'
 import { entropyBalanceCommand } from './balance/command'
 
-let entropy: Entropy
+let entropyGlobal: Entropy
 async function setEntropyGlobal (address: string, endpoint: string, password?: string) {
+  console.log('args', address, endpoint, password);
+  
+  let entropy: Entropy = entropyGlobal
   if (entropy) {
     const currentAddress = entropy?.keyring?.accounts?.registration?.address
     if (address !== currentAddress) {
@@ -28,13 +31,14 @@ async function setEntropyGlobal (address: string, endpoint: string, password?: s
   }
   else if (address && endpoint) {
     entropy = await loadEntropy(address, endpoint, password)
-  } else {
-    return
   }
+
+  // console.log('entropy', entropy);
+
+  return entropy
 }
 
 const program = new Command()
-let commandName: string // the top level command
 
 /* no command */
 program
@@ -50,10 +54,10 @@ program
       .env('DEV_MODE')
       .hideHelp()
   )
-  .hook('preSubcommand', async (_thisCommand, subCommand) => {
-    commandName = subCommand.name()
-  })
   .hook('preAction', async (_thisCommand, actionCommand) => {
+    const commandName = actionCommand?.name()
+    console.log('command name', commandName);
+    
     await config.init()
     if (commandName === 'account') return
     // entropy not required for any account commands
@@ -62,16 +66,20 @@ program
     const address = commandName === 'balance'
       ? actionCommand.args[0]
       : account
-
-    await setEntropyGlobal(address, endpoint, password)
+    console.log('address from hook', address);
+    console.log('action command', actionCommand.args, actionCommand.opts());
+    
+    entropyGlobal = await setEntropyGlobal(address, endpoint, password)
+    // console.log('entropy global in hook', entropyGlobal);
+    
   })
+  .addCommand(entropyBalanceCommand())
+  .addCommand(entropyAccountCommand())
+  .addCommand(entropyTransferCommand())
+  .addCommand(entropySignCommand())
   .action((options: EntropyTuiOptions) => {
-    launchTui(entropy, options)
+    launchTui(entropyGlobal, options)
   })
-
-entropyAccountCommand(entropy, program)
-entropyBalanceCommand(entropy, program)
-entropyTransferCommand(entropy, program)
-entropySignCommand(entropy, program)
+// entropySignCommand(entropyGlobal, program)
 
 program.parseAsync().then(() => {})

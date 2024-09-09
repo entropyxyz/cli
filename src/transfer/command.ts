@@ -1,10 +1,11 @@
 import Entropy from "@entropyxyz/sdk"
 import { Command } from "commander"
-import { currentAccountAddressOption, endpointOption, passwordOption } from "src/common/utils-cli"
+import { currentAccountAddressOption, endpointOption, loadEntropy, passwordOption } from "src/common/utils-cli"
 import { EntropyTransfer } from "./main"
 
-export async function entropyTransferCommand (entropy: Entropy, rootCommand: Command) {
-  rootCommand.command('transfer')
+export function entropyTransferCommand () {
+  const transferCommand = new Command('tranfer')
+  transferCommand
     .description('Transfer funds between two Entropy accounts.') // TODO: name the output
     .argument('destination', 'Account address funds will be sent to')
     .argument('amount', 'Amount of funds to be moved')
@@ -12,9 +13,11 @@ export async function entropyTransferCommand (entropy: Entropy, rootCommand: Com
     .addOption(endpointOption())
     .addOption(currentAccountAddressOption())
     .action(async (destination, amount, opts) => {
+      const entropy = await loadEntropy(opts.account, opts.endpoint)
       const TransferService = new EntropyTransfer(entropy, opts.endpoint)
       await TransferService.transfer(destination, amount)
       // cliWrite(??) // TODO: write the output
       process.exit(0)
     })
+  return transferCommand
 }
