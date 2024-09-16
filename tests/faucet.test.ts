@@ -61,7 +61,7 @@ test.skip('Faucet Tests', async t => {
   console.log('Balance charlie 2::', entropyBalance);
   
   
-  await run('Transfer funds to faucet address', TransferService.transfer(faucetAddress, "10000000000000"))
+  await run('Transfer funds to faucet address', TransferService.transfer(faucetAddress, "1000"))
 
   const transferStatus = await sendMoney(
     naynayEntropy,
