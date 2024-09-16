@@ -74,7 +74,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
         validate: (input) => (input ? true : "Program pointer is required!"),
       }])
       logger.debug(`program pointer: ${programPointer}`, `${FLOW_CONTEXT}::PROGRAM_PRESENCE_CHECK`);
-      const program = await entropy.programs.dev.get(programPointer);
+      const program = await entropy.programs.dev.getProgramInfo(programPointer);
       print(program);
     } catch (error) {
       console.error(error.message);

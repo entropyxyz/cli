@@ -32,13 +32,15 @@ export function promiseRunner(t: any, keepThrowing = false) {
     return promise
       .then((result) => {
         const time = (Date.now() - startTime) / 1000
-        const pad = Array(40 - message.length)
+        const noPad = message.length > 40
+        const pad = noPad ? '' : Array(40 - message.length)
           .fill('-')
           .join('')
         t.pass(`${message} ${pad} ${time}s`)
         return result
       })
       .catch((err) => {
+        console.log('error', err);
         t.error(err, message)
         if (keepThrowing) throw err
       })
