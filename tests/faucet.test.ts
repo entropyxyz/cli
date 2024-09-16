@@ -8,7 +8,7 @@ import { getRandomFaucet, sendMoney } from '../src/flows/entropyFaucet/faucet'
 import { LOCAL_PROGRAM_HASH } from '../src/flows/entropyFaucet/constants'
 import { EntropyAccount } from '../src/account/main'
 
-test.skip('Faucet Tests', async t => {
+test('Faucet Tests', async t => {
   const { run, entropy, endpoint } = await setupTest(t, { seed: charlieStashSeed })
   const { entropy: naynayEntropy } = await setupTest(t)
 

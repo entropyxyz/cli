@@ -1,6 +1,5 @@
 import test from 'tape'
 import { wasmGlobalsReady } from '@entropyxyz/sdk'
-// @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
 import { 
   makeSeed,
@@ -13,6 +12,7 @@ import { initializeEntropy } from '../src/common/initializeEntropy'
 import { EntropyTransfer } from '../src/transfer/main'
 import { EntropyBalance } from '../src/balance/main'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
+import { EntropyAccountData } from '../src/config/types'
 
 const networkType = 'two-nodes'
 const endpoint = 'ws://127.0.0.1:9944'
@@ -32,12 +32,12 @@ test('Transfer', async (t) => {
   })
 
   const charlieKeyring = new Keyring({ seed: charlieStashSeed, debug: true })
-  const charlieEntropy = await initializeEntropy({ keyMaterial: charlieKeyring.getAccount(), endpoint, })
+  const charlieEntropy = await initializeEntropy({ keyMaterial: charlieKeyring.getAccount() as EntropyAccountData, endpoint, })
   await run('charlie ready', charlieEntropy.ready)
 
   const naynaySeed = makeSeed()
   const naynayKeyring = new Keyring({ seed: naynaySeed, debug: true })
-  const naynayEntropy = await initializeEntropy({ keyMaterial: naynayKeyring.getAccount(), endpoint, })
+  const naynayEntropy = await initializeEntropy({ keyMaterial: naynayKeyring.getAccount() as EntropyAccountData, endpoint, })
   await run('naynay ready', naynayEntropy.ready)
 
   const naynayAddress = naynayEntropy.keyring.accounts.registration.address
