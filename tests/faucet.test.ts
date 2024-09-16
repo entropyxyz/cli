@@ -55,7 +55,7 @@ test('Faucet Tests', async t => {
   const { chosenVerifyingKey, faucetAddress } = await getRandomFaucet(entropy, [], entropy.keyring.accounts.registration.address)
   // adding funds to faucet address
 
-  await run('Transfer funds to faucet address', TransferService.transfer(faucetAddress, "100000000000000"))
+  await run('Transfer funds to faucet address', TransferService.transfer(faucetAddress, "1000"))
 
   const transferStatus = await sendMoney(
     naynayEntropy,

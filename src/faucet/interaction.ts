@@ -1,9 +1,9 @@
 import Entropy from "@entropyxyz/sdk"
-import { getSelectedAccount, print } from "../../common/utils"
-import { initializeEntropy } from "../../common/initializeEntropy"
-import { EntropyLogger } from '../../common/logger'
-import { getRandomFaucet, sendMoney } from "./faucet"
-import { TESTNET_PROGRAM_HASH } from "./constants"
+import { getSelectedAccount, print } from "../common/utils"
+import { initializeEntropy } from "../common/initializeEntropy"
+import { EntropyLogger } from '../common/logger'
+import { TESTNET_PROGRAM_HASH } from "./utils"
+import { EntropyFaucet } from "./main"
 
 let chosenVerifyingKeys = []
 export async function entropyFaucet ({ accounts, selectedAccount: selectedAccountAddress }, options, logger: EntropyLogger) {
@@ -20,12 +20,12 @@ export async function entropyFaucet ({ accounts, selectedAccount: selectedAccoun
   try {
     // @ts-ignore (see TODO on aliceAccount)
     entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint })
-
+    const FaucetService = new EntropyFaucet(entropy, options.endpoint)
     if (!entropy.registrationManager.signer.pair) {
       throw new Error("Keys are undefined")
     }
 
-    ({ chosenVerifyingKey, faucetAddress, verifyingKeys } = await getRandomFaucet(entropy, chosenVerifyingKeys))
+    ({ chosenVerifyingKey, faucetAddress, verifyingKeys } = await FaucetService.getRandomFaucet(chosenVerifyingKeys))
 
     await sendMoney(entropy, options.endpoint, { amount, addressToSendTo: selectedAccountAddress, faucetAddress, chosenVerifyingKey, faucetProgramPointer: TESTNET_PROGRAM_HASH })
     // reset chosen keys after successful transfer

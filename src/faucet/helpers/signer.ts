@@ -2,8 +2,8 @@ import Entropy from "@entropyxyz/sdk";
 import type { Signer, SignerResult } from "@polkadot/api/types";
 import { Registry, SignerPayloadJSON } from "@polkadot/types/types";
 import { u8aToHex } from "@polkadot/util";
-import { stripHexPrefix } from "../../common/utils";
 import { blake2AsHex, decodeAddress, encodeAddress, signatureVerify } from "@polkadot/util-crypto";
+import { stripHexPrefix } from "../../common/utils";
 
 let id = 0
 export default class FaucetSigner implements Signer {
