@@ -16,8 +16,6 @@ import { entropyBalanceCommand } from './balance/command'
 
 let entropy: Entropy
 async function setEntropyGlobal (address: string, endpoint: string, password?: string) {
-  console.log('args', address, endpoint, password);
-  
   if (entropy) {
     const currentAddress = entropy?.keyring?.accounts?.registration?.address
     if (address !== currentAddress) {
