@@ -10,6 +10,7 @@ import { loadEntropy } from './common/utils-cli'
 import { entropySign } from './sign/interaction'
 import { entropyBalance } from './balance/interaction'
 import { entropyTransfer } from './transfer/interaction'
+import { entropyFaucet } from './faucet/interaction'
 
 let hasConfigInit = false
 async function setupConfig () {
@@ -49,14 +50,13 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
     // TODO: design programs in TUI (merge deploy+user programs)
     'Deploy Program': flows.devPrograms,
     'User Programs': flows.userPrograms,
-    'Entropy Faucet': flows.entropyFaucet,
   }
 
-  // const devChoices = {
-  //   // 'Entropy Faucet': flows.entropyFaucet,
-  // }
+  const devChoices = {
+    'Entropy Faucet': () => {},
+  }
 
-  // if (options.dev) Object.assign(choices, devChoices)
+  if (options.dev) Object.assign(choices, devChoices)
 
   // assign exit so its last
   Object.assign(choices, { 'Exit': async () => {} })
@@ -115,6 +115,14 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
         await entropySign(entropy, options.endpoint)
       } catch (error) {
         console.error('There was an issue with signing', error)
+      }
+      break
+    }
+    case 'Entropy Faucet': {
+      try {
+        await entropyFaucet(entropy, options, logger)
+      } catch (error) {
+        console.error('There was an issue with running the faucet', error);
       }
       break
     }

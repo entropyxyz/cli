@@ -5,11 +5,12 @@ import { FAUCET_PROGRAM_MOD_KEY, TESTNET_PROGRAM_HASH } from "./utils";
 import { EntropyBalance } from "src/balance/main";
 import { viewPrograms } from "src/flows/programs/view";
 import FaucetSigner from "./helpers/signer";
+import { SendMoneyParams } from "./types";
 
 const FLOW_CONTEXT = 'ENTROPY-FAUCET'
 
 export class EntropyFaucet extends EntropyBase {
-  constructor(entropy: Entropy, endpoint: string) {
+  constructor (entropy: Entropy, endpoint: string) {
     super(entropy, endpoint, FLOW_CONTEXT)
   }
 
@@ -70,13 +71,7 @@ export class EntropyFaucet extends EntropyBase {
       faucetAddress,
       chosenVerifyingKey,
       faucetProgramPointer = TESTNET_PROGRAM_HASH
-    }: { 
-      amount: string,
-      addressToSendTo: string,
-      faucetAddress: string,
-      chosenVerifyingKey: string,
-      faucetProgramPointer: string
-    }
+    }: SendMoneyParams
   ): Promise<any> {
     const BalanceService = new EntropyBalance(this.entropy, this.endpoint)
     // check balance of faucet address
