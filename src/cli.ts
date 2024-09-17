@@ -14,11 +14,10 @@ import { entropyTransferCommand } from './transfer/command'
 import { entropySignCommand } from './sign/command'
 import { entropyBalanceCommand } from './balance/command'
 
-let entropyGlobal: Entropy
+let entropy: Entropy
 async function setEntropyGlobal (address: string, endpoint: string, password?: string) {
   console.log('args', address, endpoint, password);
   
-  let entropy: Entropy = entropyGlobal
   if (entropy) {
     const currentAddress = entropy?.keyring?.accounts?.registration?.address
     if (address !== currentAddress) {
@@ -32,8 +31,6 @@ async function setEntropyGlobal (address: string, endpoint: string, password?: s
   else if (address && endpoint) {
     entropy = await loadEntropy(address, endpoint, password)
   }
-
-  // console.log('entropy', entropy);
 
   return entropy
 }
@@ -56,8 +53,6 @@ program
   )
   .hook('preAction', async (_thisCommand, actionCommand) => {
     const commandName = actionCommand?.name()
-    console.log('command name', commandName);
-    
     await config.init()
     if (commandName === 'account') return
     // entropy not required for any account commands
@@ -66,20 +61,15 @@ program
     const address = commandName === 'balance'
       ? actionCommand.args[0]
       : account
-    console.log('address from hook', address);
-    console.log('action command', actionCommand.args, actionCommand.opts());
     
-    entropyGlobal = await setEntropyGlobal(address, endpoint, password)
-    // console.log('entropy global in hook', entropyGlobal);
-    
+    await setEntropyGlobal(address, endpoint, password)
   })
   .addCommand(entropyBalanceCommand())
   .addCommand(entropyAccountCommand())
   .addCommand(entropyTransferCommand())
   .addCommand(entropySignCommand())
   .action((options: EntropyTuiOptions) => {
-    launchTui(entropyGlobal, options)
+    launchTui(entropy, options)
   })
-// entropySignCommand(entropyGlobal, program)
 
 program.parseAsync().then(() => {})

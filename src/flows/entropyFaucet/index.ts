@@ -1,5 +1,5 @@
 import Entropy from "@entropyxyz/sdk"
-import { getSelectedAccount, print } from "../../common/utils"
+import { findAccountNameByAddress, print } from "../../common/utils"
 import { initializeEntropy } from "../../common/initializeEntropy"
 import { EntropyLogger } from '../../common/logger'
 import { getRandomFaucet, sendMoney } from "./faucet"
@@ -14,7 +14,7 @@ export async function entropyFaucet ({ accounts, selectedAccount: selectedAccoun
   let verifyingKeys: string[] = []
   const amount = "10000000000"
   const { endpoint } = options
-  const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
+  const selectedAccount = findAccountNameByAddress(accounts, selectedAccountAddress)
   logger.log(`selectedAccount::`, FLOW_CONTEXT)
   logger.log(selectedAccount, FLOW_CONTEXT)
   try {

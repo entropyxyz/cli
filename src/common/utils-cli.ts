@@ -1,5 +1,5 @@
 import { Option } from 'commander'
-import { getSelectedAccount, stringify } from './utils'
+import { findAccountNameByAddress, stringify } from './utils'
 import * as config from '../config'
 import Entropy from '@entropyxyz/sdk'
 import { initializeEntropy } from './initializeEntropy'
@@ -63,7 +63,7 @@ export function currentAccountAddressOption () {
 
 export async function loadEntropy (address: string, endpoint: string, password?: string): Promise<Entropy> {
   const storedConfig = config.getSync()
-  const selectedAccount = getSelectedAccount(storedConfig.accounts, address)
+  const selectedAccount = findAccountNameByAddress(storedConfig.accounts, address)
   if (!selectedAccount) throw new Error(`AddressError: No account with name or address "${address}"`)
 
   // check if data is encrypted + we have a password

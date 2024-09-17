@@ -67,8 +67,12 @@ export function getSync (configPath = CONFIG_PATH) {
   try {
     configBuffer = readFileSync(configPath, 'utf8')
   } catch (error) {
-    writeFileSync(configPath, '{}')
-    configBuffer = readFileSync(configPath, 'utf8')
+    if (error.message.includes('ENOENT: no such file or directory')) {
+      writeFileSync(configPath, '{}')
+      configBuffer = readFileSync(configPath, 'utf8')
+    } else {
+      throw error
+    }
   }
   return deserialize(configBuffer)
 }

@@ -4,7 +4,7 @@ import { EntropyAccount } from "./main";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
 import { cliWrite, currentAccountAddressOption, endpointOption, loadEntropy, passwordOption } from "../common/utils-cli";
-import { getSelectedAccount, updateConfig } from "src/common/utils";
+import { findAccountNameByAddress, updateConfig } from "src/common/utils";
 
 export function entropyAccountCommand () {
   const accountCommand = new Command('account')
@@ -109,25 +109,25 @@ function entropyAccountRegister () {
     .addOption(passwordOption())
     .addOption(endpointOption())
     .addOption(currentAccountAddressOption())
-    .addOption(
-      new Option(
-        '-pointer, --pointer',
-        'Program pointer of program to be used for registering'
-      )
-    )
-    .addOption(
-      new Option(
-        '-data, --program-data',
-        'Path to file containing program data in JSON format'
-      )
-    )
+    // Removing these options for now until we update the design to accept program configs
+    // .addOption(
+    //   new Option(
+    //     '-pointer, --pointer',
+    //     'Program pointer of program to be used for registering'
+    //   )
+    // )
+    // .addOption(
+    //   new Option(
+    //     '-data, --program-data',
+    //     'Path to file containing program data in JSON format'
+    //   )
+    // )
     .action(async (opts) => {
       const storedConfig = await config.get()
       const { accounts } = storedConfig
-      const entropy = await loadEntropy(opts.account, opts.endpoint)
+      const entropy: Entropy = await loadEntropy(opts.account, opts.endpoint)
       const AccountsService = new EntropyAccount(entropy, opts.endpoint)
-      cliWrite('Attempting to register account with addtess: ' + opts.account)
-      const accountToRegister = getSelectedAccount(accounts, opts.account)
+      const accountToRegister = findAccountNameByAddress(accounts, opts.account)
       if (!accountToRegister) {
         throw new Error('AccountError: Unable to register non-existent account')
       }

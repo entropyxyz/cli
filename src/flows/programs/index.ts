@@ -9,7 +9,7 @@ import { removeProgram } from "./remove";
 import { addQuestions, getProgramPointerInput, verifyingKeyQuestion } from "./helpers/questions";
 import { displayPrograms } from "./helpers/utils";
 import { initializeEntropy } from "../../common/initializeEntropy"
-import { getSelectedAccount, print } from "../../common/utils"
+import { findAccountNameByAddress, print } from "../../common/utils"
 import { EntropyLogger } from "../../common/logger";
 import { EntropyTuiOptions } from "../../types"
 
@@ -18,7 +18,7 @@ let verifyingKey: string;
 export async function userPrograms ({ accounts, selectedAccount: selectedAccountAddress }, options: EntropyTuiOptions, logger: EntropyLogger) {
   const FLOW_CONTEXT = 'PROGRAMS'
   const { endpoint } = options
-  const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
+  const selectedAccount = findAccountNameByAddress(accounts, selectedAccountAddress)
 
   const actionChoice = await inquirer.prompt([
     {
@@ -120,7 +120,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
 export async function devPrograms ({ accounts, selectedAccount: selectedAccountAddress }, options: EntropyTuiOptions, logger: EntropyLogger) {
   // const FLOW_CONTEXT = 'PROGRAMS'
   const { endpoint } = options
-  const selectedAccount = getSelectedAccount(accounts, selectedAccountAddress)
+  const selectedAccount = findAccountNameByAddress(accounts, selectedAccountAddress)
 
   const choices = {
     "Deploy": deployProgramTUI,

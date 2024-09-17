@@ -5,7 +5,6 @@ import { randomAsHex } from '@polkadot/util-crypto'
 
 import { FLOW_CONTEXT } from "./constants";
 import { AccountCreateParams, AccountImportParams, AccountRegisterParams } from "./types";
-import { print } from "src/common/utils";
 
 import { EntropyBase } from "../common/entropy-base";
 import { EntropyAccountConfig } from "../config/types";
@@ -99,16 +98,31 @@ export class EntropyAccount extends EntropyBase {
   /* PRIVATE */
 
   private async pruneRegistration () {
-    try {
-      const tx = this.entropy.substrate.tx.registry.pruneRegistration()
-      await tx.signAndSend(this.entropy.keyring.accounts.registration.pair, ({ status }) => {
-        if (status.isFinalized) {
-          print('Successfully pruned registration');
-        }
-      })
-    } catch (error) {
-      console.error('Unable to prune registration due to:', error.message);
-      throw error
-    }
+    return new Promise((resolve, reject) => {
+      this.entropy.substrate.tx.registry.pruneRegistration()
+        .signAndSend(this.entropy.keyring.accounts.registration.pair, ({ status, dispatchError }) => {
+          if (dispatchError) {
+            let msg: string
+            if (dispatchError.isModule) {
+              // for module errors, we have the section indexed, lookup
+              const decoded = this.entropy.substrate.registry.findMetaError(
+                dispatchError.asModule
+              )
+              const { docs, name, section } = decoded
+  
+              msg = `${section}.${name}: ${docs.join(' ')}`
+            } else {
+              // Other, CannotLookup, BadOrigin, no extra info
+              msg = dispatchError.toString()
+            }
+            const error = Error(msg)
+            this.logger.error('There was an issue pruning registration', error)
+            return reject(error)
+          }
+          if (status.isFinalized) {
+            resolve(status)
+          }
+        })
+    })
   }
 }

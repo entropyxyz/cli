@@ -66,8 +66,7 @@ export function accountChoicesWithOther (accounts: EntropyAccountConfig[]) {
     .concat([{ name: "Other", value: null }])
 }
 
-// TODO: rename => findAccountByNameAddress
-export function getSelectedAccount (accounts: EntropyAccountConfig[], aliasOrAddress: string) {
+export function findAccountNameByAddress (accounts: EntropyAccountConfig[], aliasOrAddress: string) {
   if (!aliasOrAddress || !aliasOrAddress.length) throw Error('aliasOrAddress required')
 
   return (
@@ -76,7 +75,11 @@ export function getSelectedAccount (accounts: EntropyAccountConfig[], aliasOrAdd
   )
 }
 
-export async function updateConfig (storedConfig: EntropyConfig, newUpdates: any) {
+// Used to update config with new updates, new updates can either be partial properties from the EntropyConfig type, or 'exit'
+// if newUpdates is populated with 'exit' function will return true to handle returning to main menu for the TUI.
+// if newUpdates is populated with an object containing partial entropy config properties, false is returned, forcing the TUI
+// to ask the user if they want to return to main menu.
+export async function updateConfig (storedConfig: EntropyConfig, newUpdates?: Partial<EntropyConfig> | "exit"): Promise<boolean> {
   if (typeof newUpdates === 'string' && newUpdates === 'exit') {
     return true
   } else if (newUpdates) {

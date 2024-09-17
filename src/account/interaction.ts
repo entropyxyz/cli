@@ -1,7 +1,7 @@
 import inquirer from "inquirer";
 import Entropy from "@entropyxyz/sdk";
 
-import { getSelectedAccount, print } from "../common/utils"
+import { findAccountNameByAddress, print } from "../common/utils"
 import { EntropyConfig } from "../config/types";
 import { EntropyAccount } from './main'
 
@@ -74,7 +74,7 @@ export async function entropyRegister (entropy: Entropy, endpoint: string, store
   const AccountService = new EntropyAccount(entropy, endpoint)
 
   const { accounts, selectedAccount } = storedConfig
-  const currentAccount = getSelectedAccount(accounts, selectedAccount)
+  const currentAccount = findAccountNameByAddress(accounts, selectedAccount)
   if (!currentAccount) {
     print("No account selected to register")
     return;
