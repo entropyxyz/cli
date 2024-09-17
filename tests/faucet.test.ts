@@ -5,9 +5,9 @@ import { stripHexPrefix } from '../src/common/utils'
 import { readFileSync } from 'fs'
 import { EntropyBalance } from '../src/balance/main'
 import { EntropyTransfer } from '../src/transfer/main'
-import { getRandomFaucet, sendMoney } from '../src/flows/entropyFaucet/faucet'
 import { register } from '../src/flows/register/register'
-import { LOCAL_PROGRAM_HASH } from '../src/flows/entropyFaucet/constants'
+import { EntropyFaucet } from '../src/faucet/main'
+import { LOCAL_PROGRAM_HASH } from '../src/faucet/utils'
 
 test('Faucet Tests', async t => {
   const { run, entropy, endpoint } = await setupTest(t, { seed: charlieStashSeed })
@@ -15,6 +15,7 @@ test('Faucet Tests', async t => {
 
   const BalanceService = new EntropyBalance(entropy, endpoint)
   const TransferService = new EntropyTransfer(entropy, endpoint)
+  const FaucetService = new EntropyFaucet(naynayEntropy, endpoint)
 
   const faucetProgram = readFileSync('tests/programs/faucet_program.wasm')
 
@@ -52,14 +53,12 @@ test('Faucet Tests', async t => {
     }
   ))
   
-  const { chosenVerifyingKey, faucetAddress } = await getRandomFaucet(entropy, [], entropy.keyring.accounts.registration.address)
+  const { chosenVerifyingKey, faucetAddress } = await FaucetService.getRandomFaucet([], entropy.keyring.accounts.registration.address)
   // adding funds to faucet address
 
   await run('Transfer funds to faucet address', TransferService.transfer(faucetAddress, "1000"))
 
-  const transferStatus = await sendMoney(
-    naynayEntropy,
-    endpoint,
+  const transferStatus = await FaucetService.sendMoney(
     {
       amount: "10000000000",
       addressToSendTo: naynayEntropy.keyring.accounts.registration.address,
