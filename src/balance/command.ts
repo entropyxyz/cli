@@ -11,7 +11,7 @@ export function entropyBalanceCommand () {
     .addOption(passwordOption())
     .addOption(endpointOption())
     .action(async (address, opts) => {
-      const entropy = await loadEntropy(address,opts.endpoint)
+      const entropy = await loadEntropy(address, opts.endpoint)
       const BalanceService = new EntropyBalance(entropy, opts.endpoint)
       const balance = await BalanceService.getBalance(address)
       cliWrite(`${balance.toLocaleString('en-US')} BITS`)
