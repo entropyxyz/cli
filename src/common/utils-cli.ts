@@ -56,8 +56,9 @@ export function currentAccountAddressOption () {
 
       return account
     })
-    .hideHelp()
     .default(storedConfig.selectedAccount)
+    // TODO: display the *name* not address
+    // TODO: standardise whether selectedAccount is name or address.
 }
 
 export async function loadEntropy (addressOrName: string, endpoint: string, password?: string): Promise<Entropy> {
