@@ -1,24 +1,23 @@
 import Entropy from "@entropyxyz/sdk"
 import { Command, Option } from 'commander'
 import { EntropyAccount } from "./main";
+import { selectAndPersistNewAccount } from "./utils";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
 import { cliWrite, currentAccountAddressOption, endpointOption, loadEntropy, passwordOption } from "../common/utils-cli";
-import { findAccountNameByAddress, updateConfig } from "src/common/utils";
+import { findAccountByAddressOrName } from "src/common/utils";
 
 export function entropyAccountCommand () {
-  const accountCommand = new Command('account')
+  return new Command('account')
     .description('Commands to work with accounts on the Entropy Network')
     .addCommand(entropyAccountCreate())
     .addCommand(entropyAccountImport())
     .addCommand(entropyAccountList())
     .addCommand(entropyAccountRegister())
-
-  return accountCommand
 }
 
 function entropyAccountCreate () {
-  const accountCreateCommand = new Command('create')
+  return new Command('create')
     .alias('new')
     .description('Create a new entropy account from scratch. Output is JSON of form {name, address}')
     .addOption(passwordOption())
@@ -33,7 +32,7 @@ function entropyAccountCreate () {
       const { path } = opts
       const newAccount = await EntropyAccount.create({ name, path })
 
-      await persistAndSelectNewAccount(newAccount)
+      await selectAndPersistNewAccount(newAccount)
 
       cliWrite({
         name: newAccount.name,
@@ -41,11 +40,10 @@ function entropyAccountCreate () {
       })
       process.exit(0)
     })
-  return accountCreateCommand
 }
 
 function entropyAccountImport () {
-  const accountImportCommand = new Command('import')
+  return new Command('import')
     .description('Import an existing entropy account from seed. Output is JSON of form {name, address}')
     .addOption(passwordOption())
     .argument('<name>', 'A user friendly name for your new account.')
@@ -60,7 +58,7 @@ function entropyAccountImport () {
       const { path } = opts
       const newAccount = await EntropyAccount.import({ name, seed, path })
 
-      await persistAndSelectNewAccount(newAccount)
+      await selectAndPersistNewAccount(newAccount)
 
       cliWrite({
         name: newAccount.name,
@@ -68,27 +66,10 @@ function entropyAccountImport () {
       })
       process.exit(0)
     })
-  return accountImportCommand
-}
-
-async function persistAndSelectNewAccount (newAccount) {
-  const storedConfig = await config.get()
-  const { accounts } = storedConfig
-
-  const isExistingName = accounts.find(account => account.name === newAccount.name)
-  if (isExistingName) {
-    throw Error(`An account with name "${newAccount.name}" already exists. Choose a different name`)
-  }
-
-  accounts.push(newAccount) 
-  await updateConfig(storedConfig, {
-    accounts,
-    selectedAccount: newAccount.address
-  })
 }
 
 function entropyAccountList () {
-  const accountListCommand = new Command('list')
+  return new Command('list')
     .alias('ls')
     .description('List all accounts. Output is JSON of form [{ name, address, verifyingKeys }]')
     .action(async () => {
@@ -98,13 +79,11 @@ function entropyAccountList () {
       cliWrite(accounts)
       process.exit(0)
     })
-  return accountListCommand
 }
 
 /* register */
 function entropyAccountRegister () {
-  const accountRegisterCommand = new Command('register')
-  accountRegisterCommand
+  return new Command('register')
     .description('Register an entropy account with a program')
     .addOption(passwordOption())
     .addOption(endpointOption())
@@ -123,20 +102,29 @@ function entropyAccountRegister () {
     //   )
     // )
     .action(async (opts) => {
+      const { account, endpoint, /* password */ } = opts
       const storedConfig = await config.get()
       const { accounts } = storedConfig
-      const entropy: Entropy = await loadEntropy(opts.account, opts.endpoint)
-      const AccountsService = new EntropyAccount(entropy, opts.endpoint)
-      const accountToRegister = findAccountNameByAddress(accounts, opts.account)
+      const accountToRegister = findAccountByAddressOrName(accounts, account)
       if (!accountToRegister) {
         throw new Error('AccountError: Unable to register non-existent account')
       }
-      const updatedAccount = await AccountsService.registerAccount(accountToRegister)
+
+      const entropy: Entropy = await loadEntropy(accountToRegister.address, endpoint)
+      const accountService = new EntropyAccount(entropy, endpoint)
+      const updatedAccount = await accountService.registerAccount(accountToRegister)
+
       const arrIdx = accounts.indexOf(accountToRegister)
       accounts.splice(arrIdx, 1, updatedAccount)
-      await updateConfig(storedConfig, { accounts, selectedAccount: updatedAccount.address })
-      cliWrite("Your address" + updatedAccount.address + "has been successfully registered.")
+      await config.set({
+        ...storedConfig,
+        accounts,
+        selectedAccount: updatedAccount.address
+      })
+
+      const verifyingKeys = updatedAccount?.data?.registration?.verifyingKeys
+      const verifyingKey = verifyingKeys[verifyingKeys.length - 1]
+      cliWrite(verifyingKey)
       process.exit(0)
     })
-  return accountRegisterCommand
 }

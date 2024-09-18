@@ -1,5 +1,6 @@
 import test from 'tape'
 import { wasmGlobalsReady } from '@entropyxyz/sdk'
+// @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
 import { 
   makeSeed,
@@ -43,31 +44,31 @@ test('Transfer', async (t) => {
   const naynayAddress = naynayEntropy.keyring.accounts.registration.address
 
   // Check initial balances
-  const BalanceService = new EntropyBalance(naynayEntropy, endpoint)
+  const balanceService = new EntropyBalance(naynayEntropy, endpoint)
   let naynayBalance = await run(
     'getBalance (naynay)',
-    BalanceService.getBalance(naynayAddress)
+    balanceService.getBalance(naynayAddress)
   )
   t.equal(naynayBalance, 0, 'naynay is broke')
 
   let charlieBalance = await run(
     'getBalance (charlieStash)',
-    BalanceService.getBalance(charlieStashAddress)
+    balanceService.getBalance(charlieStashAddress)
   )
   t.equal(charlieBalance, 1e17, 'charlie got bank')
 
   // Do transer
-  const TransferService = new EntropyTransfer(charlieEntropy, endpoint)
+  const transferService = new EntropyTransfer(charlieEntropy, endpoint)
   const inputAmount = "1.5"
   await run(
     'transfer',
-    TransferService.transfer(naynayAddress, inputAmount)
+    transferService.transfer(naynayAddress, inputAmount)
   )
 
   // Re-Check balance
   naynayBalance = await run(
     'getBalance (naynay)',
-    BalanceService.getBalance(naynayAddress)
+    balanceService.getBalance(naynayAddress)
   )
   const expected = Number(inputAmount) * 1e10
   t.equal(naynayBalance, expected,'naynay is rolling in it!')

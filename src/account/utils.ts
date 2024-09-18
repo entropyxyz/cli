@@ -1,9 +1,30 @@
 import { EntropyAccountConfig } from "../config/types";
-import { AccountListResults } from './types';
+import * as config from "../config";
 import { ACCOUNTS_CONTENT } from './constants';
 import { generateAccountChoices } from '../common/utils';
 
-const validateSeedInput = (seed) => {
+export async function selectAndPersistNewAccount (newAccount) {
+  const storedConfig = await config.get()
+  const { accounts } = storedConfig
+
+  const isExistingName = accounts.find(account => account.name === newAccount.name)
+  if (isExistingName) {
+    throw Error(`An account with name "${newAccount.name}" already exists. Choose a different name`)
+  }
+  const isExistingAddress = accounts.find(account => account.address === newAccount.address)
+  if (isExistingAddress) {
+    throw Error(`An account with address "${newAccount.address}" already exists.`)
+  }
+
+  accounts.push(newAccount) 
+  await config.set({
+    ...storedConfig,
+    accounts,
+    selectedAccount: newAccount.address
+  })
+}
+
+function validateSeedInput (seed) {
   if (seed.includes('#debug')) return true
   if (seed.length === 66 && seed.startsWith('0x')) return true
   if (seed.length === 64) return true

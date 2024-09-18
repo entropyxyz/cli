@@ -1,9 +1,11 @@
 import inquirer from "inquirer";
 import Entropy from "@entropyxyz/sdk";
 
-import { findAccountNameByAddress, print } from "../common/utils"
-import { EntropyConfig } from "../config/types";
 import { EntropyAccount } from './main'
+import { selectAndPersistNewAccount } from "./utils";
+import { findAccountByAddressOrName, print } from "../common/utils"
+import { EntropyConfig } from "../config/types";
+import * as config from "../config";
 
 import { 
   manageAccountsQuestions,
@@ -11,8 +13,10 @@ import {
   selectAccountQuestions
 } from "./utils"
 
-
-export async function entropyManageAccounts (endpoint: string, storedConfig: EntropyConfig) {
+/*
+ * @returns partialConfigUpdate | "exit" | undefined
+ */
+export async function entropyAccount (endpoint: string, storedConfig: EntropyConfig) {
   const { accounts } = storedConfig
   const { interactionChoice } = await inquirer.prompt(manageAccountsQuestions)
 
@@ -26,15 +30,13 @@ export async function entropyManageAccounts (endpoint: string, storedConfig: Ent
       // isDebugMode = true
       seed = seed.split('#debug')[0]
     }
+
     const newAccount = seed
       ? await EntropyAccount.import({ seed, name, path })
       : await EntropyAccount.create({ name, path })
-    accounts.push(newAccount) 
 
-    return {
-      accounts,
-      selectedAccount: newAccount.address
-    }
+    await selectAndPersistNewAccount(newAccount)
+    return
   }
 
   case 'select-account': {
@@ -43,12 +45,13 @@ export async function entropyManageAccounts (endpoint: string, storedConfig: Ent
       return
     }
     const { selectedAccount } = await inquirer.prompt(selectAccountQuestions(accounts))
-    print('Current selected account is ' + selectedAccount)
-
-    return {
-      accounts: storedConfig.accounts,
+    await config.set({
+      ...storedConfig,
       selectedAccount: selectedAccount.address
-    }
+    })
+
+    print('Current selected account is ' + selectedAccount)
+    return
   }
 
   case 'list-account': {
@@ -71,16 +74,16 @@ export async function entropyManageAccounts (endpoint: string, storedConfig: Ent
 }
 
 export async function entropyRegister (entropy: Entropy, endpoint: string, storedConfig: EntropyConfig): Promise<Partial<EntropyConfig>> {
-  const AccountService = new EntropyAccount(entropy, endpoint)
+  const accountService = new EntropyAccount(entropy, endpoint)
 
   const { accounts, selectedAccount } = storedConfig
-  const currentAccount = findAccountNameByAddress(accounts, selectedAccount)
+  const currentAccount = findAccountByAddressOrName(accounts, selectedAccount)
   if (!currentAccount) {
     print("No account selected to register")
     return;
   }
   print("Attempting to register the address:", currentAccount.address)
-  const updatedAccount = await AccountService.registerAccount(currentAccount)
+  const updatedAccount = await accountService.registerAccount(currentAccount)
   const arrIdx = accounts.indexOf(currentAccount)
   accounts.splice(arrIdx, 1, updatedAccount)
   print("Your address", updatedAccount.address, "has been successfully registered.")

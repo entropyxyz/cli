@@ -1,4 +1,3 @@
-import Entropy from "@entropyxyz/sdk"
 import { Command } from "commander"
 import { currentAccountAddressOption, endpointOption, loadEntropy, passwordOption } from "src/common/utils-cli"
 import { EntropyTransfer } from "./main"
@@ -14,8 +13,8 @@ export function entropyTransferCommand () {
     .addOption(currentAccountAddressOption())
     .action(async (destination, amount, opts) => {
       const entropy = await loadEntropy(opts.account, opts.endpoint)
-      const TransferService = new EntropyTransfer(entropy, opts.endpoint)
-      await TransferService.transfer(destination, amount)
+      const transferService = new EntropyTransfer(entropy, opts.endpoint)
+      await transferService.transfer(destination, amount)
       // cliWrite(??) // TODO: write the output
       process.exit(0)
     })
