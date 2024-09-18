@@ -12,9 +12,9 @@ test('Faucet Tests', async t => {
   const { run, entropy, endpoint } = await setupTest(t, { seed: charlieStashSeed })
   const { entropy: naynayEntropy } = await setupTest(t)
 
-  const AccountService = new EntropyAccount(entropy, endpoint)
-  const BalanceService = new EntropyBalance(entropy, endpoint)
-  const TransferService = new EntropyTransfer(entropy, endpoint)
+  const accountService = new EntropyAccount(entropy, endpoint)
+  const balanceService = new EntropyBalance(entropy, endpoint)
+  const transferService = new EntropyTransfer(entropy, endpoint)
 
   const faucetProgram = readFileSync('tests/programs/faucet_program.wasm')
 
@@ -40,13 +40,13 @@ test('Faucet Tests', async t => {
   
   // Confirm faucetPointer matches deployed program pointer
   t.equal(faucetProgramPointer, LOCAL_PROGRAM_HASH, 'Program pointer matches')
-  let entropyBalance = await BalanceService.getBalance(entropy.keyring.accounts.registration.address)
+  let entropyBalance = await balanceService.getBalance(entropy.keyring.accounts.registration.address)
   console.log('Balance Charlie::', entropyBalance);
   
-  let naynayBalance = await BalanceService.getBalance(naynayEntropy.keyring.accounts.registration.address)
+  let naynayBalance = await balanceService.getBalance(naynayEntropy.keyring.accounts.registration.address)
   t.equal(naynayBalance, 0, 'Naynay is broke af')
   // register with faucet program
-  await run('Register Faucet Program for charlie stash', AccountService.register(
+  await run('Register Faucet Program for charlie stash', accountService.register(
     { 
       programModAddress: entropy.keyring.accounts.registration.address,
       programData: [{ program_pointer: faucetProgramPointer, program_config: userConfig }]
@@ -55,13 +55,13 @@ test('Faucet Tests', async t => {
   
   const { chosenVerifyingKey, faucetAddress } = await getRandomFaucet(entropy, [], entropy.keyring.accounts.registration.address)
   // adding funds to faucet address
-  entropyBalance = await BalanceService.getBalance(entropy.keyring.accounts.registration.address)
-  const faucetAddressBalance = await BalanceService.getBalance(faucetAddress)
+  entropyBalance = await balanceService.getBalance(entropy.keyring.accounts.registration.address)
+  const faucetAddressBalance = await balanceService.getBalance(faucetAddress)
   console.log('Balance faucetAddress::', faucetAddressBalance);
   console.log('Balance charlie 2::', entropyBalance);
   
   
-  await run('Transfer funds to faucet address', TransferService.transfer(faucetAddress, "1000"))
+  await run('Transfer funds to faucet address', transferService.transfer(faucetAddress, "1000"))
 
   const transferStatus = await sendMoney(
     naynayEntropy,
@@ -77,7 +77,7 @@ test('Faucet Tests', async t => {
 
   t.ok(transferStatus.isFinalized, 'Transfer is good')
 
-  naynayBalance = await BalanceService.getBalance(naynayEntropy.keyring.accounts.registration.address)
+  naynayBalance = await balanceService.getBalance(naynayEntropy.keyring.accounts.registration.address)
 
   t.ok(naynayBalance > 0, 'Naynay is drippin in faucet tokens')
 

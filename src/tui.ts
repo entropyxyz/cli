@@ -4,10 +4,11 @@ import * as config from './config'
 import * as flows from './flows'
 import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
-import { print, updateConfig } from './common/utils'
+import { print } from './common/utils'
 import { loadEntropy } from './common/utils-cli'
 import { EntropyLogger } from './common/logger'
-import { entropyManageAccounts, entropyRegister } from './account/interaction'
+
+import { entropyAccount, entropyRegister } from './account/interaction'
 import { entropySign } from './sign/interaction'
 import { entropyBalance } from './balance/interaction'
 import { entropyTransfer } from './transfer/interaction'
@@ -17,9 +18,9 @@ async function setupConfig () {
 
   // set selectedAccount if we can
   if (!storedConfig.selectedAccount && storedConfig.accounts.length) {
-    await config.set({ 
-      selectedAccount: storedConfig.accounts[0].address,
-      ...storedConfig
+    await config.set({
+      ...storedConfig,
+      selectedAccount: storedConfig.accounts[0].address
     })
     storedConfig = await config.get()
   }
@@ -60,8 +61,8 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
 }
 
 async function main (entropy: Entropy, choices, options, logger: EntropyLogger) {
-  let storedConfig = await setupConfig()
-  
+  const storedConfig = await setupConfig()
+
   // If the selected account changes within the TUI we need to reset the entropy instance being used
   const currentAccount = entropy?.keyring?.accounts?.registration?.address
   if (currentAccount && currentAccount !== storedConfig.selectedAccount) {
@@ -90,54 +91,36 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     logger.debug(answers)
     switch (answers.choice) {
     case 'Manage Accounts': {
-      const response = await entropyManageAccounts(options.endpoint, storedConfig)
-      returnToMain = await updateConfig(storedConfig, response)
-      storedConfig = await config.get()
+      const response = await entropyAccount(options.endpoint, storedConfig)
+      if (response === 'exit') { returnToMain = true }
       break
     }
     case 'Register': {
-      const { accounts, selectedAccount } = await entropyRegister(entropy, options.endpoint, storedConfig)
-      returnToMain = await updateConfig(storedConfig, { accounts, selectedAccount })
-      storedConfig = await config.get()
+      await entropyRegister(entropy, options.endpoint, storedConfig)
       break
     }
     case 'Balance': {
-      try {
-        await entropyBalance(entropy, options.endpoint, storedConfig)
-      } catch (error) {
-        console.error('There was an error retrieving balance', error)
-      }
+      await entropyBalance(entropy, options.endpoint, storedConfig)
+        .catch(err => console.error('There was an error retrieving balance', err))
       break
     }
     case 'Transfer': {
-      try {
-        await entropyTransfer(entropy, options.endpoint)
-      } catch (error) {
-        console.error('There was an error sending the transfer', error)
-      }
+      await entropyTransfer(entropy, options.endpoint)
+        .catch(err => console.error('There was an error sending the transfer', err))
       break
     }
     case 'Sign': {
-      try {
-        await entropySign(entropy, options.endpoint)
-      } catch (error) {
-        console.error('There was an issue with signing', error)
-      }
+      await entropySign(entropy, options.endpoint)
+        .catch(err => console.error('There was an issue with signing', err))
       break
     }
     default: {
-      const newConfigUpdates = await choices[answers.choice](storedConfig, options, logger)
-      if (typeof newConfigUpdates === 'string' && newConfigUpdates === 'exit') {
-        returnToMain = true
-      } else {
-        await config.set({ ...storedConfig, ...newConfigUpdates })
-      }
-      storedConfig = await config.get()
+      throw Error(`unsupported choice: ${answers.choice}`)
     }
     }
   }
 
-  if (!returnToMain) {
+  if (returnToMain === undefined) {
     ({ returnToMain } = await inquirer.prompt([{
       type: 'confirm',
       name: 'returnToMain',

@@ -67,6 +67,8 @@ export class EntropyAccount extends EntropyBase {
       : undefined
 
     return this.entropy.register(registerParams)
+      // NOTE: if "register" fails for any reason, core currently leaves the chain in a "polluted"
+      // state. To fix this we manually "prune" the dirty registration transaction.
       .catch(async error => {
         await this.pruneRegistration()
         throw error
@@ -86,8 +88,8 @@ export class EntropyAccount extends EntropyBase {
     // Register params to be defined from user input (arguments/options or inquirer prompts)
     try {
       const verifyingKey = await this.register(registerParams)
-
-      account?.data?.registration?.verifyingKeys?.push(verifyingKey)
+      // NOTE: this mutation triggers events in Keyring
+      account.data.registration.verifyingKeys.push(verifyingKey)
       return account
     } catch (error) {
       this.logger.error('There was a problem registering', error)
