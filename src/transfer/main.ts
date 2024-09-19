@@ -6,7 +6,7 @@ const FLOW_CONTEXT = 'ENTROPY_TRANSFER'
 
 export class EntropyTransfer extends EntropyBase {
   constructor (entropy: Entropy, endpoint: string) {
-    super(entropy, endpoint, FLOW_CONTEXT)
+    super({ entropy, endpoint, flowContext: FLOW_CONTEXT })
   }
 
   // NOTE: a more accessible function which handles

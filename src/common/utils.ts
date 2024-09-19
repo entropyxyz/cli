@@ -52,7 +52,7 @@ export function buf2hex (buffer: ArrayBuffer): string {
   return Buffer.from(buffer).toString("hex")
 }
 
-export function accountChoices (accounts: EntropyAccountConfig[]) {
+export function generateAccountChoices (accounts: EntropyAccountConfig[]) {
   return accounts
     .map((account) => ({
       name: `${account.name} (${account.address})`,
@@ -61,11 +61,11 @@ export function accountChoices (accounts: EntropyAccountConfig[]) {
 }
 
 export function accountChoicesWithOther (accounts: EntropyAccountConfig[]) {
-  return accountChoices(accounts)
+  return generateAccountChoices(accounts)
     .concat([{ name: "Other", value: null }])
 }
 
-export function getSelectedAccount (accounts: EntropyAccountConfig[], aliasOrAddress: string) {
+export function findAccountByAddressOrName (accounts: EntropyAccountConfig[], aliasOrAddress: string) {
   if (!aliasOrAddress || !aliasOrAddress.length) throw Error('aliasOrAddress required')
 
   return (

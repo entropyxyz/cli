@@ -7,7 +7,7 @@ import { stringToHex } from "./utils";
 
 export class EntropySign extends EntropyBase {
   constructor (entropy: Entropy, endpoint: string) {
-    super(entropy, endpoint, FLOW_CONTEXT)
+    super({ entropy, endpoint, flowContext: FLOW_CONTEXT })
   }
 
   // async rawSign (entropy: Entropy, payload: RawSignPayload) {

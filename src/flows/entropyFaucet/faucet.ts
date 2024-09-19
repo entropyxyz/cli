@@ -75,9 +75,9 @@ export async function sendMoney (
     faucetProgramPointer: string
   }
 ): Promise<any> {
-  const BalanceService = new EntropyBalance(entropy, endpoint)
+  const balanceService = new EntropyBalance(entropy, endpoint)
   // check balance of faucet address
-  const balance = await BalanceService.getBalance(faucetAddress)
+  const balance = await balanceService.getBalance(faucetAddress)
   if (balance <= 0) throw new Error('FundsError: Faucet Account does not have funds')
   // check verifying key for only one program matching the program hash
   const programs = await viewPrograms(entropy, { verifyingKey: chosenVerifyingKey })
