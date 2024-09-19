@@ -2,24 +2,13 @@ import Entropy from "@entropyxyz/sdk"
 import inquirer from "inquirer"
 import { u8aToHex } from "@polkadot/util"
 
-import { deployProgram } from "./deploy";
-import { addProgram } from "./add";
-import { viewPrograms } from "./view";
-import { removeProgram } from "./remove";
-import { addQuestions, getProgramPointerInput, verifyingKeyQuestion } from "./helpers/questions";
-import { displayPrograms } from "./helpers/utils";
-import { initializeEntropy } from "../../common/initializeEntropy"
-import { findAccountByAddressOrName, print } from "../../common/utils"
-import { EntropyLogger } from "../../common/logger";
-import { EntropyTuiOptions } from "../../types"
+import { displayPrograms, addQuestions, getProgramPointerInput, verifyingKeyQuestion } from "./utils";
+import { EntropyProgram } from "./main";
+import { print } from "../common/utils"
 
 let verifyingKey: string;
 
-export async function userPrograms ({ accounts, selectedAccount: selectedAccountAddress }, options: EntropyTuiOptions, logger: EntropyLogger) {
-  const FLOW_CONTEXT = 'PROGRAMS'
-  const { endpoint } = options
-  const selectedAccount = findAccountByAddressOrName(accounts, selectedAccountAddress)
-
+export async function entropyProgram (entropy: Entropy, endpoint: string) {
   const actionChoice = await inquirer.prompt([
     {
       type: "list",
@@ -35,14 +24,11 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
     },
   ])
 
-  const entropy = await initializeEntropy({
-    keyMaterial: selectedAccount.data,
-    endpoint
-  })
-
   if (!entropy.registrationManager?.signer?.pair) {
     throw new Error("Keys are undefined")
   }
+
+  const program = new EntropyProgram(entropy, endpoint)
 
   switch (actionChoice.action) {
   case "View My Programs": {
@@ -53,7 +39,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
         print('You currently have no verifying keys, please register this account to generate the keys')
         break
       }
-      const programs = await viewPrograms(entropy, { verifyingKey })
+      const programs = await program.list({ verifyingKey })
       if (programs.length === 0) {
         print("You currently have no programs set.")
       } else {
@@ -73,9 +59,8 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
         message: "Enter the program pointer you wish to check:",
         validate: (input) => (input ? true : "Program pointer is required!"),
       }])
-      logger.debug(`program pointer: ${programPointer}`, `${FLOW_CONTEXT}::PROGRAM_PRESENCE_CHECK`);
-      const program = await entropy.programs.dev.getProgramInfo(programPointer);
-      print(program);
+      const info = await program.get(programPointer);
+      print(info);
     } catch (error) {
       console.error(error.message);
     }
@@ -90,7 +75,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
       const byteArray = encoder.encode(programConfigJson)
       const programConfigHex = u8aToHex(byteArray)
 
-      await addProgram(entropy, { programPointer: programPointerToAdd, programConfig: programConfigHex })
+      await program.add({ programPointer: programPointerToAdd, programConfig: programConfigHex })
 
       print("Program added successfully.")
     } catch (error) {
@@ -104,7 +89,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
         ({ verifyingKey } = await inquirer.prompt(verifyingKeyQuestion(entropy)))
       }
       const { programPointer: programPointerToRemove } = await inquirer.prompt(getProgramPointerInput)
-      await removeProgram(entropy, { programPointer: programPointerToRemove, verifyingKey })
+      await program.remove({ programPointer: programPointerToRemove, verifyingKey })
       print("Program removed successfully.")
     } catch (error) {
       console.error(error.message)
@@ -117,11 +102,7 @@ export async function userPrograms ({ accounts, selectedAccount: selectedAccount
 }
 
 // eslint-disable-next-line
-export async function devPrograms ({ accounts, selectedAccount: selectedAccountAddress }, options: EntropyTuiOptions, logger: EntropyLogger) {
-  // const FLOW_CONTEXT = 'PROGRAMS'
-  const { endpoint } = options
-  const selectedAccount = findAccountByAddressOrName(accounts, selectedAccountAddress)
-
+export async function entropyProgramDev (entropy, endpoint) {
   const choices = {
     "Deploy": deployProgramTUI,
     "Get Owned Programs": getOwnedProgramsTUI,
@@ -137,16 +118,13 @@ export async function devPrograms ({ accounts, selectedAccount: selectedAccountA
     },
   ])
 
-  const entropy = await initializeEntropy({
-    keyMaterial: selectedAccount.data,
-    endpoint
-  })
-
   const flow = choices[actionChoice.action]
-  await flow(entropy, selectedAccount)
+  await flow(entropy, endpoint)
 }
 
-async function deployProgramTUI (entropy: Entropy, account: any) {
+async function deployProgramTUI (entropy: Entropy, endpoint: string) {
+  const program = new EntropyProgram(entropy, endpoint)
+
   const answers = await inquirer.prompt([
     {
       type: "input",
@@ -181,22 +159,19 @@ async function deployProgramTUI (entropy: Entropy, account: any) {
   ])
 
   try {
-    const pointer = await deployProgram(entropy, answers)
+    const pointer = await program.deploy(answers)
 
     print("Program deployed successfully with pointer:", pointer)
   } catch (deployError) {
     console.error("Deployment failed:", deployError)
   }
-
-  print("Deploying from account:", account.address)
 }
 
-async function getOwnedProgramsTUI (entropy: Entropy, account: any) {
-  const userAddress = account.address
-  if (!userAddress) return
+async function getOwnedProgramsTUI (entropy: Entropy, endpoint: string) {
+  const program = new EntropyProgram(entropy, endpoint)
 
   try {
-    const fetchedPrograms = await entropy.programs.dev.get(userAddress)
+    const fetchedPrograms = await program.listDeployed()
     if (fetchedPrograms.length) {
       print("Retrieved program pointers:")
       print(fetchedPrograms)
