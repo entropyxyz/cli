@@ -9,7 +9,7 @@ export function deserialize (config) {
   return JSON.parse(config, reviver)
 }
 
-function replacer (key, value) {
+function replacer (_key: string, value: any) {
   if (value instanceof Uint8Array) {
     return PREFIX + Buffer.from(value).toString('base64')
   }

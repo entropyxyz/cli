@@ -7,6 +7,8 @@ const DEFAULT_MASKED_FIELDS = [
 ];
 
 export function maskPayload (payload: any): any {
+  if (typeof payload === 'string') return payload
+
   const clonedPayload = cloneDeep(payload);
   const maskedPayload = {}
 

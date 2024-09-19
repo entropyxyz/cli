@@ -14,6 +14,7 @@ interface SetupTestOpts {
   networkType?: string
   seed?: string
   endpoint?: string
+  createAccountOnly?: boolean
 }
 const NETWORK_TYPE_DEFAULT = 'two-nodes'
 let counter = 0

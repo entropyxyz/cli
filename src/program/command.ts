@@ -1,20 +1,18 @@
 import { Command } from 'commander'
-import { Entropy } from '@entropyxyz/sdk'
-import { currentAccountAddressOption, cliWrite, endpointOption } from '../common/utils-cli'
 
+import { currentAccountAddressOption, endpointOption, cliWrite, loadEntropy } from '../common/utils-cli'
 import { deployProgram } from '../flows/programs/deploy'
 
-export function entropyProgramCommand (entropy: Entropy, rootCommand: Command) {
-  const programCommand = rootCommand.command('program')
+export function entropyProgramCommand () {
+  return new Command('program')
     .description('Commands for working with programs deployed to the Entropy Network')
-
-  entropyProgramDeploy(entropy, programCommand)
-  // entropyProgramGet(program)
-  // entropyProgramRemove(program)
+    .addCommand(entropyProgramDeploy())
+    // .addCommand(entropyProgramGet())
+    // .addCommand(entropyProgramRemove())
 }
 
-function entropyProgramDeploy (entropy: Entropy, programCommand: Command) {
-  programCommand.command('deploy')
+function entropyProgramDeploy () {
+  return new Command('deploy')
     .description([
       'Deploys a program to the Entropy network.',
       'Requires funds.'
@@ -44,6 +42,8 @@ function entropyProgramDeploy (entropy: Entropy, programCommand: Command) {
     .addOption(endpointOption())
 
     .action(async (bytecodePath, configurationSchemaPath, auxillaryDataSchemaPath, opts) => { // eslint-disable-line
+      const entropy = await loadEntropy(opts.account, opts.endpoint)
+
       const pointer = await deployProgram(entropy, {
         bytecodePath,
         configurationSchemaPath,

@@ -1,12 +1,13 @@
+import Entropy from '@entropyxyz/sdk'
 import { Option } from 'commander'
-import { stringify } from './utils'
+import { findAccountByAddressOrName, stringify } from './utils'
 import * as config from '../config'
+import { initializeEntropy } from './initializeEntropy'
 
 export function cliWrite (result) {
-  const prettyResult = stringify(result)
+  const prettyResult = stringify(result, 0)
   process.stdout.write(prettyResult)
 }
-
 
 export function endpointOption () {
   return new Option(
@@ -41,19 +42,41 @@ export function passwordOption (description?: string) {
 
 export function currentAccountAddressOption () {
   const storedConfig = config.getSync()
+
   return new Option(
-    '-a, --account <accountAddressOrAlias>',
-    'Sets the current account for the session and sets the default account for all future calls'
+    '-a, --account <accountAddressOrName>',
+    'Sets the current account for the session and sets the default account for all future calls.'
   )
     .env('ACCOUNT_ADDRESS')
-    .argParser(async (address) => {
-      if (address === storedConfig.selectedAccount) return address
+    .argParser(async (account) => {
+      if (account === storedConfig.selectedAccount) return account
       // Updated selected account in config with new address from this option
-      const newConfigUpdates = { selectedAccount: address }
-      await config.set({ ...storedConfig, ...newConfigUpdates })
+      await config.set({
+        ...storedConfig,
+        selectedAccount: account
+      })
 
-      return address
+      return account
     })
-    .hideHelp()
     .default(storedConfig.selectedAccount)
+    // TODO: display the *name* not address
+    // TODO: standardise whether selectedAccount is name or address.
+}
+
+export async function loadEntropy (addressOrName: string, endpoint: string, password?: string): Promise<Entropy> {
+  const storedConfig = config.getSync()
+  const selectedAccount = findAccountByAddressOrName(storedConfig.accounts, addressOrName)
+  if (!selectedAccount) throw new Error(`AddressError: No account with name or address "${addressOrName}"`)
+
+  // check if data is encrypted + we have a password
+  if (typeof selectedAccount.data === 'string' && !password) {
+    throw new Error('AuthError: This account requires a password, add --password <password>')
+  }
+
+  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint, password })
+  if (!entropy?.keyring?.accounts?.registration?.pair) {
+    throw new Error("Signer keypair is undefined or not properly initialized.")
+  }
+
+  return entropy
 }

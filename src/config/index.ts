@@ -1,11 +1,12 @@
 import { readFile, writeFile, rm } from 'node:fs/promises'
-import { readFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { mkdirp } from 'mkdirp'
 import { join, dirname } from 'path'
 import envPaths from 'env-paths'
 
 import allMigrations from './migrations'
 import { serialize, deserialize } from './encoding'
+import { EntropyConfig } from './types'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
 const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
@@ -35,7 +36,7 @@ function hasRunMigration (config: any, version: number) {
 export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG_PATH) {
   const currentConfig = await get(configPath)
     .catch(async (err) => {
-      if (err && err.code !== 'ENOENT') throw err
+      if (err.code !== 'ENOENT') throw err
 
       const oldConfig = await get(oldConfigPath).catch(noop) // drop errors
       if (oldConfig) {
@@ -57,16 +58,24 @@ function noop () {}
 
 export async function get (configPath = CONFIG_PATH) {
   const configBuffer = await readFile(configPath)
+
   return deserialize(configBuffer.toString())
 }
 
-export function getSync (configPath = CONFIG_PATH) {
-  const configBuffer = readFileSync(configPath, 'utf8')
-  return deserialize(configBuffer)
+export function getSync (configPath = CONFIG_PATH): EntropyConfig {
+  try {
+    const configBuffer = readFileSync(configPath, 'utf8')
+    return deserialize(configBuffer)
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err
+
+    const newConfig = migrateData(allMigrations, {})
+    writeFileSync(configPath, serialize(newConfig))
+    return newConfig
+  }
 }
 
-export async function set (config = {}, configPath = CONFIG_PATH) {
+export async function set (config: EntropyConfig, configPath = CONFIG_PATH) {
   await mkdirp(dirname(configPath))
   await writeFile(configPath, serialize(config))
 }
-

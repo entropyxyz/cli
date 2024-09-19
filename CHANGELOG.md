@@ -34,6 +34,9 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - new: './src/transfer' - new file structure for our CLI/TUI flows
   - new: './src/transfer/command.ts' - main entry file for transfer command for tui/cli
   - new: './src/transfer/utils.ts' - utilities and helper methods for all things transfer
+- new: './src/accounts' - new file structure for our CLI/TUI flows
+  - new: './src/accounts/command.ts' - main entry file for accounts command for tui/cli
+  - new: './src/accounts/utils.ts' - utilities and helper methods for all things accounts
 
 ### Changed
 
@@ -43,6 +46,8 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - merged user + dev program folders + tests
 - removed flows/balance/*.ts directory with file restructure
 - removed flows/entropyTransfer/*.ts directory with file restructure
+- removed flows/manage-accounts/*/*.ts directory with file restructure
+- removed flows/register/*.ts directory with file restructure
 
 
 ### Broke

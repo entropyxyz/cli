@@ -1,0 +1,80 @@
+import { EntropyAccountConfig } from "../config/types";
+import * as config from "../config";
+import { ACCOUNTS_CONTENT } from './constants';
+import { generateAccountChoices } from '../common/utils';
+
+export async function selectAndPersistNewAccount (newAccount) {
+  const storedConfig = await config.get()
+  const { accounts } = storedConfig
+
+  const isExistingName = accounts.find(account => account.name === newAccount.name)
+  if (isExistingName) {
+    throw Error(`An account with name "${newAccount.name}" already exists. Choose a different name`)
+  }
+  const isExistingAddress = accounts.find(account => account.address === newAccount.address)
+  if (isExistingAddress) {
+    throw Error(`An account with address "${newAccount.address}" already exists.`)
+  }
+
+  accounts.push(newAccount) 
+  await config.set({
+    ...storedConfig,
+    accounts,
+    selectedAccount: newAccount.address
+  })
+}
+
+function validateSeedInput (seed) {
+  if (seed.includes('#debug')) return true
+  if (seed.length === 66 && seed.startsWith('0x')) return true
+  if (seed.length === 64) return true
+  return ACCOUNTS_CONTENT.seed.invalidSeed
+}
+
+export const importQuestions = [
+  {
+    type: 'input',
+    name: ACCOUNTS_CONTENT.seed.name,
+    message: ACCOUNTS_CONTENT.seed.message,
+    validate: validateSeedInput,
+    when: ({ importKey }) => importKey
+  },
+  {
+    type: 'input',
+    name: ACCOUNTS_CONTENT.path.name,
+    message: ACCOUNTS_CONTENT.path.message,
+    default: ACCOUNTS_CONTENT.path.default,
+    when: ({ importKey }) => importKey
+  },
+]
+
+export const newAccountQuestions = [
+  {
+    type: 'confirm',
+    name: ACCOUNTS_CONTENT.importKey.name,
+    message: ACCOUNTS_CONTENT.importKey.message,
+    default: ACCOUNTS_CONTENT.importKey.default,
+  },
+  ...importQuestions,
+  {
+    type: 'input',
+    name: ACCOUNTS_CONTENT.name.name,
+    default: ACCOUNTS_CONTENT.name.default,
+  },
+]
+
+export const selectAccountQuestions = (accounts: EntropyAccountConfig[]) => [{
+  type: 'list',
+  name: ACCOUNTS_CONTENT.selectAccount.name,
+  message: ACCOUNTS_CONTENT.selectAccount.message,
+  choices: generateAccountChoices(accounts)
+}]
+
+export const manageAccountsQuestions = [
+  {
+    type: 'list',
+    name: ACCOUNTS_CONTENT.interactionChoice.name,
+    pageSize: ACCOUNTS_CONTENT.interactionChoice.choices.length,
+    choices: ACCOUNTS_CONTENT.interactionChoice.choices
+  }
+]
