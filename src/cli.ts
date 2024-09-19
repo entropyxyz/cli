@@ -3,53 +3,15 @@
 /* NOTE: calling this file entropy.ts helps commander parse process.argv */
 import { Command, Option } from 'commander'
 
+import { EntropyTuiOptions } from './types'
+import { accountOption, endpointOption, loadEntropy } from './common/utils-cli'
+
+import launchTui from './tui'
 import { entropyAccountCommand } from './account/command'
 import { entropyTransferCommand } from './transfer/command'
 import { entropySignCommand } from './sign/command'
 import { entropyBalanceCommand } from './balance/command'
 import { entropyProgramCommand } from './program/command'
-
-import launchTui from './tui'
-import { EntropyTuiOptions } from './types'
-import { currentAccountAddressOption, endpointOption, loadEntropy } from './common/utils-cli'
-
-// import launchTui from './tui'
-// import { EntropyTuiOptions } from './types'
-// import * as config from './config'
-
-// import { cliListAccounts } from './flows/manage-accounts/cli'
-// import { cliSign } from './flows/sign/cli'
-
-// import { cliWrite, passwordOption, endpointOption, currentAccountAddressOption } from './common/utils-cli'
-// import { getSelectedAccount, stringify, } from './common/utils'
-// import Entropy from '@entropyxyz/sdk'
-// import { initializeEntropy } from './common/initializeEntropy'
-// import { BalanceCommand } from './balance/command'
-// import { TransferCommand } from './transfer/command'
-
-// const program = new Command()
-
-// let entropy: Entropy
-
-// export async function loadEntropy (address: string, endpoint: string, password?: string): Promise<Entropy> {
-//   const storedConfig = config.getSync()
-//   const selectedAccount = getSelectedAccount(storedConfig.accounts, address)
-
-//   if (!selectedAccount) throw Error(`No account with address ${address}`)
-
-//   // check if data is encrypted + we have a password
-//   if (typeof selectedAccount.data === 'string' && !password) {
-//     throw Error('This account requires a password, add --password <password>')
-//   }
-
-//   entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint, password })
-
-//   if (!entropy?.keyring?.accounts?.registration?.pair) {
-//     throw new Error("Signer keypair is undefined or not properly initialized.")
-//   }
-
-//   return entropy
-// }
 
 const program = new Command()
 
@@ -57,7 +19,7 @@ const program = new Command()
 program
   .name('entropy')
   .description('CLI interface for interacting with entropy.xyz. Running without commands starts an interactive ui')
-  .addOption(currentAccountAddressOption())
+  .addOption(accountOption())
   .addOption(endpointOption())
   // NOTE: I think this is currently unused
   .addOption(

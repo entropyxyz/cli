@@ -17,7 +17,7 @@ export function endpointOption () {
       'Can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`.'
     ].join(' ')
   )
-    .env('ENDPOINT')
+    .env('ENTROPY_ENDPOINT')
     .argParser(aliasOrEndpoint => {
       /* see if it's a raw endpoint */
       if (aliasOrEndpoint.match(/^wss?:\/\//)) return aliasOrEndpoint
@@ -40,14 +40,17 @@ export function passwordOption (description?: string) {
   )
 }
 
-export function currentAccountAddressOption () {
+export function accountOption () {
   const storedConfig = config.getSync()
 
   return new Option(
     '-a, --account <accountAddressOrName>',
-    'Sets the current account for the session and sets the default account for all future calls.'
+    [
+      'Sets the account for the session.',
+      'Defaults to the last set account (or the first account if one has not been set before).'
+    ].join(' ')
   )
-    .env('ACCOUNT_ADDRESS')
+    .env('ENTROPY_ACCOUNT')
     .argParser(async (account) => {
       if (account === storedConfig.selectedAccount) return account
       // Updated selected account in config with new address from this option

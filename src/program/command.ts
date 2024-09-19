@@ -1,6 +1,6 @@
 import { Command } from 'commander'
 
-import { currentAccountAddressOption, endpointOption, cliWrite, loadEntropy } from '../common/utils-cli'
+import { accountOption, endpointOption, cliWrite, loadEntropy } from '../common/utils-cli'
 import { deployProgram } from '../flows/programs/deploy'
 
 export function entropyProgramCommand () {
@@ -38,7 +38,7 @@ function entropyProgramDeploy () {
         'Must be a .json file.'
       ].join(' ')
     )
-    .addOption(currentAccountAddressOption())
+    .addOption(accountOption())
     .addOption(endpointOption())
 
     .action(async (bytecodePath, configurationSchemaPath, auxillaryDataSchemaPath, opts) => { // eslint-disable-line
