@@ -6,7 +6,7 @@ import { BalanceInfo } from "./types"
 const FLOW_CONTEXT = 'ENTROPY-BALANCE'
 export class EntropyBalance extends EntropyBase {
   constructor (entropy: Entropy, endpoint: string) {
-    super(entropy, endpoint, FLOW_CONTEXT)
+    super({ entropy, endpoint, flowContext: FLOW_CONTEXT })
   }
 
   async getBalance (address: string): Promise<number> {

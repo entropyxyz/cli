@@ -11,7 +11,7 @@ const FLOW_CONTEXT = 'ENTROPY-FAUCET'
 
 export class EntropyFaucet extends EntropyBase {
   constructor (entropy: Entropy, endpoint: string) {
-    super(entropy, endpoint, FLOW_CONTEXT)
+    super({ entropy, endpoint, flowContext: FLOW_CONTEXT })
   }
 
   async faucetSignAndSend (call: any, amount: number, senderAddress: string, chosenVerifyingKey: any): Promise<any> {

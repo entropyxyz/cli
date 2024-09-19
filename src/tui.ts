@@ -5,27 +5,23 @@ import * as flows from './flows'
 import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
 import { print } from './common/utils'
-import { EntropyLogger } from './common/logger'
 import { loadEntropy } from './common/utils-cli'
+import { EntropyLogger } from './common/logger'
+
+import { entropyAccount, entropyRegister } from './account/interaction'
 import { entropySign } from './sign/interaction'
 import { entropyBalance } from './balance/interaction'
 import { entropyTransfer } from './transfer/interaction'
 import { entropyFaucet } from './faucet/interaction'
 
-let hasConfigInit = false
 async function setupConfig () {
-  if (!hasConfigInit) {
-    await config.init()
-    hasConfigInit = true
-  }
-
   let storedConfig = await config.get()
 
   // set selectedAccount if we can
   if (!storedConfig.selectedAccount && storedConfig.accounts.length) {
-    await config.set({ 
-      selectedAccount: storedConfig.accounts[0].address,
-      ...storedConfig
+    await config.set({
+      ...storedConfig,
+      selectedAccount: storedConfig.accounts[0].address
     })
     storedConfig = await config.get()
   }
@@ -41,10 +37,10 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
   logger.debug(options)
 
   const choices = {
-    'Manage Accounts': flows.manageAccounts,
+    'Manage Accounts': () => {},
     // leaving as a noop function until all flows are restructured
     'Balance': () => {},
-    'Register': flows.entropyRegister,
+    'Register': () => {},
     'Sign': () => {},
     'Transfer': () => {},
     // TODO: design programs in TUI (merge deploy+user programs)
@@ -65,11 +61,11 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
 }
 
 async function main (entropy: Entropy, choices, options, logger: EntropyLogger) {
-  let storedConfig = await setupConfig()
+  const storedConfig = await setupConfig()
 
   // If the selected account changes within the TUI we need to reset the entropy instance being used
-  const currentAccount = entropy.keyring.accounts.registration.address
-  if (currentAccount !== storedConfig.selectedAccount) {
+  const currentAccount = entropy?.keyring?.accounts?.registration?.address
+  if (currentAccount && currentAccount !== storedConfig.selectedAccount) {
     await entropy.close()
     entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint);
   }
@@ -94,28 +90,28 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
   } else {
     logger.debug(answers)
     switch (answers.choice) {
-    case "Balance": {
-      try {
-        await entropyBalance(entropy, options.endpoint, storedConfig)
-      } catch (error) {
-        console.error('There was an error retrieving balance', error)
-      }
-      break;
-    }
-    case "Transfer": {
-      try {
-        await entropyTransfer(entropy, options.endpoint)
-      } catch (error) {
-        console.error('There was an error sending the transfer', error)
-      }
+    case 'Manage Accounts': {
+      const response = await entropyAccount(options.endpoint, storedConfig)
+      if (response === 'exit') { returnToMain = true }
       break
     }
-    case "Sign": {
-      try {
-        await entropySign(entropy, options.endpoint)
-      } catch (error) {
-        console.error('There was an issue with signing', error)
-      }
+    case 'Register': {
+      await entropyRegister(entropy, options.endpoint, storedConfig)
+      break
+    }
+    case 'Balance': {
+      await entropyBalance(entropy, options.endpoint, storedConfig)
+        .catch(err => console.error('There was an error retrieving balance', err))
+      break
+    }
+    case 'Transfer': {
+      await entropyTransfer(entropy, options.endpoint)
+        .catch(err => console.error('There was an error sending the transfer', err))
+      break
+    }
+    case 'Sign': {
+      await entropySign(entropy, options.endpoint)
+        .catch(err => console.error('There was an issue with signing', err))
       break
     }
     case 'Entropy Faucet': {
@@ -127,19 +123,12 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
       break
     }
     default: {
-      const newConfigUpdates = await choices[answers.choice](storedConfig, options, logger)
-      if (typeof newConfigUpdates === 'string' && newConfigUpdates === 'exit') {
-        returnToMain = true
-      } else {
-        await config.set({ ...storedConfig, ...newConfigUpdates })
-      }
-      storedConfig = await config.get()
-      break;
+      throw Error(`unsupported choice: ${answers.choice}`)
     }
     }
   }
 
-  if (!returnToMain) {
+  if (returnToMain === undefined) {
     ({ returnToMain } = await inquirer.prompt([{
       type: 'confirm',
       name: 'returnToMain',

@@ -1,5 +1,5 @@
 import { Option } from 'commander'
-import { getSelectedAccount, stringify } from './utils'
+import { findAccountByAddressOrName, stringify } from './utils'
 import * as config from '../config'
 import Entropy from '@entropyxyz/sdk'
 import { initializeEntropy } from './initializeEntropy'
@@ -42,6 +42,7 @@ export function passwordOption (description?: string) {
 
 export function currentAccountAddressOption () {
   const storedConfig = config.getSync()
+
   return new Option(
     '-a, --account <address>',
     'Sets the current account for the session or defaults to the account stored in the config'
@@ -55,15 +56,15 @@ export function currentAccountAddressOption () {
 
       return account
     })
-    .hideHelp()
     .default(storedConfig.selectedAccount)
+    // TODO: display the *name* not address
+    // TODO: standardise whether selectedAccount is name or address.
 }
 
-export async function loadEntropy (address: string, endpoint: string, password?: string): Promise<Entropy> {
+export async function loadEntropy (addressOrName: string, endpoint: string, password?: string): Promise<Entropy> {
   const storedConfig = config.getSync()
-  const selectedAccount = getSelectedAccount(storedConfig.accounts, address)
-
-  if (!selectedAccount) throw new Error(`AddressError: No account with address ${address}`)
+  const selectedAccount = findAccountByAddressOrName(storedConfig.accounts, addressOrName)
+  if (!selectedAccount) throw new Error(`AddressError: No account with name or address "${addressOrName}"`)
 
   // check if data is encrypted + we have a password
   if (typeof selectedAccount.data === 'string' && !password) {

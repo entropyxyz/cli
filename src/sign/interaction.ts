@@ -5,7 +5,7 @@ import Entropy from "@entropyxyz/sdk"
 import { EntropySign } from "./main"
 
 export async function entropySign (entropy: Entropy, endpoint: string) {
-  const SigningService = new EntropySign(entropy, endpoint)
+  const signingService = new EntropySign(entropy, endpoint)
   // const { interactionChoice } = await inquirer.prompt(interactionChoiceQuestions)
   // switch (interactionChoice) {
   // case 'Raw Sign': {
@@ -25,7 +25,7 @@ export async function entropySign (entropy: Entropy, endpoint: string) {
   // }
   // case 'Sign With Adapter': {
   const { msg } = await getMsgFromUser(inquirer)
-  const { signature, verifyingKey } = await SigningService.signMessageWithAdapters({ msg })
+  const { signature, verifyingKey } = await signingService.signMessageWithAdapters({ msg })
   print('msg to be signed:', msg)
   print('verifying key:', verifyingKey)
   print('signature:', signature)
