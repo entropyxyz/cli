@@ -1,5 +1,4 @@
 import test from 'tape'
-import * as util from "@polkadot/util"
 import { charlieStashSeed, setupTest } from './testing-utils'
 import { stripHexPrefix } from '../src/common/utils'
 import { readFileSync } from 'fs'
@@ -13,9 +12,9 @@ test('Faucet Tests', async t => {
   const { run, entropy, endpoint } = await setupTest(t, { seed: charlieStashSeed })
   const { entropy: naynayEntropy } = await setupTest(t)
 
-  const BalanceService = new EntropyBalance(entropy, endpoint)
-  const TransferService = new EntropyTransfer(entropy, endpoint)
-  const FaucetService = new EntropyFaucet(naynayEntropy, endpoint)
+  const balanceService = new EntropyBalance(entropy, endpoint)
+  const transferService = new EntropyTransfer(entropy, endpoint)
+  const faucetService = new EntropyFaucet(naynayEntropy, endpoint)
 
   const faucetProgram = readFileSync('tests/programs/faucet_program.wasm')
 
@@ -42,7 +41,7 @@ test('Faucet Tests', async t => {
   // Confirm faucetPointer matches deployed program pointer
   t.equal(faucetProgramPointer, LOCAL_PROGRAM_HASH, 'Program pointer matches')
 
-  let naynayBalance = await BalanceService.getBalance(naynayEntropy.keyring.accounts.registration.address)
+  let naynayBalance = await balanceService.getBalance(naynayEntropy.keyring.accounts.registration.address)
   t.equal(naynayBalance, 0, 'Naynay is broke af')
   // register with faucet program
   await run('Register Faucet Program for charlie stash', register(
@@ -52,13 +51,14 @@ test('Faucet Tests', async t => {
       programData: [{ program_pointer: faucetProgramPointer, program_config: userConfig }]
     }
   ))
-  
-  const { chosenVerifyingKey, faucetAddress } = await FaucetService.getRandomFaucet([], entropy.keyring.accounts.registration.address)
+  const verifyingKeys = await faucetService.getAllFaucetVerifyingKeys(entropy.keyring.accounts.registration.address)
+  // @ts-expect-error
+  const { chosenVerifyingKey, faucetAddress } = faucetService.getRandomFaucet([], verifyingKeys)
   // adding funds to faucet address
 
-  await run('Transfer funds to faucet address', TransferService.transfer(faucetAddress, "1000"))
+  await run('Transfer funds to faucet address', transferService.transfer(faucetAddress, "1000"))
 
-  const transferStatus = await FaucetService.sendMoney(
+  const transferStatus = await faucetService.sendMoney(
     {
       amount: "10000000000",
       addressToSendTo: naynayEntropy.keyring.accounts.registration.address,
@@ -70,7 +70,7 @@ test('Faucet Tests', async t => {
 
   t.ok(transferStatus.isFinalized, 'Transfer is good')
 
-  naynayBalance = await BalanceService.getBalance(naynayEntropy.keyring.accounts.registration.address)
+  naynayBalance = await balanceService.getBalance(naynayEntropy.keyring.accounts.registration.address)
 
   t.ok(naynayBalance > 0, 'Naynay is drippin in faucet tokens')
 

@@ -45,23 +45,25 @@ export class EntropyFaucet extends EntropyBase {
     })
   }
 
-  async getRandomFaucet (previousVerifyingKeys: string[] = [], programModKey = FAUCET_PROGRAM_MOD_KEY) {
+  async getAllFaucetVerifyingKeys (programModKey = FAUCET_PROGRAM_MOD_KEY) {
     const modifiableKeys = await this.entropy.substrate.query.registry.modifiableKeys(programModKey)
-    const verifyingKeys = JSON.parse(JSON.stringify(modifiableKeys.toJSON()))
-  
+    return modifiableKeys.toJSON()
+  }
+
+  getRandomFaucet (previousVerifyingKeys: string[] = [], allVerifyingKeys: string[] = []) {
     // Choosing one of the 5 verifiying keys at random to be used as the faucet sender
-    if (verifyingKeys.length === previousVerifyingKeys.length) {
+    if (allVerifyingKeys.length === previousVerifyingKeys.length) {
       throw new Error('FaucetError: There are no more faucets to choose from')
     }
-    let chosenVerifyingKey = verifyingKeys[Math.floor(Math.random() * verifyingKeys.length)]
+    let chosenVerifyingKey = allVerifyingKeys[Math.floor(Math.random() * allVerifyingKeys.length)]
     if (previousVerifyingKeys.length && previousVerifyingKeys.includes(chosenVerifyingKey)) {
-      const filteredVerifyingKeys = verifyingKeys.filter((key: string) => !previousVerifyingKeys.includes(key))
+      const filteredVerifyingKeys = allVerifyingKeys.filter((key: string) => !previousVerifyingKeys.includes(key))
       chosenVerifyingKey = filteredVerifyingKeys[Math.floor(Math.random() * filteredVerifyingKeys.length)]
     }
     const hashedKey = blake2AsHex(chosenVerifyingKey)
     const faucetAddress = encodeAddress(hashedKey, 42).toString()
   
-    return { chosenVerifyingKey, faucetAddress, verifyingKeys } 
+    return { chosenVerifyingKey, faucetAddress } 
   }
 
   async sendMoney (
@@ -73,9 +75,9 @@ export class EntropyFaucet extends EntropyBase {
       faucetProgramPointer = TESTNET_PROGRAM_HASH
     }: SendMoneyParams
   ): Promise<any> {
-    const BalanceService = new EntropyBalance(this.entropy, this.endpoint)
+    const balanceService = new EntropyBalance(this.entropy, this.endpoint)
     // check balance of faucet address
-    const balance = await BalanceService.getBalance(faucetAddress)
+    const balance = await balanceService.getBalance(faucetAddress)
     if (balance <= 0) throw new Error('FundsError: Faucet Account does not have funds')
     // check verifying key for only one program matching the program hash
     const programs = await viewPrograms(this.entropy, { verifyingKey: chosenVerifyingKey })
