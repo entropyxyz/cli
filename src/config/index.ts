@@ -54,12 +54,11 @@ export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG
     await set(newConfig, configPath)
   }
 }
-function noop () {}
 
 export async function get (configPath = CONFIG_PATH) {
-  const configBuffer = await readFile(configPath)
-
-  return deserialize(configBuffer.toString())
+  return readFile(configPath, 'utf-8')
+    .then(deserialize)
+    .catch(makeGetErrorHandler(configPath))
 }
 
 export function getSync (configPath = CONFIG_PATH): EntropyConfig {
@@ -67,15 +66,24 @@ export function getSync (configPath = CONFIG_PATH): EntropyConfig {
     const configBuffer = readFileSync(configPath, 'utf8')
     return deserialize(configBuffer)
   } catch (err) {
-    if (err.code !== 'ENOENT') throw err
-
-    const newConfig = migrateData(allMigrations, {})
-    writeFileSync(configPath, serialize(newConfig))
-    return newConfig
+    return makeGetErrorHandler(configPath)(err)
   }
 }
 
 export async function set (config: EntropyConfig, configPath = CONFIG_PATH) {
   await mkdirp(dirname(configPath))
   await writeFile(configPath, serialize(config))
+}
+
+/* util */
+function noop () {}
+
+function makeGetErrorHandler (configPath) {
+  return function getErrorHandler (err) {
+    if (err.code !== 'ENOENT') throw err
+
+    const newConfig = migrateData(allMigrations, {})
+    writeFileSync(configPath, serialize(newConfig))
+    return newConfig
+  }
 }
