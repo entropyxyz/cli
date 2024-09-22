@@ -83,6 +83,7 @@ function makeGetErrorHandler (configPath) {
     if (err.code !== 'ENOENT') throw err
 
     const newConfig = migrateData(allMigrations, {})
+    mkdirp.sync(dirname(configPath))
     writeFileSync(configPath, serialize(newConfig))
     return newConfig
   }
