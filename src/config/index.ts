@@ -67,9 +67,11 @@ export function getSync (configPath = CONFIG_PATH): EntropyConfig {
     const configBuffer = readFileSync(configPath, 'utf8')
     return deserialize(configBuffer)
   } catch (err) {
+    console.log('CODE', err.code)
     if (err.code !== 'ENOENT') throw err
 
     const newConfig = migrateData(allMigrations, {})
+    mkdirp.sync(dirname(configPath))
     writeFileSync(configPath, serialize(newConfig))
     return newConfig
   }

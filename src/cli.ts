@@ -35,10 +35,13 @@ program
   .addCommand(entropyTransferCommand())
   .addCommand(entropySignCommand())
   .addCommand(entropyProgramCommand())
-  .action(async (options: EntropyTuiOptions) => {
-    const { account, endpoint } = options
-    const entropy = await loadEntropy(account, endpoint)
-    launchTui(entropy, options)
+  .action(async (opts: EntropyTuiOptions) => {
+    const { account, endpoint } = opts
+    const entropy = account
+      ? await loadEntropy(account, endpoint)
+      : undefined
+    // NOTE: on initial startup you have no account
+    launchTui(entropy, opts)
   })
 
 program.parseAsync().then(() => {})

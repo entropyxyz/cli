@@ -53,7 +53,7 @@ export class EntropyProgram extends EntropyBase {
     )
   }
 
-  async get (programPointer: string) {
+  async get (programPointer: string): Promise<any> {
     this.logger.debug(`program pointer: ${programPointer}`, `${FLOW_CONTEXT}::PROGRAM_PRESENCE_CHECK`);
     return this.entropy.programs.dev.getProgramInfo(programPointer)
   }
