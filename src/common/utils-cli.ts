@@ -9,6 +9,15 @@ export function cliWrite (result) {
   process.stdout.write(prettyResult)
 }
 
+function getConfigOrNull () {
+  try {
+    return config.getSync()
+  } catch (err) {
+    if (config.isDangerousReadError(err)) throw err
+    return null
+  }
+}
+
 export function endpointOption () {
   return new Option(
     '-e, --endpoint <endpoint>',
@@ -23,8 +32,8 @@ export function endpointOption () {
       if (aliasOrEndpoint.match(/^wss?:\/\//)) return aliasOrEndpoint
 
       /* look up endpoint-alias */
-      const storedConfig = config.getSync()
-      const endpoint = storedConfig.endpoints[aliasOrEndpoint]
+      const storedConfig = getConfigOrNull()
+      const endpoint = storedConfig?.endpoints?.[aliasOrEndpoint]
       if (!endpoint) throw Error('unknown endpoint alias: ' + aliasOrEndpoint)
 
       return endpoint
@@ -41,7 +50,7 @@ export function passwordOption (description?: string) {
 }
 
 export function accountOption () {
-  const storedConfig = config.getSync()
+  const storedConfig = getConfigOrNull()
 
   return new Option(
     '-a, --account <accountAddressOrName>',
@@ -52,24 +61,25 @@ export function accountOption () {
   )
     .env('ENTROPY_ACCOUNT')
     .argParser(async (account) => {
-      if (account === storedConfig.selectedAccount) return account
-      // Updated selected account in config with new address from this option
-      await config.set({
-        ...storedConfig,
-        selectedAccount: account
-      })
+      if (storedConfig && storedConfig.selectedAccount !== account) {
+        // Updated selected account in config with new address from this option
+        await config.set({
+          ...storedConfig,
+          selectedAccount: account
+        })
+      }
 
       return account
     })
-    .default(storedConfig.selectedAccount)
+    .default(storedConfig?.selectedAccount)
     // TODO: display the *name* not address
     // TODO: standardise whether selectedAccount is name or address.
 }
 
 export async function loadEntropy (addressOrName: string, endpoint: string, password?: string): Promise<Entropy> {
-  const storedConfig = config.getSync()
-  const selectedAccount = findAccountByAddressOrName(storedConfig.accounts, addressOrName)
-  if (!selectedAccount) throw new Error(`AddressError: No account with name or address "${addressOrName}"`)
+  const accounts = getConfigOrNull()?.accounts || []
+  const selectedAccount = findAccountByAddressOrName(accounts, addressOrName)
+  if (!selectedAccount) throw new Error(`No account with name or address: "${addressOrName}"`)
 
   // check if data is encrypted + we have a password
   if (typeof selectedAccount.data === 'string' && !password) {

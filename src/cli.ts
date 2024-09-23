@@ -1,10 +1,11 @@
 #! /usr/bin/env node
 
 /* NOTE: calling this file entropy.ts helps commander parse process.argv */
-import { Command, Option } from 'commander'
+import { Command, /* Option */ } from 'commander'
 
 import { EntropyTuiOptions } from './types'
 import { accountOption, endpointOption, loadEntropy } from './common/utils-cli'
+import * as config from './config'
 
 import launchTui from './tui'
 import { entropyAccountCommand } from './account/command'
@@ -21,15 +22,15 @@ program
   .description('CLI interface for interacting with entropy.xyz. Running without commands starts an interactive ui')
   .addOption(accountOption())
   .addOption(endpointOption())
-  // NOTE: I think this is currently unused
-  .addOption(
-    new Option(
-      '-d, --dev',
-      'Runs entropy in a developer mode uses the dev endpoint as the main endpoint and allows for faucet option to be available in the main menu'
-    )
-      .env('DEV_MODE')
-      .hideHelp()
-  )
+  // NOTE: currently unused
+  // .addOption(
+  //   new Option(
+  //     '-d, --dev',
+  //     'Runs entropy in a developer mode uses the dev endpoint as the main endpoint and allows for faucet option to be available in the main menu'
+  //   )
+  //     .env('DEV_MODE')
+  //     .hideHelp()
+  // )
   .addCommand(entropyBalanceCommand())
   .addCommand(entropyAccountCommand())
   .addCommand(entropyTransferCommand())
@@ -43,5 +44,9 @@ program
     // NOTE: on initial startup you have no account
     launchTui(entropy, opts)
   })
+  .hook('preAction', async () => {
+    // set up config file, run migrations
+    return config.init()
+  })
 
-program.parseAsync().then(() => {})
+program.parseAsync()
