@@ -17,7 +17,7 @@ const program = new Command()
 /* no command */
 program
   .name('entropy')
-  .description('CLI interface for interacting with entropy.xyz. Running without commands starts an interactive ui')
+  .description('CLI interface for interacting with entropy.xyz. Running this binary without any commands or arguments starts a text-based interface.')
   .addOption(currentAccountAddressOption())
   .addOption(endpointOption())
   // NOTE: I think this is currently unused
