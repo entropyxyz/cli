@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 
 /* NOTE: calling this file entropy.ts helps commander parse process.argv */
-import { Command, /* Option */ } from 'commander'
+import { Command, Option } from 'commander'
 
 import { EntropyTuiOptions } from './types'
 import { accountOption, endpointOption, loadEntropy } from './common/utils-cli'
@@ -22,15 +22,14 @@ program
   .description('CLI interface for interacting with entropy.xyz. Running without commands starts an interactive ui')
   .addOption(accountOption())
   .addOption(endpointOption())
-  // NOTE: currently unused
-  // .addOption(
-  //   new Option(
-  //     '-d, --dev',
-  //     'Runs entropy in a developer mode uses the dev endpoint as the main endpoint and allows for faucet option to be available in the main menu'
-  //   )
-  //     .env('DEV_MODE')
-  //     .hideHelp()
-  // )
+  .addOption(
+    new Option(
+      '-d, --dev',
+      'Runs entropy in a developer mode uses the dev endpoint as the main endpoint and allows for faucet option to be available in the main menu'
+    )
+      .env('DEV_MODE')
+      .hideHelp()
+  )
   .addCommand(entropyBalanceCommand())
   .addCommand(entropyAccountCommand())
   .addCommand(entropyTransferCommand())
