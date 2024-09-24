@@ -1,3 +1,4 @@
+import { exec } from 'node:child_process'
 // @ts-ignore
 import { spinNetworkUp, spinNetworkDown, } from "@entropyxyz/sdk/testing"
 import * as readline from 'readline'
@@ -10,6 +11,21 @@ export {
 
 export * from './constants'
 export * from './setup-test'
+
+/* Promise wrapper function of [exec](https://nodejs.org/api/child_process.html#child_processexeccommand-options-callback)
+ *
+ * @param {string} command - a string command to run in child process
+ */
+
+export function execPromise (command: string): Promise<any> {
+  return new Promise((res, rej) => {
+    exec(command, (error, stdout, stderr) => {
+      if (!error && !stderr) res(stdout)
+      else if (!!stderr && !error) rej(stderr)
+      else if (!!error) rej(error)
+    })
+  })
+}
 
 /* Helper for wrapping promises which makes it super clear in logging if the promise
  * resolves or threw.
