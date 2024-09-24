@@ -81,10 +81,11 @@ test('config - get', async t => {
   const result = await get(configPath)
   t.deepEqual(result, config, 'get works')
 
+  const MSG = 'path that does not exist fails'
   await get('/tmp/junk')
-    .then(() => t.fail('bad path should fail'))
+    .then(() => t.fail(MSG))
     .catch(err => {
-      t.match(err.message, /no such file/, 'bad path should fail')
+      t.match(err.message, /ENOENT/, MSG)
     })
 })
 
@@ -95,6 +96,7 @@ test('config - set', async t => {
     dog: true,
     secretKey: makeKey()
   }
+  // @ts-expect-error : this is a breaking test
   await set(config, configPath)
   const actual = await get(configPath)
 

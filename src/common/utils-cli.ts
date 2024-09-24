@@ -1,12 +1,21 @@
+import Entropy from '@entropyxyz/sdk'
 import { Option } from 'commander'
 import { findAccountByAddressOrName, stringify } from './utils'
 import * as config from '../config'
-import Entropy from '@entropyxyz/sdk'
 import { initializeEntropy } from './initializeEntropy'
 
 export function cliWrite (result) {
   const prettyResult = stringify(result, 0)
   process.stdout.write(prettyResult)
+}
+
+function getConfigOrNull () {
+  try {
+    return config.getSync()
+  } catch (err) {
+    if (config.isDangerousReadError(err)) throw err
+    return null
+  }
 }
 
 export function endpointOption () {
@@ -17,14 +26,14 @@ export function endpointOption () {
       'Can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`.'
     ].join(' ')
   )
-    .env('ENDPOINT')
+    .env('ENTROPY_ENDPOINT')
     .argParser(aliasOrEndpoint => {
       /* see if it's a raw endpoint */
       if (aliasOrEndpoint.match(/^wss?:\/\//)) return aliasOrEndpoint
 
       /* look up endpoint-alias */
-      const storedConfig = config.getSync()
-      const endpoint = storedConfig.endpoints[aliasOrEndpoint]
+      const storedConfig = getConfigOrNull()
+      const endpoint = storedConfig?.endpoints?.[aliasOrEndpoint]
       if (!endpoint) throw Error('unknown endpoint alias: ' + aliasOrEndpoint)
 
       return endpoint
@@ -40,31 +49,37 @@ export function passwordOption (description?: string) {
   )
 }
 
-export function currentAccountAddressOption () {
-  const storedConfig = config.getSync()
+export function accountOption () {
+  const storedConfig = getConfigOrNull()
 
   return new Option(
-    '-a, --account <address>',
-    'Sets the current account for the session or defaults to the account stored in the config'
+    '-a, --account <accountAddressOrName>',
+    [
+      'Sets the account for the session.',
+      'Defaults to the last set account (or the first account if one has not been set before).'
+    ].join(' ')
   )
-    .env('ACCOUNT_ADDRESS')
+    .env('ENTROPY_ACCOUNT')
     .argParser(async (account) => {
-      if (account === storedConfig.selectedAccount) return account
-      // Updated selected account in config with new address from this option
-      const newConfigUpdates = { selectedAccount: account }
-      await config.set({ ...storedConfig, ...newConfigUpdates })
+      if (storedConfig && storedConfig.selectedAccount !== account) {
+        // Updated selected account in config with new address from this option
+        await config.set({
+          ...storedConfig,
+          selectedAccount: account
+        })
+      }
 
       return account
     })
-    .default(storedConfig.selectedAccount)
+    .default(storedConfig?.selectedAccount)
     // TODO: display the *name* not address
     // TODO: standardise whether selectedAccount is name or address.
 }
 
 export async function loadEntropy (addressOrName: string, endpoint: string, password?: string): Promise<Entropy> {
-  const storedConfig = config.getSync()
-  const selectedAccount = findAccountByAddressOrName(storedConfig.accounts, addressOrName)
-  if (!selectedAccount) throw new Error(`AddressError: No account with name or address "${addressOrName}"`)
+  const accounts = getConfigOrNull()?.accounts || []
+  const selectedAccount = findAccountByAddressOrName(accounts, addressOrName)
+  if (!selectedAccount) throw new Error(`No account with name or address: "${addressOrName}"`)
 
   // check if data is encrypted + we have a password
   if (typeof selectedAccount.data === 'string' && !password) {

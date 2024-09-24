@@ -4,7 +4,8 @@
 import { Command, Option } from 'commander'
 
 import { EntropyTuiOptions } from './types'
-import { currentAccountAddressOption, endpointOption, loadEntropy } from './common/utils-cli'
+import { accountOption, endpointOption, loadEntropy } from './common/utils-cli'
+import * as config from './config'
 
 import launchTui from './tui'
 import { entropyAccountCommand } from './account/command'
@@ -18,9 +19,8 @@ const program = new Command()
 program
   .name('entropy')
   .description('CLI interface for interacting with entropy.xyz. Running this binary without any commands or arguments starts a text-based interface.')
-  .addOption(currentAccountAddressOption())
+  .addOption(accountOption())
   .addOption(endpointOption())
-  // NOTE: I think this is currently unused
   .addOption(
     new Option(
       '-d, --dev',
@@ -33,10 +33,17 @@ program
   .addCommand(entropyAccountCommand())
   .addCommand(entropyTransferCommand())
   .addCommand(entropySignCommand())
-  .action(async (options: EntropyTuiOptions) => {
-    const { account, endpoint } = options
-    const entropy = await loadEntropy(account, endpoint)
-    launchTui(entropy, options)
+  .action(async (opts: EntropyTuiOptions) => {
+    const { account, endpoint } = opts
+    const entropy = account
+      ? await loadEntropy(account, endpoint)
+      : undefined
+    // NOTE: on initial startup you have no account
+    launchTui(entropy, opts)
+  })
+  .hook('preAction', async () => {
+    // set up config file, run migrations
+    return config.init()
   })
 
-program.parseAsync().then(() => {})
+program.parseAsync()
