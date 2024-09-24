@@ -27,16 +27,21 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - new: 'src/flows/user-program-management/view.ts' - service file for pure functions of viewing user programs
 - new: 'src/flows/user-program-management/helpers/utils.ts' - utility helper file for user program management specific methods
 - new: './src/flows/user-program-management/remove.ts' - service file for removing user program pure function
-- new: './src/common/base-commands.ts' - base abstract class for new command classes
+- new: './src/common/entropy-base.ts' - base abstract class for new command classes
 - new: './src/balance' - new file structure for our CLI/TUI flows
-  - new: './src/balance/command.ts' - main entry file for balance command for tui/cli
+  - new: './src/balance/main.ts' - main entry file for balance command for tui/cli
   - new: './src/balance/utils.ts' - utilities and helper methods for all things balance
 - new: './src/transfer' - new file structure for our CLI/TUI flows
-  - new: './src/transfer/command.ts' - main entry file for transfer command for tui/cli
+  - new: './src/transfer/main.ts' - main entry file for transfer command for tui/cli
   - new: './src/transfer/utils.ts' - utilities and helper methods for all things transfer
-- new: './src/accounts' - new file structure for our CLI/TUI flows
-  - new: './src/accounts/command.ts' - main entry file for accounts command for tui/cli
-  - new: './src/accounts/utils.ts' - utilities and helper methods for all things accounts
+- new: './src/account' - new file structure for our CLI/TUI flows
+  - new: './src/account/main.ts' - main entry file for accounts command for tui/cli
+  - new: './src/account/utils.ts' - utilities and helper methods for all things accounts
+- new: './src/faucet' - new file structure for our CLI/TUI flows
+  - new: './src/faucet/main.ts' - main entry file for faucet methods used for command and interaction files
+  - new: './src/faucet/utils.ts' - utilities and helper methods for all things faucet
+  - new: './src/faucet/interaction.ts' - main entrypoint for TUI flows
+  - new: './src/faucet/command.ts' - main entrypoint for CLI flows
 
 ### Changed
 
@@ -48,6 +53,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - removed flows/entropyTransfer/*.ts directory with file restructure
 - removed flows/manage-accounts/*/*.ts directory with file restructure
 - removed flows/register/*.ts directory with file restructure
+- removed flow/entropyFaucet/*.ts directory with file restructure
 
 
 ### Broke
