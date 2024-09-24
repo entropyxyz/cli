@@ -1,5 +1,5 @@
 import { readFile, writeFile, rm } from 'node:fs/promises'
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { mkdirp } from 'mkdirp'
 import { join, dirname } from 'path'
 import envPaths from 'env-paths'
@@ -35,9 +35,10 @@ function hasRunMigration (config: any, version: number) {
 
 export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG_PATH) {
   const currentConfig = await get(configPath)
-    .catch(async (err) => {
-      if (err.code !== 'ENOENT') throw err
+    .catch(async (err ) => {
+      if (isDangerousReadError(err)) throw err
 
+      // If there is no current config, try loading the old one
       const oldConfig = await get(oldConfigPath).catch(noop) // drop errors
       if (oldConfig) {
         // move the config
@@ -58,33 +59,30 @@ export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG
 export async function get (configPath = CONFIG_PATH) {
   return readFile(configPath, 'utf-8')
     .then(deserialize)
-    .catch(makeGetErrorHandler(configPath))
 }
 
-export function getSync (configPath = CONFIG_PATH): EntropyConfig {
-  try {
-    const configBuffer = readFileSync(configPath, 'utf8')
-    return deserialize(configBuffer)
-  } catch (err) {
-    return makeGetErrorHandler(configPath)(err)
-  }
+export function getSync (configPath = CONFIG_PATH) {
+  const configStr = readFileSync(configPath, 'utf8')
+  return deserialize(configStr)
 }
 
 export async function set (config: EntropyConfig, configPath = CONFIG_PATH) {
+  assertConfigPath(configPath)
+
   await mkdirp(dirname(configPath))
   await writeFile(configPath, serialize(config))
 }
 
 /* util */
 function noop () {}
-
-function makeGetErrorHandler (configPath) {
-  return function getErrorHandler (err) {
-    if (err.code !== 'ENOENT') throw err
-
-    const newConfig = migrateData(allMigrations, {})
-    mkdirp.sync(dirname(configPath))
-    writeFileSync(configPath, serialize(newConfig))
-    return newConfig
+function assertConfigPath (configPath) {
+  if (!configPath.endsWith('.json')) {
+    throw Error(`configPath must be of form *.json, got ${configPath}`)
   }
+}
+export function isDangerousReadError (err) {
+  // file not found:
+  if (err.code === 'ENOENT') return false
+
+  return true
 }

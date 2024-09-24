@@ -3,7 +3,7 @@ import { EntropyBase } from "../common/entropy-base";
 import { blake2AsHex, encodeAddress } from "@polkadot/util-crypto";
 import { FAUCET_PROGRAM_MOD_KEY, TESTNET_PROGRAM_HASH } from "./utils";
 import { EntropyBalance } from "src/balance/main";
-import { viewPrograms } from "src/flows/programs/view";
+import { EntropyProgram } from "src/program/main";
 import FaucetSigner from "./helpers/signer";
 import { SendMoneyParams } from "./types";
 
@@ -76,11 +76,12 @@ export class EntropyFaucet extends EntropyBase {
     }: SendMoneyParams
   ): Promise<any> {
     const balanceService = new EntropyBalance(this.entropy, this.endpoint)
+    const programService = new EntropyProgram(this.entropy, this.endpoint)
     // check balance of faucet address
     const balance = await balanceService.getBalance(faucetAddress)
     if (balance <= 0) throw new Error('FundsError: Faucet Account does not have funds')
     // check verifying key for only one program matching the program hash
-    const programs = await viewPrograms(this.entropy, { verifyingKey: chosenVerifyingKey })
+    const programs = await programService.list({ verifyingKey: chosenVerifyingKey })
     if (programs.length) {
       if (programs.length > 1) throw new Error('ProgramsError: Faucet Account has too many programs attached, expected less')
       if (programs.length === 1 && programs[0].program_pointer !== faucetProgramPointer) {

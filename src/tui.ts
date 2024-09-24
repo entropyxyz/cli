@@ -1,7 +1,6 @@
 import inquirer from 'inquirer'
 import Entropy from '@entropyxyz/sdk'
 import * as config from './config'
-import * as flows from './flows'
 import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
 import { print } from './common/utils'
@@ -13,6 +12,7 @@ import { entropySign } from './sign/interaction'
 import { entropyBalance } from './balance/interaction'
 import { entropyTransfer } from './transfer/interaction'
 import { entropyFaucet } from './faucet/interaction'
+import { entropyProgram, entropyProgramDev } from './program/interaction'
 
 async function setupConfig () {
   let storedConfig = await config.get()
@@ -44,8 +44,8 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
     'Sign': () => {},
     'Transfer': () => {},
     // TODO: design programs in TUI (merge deploy+user programs)
-    'Deploy Program': flows.devPrograms,
-    'User Programs': flows.userPrograms,
+    'Deploy Program': () => {},
+    'User Programs': () => {},
   }
 
   const devChoices = {
@@ -89,6 +89,7 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     console.error('There are currently no accounts available, please create or import your new account using the Manage Accounts feature')
   } else {
     logger.debug(answers)
+
     switch (answers.choice) {
     case 'Manage Accounts': {
       const response = await entropyAccount(options.endpoint, storedConfig)
@@ -120,6 +121,16 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
       } catch (error) {
         console.error('There was an issue with running the faucet', error);
       }
+      break
+    }
+    case 'User Programs': {
+      await entropyProgram(entropy, options.endpoint)
+        .catch(err => console.error('There was an error with programs', err))
+      break
+    }
+    case 'Deploy Program': {
+      await entropyProgramDev(entropy, options.endpoint)
+        .catch(err => console.error('There was an error with program dev', err))
       break
     }
     default: {

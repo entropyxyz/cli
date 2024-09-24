@@ -31,7 +31,7 @@ function validateSeedInput (seed) {
   return ACCOUNTS_CONTENT.seed.invalidSeed
 }
 
-export const importQuestions = [
+export const accountImportQuestions = [
   {
     type: 'input',
     name: ACCOUNTS_CONTENT.seed.name,
@@ -48,14 +48,14 @@ export const importQuestions = [
   },
 ]
 
-export const newAccountQuestions = [
+export const accountNewQuestions = [
   {
     type: 'confirm',
     name: ACCOUNTS_CONTENT.importKey.name,
     message: ACCOUNTS_CONTENT.importKey.message,
     default: ACCOUNTS_CONTENT.importKey.default,
   },
-  ...importQuestions,
+  ...accountImportQuestions,
   {
     type: 'input',
     name: ACCOUNTS_CONTENT.name.name,
@@ -63,14 +63,14 @@ export const newAccountQuestions = [
   },
 ]
 
-export const selectAccountQuestions = (accounts: EntropyAccountConfig[]) => [{
+export const accountSelectQuestions = (accounts: EntropyAccountConfig[]) => [{
   type: 'list',
   name: ACCOUNTS_CONTENT.selectAccount.name,
   message: ACCOUNTS_CONTENT.selectAccount.message,
   choices: generateAccountChoices(accounts)
 }]
 
-export const manageAccountsQuestions = [
+export const accountManageQuestions = [
   {
     type: 'list',
     name: ACCOUNTS_CONTENT.interactionChoice.name,
