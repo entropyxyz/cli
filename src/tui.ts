@@ -36,26 +36,25 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
   console.log(logo) // the Entropy logo
   logger.debug(options)
 
-  const choices = {
-    'Manage Accounts': () => {},
-    // leaving as a noop function until all flows are restructured
-    'Balance': () => {},
-    'Register': () => {},
-    'Sign': () => {},
-    'Transfer': () => {},
+  let choices = [
+    'Manage Accounts',
+    'Balance',
+    'Register',
+    'Sign',
+    'Transfer',
     // TODO: design programs in TUI (merge deploy+user programs)
-    'Deploy Program': () => {},
-    'User Programs': () => {},
-  }
+    'Deploy Program',
+    'User Programs',
+  ]
 
-  const devChoices = {
-    'Entropy Faucet': () => {},
-  }
+  const devChoices = [
+    'Entropy Faucet',
+  ]
 
-  if (options.dev) Object.assign(choices, devChoices)
+  if (options.dev) choices = [...choices, ...devChoices]
 
   // assign exit so its last
-  Object.assign(choices, { 'Exit': async () => {} })
+  choices = [...choices, 'Exit']
 
   main(entropy, choices, options, logger)
 }
@@ -63,19 +62,25 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
 async function main (entropy: Entropy, choices, options, logger: EntropyLogger) {
   const storedConfig = await setupConfig()
 
+  // Entropy is undefined on initial install, after user creates their first account,
+  // entropy should be loaded
+  if (storedConfig.selectedAccount && !entropy) {
+    entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint)
+  }
   // If the selected account changes within the TUI we need to reset the entropy instance being used
   const currentAccount = entropy?.keyring?.accounts?.registration?.address
   if (currentAccount && currentAccount !== storedConfig.selectedAccount) {
     await entropy.close()
     entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint);
   }
+  
 
   const answers = await inquirer.prompt([{
     type: 'list',
     name: 'choice',
     message: 'Select Action',
-    pageSize: Object.keys(choices).length,
-    choices: Object.keys(choices),
+    pageSize: choices.length,
+    choices,
   }])
 
   if (answers.choice === 'Exit')  {
