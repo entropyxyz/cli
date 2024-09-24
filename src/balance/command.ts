@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import Entropy from "@entropyxyz/sdk";
 import { cliWrite, endpointOption, loadEntropy, passwordOption } from "src/common/utils-cli";
 import { EntropyBalance } from "./main";
 
@@ -10,7 +11,7 @@ export function entropyBalanceCommand () {
     .addOption(passwordOption())
     .addOption(endpointOption())
     .action(async (address, opts) => {
-      const entropy = await loadEntropy(address, opts.endpoint)
+      const entropy: Entropy = await loadEntropy(address, opts.endpoint)
       const BalanceService = new EntropyBalance(entropy, opts.endpoint)
       const balance = await BalanceService.getBalance(address)
       cliWrite(`${balance.toLocaleString('en-US')} BITS`)

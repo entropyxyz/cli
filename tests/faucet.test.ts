@@ -4,17 +4,18 @@ import { stripHexPrefix } from '../src/common/utils'
 import { readFileSync } from 'fs'
 import { EntropyBalance } from '../src/balance/main'
 import { EntropyTransfer } from '../src/transfer/main'
-import { getRandomFaucet, sendMoney } from '../src/flows/entropyFaucet/faucet'
-import { LOCAL_PROGRAM_HASH } from '../src/flows/entropyFaucet/constants'
+import { EntropyFaucet } from '../src/faucet/main'
+import { LOCAL_PROGRAM_HASH } from '../src/faucet/utils'
 import { EntropyAccount } from '../src/account/main'
 
 test('Faucet Tests', async t => {
   const { run, entropy, endpoint } = await setupTest(t, { seed: charlieStashSeed })
   const { entropy: naynayEntropy } = await setupTest(t)
 
-  const accountService = new EntropyAccount(entropy, endpoint)
   const balanceService = new EntropyBalance(entropy, endpoint)
   const transferService = new EntropyTransfer(entropy, endpoint)
+  const faucetService = new EntropyFaucet(naynayEntropy, endpoint)
+  const accountService = new EntropyAccount(entropy, endpoint)
 
   const faucetProgram = readFileSync('tests/programs/faucet_program.wasm')
 
@@ -52,8 +53,9 @@ test('Faucet Tests', async t => {
       programData: [{ program_pointer: faucetProgramPointer, program_config: userConfig }]
     }
   ))
-  
-  const { chosenVerifyingKey, faucetAddress } = await getRandomFaucet(entropy, [], entropy.keyring.accounts.registration.address)
+  const verifyingKeys = await faucetService.getAllFaucetVerifyingKeys(entropy.keyring.accounts.registration.address)
+  // @ts-expect-error
+  const { chosenVerifyingKey, faucetAddress } = faucetService.getRandomFaucet([], verifyingKeys)
   // adding funds to faucet address
   entropyBalance = await balanceService.getBalance(entropy.keyring.accounts.registration.address)
   const faucetAddressBalance = await balanceService.getBalance(faucetAddress)
@@ -63,9 +65,7 @@ test('Faucet Tests', async t => {
   
   await run('Transfer funds to faucet address', transferService.transfer(faucetAddress, "1000"))
 
-  const transferStatus = await sendMoney(
-    naynayEntropy,
-    endpoint,
+  const transferStatus = await faucetService.sendMoney(
     {
       amount: "10000000000",
       addressToSendTo: naynayEntropy.keyring.accounts.registration.address,

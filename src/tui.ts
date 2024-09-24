@@ -1,7 +1,6 @@
 import inquirer from 'inquirer'
 import Entropy from '@entropyxyz/sdk'
 import * as config from './config'
-import * as flows from './flows'
 import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
 import { print } from './common/utils'
@@ -12,6 +11,7 @@ import { entropyAccount, entropyRegister } from './account/interaction'
 import { entropySign } from './sign/interaction'
 import { entropyBalance } from './balance/interaction'
 import { entropyTransfer } from './transfer/interaction'
+import { entropyFaucet } from './faucet/interaction'
 import { entropyProgram, entropyProgramDev } from './program/interaction'
 
 async function setupConfig () {
@@ -46,14 +46,13 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
     // TODO: design programs in TUI (merge deploy+user programs)
     'Deploy Program': () => {},
     'User Programs': () => {},
-    'Entropy Faucet': flows.entropyFaucet,
   }
 
-  // const devChoices = {
-  //   // 'Entropy Faucet': flows.entropyFaucet,
-  // }
+  const devChoices = {
+    'Entropy Faucet': () => {},
+  }
 
-  // if (options.dev) Object.assign(choices, devChoices)
+  if (options.dev) Object.assign(choices, devChoices)
 
   // assign exit so its last
   Object.assign(choices, { 'Exit': async () => {} })
@@ -114,6 +113,14 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     case 'Sign': {
       await entropySign(entropy, options.endpoint)
         .catch(err => console.error('There was an issue with signing', err))
+      break
+    }
+    case 'Entropy Faucet': {
+      try {
+        await entropyFaucet(entropy, options, logger)
+      } catch (error) {
+        console.error('There was an issue with running the faucet', error);
+      }
       break
     }
     case 'User Programs': {
