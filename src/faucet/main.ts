@@ -14,6 +14,8 @@ export class EntropyFaucet extends EntropyBase {
     super({ entropy, endpoint, flowContext: FLOW_CONTEXT })
   }
 
+  // Method used to sign and send the transfer request (transfer request = call argument) using the custom signer
+  // created to overwrite how we sign the payload that is sent up chain
   async faucetSignAndSend (call: any, amount: number, senderAddress: string, chosenVerifyingKey: any): Promise<any> {
     const api = this.entropy.substrate
     const faucetSigner = new FaucetSigner(api.registry, this.entropy, amount, chosenVerifyingKey)
@@ -50,8 +52,9 @@ export class EntropyFaucet extends EntropyBase {
     return modifiableKeys.toJSON()
   }
 
+  // To handle overloading the individual faucet, multiple faucet accounts have been generated, and here is
+  // where we choose one of those faucet's at random
   getRandomFaucet (previousVerifyingKeys: string[] = [], allVerifyingKeys: string[] = []) {
-    // Choosing one of the 5 verifiying keys at random to be used as the faucet sender
     if (allVerifyingKeys.length === previousVerifyingKeys.length) {
       throw new Error('FaucetError: There are no more faucets to choose from')
     }

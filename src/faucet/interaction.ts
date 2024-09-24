@@ -19,6 +19,8 @@ export async function entropyFaucet (entropy: Entropy, options, logger: EntropyL
   return sendMoneyFromRandomFaucet(entropy, options.endpoint, verifyingKeys, logger)
 }
 
+// Method that takes in the initial list of verifying keys (to avoid multiple calls to the rpc) and recursively retries each faucet until
+// a successful transfer is made
 async function sendMoneyFromRandomFaucet (entropy: Entropy, endpoint: string, verifyingKeys: string[], logger: EntropyLogger) {
   const faucetService = new EntropyFaucet(entropy, endpoint)
   const selectedAccountAddress = entropy.keyring.accounts.registration.address
