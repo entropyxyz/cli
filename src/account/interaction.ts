@@ -8,9 +8,9 @@ import { EntropyConfig } from "../config/types";
 import * as config from "../config";
 
 import { 
-  manageAccountsQuestions,
-  newAccountQuestions,
-  selectAccountQuestions
+  accountManageQuestions,
+  accountNewQuestions,
+  accountSelectQuestions
 } from "./utils"
 
 /*
@@ -18,12 +18,12 @@ import {
  */
 export async function entropyAccount (endpoint: string, storedConfig: EntropyConfig) {
   const { accounts } = storedConfig
-  const { interactionChoice } = await inquirer.prompt(manageAccountsQuestions)
+  const { interactionChoice } = await inquirer.prompt(accountManageQuestions)
 
   switch (interactionChoice) {
 
   case 'create-import': {
-    const answers = await inquirer.prompt(newAccountQuestions)
+    const answers = await inquirer.prompt(accountNewQuestions)
     const { name, path, importKey } = answers
     let { seed } = answers
     if (importKey && seed.includes('#debug')) {
@@ -44,7 +44,7 @@ export async function entropyAccount (endpoint: string, storedConfig: EntropyCon
       console.error('There are currently no accounts available, please create or import a new account using the Manage Accounts feature')
       return
     }
-    const { selectedAccount } = await inquirer.prompt(selectAccountQuestions(accounts))
+    const { selectedAccount } = await inquirer.prompt(accountSelectQuestions(accounts))
     await config.set({
       ...storedConfig,
       selectedAccount: selectedAccount.address

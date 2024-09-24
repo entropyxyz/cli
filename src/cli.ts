@@ -12,6 +12,7 @@ import { entropyAccountCommand } from './account/command'
 import { entropyTransferCommand } from './transfer/command'
 import { entropySignCommand } from './sign/command'
 import { entropyBalanceCommand } from './balance/command'
+import { entropyProgramCommand } from './program/command'
 
 const program = new Command()
 
@@ -33,6 +34,7 @@ program
   .addCommand(entropyAccountCommand())
   .addCommand(entropyTransferCommand())
   .addCommand(entropySignCommand())
+  .addCommand(entropyProgramCommand())
   .action(async (opts: EntropyTuiOptions) => {
     const { account, endpoint } = opts
     const entropy = account

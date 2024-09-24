@@ -1,4 +1,3 @@
-import Entropy from "@entropyxyz/sdk";
 import { Command } from "commander";
 import { cliWrite, endpointOption, loadEntropy, passwordOption } from "src/common/utils-cli";
 import { EntropyBalance } from "./main";
