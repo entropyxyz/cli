@@ -24,11 +24,10 @@ export class EntropyAccount extends EntropyBase {
 
     await wasmGlobalsReady()
     const keyring = new Keyring({ seed, path, debug: true })
-    const fullAccount = keyring.getAccount()
+    const data = keyring.getAccount()
     // TODO: sdk should create account on constructor
-    const { admin } = keyring.getAccount()
+    const { admin } = data
 
-    const data = fullAccount
     delete admin.pair
     // const encryptedData = password ? passwordFlow.encrypt(data, password) : data
     
@@ -98,6 +97,12 @@ export class EntropyAccount extends EntropyBase {
   }
 
   /* PRIVATE */
+
+  /*
+
+  WARNIG: this function needs to be removed in next core release [0.3.0]!
+
+  */
 
   private async pruneRegistration () {
     return new Promise((resolve, reject) => {
