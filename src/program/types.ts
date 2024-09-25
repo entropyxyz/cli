@@ -8,7 +8,7 @@ export interface EntropyProgramDeployParams {
 
 export interface EntropyProgramAddParams { 
   programPointer: string
-  programConfig: string
+  programConfigPath: string
   verifyingKey?: string 
 }
 

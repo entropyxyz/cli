@@ -17,7 +17,14 @@ export class EntropyProgram extends EntropyBase {
 
   // User Methods:
 
-  async add ({ programPointer, programConfig, verifyingKey }: EntropyProgramAddParams): Promise<void> {
+  async add ({ programPointer, programConfigPath, verifyingKey }: EntropyProgramAddParams): Promise<void> {
+  // QUESTION: change the signature to "required + opts"?
+  // i.e.
+  // async add (programPointer, { programConfigPath, verifyingKey }): Promise<void> {
+    const programConfig = programConfigPath
+      ? await loadFile(programConfigPath, 'json')
+      : undefined
+
     return this.entropy.programs.add(
       {
         program_pointer: programPointer,
@@ -56,12 +63,16 @@ export class EntropyProgram extends EntropyBase {
   async get (programPointer: string): Promise<any> {
     this.logger.debug(`program pointer: ${programPointer}`, `${FLOW_CONTEXT}::PROGRAM_PRESENCE_CHECK`);
     return this.entropy.programs.dev.getProgramInfo(programPointer)
+    // TODO: after next SDK release
+    // return this.entropy.programs.dev.get(programPointer)
   }
 
   async listDeployed () {
+    // QUESTION: does the CLI ever want to take in an address?
     const address = this.entropy.keyring.accounts.registration.address
-    // QUESTION: will we always be wanting this address?
     return this.entropy.programs.dev.get(address)
+    // TODO: after next SDK release
+    // return this.entropy.programs.dev.getByDeployer(address)
   }
 }
 
