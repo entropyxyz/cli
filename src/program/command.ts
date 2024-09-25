@@ -1,7 +1,10 @@
 import { Command } from 'commander'
 
 import { EntropyProgram } from './main'
-import { accountOption, endpointOption, verifyingKeyOption, cliWrite, loadEntropy } from '../common/utils-cli'
+import {
+  accountOption, endpointOption, verifyingKeyOption, programModKeyOption,
+  cliWrite, loadEntropy
+} from '../common/utils-cli'
 
 async function programService (opts) {
   const entropy = await loadEntropy(opts.account, opts.endpoint)
@@ -15,8 +18,8 @@ export function entropyProgramCommand () {
     .addCommand(entropyProgramGet())
     .addCommand(entropyProgramListDeployed())
     .addCommand(entropyProgramAdd())
-    // .addCommand(entropyProgramRemove())
-    // .addCommand(entropyProgramList())
+    .addCommand(entropyProgramRemove())
+    .addCommand(entropyProgramList())
 }
 
 function entropyProgramDeploy () {
@@ -119,3 +122,46 @@ function entropyProgramAdd () {
     })
 }
 
+
+function entropyProgramRemove () {
+  return new Command('remove')
+    .alias('rm')
+    .description('Remove a program from an account (specified by a verifyingKey)')
+    .argument('<programPointer>', 'The pointer for the program you want to remove.')
+    .argument('<programPointer>', 'The pointer for the program interface.')
+    .argument('[programConfigPath]', 'The path to the config to apply to the program. Must be a .json file')
+    .addOption(accountOption())
+    .addOption(endpointOption())
+    .addOption(verifyingKeyOption())
+    .addOption(programModKeyOption())
+
+    .action(async (programPointer, opts) => { // eslint-disable-line
+      const program = await programService(opts)
+
+      await program.remove({
+        programPointer,
+        programModKey: opts['program-mod-key'],
+        verifyingKey: opts['verifying-key'] // WARNING: check this is working
+      })
+
+      process.exit(0)
+    })
+}
+
+function entropyProgramList () {
+  return new Command('list')
+    .alias('ls')
+    .description('List all the programs (an associated config) added to a particular verifyingKey.')
+    .argument('<verifyingKey>', 'The verifyingKey being queried.')
+    .addOption(accountOption())
+    .addOption(endpointOption())
+
+    .action(async (verifyingKey, opts) => { // eslint-disable-line
+      const program = await programService(opts)
+
+      await program.list({ verifyingKey })
+
+      process.exit(0)
+    })
+
+}

@@ -85,6 +85,15 @@ export function verifyingKeyOption () {
   )
 }
 
+export function programModKeyOption () {
+  return new Option(
+    '-pmk, --program-mod-key',
+    [
+      'The programModKey to perform this function with.'
+    ].join(' ')
+  )
+}
+
 export async function loadEntropy (addressOrName: string, endpoint: string, password?: string): Promise<Entropy> {
   const accounts = getConfigOrNull()?.accounts || []
   const selectedAccount = findAccountByAddressOrName(accounts, addressOrName)

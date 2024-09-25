@@ -8,13 +8,14 @@ export interface EntropyProgramDeployParams {
 
 export interface EntropyProgramAddParams { 
   programPointer: string
-  programConfigPath: string
+  programConfigPath?: string
   verifyingKey?: string 
 }
 
 export interface EntropyProgramRemoveParams {
   programPointer: string
-  verifyingKey: string
+  programModKey?: string
+  verifyingKey?: string
 }
 
 export interface EntropyProgramViewProgramsParams {
