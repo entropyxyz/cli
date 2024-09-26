@@ -1,4 +1,4 @@
-export const PROMPT_CONTENT = {
+export const PROMPT = {
   amount: {
     name: 'amount',
     message: 'Input amount to transfer:',

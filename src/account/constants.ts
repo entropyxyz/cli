@@ -1,4 +1,4 @@
-export const FLOW_CONTEXT = 'ENTROPY_ACCOUNT'
+export const FLOW_CONTEXT = 'ENTROPY_ACCOUNTS'
 
 export const ACCOUNTS_CONTENT = {
   seed: {
