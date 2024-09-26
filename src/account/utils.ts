@@ -1,9 +1,9 @@
+import { ACCOUNTS_CONTENT } from './constants';
 import { EntropyAccountConfig } from "../config/types";
 import * as config from "../config";
-import { ACCOUNTS_CONTENT } from './constants';
-import { generateAccountChoices } from '../common/utils';
+import { generateAccountChoices, findAccountByAddressOrName } from '../common/utils';
 
-export async function selectAndPersistNewAccount (newAccount) {
+export async function selectAndPersistNewAccount (newAccount: EntropyAccountConfig) {
   const storedConfig = await config.get()
   const { accounts } = storedConfig
 
@@ -19,8 +19,19 @@ export async function selectAndPersistNewAccount (newAccount) {
   accounts.push(newAccount) 
   await config.set({
     ...storedConfig,
-    accounts,
     selectedAccount: newAccount.address
+  })
+}
+
+export async function addVerifyingKeyToAccountAndSelect (verifyingKey: string, accountNameOrAddress: string) {
+  const storedConfig = await config.get()
+  const account = findAccountByAddressOrName(storedConfig.accounts, accountNameOrAddress)
+  account.data.registration.verifyingKeys.push(verifyingKey)
+
+  // persist to config, set selectedAccount
+  await config.set({
+    ...storedConfig,
+    selectedAccount: account.address
   })
 }
 

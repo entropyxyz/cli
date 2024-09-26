@@ -1,11 +1,10 @@
 import Entropy from "@entropyxyz/sdk"
 import { Command, Option } from 'commander'
 import { EntropyAccount } from "./main";
-import { selectAndPersistNewAccount } from "./utils";
+import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from "./utils";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
 import { cliWrite, accountOption, endpointOption, loadEntropy, passwordOption } from "../common/utils-cli";
-import { findAccountByAddressOrName } from "src/common/utils";
 
 export function entropyAccountCommand () {
   return new Command('account')
@@ -102,28 +101,13 @@ function entropyAccountRegister () {
     //   )
     // )
     .action(async (opts) => {
-      const { account, endpoint, /* password */ } = opts
-      const storedConfig = await config.get()
-      const { accounts } = storedConfig
-      const accountToRegister = findAccountByAddressOrName(accounts, account)
-      if (!accountToRegister) {
-        throw new Error('AccountError: Unable to register non-existent account')
-      }
+      // NOTE: loadEntropy throws if it can't find opts.account
+      const entropy: Entropy = await loadEntropy(opts.account, opts.endpoint)
+      const accountService = new EntropyAccount(entropy, opts.endpoint)
 
-      const entropy: Entropy = await loadEntropy(accountToRegister.address, endpoint)
-      const accountService = new EntropyAccount(entropy, endpoint)
-      const updatedAccount = await accountService.registerAccount(accountToRegister)
+      const verifyingKey = await accountService.register()
+      await addVerifyingKeyToAccountAndSelect(verifyingKey, opts.account)
 
-      const arrIdx = accounts.indexOf(accountToRegister)
-      accounts.splice(arrIdx, 1, updatedAccount)
-      await config.set({
-        ...storedConfig,
-        accounts,
-        selectedAccount: updatedAccount.address
-      })
-
-      const verifyingKeys = updatedAccount?.data?.registration?.verifyingKeys
-      const verifyingKey = verifyingKeys[verifyingKeys.length - 1]
       cliWrite(verifyingKey)
       process.exit(0)
     })
