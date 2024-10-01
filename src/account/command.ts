@@ -13,6 +13,9 @@ export function entropyAccountCommand () {
     .addCommand(entropyAccountImport())
     .addCommand(entropyAccountList())
     .addCommand(entropyAccountRegister())
+    // .addCommand(entropyAccountAlias())
+    // IDEA: support aliases for remote accounts (those we don't have seeds for)
+    // this would make transfers safer/ easier from CLI
 }
 
 function entropyAccountCreate () {
@@ -84,9 +87,9 @@ function entropyAccountList () {
 function entropyAccountRegister () {
   return new Command('register')
     .description('Register an entropy account with a program')
-    .addOption(passwordOption())
-    .addOption(endpointOption())
     .addOption(accountOption())
+    .addOption(endpointOption())
+    .addOption(passwordOption())
     // Removing these options for now until we update the design to accept program configs
     // .addOption(
     //   new Option(
@@ -101,11 +104,16 @@ function entropyAccountRegister () {
     //   )
     // )
     .action(async (opts) => {
+      console.log('here 0')
+      console.log(opts)
       // NOTE: loadEntropy throws if it can't find opts.account
       const entropy: Entropy = await loadEntropy(opts.account, opts.endpoint)
       const accountService = new EntropyAccount(entropy, opts.endpoint)
 
+      console.log('here 1')
+
       const verifyingKey = await accountService.register()
+      console.log('here 2')
       await addVerifyingKeyToAccountAndSelect(verifyingKey, opts.account)
 
       cliWrite(verifyingKey)
