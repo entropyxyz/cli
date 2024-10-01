@@ -12,16 +12,8 @@ export function entropyTransferCommand () {
     .addOption(endpointOption())
     .addOption(passwordOption('Password for the source account (if required)'))
     .action(async (destination, amount, opts) => {
-      console.log({ destination, amount, opts })
-
       // TODO: destination as <name|address> ?
       const entropy = await loadEntropy(opts.account, opts.endpoint)
-        .catch(err => {
-          // WIP here. SOMETHING is wrecking the config upstream
-          console.error("loadEntropy failed", err)
-          throw err
-        })
-
       const transferService = new EntropyTransfer(entropy, opts.endpoint)
 
       await transferService.transfer(destination, amount)

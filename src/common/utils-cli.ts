@@ -39,7 +39,7 @@ export function endpointOption () {
       return endpoint
     })
     .default('ws://testnet.entropy.xyz:9944/')
-    // NOTE: argParser is only run IF an option is provided, so this cannot be 'test-net'
+    // NOTE: argParser only runs IF the -e/--endpoint option called, so this default cannot be 'test-net'
 }
 
 export function passwordOption (description?: string) {
@@ -61,20 +61,20 @@ export function accountOption () {
     ].join(' ')
   )
     .env('ENTROPY_ACCOUNT')
-    .argParser(async (account) => {
-      if (storedConfig && storedConfig.selectedAccount !== account) {
-        // Updated selected account in config with new address from this option
-        await config.set({
-          ...storedConfig,
-          selectedAccount: account
-        })
-      }
+    .argParser(async (addressOrName) => {
+      // We try to map addressOrName to an account we have stored
+      if (!storedConfig) return addressOrName
 
-      return account
+      const account = findAccountByAddressOrName(storedConfig.accounts, addressOrName)
+      if (!account) return addressOrName
+
+      // If we find one, we set this account as the future default
+      await config.setSelectedAccount(account)
+
+      // We finally return the account name to be as consistent as possible (using name, not address)
+      return account.name
     })
     .default(storedConfig?.selectedAccount)
-    // TODO: display the *name* not address
-    // TODO: standardise whether selectedAccount is name or address.
 }
 
 export async function loadEntropy (addressOrName: string, endpoint: string, password?: string): Promise<Entropy> {

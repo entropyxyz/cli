@@ -4,6 +4,7 @@ export interface EntropyConfig {
     dev: string;
     'test-net': string
   }
+  // selectedAccount is account.name (alias) for the account
   selectedAccount: string
   'migration-version': string
 }

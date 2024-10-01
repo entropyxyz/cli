@@ -76,8 +76,11 @@ function entropyAccountList () {
     .description('List all accounts. Output is JSON of form [{ name, address, verifyingKeys }]')
     .action(async () => {
       // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
-      const storedConfig = await config.get()
-      const accounts = EntropyAccount.list(storedConfig)
+      const accounts = await config.get()
+        .then(storedConfig => EntropyAccount.list(storedConfig))
+        .catch(() => [])
+      // QUESTION: is dropping the error right? Maybe only if "There are currently no accounts"
+
       cliWrite(accounts)
       process.exit(0)
     })
@@ -104,16 +107,11 @@ function entropyAccountRegister () {
     //   )
     // )
     .action(async (opts) => {
-      console.log('here 0')
-      console.log(opts)
       // NOTE: loadEntropy throws if it can't find opts.account
       const entropy: Entropy = await loadEntropy(opts.account, opts.endpoint)
       const accountService = new EntropyAccount(entropy, opts.endpoint)
 
-      console.log('here 1')
-
       const verifyingKey = await accountService.register()
-      console.log('here 2')
       await addVerifyingKeyToAccountAndSelect(verifyingKey, opts.account)
 
       cliWrite(verifyingKey)

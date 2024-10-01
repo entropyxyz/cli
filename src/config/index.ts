@@ -6,7 +6,7 @@ import envPaths from 'env-paths'
 
 import allMigrations from './migrations'
 import { serialize, deserialize } from './encoding'
-import { EntropyConfig } from './types'
+import { EntropyConfig, EntropyAccountConfig } from './types'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
 const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
@@ -63,6 +63,7 @@ export async function get (configPath = CONFIG_PATH) {
 
 export function getSync (configPath = CONFIG_PATH) {
   const configStr = readFileSync(configPath, 'utf8')
+  // console.log('getSync', configPath, configStr)
   return deserialize(configStr)
 }
 
@@ -71,6 +72,20 @@ export async function set (config: EntropyConfig, configPath = CONFIG_PATH) {
 
   await mkdirp(dirname(configPath))
   await writeFile(configPath, serialize(config))
+}
+
+export async function setSelectedAccount (account: EntropyAccountConfig, configPath = CONFIG_PATH) {
+  const storedConfig = await get(configPath)
+
+  if (storedConfig.selectedAccount === account.name) return storedConfig
+  // no need for update
+
+  const newConfig = {
+    ...storedConfig,
+    selectedAccount: account.name
+  }
+  await set(newConfig, configPath)
+  return newConfig
 }
 
 /* util */

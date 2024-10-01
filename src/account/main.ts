@@ -19,19 +19,19 @@ export class EntropyAccount extends EntropyBase {
     return EntropyAccount.import({ name, seed, path })
   }
 
+  // WARNING: #create depends on #import => be careful modifying this function
   static async import ({ name, seed, path }: AccountImportParams ): Promise<EntropyAccountConfig> {
-    // WARNING: #create currently depends on this => be careful modifying this function
-
     await wasmGlobalsReady()
     const keyring = new Keyring({ seed, path, debug: true })
+
     const fullAccount = keyring.getAccount()
     // TODO: sdk should create account on constructor
-    const { admin } = keyring.getAccount()
-
-    const data = fullAccount
-    delete admin.pair
+    const data = fixData(fullAccount)
     // const encryptedData = password ? passwordFlow.encrypt(data, password) : data
-    
+
+    const { admin } = keyring.getAccount()
+    delete admin.pair
+
     return {
       name,
       address: admin.address,
@@ -90,7 +90,7 @@ export class EntropyAccount extends EntropyBase {
                 dispatchError.asModule
               )
               const { docs, name, section } = decoded
-  
+
               msg = `${section}.${name}: ${docs.join(' ')}`
             } else {
               // Other, CannotLookup, BadOrigin, no extra info
@@ -106,4 +106,29 @@ export class EntropyAccount extends EntropyBase {
         })
     })
   }
+}
+
+// TODO: there is a bug in SDK that is munting this data
+function fixData (data) {
+  if (data.admin) {
+    data.admin.pair.addressRaw = objToUint8Array(data.admin.pair.addressRaw)
+    data.admin.pair.secretKey = objToUint8Array(data.admin.pair.secretKey)
+    data.admin.pair.publicKey = objToUint8Array(data.admin.pair.publicKey)
+  }
+
+  if (data.registration) {
+    data.registration.pair.addressRaw = objToUint8Array(data.registration.pair.addressRaw)
+    data.registration.pair.secretKey = objToUint8Array(data.registration.pair.secretKey)
+    data.registration.pair.publicKey = objToUint8Array(data.registration.pair.publicKey)
+  }
+
+  return data
+}
+
+function objToUint8Array (obj) {
+  const values: any = Object.entries(obj)
+    .sort((a, b) => Number(a[0]) - Number(b[0])) // sort entries by keys
+    .map(entry => entry[1])
+
+  return new Uint8Array(values)
 }

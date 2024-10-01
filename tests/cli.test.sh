@@ -15,9 +15,9 @@ print () {
 
 print "// ACCOUNT /////////////////////////////////////////////////"
 
-# Errors (correct, but messy?)
-# print "account ls:"
-# entropy account ls | jq
+print "account ls"
+entropy account ls | jq
+# TODO: change this to return [] ?
 
 print "account create"
 entropy account create naynay | jq
@@ -45,7 +45,6 @@ print "// TRANSFER ////////////////////////////////////////////////"
 
 print "entropy transfer"
 NAYNAY_ADDRESS=`entropy account ls | jq --raw-output ".[0].address"`
-# NOTE: --raw-output is needed to drop the quotes
 entropy transfer -a faucet ${NAYNAY_ADDRESS} 2.5
 entropy balance naynay
 
