@@ -78,10 +78,10 @@ entropy sign -a naynay "some content!\nNICE&SIMPLE"
 
 print "// PROGRAM /////////////////////////////////////////////////"
 
+print "program deploy"
 DATE=`date` && echo "wasm junk - ${DATE}" > /tmp/entropy.fake.wasm
 echo '{"type": "object"}' > /tmp/entropy.configSchema.fake.json
 echo '{"type": "object"}' > /tmp/entropy.auxDataSchema.fake.json
-print "program deploy"
 entropy program deploy -a naynay \
   /tmp/entropy.fake.wasm \
   /tmp/entropy.configSchema.fake.json \
