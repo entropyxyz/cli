@@ -1,17 +1,21 @@
 import test from 'tape'
-import * as util from "@polkadot/util"
 import { charlieStashSeed, setupTest } from './testing-utils'
 import { stripHexPrefix } from '../src/common/utils'
 import { readFileSync } from 'fs'
-import { getRandomFaucet, sendMoney } from '../src/flows/entropyFaucet/faucet'
-import { getBalance } from '../src/flows/balance/balance'
-import { register } from '../src/flows/register/register'
-import { transfer } from '../src/flows/entropyTransfer/transfer'
-import { LOCAL_PROGRAM_HASH } from '../src/flows/entropyFaucet/constants'
+import { EntropyBalance } from '../src/balance/main'
+import { EntropyTransfer } from '../src/transfer/main'
+import { EntropyFaucet } from '../src/faucet/main'
+import { LOCAL_PROGRAM_HASH } from '../src/faucet/utils'
+import { EntropyAccount } from '../src/account/main'
 
 test('Faucet Tests', async t => {
-  const { run, entropy } = await setupTest(t, { seed: charlieStashSeed })
+  const { run, entropy, endpoint } = await setupTest(t, { seed: charlieStashSeed })
   const { entropy: naynayEntropy } = await setupTest(t)
+
+  const balanceService = new EntropyBalance(entropy, endpoint)
+  const transferService = new EntropyTransfer(entropy, endpoint)
+  const faucetService = new EntropyFaucet(naynayEntropy, endpoint)
+  const accountService = new EntropyAccount(entropy, endpoint)
 
   const faucetProgram = readFileSync('tests/programs/faucet_program.wasm')
 
@@ -37,26 +41,32 @@ test('Faucet Tests', async t => {
   
   // Confirm faucetPointer matches deployed program pointer
   t.equal(faucetProgramPointer, LOCAL_PROGRAM_HASH, 'Program pointer matches')
-
-  let naynayBalance = await getBalance(naynayEntropy, naynayEntropy.keyring.accounts.registration.address)
+  let entropyBalance = await balanceService.getBalance(entropy.keyring.accounts.registration.address)
+  console.log('Balance Charlie::', entropyBalance);
+  
+  let naynayBalance = await balanceService.getBalance(naynayEntropy.keyring.accounts.registration.address)
   t.equal(naynayBalance, 0, 'Naynay is broke af')
   // register with faucet program
-  await run('Register Faucet Program for charlie stash', register(
-    entropy,
+  await run('Register Faucet Program for charlie stash', accountService.register(
     { 
       programModAddress: entropy.keyring.accounts.registration.address,
       programData: [{ program_pointer: faucetProgramPointer, program_config: userConfig }]
     }
   ))
-  
-  const { chosenVerifyingKey, faucetAddress } = await getRandomFaucet(entropy, [], entropy.keyring.accounts.registration.address)
+  const verifyingKeys = await faucetService.getAllFaucetVerifyingKeys(entropy.keyring.accounts.registration.address)
+  // @ts-expect-error
+  const { chosenVerifyingKey, faucetAddress } = faucetService.getRandomFaucet([], verifyingKeys)
   // adding funds to faucet address
+  entropyBalance = await balanceService.getBalance(entropy.keyring.accounts.registration.address)
+  const faucetAddressBalance = await balanceService.getBalance(faucetAddress)
+  console.log('Balance faucetAddress::', faucetAddressBalance);
+  console.log('Balance charlie 2::', entropyBalance);
+  
+  
+  await run('Transfer funds to faucet address', transferService.transfer(faucetAddress, "1000"))
 
-  await run('Transfer funds to faucet address', transfer(entropy, { from: entropy.keyring.accounts.registration.pair, to: faucetAddress, amount: BigInt("100000000000000") }))
-
-  const transferStatus = await sendMoney(
-    naynayEntropy, 
-    { 
+  const transferStatus = await faucetService.sendMoney(
+    {
       amount: "10000000000",
       addressToSendTo: naynayEntropy.keyring.accounts.registration.address,
       faucetAddress,
@@ -67,7 +77,7 @@ test('Faucet Tests', async t => {
 
   t.ok(transferStatus.isFinalized, 'Transfer is good')
 
-  naynayBalance = await getBalance(naynayEntropy, naynayEntropy.keyring.accounts.registration.address)
+  naynayBalance = await balanceService.getBalance(naynayEntropy.keyring.accounts.registration.address)
 
   t.ok(naynayBalance > 0, 'Naynay is drippin in faucet tokens')
 
