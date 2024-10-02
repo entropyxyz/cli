@@ -10,7 +10,6 @@ export function deserialize (config: string) {
     return JSON.parse(config, reviver)
   } catch (err) {
     console.log('broken config:', config)
-    // WIP here: nothing being passed in?!!
     throw err
   }
 }
