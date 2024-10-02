@@ -61,7 +61,7 @@ export function accountOption () {
     ].join(' ')
   )
     .env('ENTROPY_ACCOUNT')
-    .argParser(async (addressOrName) => {
+    .argParser(addressOrName => {
       // We try to map addressOrName to an account we have stored
       if (!storedConfig) return addressOrName
 
@@ -69,7 +69,13 @@ export function accountOption () {
       if (!account) return addressOrName
 
       // If we find one, we set this account as the future default
-      await config.setSelectedAccount(account)
+      config.setSelectedAccount(account)
+      // NOTE: argParser cannot be an async function, so we cannot await this call
+      // WARNING: this will lead to a race-condition if functions are called in quick succession
+      // and assume the selectedAccount has been persisted
+      //
+      // RISK: doesn't seem likely as most of our functions will await at slow other steps....
+      // SOLUTION: write a scynchronous version?
 
       // We finally return the account name to be as consistent as possible (using name, not address)
       return account.name

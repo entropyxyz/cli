@@ -38,7 +38,8 @@ function entropyAccountCreate () {
 
       cliWrite({
         name: newAccount.name,
-        address: newAccount.address
+        address: newAccount.address,
+        verifyingKeys: []
       })
       process.exit(0)
     })
@@ -64,7 +65,8 @@ function entropyAccountImport () {
 
       cliWrite({
         name: newAccount.name,
-        address: newAccount.address
+        address: newAccount.address,
+        verifyingKeys: []
       })
       process.exit(0)
     })
@@ -78,8 +80,11 @@ function entropyAccountList () {
       // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
       const accounts = await config.get()
         .then(storedConfig => EntropyAccount.list(storedConfig))
-        .catch(() => [])
-      // QUESTION: is dropping the error right? Maybe only if "There are currently no accounts"
+        .catch((err) => {
+          if (err.message.includes('currently no accounts')) return []
+
+          throw err
+        })
 
       cliWrite(accounts)
       process.exit(0)

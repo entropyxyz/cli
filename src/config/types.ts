@@ -15,6 +15,13 @@ export interface EntropyAccountConfig {
   data: EntropyAccountData
 }
 
+// Safe output format
+export interface EntropyAccountConfigFormatted {
+  name: string
+  address: string
+  verifyingKeys: string[]
+}
+
 export interface EntropyAccountData {
   debug?: boolean
   seed: string

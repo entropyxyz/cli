@@ -7,7 +7,7 @@ import { FLOW_CONTEXT } from "./constants";
 import { AccountCreateParams, AccountImportParams, AccountRegisterParams } from "./types";
 
 import { EntropyBase } from "../common/entropy-base";
-import { EntropyAccountConfig } from "../config/types";
+import { EntropyAccountConfig, EntropyAccountConfigFormatted } from "../config/types";
 
 export class EntropyAccount extends EntropyBase {
   constructor (entropy: Entropy, endpoint: string) {
@@ -27,7 +27,8 @@ export class EntropyAccount extends EntropyBase {
     const fullAccount = keyring.getAccount()
     // TODO: sdk should create account on constructor
     const data = fixData(fullAccount)
-    // const encryptedData = password ? passwordFlow.encrypt(data, password) : data
+    const maybeEncryptedData = data
+    // const maybeEncryptedData = password ? passwordFlow.encrypt(data, password) : data
 
     const { admin } = keyring.getAccount()
     delete admin.pair
@@ -35,12 +36,11 @@ export class EntropyAccount extends EntropyBase {
     return {
       name,
       address: admin.address,
-      data
-      // data: encryptedData // TODO: replace once password input is added back
+      data: maybeEncryptedData,
     }
   }
 
-  static list ({ accounts }: { accounts: EntropyAccountConfig[] }) {
+  static list ({ accounts }: { accounts: EntropyAccountConfig[] }): EntropyAccountConfigFormatted[] {
     if (!accounts.length)
       throw new Error(
         'AccountsError: There are currently no accounts available, please create or import a new account using the Manage Accounts feature'
@@ -49,7 +49,7 @@ export class EntropyAccount extends EntropyBase {
     return accounts.map((account: EntropyAccountConfig) => ({
       name: account.name,
       address: account.address,
-      verifyingKeys: account?.data?.admin?.verifyingKeys
+      verifyingKeys: account?.data?.registration?.verifyingKeys || []
     }))
   }
 

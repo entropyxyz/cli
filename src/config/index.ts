@@ -63,7 +63,6 @@ export async function get (configPath = CONFIG_PATH) {
 
 export function getSync (configPath = CONFIG_PATH) {
   const configStr = readFileSync(configPath, 'utf8')
-  // console.log('getSync', configPath, configStr)
   return deserialize(configStr)
 }
 
