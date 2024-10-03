@@ -89,12 +89,12 @@ export async function setSelectedAccount (account: EntropyAccountConfig, configP
 
 /* util */
 function noop () {}
-function assertConfigPath (configPath) {
+function assertConfigPath (configPath: string) {
   if (!configPath.endsWith('.json')) {
     throw Error(`configPath must be of form *.json, got ${configPath}`)
   }
 }
-export function isDangerousReadError (err) {
+export function isDangerousReadError (err: any) {
   // file not found:
   if (err.code === 'ENOENT') return false
 
