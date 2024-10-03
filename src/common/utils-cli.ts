@@ -61,20 +61,29 @@ export function accountOption () {
     ].join(' ')
   )
     .env('ENTROPY_ACCOUNT')
-    .argParser(async (account) => {
-      if (storedConfig && storedConfig.selectedAccount !== account) {
-        // Updated selected account in config with new address from this option
-        await config.set({
-          ...storedConfig,
-          selectedAccount: account
-        })
-      }
+    .argParser(addressOrName => {
+      // We try to map addressOrName to an account we have stored
+      if (!storedConfig) return addressOrName
 
-      return account
+      const account = findAccountByAddressOrName(storedConfig.accounts, addressOrName)
+      if (!account) return addressOrName
+
+      // If we find one, we set this account as the future default
+      config.set({
+        ...storedConfig,
+        selectedAccount: account.name
+      })
+      // NOTE: argParser cannot be an async function, so we cannot await this call
+      // WARNING: this will lead to a race-condition if functions are called in quick succession
+      // and assume the selectedAccount has been persisted
+      //
+      // RISK: doesn't seem likely as most of our functions will await at slow other steps....
+      // SOLUTION: write a scynchronous version?
+
+      // We finally return the account name to be as consistent as possible (using name, not address)
+      return account.name
     })
     .default(storedConfig?.selectedAccount)
-    // TODO: display the *name* not address
-    // TODO: standardise whether selectedAccount is name or address.
 }
 
 export async function loadEntropy (addressOrName: string, endpoint: string, password?: string): Promise<Entropy> {
