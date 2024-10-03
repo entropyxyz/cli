@@ -4,7 +4,7 @@ import { EntropyAccount } from "./main";
 import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from "./utils";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
-import { cliWrite, accountOption, endpointOption, loadEntropy, passwordOption } from "../common/utils-cli";
+import { accountOption, endpointOption, passwordOption, cliWrite, loadEntropy } from "../common/utils-cli";
 
 export function entropyAccountCommand () {
   return new Command('account')
@@ -84,9 +84,9 @@ function entropyAccountList () {
 function entropyAccountRegister () {
   return new Command('register')
     .description('Register an entropy account with a program')
-    .addOption(passwordOption())
-    .addOption(endpointOption())
     .addOption(accountOption())
+    .addOption(endpointOption())
+    .addOption(passwordOption())
     // Removing these options for now until we update the design to accept program configs
     // .addOption(
     //   new Option(

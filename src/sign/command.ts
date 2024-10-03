@@ -1,14 +1,14 @@
 import { Command, /* Option */ } from 'commander'
-import { cliWrite, accountOption, endpointOption, loadEntropy, passwordOption } from '../common/utils-cli'
+import { accountOption, endpointOption, passwordOption, cliWrite, loadEntropy } from '../common/utils-cli'
 import { EntropySign } from './main'
 
 export function entropySignCommand () {
   const signCommand = new Command('sign')
     .description('Sign a message using the Entropy network. Output is a JSON { verifyingKey, signature }')
     .argument('msg', 'Message you would like to sign (string)')
-    .addOption(passwordOption('Password for the source account (if required)'))
-    .addOption(endpointOption())
     .addOption(accountOption())
+    .addOption(endpointOption())
+    .addOption(passwordOption('Password for the source account (if required)'))
     // .addOption(
     //   new Option(
     //     '-r, --raw',

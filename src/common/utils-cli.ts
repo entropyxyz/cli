@@ -20,7 +20,7 @@ function getConfigOrNull () {
 
 export function endpointOption () {
   return new Option(
-    '-e, --endpoint <endpoint>',
+    '-e, --endpoint <url>',
     [
       'Runs entropy with the given endpoint and ignores network endpoints in config.',
       'Can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`.'
@@ -44,16 +44,17 @@ export function endpointOption () {
 
 export function passwordOption (description?: string) {
   return new Option(
-    '-p, --password <password>',
+    '-p, --password <string>',
     description || 'Password for the account'
   )
+    .hideHelp(true)
 }
 
 export function accountOption () {
   const storedConfig = getConfigOrNull()
 
   return new Option(
-    '-a, --account <accountAddressOrName>',
+    '-a, --account <name|address>',
     [
       'Sets the account for the session.',
       'Defaults to the last set account (or the first account if one has not been set before).'
