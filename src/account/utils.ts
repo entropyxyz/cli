@@ -32,7 +32,7 @@ export async function addVerifyingKeyToAccountAndSelect (verifyingKey: string, a
   if (!account) throw Error(`Unable to persist verifyingKey "${verifyingKey}" to unknown account "${accountNameOrAddress}"`)
 
   // persist to config, set selectedAccount
-  account.data.registration.verifyingKeys.push(verifyingKey)
+  account.data.admin.verifyingKeys.push(verifyingKey)
   await config.set({
     ...storedConfig,
     setSelectedAccount: account.name

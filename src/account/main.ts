@@ -49,7 +49,7 @@ export class EntropyAccount extends EntropyBase {
     return accounts.map((account: EntropyAccountConfig) => ({
       name: account.name,
       address: account.address,
-      verifyingKeys: account?.data?.registration?.verifyingKeys || []
+      verifyingKeys: account?.data?.admin?.verifyingKeys || []
     }))
   }
 
