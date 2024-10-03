@@ -7,7 +7,7 @@
 #   - jq - see https://jqlang.github.io/jq
 #
 # Run
-#   $ yarn build && ./tests/qa.sh
+#   $ yarn build && ./tests/e2e.cli.sh
 
 rm ~/.config/entropy-cryptography/entropy-cli.json
 
@@ -59,6 +59,8 @@ print "// REGISTER ////////////////////////////////////////////////"
 
 print "register"
 entropy account register -a naynay
+# NOTE, this does not work:
+# entropy account -a naynay register
 
 print "account ls"
 entropy account ls | jq
@@ -79,7 +81,7 @@ entropy sign -a naynay "some content!\nNICE&SIMPLE"
 print "// PROGRAM /////////////////////////////////////////////////"
 
 print "program deploy"
-DATE=`date` && echo "wasm junk - ${DATE}" > /tmp/entropy.fake.wasm
+echo "wasm junk - $(date)"  > /tmp/entropy.fake.wasm
 echo '{"type": "object"}' > /tmp/entropy.configSchema.fake.json
 echo '{"type": "object"}' > /tmp/entropy.auxDataSchema.fake.json
 entropy program deploy -a naynay \

@@ -39,12 +39,13 @@ export function endpointOption () {
       return endpoint
     })
     .default('ws://testnet.entropy.xyz:9944/')
-    // NOTE: argParser only runs IF the -e/--endpoint option called, so this default cannot be 'test-net'
+    // NOTE: default cannot be "test-net" as argParser only runs if the -e/--endpoint flag
+    // or ENTROPY_ENDPOINT env set
 }
 
 export function passwordOption (description?: string) {
   return new Option(
-    '-p, --password',
+    '-p, --password <string>',
     description || 'Password for the account'
   )
     .hideHelp() // TEMP
@@ -80,7 +81,7 @@ export function accountOption () {
       // We finally return the account name to be as consistent as possible (using name, not address)
       return account.name
     })
-    .default(storedConfig?.selectedAccount)
+    // .default(storedConfig?.selectedAccount)
 }
 
 export async function loadEntropy (addressOrName: string, endpoint: string, password?: string): Promise<Entropy> {

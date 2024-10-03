@@ -22,6 +22,7 @@ export interface EntropyAccountConfigFormatted {
   verifyingKeys: string[]
 }
 
+// TODO: document this whole thing
 export interface EntropyAccountData {
   debug?: boolean
   seed: string
@@ -42,6 +43,7 @@ export interface EntropyAccount {
 
 export enum EntropyAccountContextType {
   programDev = 'PROGRAM_DEV_KEY',
+  // QUESTION: what is this and why is registration = ADMIN_KEY?!
   registration = 'ADMIN_KEY',
   deviceKey = 'CONSUMER_KEY',
   undefined = 'MIXED_KEY',

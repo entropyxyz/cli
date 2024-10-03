@@ -110,23 +110,31 @@ export class EntropyAccount extends EntropyBase {
 
 // TODO: there is a bug in SDK that is munting this data
 function fixData (data) {
-  if (data.admin) {
-    data.admin.pair.addressRaw = objToUint8Array(data.admin.pair.addressRaw)
-    data.admin.pair.secretKey = objToUint8Array(data.admin.pair.secretKey)
-    data.admin.pair.publicKey = objToUint8Array(data.admin.pair.publicKey)
+  if (data.admin?.pair) {
+    const { addressRaw, secretKey, publicKey } = data.admin.pair
+    Object.assign(data.admin.pair, {
+      addressRaw: objToUint8Array(addressRaw),
+      secretKey: objToUint8Array(secretKey),
+      publicKey: objToUint8Array(publicKey)
+    })
   }
 
-  if (data.registration) {
-    data.registration.pair.addressRaw = objToUint8Array(data.registration.pair.addressRaw)
-    data.registration.pair.secretKey = objToUint8Array(data.registration.pair.secretKey)
-    data.registration.pair.publicKey = objToUint8Array(data.registration.pair.publicKey)
+  if (data.registration?.pair) {
+    const { addressRaw, secretKey, publicKey } = data.registration.pair
+    Object.assign(data.registration.pair, {
+      addressRaw: objToUint8Array(addressRaw),
+      secretKey: objToUint8Array(secretKey),
+      publicKey: objToUint8Array(publicKey)
+    })
   }
 
   return data
 }
 
-function objToUint8Array (obj) {
-  const values: any = Object.entries(obj)
+function objToUint8Array (input) {
+  if (input instanceof Uint8Array) return input
+
+  const values: any = Object.entries(input)
     .sort((a, b) => Number(a[0]) - Number(b[0])) // sort entries by keys
     .map(entry => entry[1])
 
