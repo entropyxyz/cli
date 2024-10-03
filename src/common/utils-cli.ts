@@ -69,10 +69,7 @@ export function accountOption () {
       if (!account) return addressOrName
 
       // If we find one, we set this account as the future default
-      config.set({
-        ...storedConfig,
-        selectedAccount: account.name
-      })
+      config.setSelectedAccount(account)
       // NOTE: argParser cannot be an async function, so we cannot await this call
       // WARNING: this will lead to a race-condition if functions are called in quick succession
       // and assume the selectedAccount has been persisted
