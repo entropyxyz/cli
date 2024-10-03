@@ -48,14 +48,14 @@ export function passwordOption (description?: string) {
     '-p, --password <string>',
     description || 'Password for the account'
   )
-    .hideHelp() // TEMP
+    .hideHelp(true)
 }
 
 export function accountOption () {
   const storedConfig = getConfigOrNull()
 
   return new Option(
-    '-a, --account <address|name>',
+    '-a, --account <name|address>',
     [
       'Sets the account for the session.',
       'Defaults to the last set account (or the first account if one has not been set before).'
