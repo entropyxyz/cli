@@ -70,7 +70,10 @@ export function accountOption () {
       if (!account) return addressOrName
 
       // If we find one, we set this account as the future default
-      config.setSelectedAccount(account)
+      config.set({
+        ...storedConfig,
+        selectedAccount: account.name
+      })
       // NOTE: argParser cannot be an async function, so we cannot await this call
       // WARNING: this will lead to a race-condition if functions are called in quick succession
       // and assume the selectedAccount has been persisted
@@ -81,7 +84,7 @@ export function accountOption () {
       // We finally return the account name to be as consistent as possible (using name, not address)
       return account.name
     })
-    // .default(storedConfig?.selectedAccount)
+    .default(storedConfig?.selectedAccount)
 }
 
 export async function loadEntropy (addressOrName: string, endpoint: string, password?: string): Promise<Entropy> {
