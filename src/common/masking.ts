@@ -1,37 +1,38 @@
-import cloneDeep from 'lodash.clonedeep'
-
-const DEFAULT_MASKED_FIELDS = [
+const PREFIX = 'data:application/UI8A;base64,'
+const DEFAULT_MASKED_FIELDS = new Set([
   'seed',
   'secretKey',
   'addressRaw',
-];
+]);
 
 export function maskPayload (payload: any): any {
-  if (typeof payload === 'string') return payload
+  if (
+    typeof payload === 'string' ||
+    typeof payload === 'boolean' ||
+    payload === null
+  ) return payload
 
-  const clonedPayload = cloneDeep(payload);
-  const maskedPayload = {}
-
-  if (!clonedPayload) {
-    return clonedPayload;
-  }
+  const maskedPayload = Array.isArray(payload)
+    ? []
+    : {}
 
   // maskJSONFields doesn't handle nested objects very well so we'll
   // need to recursively walk to object and mask them one by one
-  for (const [property, value] of Object.entries(clonedPayload)) {
-    if (value && typeof value === 'object') {
-      if (Object.keys(clonedPayload[property]).filter(key => isNaN(parseInt(key))).length === 0) {
-        const reconstructedUintArr: number[] = Object.values(clonedPayload[property])
-        maskedPayload[property] = "base64:" + Buffer.from(reconstructedUintArr).toString("base64");
-      } else {
-        maskedPayload[property] = maskPayload(value);
-      }
-    } else if (value && typeof value === 'string' && DEFAULT_MASKED_FIELDS.includes(property)) {
-      maskedPayload[property] = "*".repeat(clonedPayload[property].length)
-    } else {
-      maskedPayload[property] = value
+  return Object.entries(payload).reduce((acc, [property, value]) => {
+    if (DEFAULT_MASKED_FIELDS.has(property)) {
+      // @ts-expect-error .length does not exist on type "unknown"
+      acc[property] = "*".repeat(value?.length || 32)
     }
-  }
+    else if (value instanceof Uint8Array) {
+      acc[property] = PREFIX + Buffer.from(value).toString('base64')
+    }
+    else if (typeof value === 'object') {
+      acc[property] = maskPayload(value);
+    }
+    else {
+      acc[property] = value
+    }
 
-  return maskedPayload;
+    return acc
+  }, maskedPayload)
 }
