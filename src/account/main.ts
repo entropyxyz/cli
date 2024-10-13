@@ -65,6 +65,7 @@ export class EntropyAccount extends EntropyBase {
       }
       : undefined
 
+    this.logger.debug(`registering with params: ${registerParams}`, 'REGISTER')
     return this.entropy.register(registerParams)
       // NOTE: if "register" fails for any reason, core currently leaves the chain in a "polluted"
       // state. To fix this we manually "prune" the dirty registration transaction.
@@ -72,28 +73,6 @@ export class EntropyAccount extends EntropyBase {
         await this.pruneRegistration()
         throw error
       })
-  }
-
-  // WATCH: should this be extracted to interaction.ts?
-  async registerAccount (account: EntropyAccountConfig, registerParams?: AccountRegisterParams): Promise<EntropyAccountConfig> {
-    this.logger.debug(
-      [
-        `registering account: ${account.address}`,
-        // @ts-expect-error Type export of ChildKey still not available from SDK
-        `to keyring: ${this.entropy.keyring.getLazyLoadAccountProxy('registration').pair.address}`
-      ].join(', '),
-      'REGISTER'
-    )
-    // Register params to be defined from user input (arguments/options or inquirer prompts)
-    try {
-      const verifyingKey = await this.register(registerParams)
-      // NOTE: this mutation triggers events in Keyring
-      account.data.registration.verifyingKeys.push(verifyingKey)
-      return account
-    } catch (error) {
-      this.logger.error('There was a problem registering', error)
-      throw error
-    }
   }
 
   /* PRIVATE */
