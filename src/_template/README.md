@@ -4,7 +4,6 @@ This folder described how we structure our "Domain" folders.
 
 ```mermaid
 flowchart
-
 direction TB
 
 entropy-base:::base
@@ -26,7 +25,7 @@ end
 entropy-base --> main
 
 classDef default fill:#B0B, stroke:none, color:#FFF;
-classDef base fill:none, stroke:#000, color:#000;
+classDef base fill:#FFF, stroke:#000, color:#000;
 classDef optional fill:#B9B, stroke:none;
 classDef cluster fill:none, stroke:#B0B;
 ```
