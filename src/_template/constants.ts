@@ -1,12 +1,27 @@
+
+// These are for interaction.ts
+// - content is grouped by flow (e.g. "add")
+//   - then questions within that flow
+//
+// This makes our code easy to import into translation tools in the future
+// and keeps the groupings in line with the UI
+
 export const PROMPT = {
-  amount: {
-    name: 'amount',
-    message: 'Input amount to transfer:',
-    default: '1',
-    invalidError: 'Please enter a value greater than 0',
+  learn: {
+    byteCodePath: {
+      name: "byteCodePath",
+      // NOTE: this is a duplicate of the parent key. A little messy, but works for the moment
+      message: "please give the path your dance's bytecode"
+    }
   },
-  recipientAddress: {
-    name: 'recipientAddress',
-    message: `Input recipient's address:`,
-  },
+  add: {
+    dancePointer: {
+      name: "dancePointer",
+      message: "please give the pointer to your dance"
+    },
+    danceConfigPath: {
+      name: "danceConfigPath",
+      message: "please give the path your dance's config (as JSON)"
+    }
+  }
 }

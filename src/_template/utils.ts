@@ -1,4 +1,4 @@
-import { PROMPT } from "./constants";
+import { PROMPT } from "./constants"
 
 export async function loadByteCode (path) {
   // TODO
@@ -8,28 +8,26 @@ export async function loadDanceConfig (path) {
   // TODO
 }
 
-function validateAmount (amount: string | number) {
-  if (isNaN(amount as number) || parseInt(amount as string) <= 0) {
-    return PROMPT.amount.invalidError
-  }
-  return true
-}
+// For advanced question options (different types, validation, ...):
+// - https://www.npmjs.com/package/inquirer
 
-const amountQuestion = {
-  type: 'input',
-  name: PROMPT.amount.name,
-  message: PROMPT.amount.message,
-  default: PROMPT.amount.default,
-  validate: validateAmount
-}
+export const learnDanceQuestions = [
+  {
+    type: 'input',
+    name: PROMPT.learn.byteCodePath.name,
+    message: PROMPT.learn.byteCodePath.message
+  },
+]
 
-const recipientAddressQuestion = {
-  type: 'input',
-  name: PROMPT.recipientAddress.name,
-  message: PROMPT.recipientAddress.message,
-}
-
-export const danceInputQuestions = [
-  amountQuestion,
-  recipientAddressQuestion
+export const addDanceQuestions = [
+  {
+    type: 'input',
+    name: PROMPT.add.dancePointer.name,
+    message: PROMPT.add.dancePointer.message
+  },
+  {
+    type: 'input',
+    name: PROMPT.add.danceConfigPath.name,
+    message: PROMPT.add.danceConfigPath.message
+  },
 ]
