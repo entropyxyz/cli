@@ -68,7 +68,7 @@ export function getSync (configPath = CONFIG_PATH) {
 
 export async function set (config: EntropyConfig, configPath = CONFIG_PATH) {
   assertConfigPath(configPath)
-  console.log('config spy: ', config)
+
   await mkdirp(dirname(configPath))
   await writeFile(configPath, serialize(config))
 }
