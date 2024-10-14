@@ -4,6 +4,7 @@ export interface EntropyConfig {
     dev: string;
     'test-net': string
   }
+  // selectedAccount is account.name (alias) for the account
   selectedAccount: string
   'migration-version': string
 }
@@ -14,6 +15,14 @@ export interface EntropyAccountConfig {
   data: EntropyAccountData
 }
 
+// Safe output format
+export interface EntropyAccountConfigFormatted {
+  name: string
+  address: string
+  verifyingKeys: string[]
+}
+
+// TODO: document this whole thing
 export interface EntropyAccountData {
   debug?: boolean
   seed: string
@@ -34,6 +43,7 @@ export interface EntropyAccount {
 
 export enum EntropyAccountContextType {
   programDev = 'PROGRAM_DEV_KEY',
+  // QUESTION: what is this and why is registration = ADMIN_KEY?!
   registration = 'ADMIN_KEY',
   deviceKey = 'CONSUMER_KEY',
   undefined = 'MIXED_KEY',

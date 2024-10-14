@@ -50,7 +50,7 @@ export class EntropyTransfer extends EntropyBase {
                 dispatchError.asModule
               )
               const { docs, name, section } = decoded
-  
+
               msg = `${section}.${name}: ${docs.join(' ')}`
             } else {
               // Other, CannotLookup, BadOrigin, no extra info
