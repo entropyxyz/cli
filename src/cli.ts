@@ -36,14 +36,18 @@ program
   .action(async (opts: EntropyTuiOptions) => {
     const { account, endpoint } = opts
     const entropy = account
-      ? await loadEntropy(account, endpoint)
+      ? await loadEntropy(account, config.CONFIG_PATH, endpoint)
       : undefined
-    // NOTE: on initial startup you have no account
+    // NOTE:
+    // - on initial startup you have no account
+    // - no custom config for the TUI at moment (opt.name collisions)
     launchTui(entropy, opts)
   })
-  .hook('preAction', async () => {
+  .hook('preAction', async (thisCommand, actionCommand) => {
+    const { config: configPath } = actionCommand.opts()
+
+    if (configPath) await config.init(configPath)
     // set up config file, run migrations
-    return config.init()
   })
 
 program.parseAsync()

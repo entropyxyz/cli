@@ -1,5 +1,5 @@
 import { Command, /* Option */ } from 'commander'
-import { accountOption, endpointOption, passwordOption, cliWrite, loadEntropy } from '../common/utils-cli'
+import { accountOption, configOption, endpointOption, passwordOption, cliWrite, loadEntropy } from '../common/utils-cli'
 import { EntropySign } from './main'
 
 export function entropySignCommand () {
@@ -7,6 +7,7 @@ export function entropySignCommand () {
     .description('Sign a message using the Entropy network. Output is a JSON { verifyingKey, signature }')
     .argument('msg', 'Message you would like to sign (string)')
     .addOption(accountOption())
+    .addOption(configOption())
     .addOption(endpointOption())
     .addOption(passwordOption('Password for the source account (if required)'))
     // .addOption(
@@ -16,7 +17,7 @@ export function entropySignCommand () {
     //   )
     // )
     .action(async (msg, opts) => {
-      const entropy = await loadEntropy(opts.account, opts.endpoint)
+      const entropy = await loadEntropy(opts)
       const SigningService = new EntropySign(entropy, opts.endpoint)
       // TO-DO: Add ability for raw signing here, maybe? new raw option can be used for the conditional
       /**

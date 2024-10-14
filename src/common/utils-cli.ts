@@ -1,6 +1,6 @@
 import Entropy from '@entropyxyz/sdk'
 import { Option } from 'commander'
-import { findAccountByAddressOrName, stringify } from './utils'
+import { absolutePath, findAccountByAddressOrName, stringify } from './utils'
 import * as config from '../config'
 import { initializeEntropy } from './initializeEntropy'
 
@@ -9,9 +9,9 @@ export function cliWrite (result) {
   process.stdout.write(prettyResult)
 }
 
-function getConfigOrNull () {
+function getConfigOrNull (configPath) {
   try {
-    return config.getSync()
+    return config.getSync(configPath)
   } catch (err) {
     if (config.isDangerousReadError(err)) throw err
     return null
@@ -33,6 +33,12 @@ export function endpointOption () {
 
       /* look up endpoint-alias */
       const storedConfig = getConfigOrNull()
+      // WIP: ... ahhh, we need --config
+      //
+      // ideas:
+      // - do arg-parsing actions in e.g. loadEntropy
+      // - try to mutate opts state in a gook :skull: 
+      //
       const endpoint = storedConfig?.endpoints?.[aliasOrEndpoint]
       if (!endpoint) throw Error('unknown endpoint alias: ' + aliasOrEndpoint)
 
@@ -51,6 +57,7 @@ export function passwordOption (description?: string) {
 }
 
 export function accountOption () {
+  // WIP: ... ahhh, we need --config
   const storedConfig = getConfigOrNull()
 
   return new Option(
@@ -83,8 +90,30 @@ export function accountOption () {
     .default(storedConfig?.selectedAccount)
 }
 
-export async function loadEntropy (addressOrName: string, endpoint: string, password?: string): Promise<Entropy> {
-  const accounts = getConfigOrNull()?.accounts || []
+export function configOption () {
+  return new Option(
+    '-c, --config <path>',
+    'Set the path to your Entropy config file (JSON).',
+  )
+    .env('ENTROPY_CONFIG')
+    .argParser(configPath => absolutePath(configPath))
+    .default(config.CONFIG_PATH)
+}
+
+export async function loadEntropy (
+  {
+    account: addressOrName,
+    config: configPath,
+    endpoint,
+    password
+  }: {
+    account: string,
+    config: string,
+    endpoint: string,
+    password?: string
+  }
+): Promise<Entropy> {
+  const accounts = getConfigOrNull(configPath)?.accounts || []
   const selectedAccount = findAccountByAddressOrName(accounts, addressOrName)
   if (!selectedAccount) throw new Error(`No account with name or address: "${addressOrName}"`)
 

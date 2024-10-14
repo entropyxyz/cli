@@ -3,8 +3,8 @@ import { EntropyAccountConfig } from "../config/types";
 import * as config from "../config";
 import { generateAccountChoices, findAccountByAddressOrName } from '../common/utils';
 
-export async function selectAndPersistNewAccount (newAccount: EntropyAccountConfig) {
-  const storedConfig = await config.get()
+export async function selectAndPersistNewAccount (configPath: string, newAccount: EntropyAccountConfig) {
+  const storedConfig = await config.get(configPath)
   const { accounts } = storedConfig
 
   const isExistingName = accounts.find(account => account.name === newAccount.name)
@@ -18,23 +18,29 @@ export async function selectAndPersistNewAccount (newAccount: EntropyAccountConf
 
   // persist to config, set selectedAccount
   accounts.push(newAccount)
-  await config.set({
-    ...storedConfig,
-    selectedAccount: newAccount.address
-  })
+  await config.set(
+    {
+      ...storedConfig,
+      selectedAccount: newAccount.address
+    },
+    configPath
+  )
 }
 
-export async function addVerifyingKeyToAccountAndSelect (verifyingKey: string, accountNameOrAddress: string) {
-  const storedConfig = await config.get()
+export async function addVerifyingKeyToAccountAndSelect (configPath, verifyingKey: string, accountNameOrAddress: string) {
+  const storedConfig = await config.get(configPath)
   const account = findAccountByAddressOrName(storedConfig.accounts, accountNameOrAddress)
   if (!account) throw Error(`Unable to persist verifyingKey "${verifyingKey}" to unknown account "${accountNameOrAddress}"`)
 
   // persist to config, set selectedAccount
   account.data.registration.verifyingKeys.push(verifyingKey)
-  await config.set({
-    ...storedConfig,
-    selectedAccount: account.address
-  })
+  await config.set(
+    {
+      ...storedConfig,
+      selectedAccount: account.address
+    },
+    configPath
+  )
 }
 
 function validateSeedInput (seed) {

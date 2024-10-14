@@ -1,6 +1,9 @@
 import test from 'tape'
+import { join } from 'path'
+import { homedir } from 'os'
 
 import { maskPayload } from '../src/common/masking'
+import { absolutePath } from '../src/common/utils'
 
 test('common/masking', async (t) => {
 
@@ -48,6 +51,34 @@ test('common/masking', async (t) => {
 
 
   t.deepEqual(maskPayload([payload, payload]), [expected, expected], 'arrays')
+
+  t.end()
+})
+
+test.only('common/utils', (t) => {
+  t.equal(
+    absolutePath('/tmp/things.json'),
+    '/tmp/things.json',
+    'absolute path (unix)'
+  )
+
+  t.equal(
+    absolutePath('C:\folder\things.json'),
+    'C:\folder\things.json',
+    'absolute path (win)'
+  )
+
+  t.equal(
+    absolutePath('../things.json'),
+    join(process.cwd(), '../things.json'),
+    'relative path (to cwd)'
+  )
+
+  t.equal(
+    absolutePath('~/things.json'),
+    join(homedir(), './things.json'),
+    'relative path (home)'
+  )
 
   t.end()
 })

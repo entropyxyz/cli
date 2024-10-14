@@ -1,4 +1,6 @@
 import { Buffer } from 'buffer'
+import { join } from 'path'
+import { homedir } from 'os'
 import { EntropyAccountConfig } from "../config/types"
 
 export function stripHexPrefix (str: string): string {
@@ -72,4 +74,15 @@ export function findAccountByAddressOrName (accounts: EntropyAccountConfig[], al
     accounts.find(account => account.address === aliasOrAddress) ||
     accounts.find(account => account.name === aliasOrAddress)
   )
+}
+
+export function absolutePath (somePath: string) {
+  switch (somePath.charAt(0)) {
+  case '.':
+    return join(process.cwd(), somePath)
+  case '~':
+    return join(homedir(), somePath.slice(1))
+  default:
+    return somePath
+  }
 }
