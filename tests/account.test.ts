@@ -32,7 +32,7 @@ test('Account - list', async t => {
       dev: 'ws://127.0.0.1:9944',
       'test-net': 'wss://testnet.entropy.xyz',
     },
-    selectedAccount: account.address,
+    selectedAccount: account.name,
     'migration-version': '0'
   }
 

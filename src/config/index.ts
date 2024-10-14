@@ -6,7 +6,7 @@ import envPaths from 'env-paths'
 
 import allMigrations from './migrations'
 import { serialize, deserialize } from './encoding'
-import { EntropyConfig } from './types'
+import { EntropyConfig, EntropyAccountConfig } from './types'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
 const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
@@ -73,14 +73,28 @@ export async function set (config: EntropyConfig, configPath = CONFIG_PATH) {
   await writeFile(configPath, serialize(config))
 }
 
+export async function setSelectedAccount (account: EntropyAccountConfig, configPath = CONFIG_PATH) {
+  const storedConfig = await get(configPath)
+
+  if (storedConfig.selectedAccount === account.name) return storedConfig
+  // no need for update
+
+  const newConfig = {
+    ...storedConfig,
+    selectedAccount: account.name
+  }
+  await set(newConfig, configPath)
+  return newConfig
+}
+
 /* util */
 function noop () {}
-function assertConfigPath (configPath) {
+function assertConfigPath (configPath: string) {
   if (!configPath.endsWith('.json')) {
     throw Error(`configPath must be of form *.json, got ${configPath}`)
   }
 }
-export function isDangerousReadError (err) {
+export function isDangerousReadError (err: any) {
   // file not found:
   if (err.code === 'ENOENT') return false
 

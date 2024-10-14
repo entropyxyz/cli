@@ -4,7 +4,7 @@
 import { Command, Option } from 'commander'
 
 import { EntropyTuiOptions } from './types'
-import { accountOption, endpointOption, loadEntropy } from './common/utils-cli'
+import { loadEntropy } from './common/utils-cli'
 import * as config from './config'
 
 import launchTui from './tui'
@@ -20,8 +20,6 @@ const program = new Command()
 program
   .name('entropy')
   .description('CLI interface for interacting with entropy.xyz. Running this binary without any commands or arguments starts a text-based interface.')
-  .addOption(accountOption())
-  .addOption(endpointOption())
   .addOption(
     new Option(
       '-d, --dev',

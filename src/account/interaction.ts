@@ -45,10 +45,7 @@ export async function entropyAccount (endpoint: string, storedConfig: EntropyCon
       return
     }
     const { selectedAccount } = await inquirer.prompt(accountSelectQuestions(accounts))
-    await config.set({
-      ...storedConfig,
-      selectedAccount: selectedAccount.address
-    })
+    await config.setSelectedAccount(selectedAccount)
 
     print('Current selected account is ' + selectedAccount)
     return
