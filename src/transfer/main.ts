@@ -45,7 +45,7 @@ export class EntropyTransfer extends EntropyBase {
         // @ts-ignore
         .signAndSend(from, ({ status, dispatchError }) => {
           if (dispatchError) {
-            const error = formatDispatchError(dispatchError)
+            const error = formatDispatchError(this.entropy, dispatchError)
             this.logger.error('There was an issue sending this transfer', error)
             return reject(error)
           }

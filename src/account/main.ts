@@ -84,7 +84,7 @@ export class EntropyAccount extends EntropyBase {
       this.entropy.substrate.tx.registry.pruneRegistration()
         .signAndSend(this.entropy.keyring.accounts.registration.pair, ({ status, dispatchError }) => {
           if (dispatchError) {
-            const error = formatDispatchError(dispatchError)
+            const error = formatDispatchError(this.entropy, dispatchError)
             this.logger.error('There was an issue pruning registration', error)
             return reject(error)
           }

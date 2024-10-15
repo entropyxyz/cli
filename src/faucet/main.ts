@@ -34,7 +34,7 @@ export class EntropyFaucet extends EntropyBase {
         // status would still be set, but in the case of error we can shortcut
         // to just check it (so an error would indicate InBlock or Finalized)
         if (dispatchError) {
-          const error = formatDispatchError(dispatchError)
+          const error = formatDispatchError(this.entropy, dispatchError)
           return reject(error)
         }
         if (status.isFinalized) resolve(status)
