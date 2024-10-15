@@ -10,6 +10,7 @@ import {
 } from './testing-utils'
 
 import { initializeEntropy } from '../src/common/initializeEntropy'
+import { BITS_PER_TOKEN } from "../src/common/constants";
 import { EntropyTransfer } from '../src/transfer/main'
 import { EntropyBalance } from '../src/balance/main'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
@@ -70,7 +71,7 @@ test('Transfer', async (t) => {
     'getBalance (naynay)',
     balanceService.getBalance(naynayAddress)
   )
-  const expected = Number(inputAmount) * 1e10
+  const expected = Number(inputAmount) * BITS_PER_TOKEN
   t.equal(naynayBalance, expected,'naynay is rolling in it!')
 
   t.end()

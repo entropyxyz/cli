@@ -1,85 +1,101 @@
 import test from 'tape'
+import { readFile } from 'fs/promises'
+
 import { charlieStashSeed, setupTest } from './testing-utils'
 import { stripHexPrefix } from '../src/common/utils'
-import { readFileSync } from 'fs'
+import { BITS_PER_TOKEN } from '../src/common/constants'
+
+import { EntropyAccount } from '../src/account/main'
 import { EntropyBalance } from '../src/balance/main'
 import { EntropyTransfer } from '../src/transfer/main'
 import { EntropyFaucet } from '../src/faucet/main'
-import { LOCAL_PROGRAM_HASH } from '../src/faucet/utils'
-import { EntropyAccount } from '../src/account/main'
 
-test('Faucet Tests', async t => {
-  const { run, entropy, endpoint } = await setupTest(t, { seed: charlieStashSeed })
-  const { entropy: naynayEntropy } = await setupTest(t)
+test.only('Faucet Tests', async t => {
+  const { run, entropy: charlie, endpoint } = await setupTest(t, { seed: charlieStashSeed })
+  const { entropy: naynay } = await setupTest(t)
 
-  const balanceService = new EntropyBalance(entropy, endpoint)
-  const transferService = new EntropyTransfer(entropy, endpoint)
-  const faucetService = new EntropyFaucet(naynayEntropy, endpoint)
-  const accountService = new EntropyAccount(entropy, endpoint)
+  const charlieAddress = charlie.keyring.accounts.registration.address
+  const naynayAddress = naynay.keyring.accounts.registration.address
 
-  const faucetProgram = readFileSync('tests/programs/faucet_program.wasm')
+  const accountService = new EntropyAccount(charlie, endpoint)
+  const balanceService = new EntropyBalance(charlie, endpoint)
+  const transferService = new EntropyTransfer(charlie, endpoint)
+  // NOTE: naynay
+  const faucetService = new EntropyFaucet(naynay, endpoint)
 
-  const genesisHash = await entropy.substrate.rpc.chain.getBlockHash(0)
+  // Deploy faucet program
+  const faucetProgram = await readFile('tests/programs/faucet_program.wasm')
+  const configurationSchema = {
+    type: "object",
+    properties: {
+      genesis_hash: { type: "string" },
+      max_transfer_amount: { type: "number" }
+    }
+  }
+  const auxDataSchema = {
+    type: "object",
+    properties: {
+      amount: { type: "number" },
+      string_account_id: { type: "string" },
+      spec_version: { type: "number" },
+      transaction_version: { type: "number" },
+    }
+  }
+  const faucetProgramPointer = await run(
+    'deploy faucet program',
+    charlie.programs.dev.deploy(faucetProgram, configurationSchema, auxDataSchema)
+  )
 
-  const userConfig = {
+  // Install faucet
+  const genesisHash = await charlie.substrate.rpc.chain.getBlockHash(0)
+  const userProgramConfig = {
     max_transfer_amount: 10_000_000_000,
     genesis_hash: stripHexPrefix(genesisHash.toString())
   }
-  const configurationSchema = {
-    max_transfer_amount: "number",
-    genesis_hash: "string"
-  }
-  const auxDataSchema = {
-    amount: "number",
-    string_account_id: "string",
-    spec_version: "number",
-    transaction_version: "number",
-  }
-  
-  // Deploy faucet program
-  const faucetProgramPointer = await run('Deploy faucet program', entropy.programs.dev.deploy(faucetProgram, configurationSchema, auxDataSchema))
-  
-  // Confirm faucetPointer matches deployed program pointer
-  t.equal(faucetProgramPointer, LOCAL_PROGRAM_HASH, 'Program pointer matches')
-  let entropyBalance = await balanceService.getBalance(entropy.keyring.accounts.registration.address)
-  console.log('Balance Charlie::', entropyBalance);
-  
-  let naynayBalance = await balanceService.getBalance(naynayEntropy.keyring.accounts.registration.address)
-  t.equal(naynayBalance, 0, 'Naynay is broke af')
-  // register with faucet program
-  await run('Register Faucet Program for charlie stash', accountService.register(
-    { 
-      programModAddress: entropy.keyring.accounts.registration.address,
-      programData: [{ program_pointer: faucetProgramPointer, program_config: userConfig }]
-    }
-  ))
-  const verifyingKeys = await faucetService.getAllFaucetVerifyingKeys(entropy.keyring.accounts.registration.address)
-  // @ts-expect-error
-  const { chosenVerifyingKey, faucetAddress } = faucetService.getRandomFaucet([], verifyingKeys)
-  // adding funds to faucet address
-  entropyBalance = await balanceService.getBalance(entropy.keyring.accounts.registration.address)
-  const faucetAddressBalance = await balanceService.getBalance(faucetAddress)
-  console.log('Balance faucetAddress::', faucetAddressBalance);
-  console.log('Balance charlie 2::', entropyBalance);
-  
-  
-  await run('Transfer funds to faucet address', transferService.transfer(faucetAddress, "1000"))
-
-  const transferStatus = await faucetService.sendMoney(
-    {
-      amount: "10000000000",
-      addressToSendTo: naynayEntropy.keyring.accounts.registration.address,
-      faucetAddress,
-      chosenVerifyingKey,
-      faucetProgramPointer
-    }
+  await run(
+    'Charlie registers with Faucet as initial program',
+    accountService.register({
+      programModAddress: charlieAddress,
+      programData: [{
+        program_pointer: faucetProgramPointer,
+        program_config: userProgramConfig
+      }]
+    })
   )
 
+  // Fund the faucet
+  const verifyingKeys = await faucetService.getAllFaucetVerifyingKeys(charlieAddress)
+  // @ts-expect-error
+  const { chosenVerifyingKey, faucetAddress } = faucetService.getRandomFaucet([], verifyingKeys)
+
+  const funding = 1000
+  await run(
+    'Charlie funds the Faucet address',
+    transferService.transfer(faucetAddress, `${funding}`)
+  )
+
+  const faucetBalance = await balanceService.getBalance(faucetAddress)
+  t.equal(faucetBalance, funding * BITS_PER_TOKEN, 'Faucet has balance')
+
+  // Use the faucet
+  let naynayBalance = await balanceService.getBalance(naynayAddress)
+  t.equal(naynayBalance, 0, 'Naynay is broke')
+
+  const transferStatus = await run(
+    "Naynay uses faucet",
+    faucetService.sendMoney({
+      amount: "10000000000",
+      faucetAddress,
+      chosenVerifyingKey,
+      faucetProgramPointer,
+      addressToSendTo: naynayAddress,
+    })
+  )
   t.ok(transferStatus.isFinalized, 'Transfer is good')
 
-  naynayBalance = await balanceService.getBalance(naynayEntropy.keyring.accounts.registration.address)
+  naynayBalance = await balanceService.getBalance(naynayAddress)
 
-  t.ok(naynayBalance > 0, 'Naynay is drippin in faucet tokens')
+  t.equal(naynayBalance, 10000000000, 'Naynay is drippin in faucet tokens')
 
   t.end()
 })

@@ -7,6 +7,7 @@ import { FLOW_CONTEXT } from "./constants";
 import { AccountCreateParams, AccountImportParams, AccountRegisterParams } from "./types";
 
 import { EntropyBase } from "../common/entropy-base";
+import { formatDispatchError } from "../common/utils";
 import { EntropyAccountConfig } from "../config/types";
 
 export class EntropyAccount extends EntropyBase {
@@ -83,20 +84,7 @@ export class EntropyAccount extends EntropyBase {
       this.entropy.substrate.tx.registry.pruneRegistration()
         .signAndSend(this.entropy.keyring.accounts.registration.pair, ({ status, dispatchError }) => {
           if (dispatchError) {
-            let msg: string
-            if (dispatchError.isModule) {
-              // for module errors, we have the section indexed, lookup
-              const decoded = this.entropy.substrate.registry.findMetaError(
-                dispatchError.asModule
-              )
-              const { docs, name, section } = decoded
-  
-              msg = `${section}.${name}: ${docs.join(' ')}`
-            } else {
-              // Other, CannotLookup, BadOrigin, no extra info
-              msg = dispatchError.toString()
-            }
-            const error = Error(msg)
+            const error = formatDispatchError(dispatchError)
             this.logger.error('There was an issue pruning registration', error)
             return reject(error)
           }

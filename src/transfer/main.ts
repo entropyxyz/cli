@@ -1,5 +1,8 @@
 import Entropy from "@entropyxyz/sdk";
+
 import { EntropyBase } from "../common/entropy-base";
+import { formatDispatchError } from "../common/utils";
+import { BITS_PER_TOKEN } from "../common/constants";
 import { TransferOptions } from "./types";
 
 const FLOW_CONTEXT = 'ENTROPY_TRANSFER'
@@ -15,8 +18,7 @@ export class EntropyTransfer extends EntropyBase {
   // - progress callbacks (optional)
 
   async transfer (toAddress: string, amount: string, progress?: { start: ()=>void, stop: ()=>void }) {
-    const formattedAmount = BigInt(Number(amount) * 1e10)
-    // TODO: name this multiplier 1e10 somewhere
+    const formattedAmount = BigInt(Number(amount) * BITS_PER_TOKEN)
 
     if (progress) progress.start()
     try {
@@ -43,20 +45,7 @@ export class EntropyTransfer extends EntropyBase {
         // @ts-ignore
         .signAndSend(from, ({ status, dispatchError }) => {
           if (dispatchError) {
-            let msg: string
-            if (dispatchError.isModule) {
-              // for module errors, we have the section indexed, lookup
-              const decoded = this.entropy.substrate.registry.findMetaError(
-                dispatchError.asModule
-              )
-              const { docs, name, section } = decoded
-  
-              msg = `${section}.${name}: ${docs.join(' ')}`
-            } else {
-              // Other, CannotLookup, BadOrigin, no extra info
-              msg = dispatchError.toString()
-            }
-            const error = Error(msg)
+            const error = formatDispatchError(dispatchError)
             this.logger.error('There was an issue sending this transfer', error)
             return reject(error)
           }
@@ -67,3 +56,4 @@ export class EntropyTransfer extends EntropyBase {
   }
 
 }
+
