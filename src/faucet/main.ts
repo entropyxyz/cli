@@ -28,11 +28,7 @@ export class EntropyFaucet extends EntropyBase {
     const faucetSigner = new FaucetSigner(api.registry, this.entropy, amount, chosenVerifyingKey)
 
     const sig = await call.signAsync(senderAddress, { signer: faucetSigner })
-      .catch(err => {
-        // WIP here is the error
-        console.log('ERROR here', err)
-        throw err
-      })
+
     return new Promise((resolve, reject) => {
       sig.send(({ status, dispatchError }: any) => {
         // status would still be set, but in the case of error we can shortcut

@@ -28,6 +28,6 @@ jobs:
         run: yarn run build
       - name: Add TSS server host mappings
         run: |
-          echo "127.0.0.1 alice-tss-server bob-tss-server carol-tss-server dave-tss-server" | sudo tee -a /etc/hosts
+          echo "127.0.0.1 alice-tss-server bob-tss-server charlie-tss-server dave-tss-server" | sudo tee -a /etc/hosts
       - name: Test
         run: yarn run test
