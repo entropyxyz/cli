@@ -73,3 +73,21 @@ export function findAccountByAddressOrName (accounts: EntropyAccountConfig[], al
     accounts.find(account => account.name === aliasOrAddress)
   )
 }
+
+export function formatDispatchError (dispatchError) {
+  let msg: string
+  if (dispatchError.isModule) {
+    // for module errors, we have the section indexed, lookup
+    const decoded = this.entropy.substrate.registry.findMetaError(
+      dispatchError.asModule
+    )
+    const { docs, name, section } = decoded
+
+    msg = `${section}.${name}: ${docs.join(' ')}`
+  } else {
+    // Other, CannotLookup, BadOrigin, no extra info
+    msg = dispatchError.toString()
+  }
+
+  return Error(msg)
+}

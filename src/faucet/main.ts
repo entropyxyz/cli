@@ -6,8 +6,14 @@ import { EntropyBalance } from "src/balance/main";
 import { EntropyProgram } from "src/program/main";
 import FaucetSigner from "./helpers/signer";
 import { SendMoneyParams } from "./types";
+import { formatDispatchError } from "src/common/utils";
 
 const FLOW_CONTEXT = 'ENTROPY-FAUCET'
+
+function pickRandom (items: string[]): string {
+  const i = Math.floor(Math.random() * items.length)
+  return items[i]
+}
 
 export class EntropyFaucet extends EntropyBase {
   constructor (entropy: Entropy, endpoint: string) {
@@ -17,30 +23,23 @@ export class EntropyFaucet extends EntropyBase {
   // Method used to sign and send the transfer request (transfer request = call argument) using the custom signer
   // created to overwrite how we sign the payload that is sent up chain
   async faucetSignAndSend (call: any, amount: number, senderAddress: string, chosenVerifyingKey: any): Promise<any> {
+    // QUESTION: call has "amount" encoded, but we also take amount in again... why?
     const api = this.entropy.substrate
     const faucetSigner = new FaucetSigner(api.registry, this.entropy, amount, chosenVerifyingKey)
-  
-    const sig = await call.signAsync(senderAddress, {
-      signer: faucetSigner,
-    });
+
+    const sig = await call.signAsync(senderAddress, { signer: faucetSigner })
+      .catch(err => {
+        // WIP here is the error
+        console.log('ERROR here', err)
+        throw err
+      })
     return new Promise((resolve, reject) => {
       sig.send(({ status, dispatchError }: any) => {
         // status would still be set, but in the case of error we can shortcut
         // to just check it (so an error would indicate InBlock or Finalized)
         if (dispatchError) {
-          let msg: string
-          if (dispatchError.isModule) {
-            // for module errors, we have the section indexed, lookup
-            const decoded = api.registry.findMetaError(dispatchError.asModule);
-            // @ts-ignore
-            const { documentation, method, section } = decoded;
-  
-            msg = `${section}.${method}: ${documentation.join(' ')}`
-          } else {
-            // Other, CannotLookup, BadOrigin, no extra info
-            msg = dispatchError.toString()
-          }
-          return reject(Error(msg))
+          const error = formatDispatchError(dispatchError)
+          return reject(error)
         }
         if (status.isFinalized) resolve(status)
       })
@@ -48,8 +47,8 @@ export class EntropyFaucet extends EntropyBase {
   }
 
   async getAllFaucetVerifyingKeys (programModKey = FAUCET_PROGRAM_MOD_KEY) {
-    const modifiableKeys = await this.entropy.substrate.query.registry.modifiableKeys(programModKey)
-    return modifiableKeys.toJSON()
+    return this.entropy.substrate.query.registry.modifiableKeys(programModKey)
+      .then(res => res.toJSON())
   }
 
   // To handle overloading the individual faucet, multiple faucet accounts have been generated, and here is
@@ -58,14 +57,12 @@ export class EntropyFaucet extends EntropyBase {
     if (allVerifyingKeys.length === previousVerifyingKeys.length) {
       throw new Error('FaucetError: There are no more faucets to choose from')
     }
-    let chosenVerifyingKey = allVerifyingKeys[Math.floor(Math.random() * allVerifyingKeys.length)]
-    if (previousVerifyingKeys.length && previousVerifyingKeys.includes(chosenVerifyingKey)) {
-      const filteredVerifyingKeys = allVerifyingKeys.filter((key: string) => !previousVerifyingKeys.includes(key))
-      chosenVerifyingKey = filteredVerifyingKeys[Math.floor(Math.random() * filteredVerifyingKeys.length)]
-    }
+
+    const unusedVerifyingKeys = allVerifyingKeys.filter((key) => !previousVerifyingKeys.includes(key))
+    const chosenVerifyingKey = pickRandom(unusedVerifyingKeys)
     const hashedKey = blake2AsHex(chosenVerifyingKey)
     const faucetAddress = encodeAddress(hashedKey, 42).toString()
-  
+
     return { chosenVerifyingKey, faucetAddress } 
   }
 
@@ -80,20 +77,24 @@ export class EntropyFaucet extends EntropyBase {
   ): Promise<any> {
     const balanceService = new EntropyBalance(this.entropy, this.endpoint)
     const programService = new EntropyProgram(this.entropy, this.endpoint)
+
     // check balance of faucet address
     const balance = await balanceService.getBalance(faucetAddress)
     if (balance <= 0) throw new Error('FundsError: Faucet Account does not have funds')
-    // check verifying key for only one program matching the program hash
+
+    // check verifying key has ONLY the exact program installed
     const programs = await programService.list({ verifyingKey: chosenVerifyingKey })
-    if (programs.length) {
-      if (programs.length > 1) throw new Error('ProgramsError: Faucet Account has too many programs attached, expected less')
-      if (programs.length === 1 && programs[0].program_pointer !== faucetProgramPointer) {
-        throw new Error('ProgramsError: Faucet Account does not possess Faucet program')
+    if (programs.length === 1) {
+      if (programs[0].program_pointer !== faucetProgramPointer) {
+        throw new Error('ProgramsError: Faucet Account does not have the correct faucet program')
       }
-    } else {
-      throw new Error('ProgramsError: Faucet Account has no programs attached')
     }
-  
+    else {
+      throw new Error(
+        `ProgramsError: Faucet Account has ${programs.length} programs attached, expected 1.`
+      )
+    }
+
     const transfer = this.entropy.substrate.tx.balances.transferAllowDeath(addressToSendTo, BigInt(amount));
     const transferStatus = await this.faucetSignAndSend(transfer, parseInt(amount), faucetAddress, chosenVerifyingKey)
     if (transferStatus.isFinalized) return transferStatus
