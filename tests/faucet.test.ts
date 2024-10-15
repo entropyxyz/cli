@@ -10,7 +10,7 @@ import { EntropyBalance } from '../src/balance/main'
 import { EntropyTransfer } from '../src/transfer/main'
 import { EntropyFaucet } from '../src/faucet/main'
 
-test.only('Faucet Tests', async t => {
+test('Faucet Tests', async t => {
   const { run, entropy: charlie, endpoint } = await setupTest(t, { seed: charlieStashSeed })
   const { entropy: naynay } = await setupTest(t)
 
