@@ -38,6 +38,7 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
 
   let choices = [
     'Manage Accounts',
+    'Entropy Faucet',
     'Balance',
     'Register',
     'Sign',
@@ -46,12 +47,6 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
     'Deploy Program',
     'User Programs',
   ]
-
-  const devChoices = [
-    'Entropy Faucet',
-  ]
-
-  if (options.dev) choices = [...choices, ...devChoices]
 
   // assign exit so its last
   choices = [...choices, 'Exit']
