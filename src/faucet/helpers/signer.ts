@@ -39,11 +39,11 @@ export default class FaucetSigner implements Signer {
       string_account_id: this.#entropy.keyring.accounts.registration.address,
       amount: this.amount
     }
-    
+
     const signature = await this.#entropy.sign({
       sigRequestHash: u8aToHex(raw),
       // @ts-ignore
-      hash: {custom: 0},
+      hash: { custom: 0 }, // TODO: hash should be a string? why is this an object?
       auxiliaryData: [auxData],
       signatureVerifyingKey: this.chosenVerifyingKey
     })
