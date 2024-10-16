@@ -2,8 +2,6 @@ import Entropy, { wasmGlobalsReady } from "@entropyxyz/sdk"
 // TODO: fix importing of types from @entropy/sdk/keys
 // @ts-ignore
 import Keyring from "@entropyxyz/sdk/keys"
-import inquirer from "inquirer"
-import { decrypt, encrypt } from "../flows/password"
 import * as config from "../config"
 import { EntropyAccountData } from "../config/types"
 import { EntropyLogger } from "./logger"
@@ -27,20 +25,19 @@ export function getKeyring (address?: string) {
 
 interface InitializeEntropyOpts {
   keyMaterial: MaybeKeyMaterial,
-  password?: string,
   endpoint: string,
   configPath?: string // for testing
 }
 type MaybeKeyMaterial = EntropyAccountData | string
 
-// WARNING: in programatic cli mode this function should NEVER prompt users, but it will if no password was provided
-// This is currently caught earlier in the code
-export const initializeEntropy = async ({ keyMaterial, password, endpoint, configPath }: InitializeEntropyOpts): Promise<Entropy> => {
+// WARNING: in programatic cli mode this function should NEVER prompt users
+
+export const initializeEntropy = async ({ keyMaterial, endpoint, configPath }: InitializeEntropyOpts): Promise<Entropy> => {
   const logger = new EntropyLogger('initializeEntropy', endpoint)
   try {
     await wasmGlobalsReady()
 
-    const { accountData, password: successfulPassword } = await getAccountDataAndPassword(keyMaterial, password)
+    const { accountData } = await getAccountData(keyMaterial)
     // check if there is no admin account and no seed so that we can throw an error
     if (!accountData.seed && !accountData.admin) {
       throw new Error("Data format is not recognized as either encrypted or unencrypted")
@@ -52,12 +49,9 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint, confi
       const store = await config.get(configPath)
       store.accounts = store.accounts.map((account) => {
         if (account.address === accountData.admin.address) {
-          let data = accountData
-          // @ts-ignore
-          if (typeof account.data === 'string' ) data = encrypt(accountData, successfulPassword)
           account = {
             ...account,
-            data,
+            data: accountData,
           }
         }
         return account
@@ -75,11 +69,9 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint, confi
         const store = await config.get(configPath)
         store.accounts = store.accounts.map((account) => {
           if (account.address === store.selectedAccount) {
-            let data = newAccountData
-            if (typeof account.data === 'string') data = encrypt(newAccountData, successfulPassword)
             const newAccount = {
               ...account,
-              data,
+              data: newAccountData,
             }
             return newAccount
           }
@@ -122,64 +114,15 @@ export const initializeEntropy = async ({ keyMaterial, password, endpoint, confi
 
 
 // NOTE: frankie this was prettier before I had to refactor it for merge conflicts, promise
-async function getAccountDataAndPassword (keyMaterial: MaybeKeyMaterial, password?: string): Promise<{ password: string | null, accountData: EntropyAccountData }> {
+async function getAccountData (keyMaterial: MaybeKeyMaterial): Promise<{ accountData: EntropyAccountData }> {
   if (isEntropyAccountData(keyMaterial)) {
     return { 
-      password: null,
       accountData: keyMaterial as EntropyAccountData
     }
   }
 
   if (typeof keyMaterial !== 'string') {
     throw new Error("Data format is not recognized as either encrypted or unencrypted")
-  }
-
-  /* Programmatic Mode */
-  if (password) {
-    const decryptedData = decrypt(keyMaterial, password)
-    if (!isEntropyAccountData(decryptedData)) {
-      throw new Error("Failed to decrypt keyMaterial or decrypted keyMaterial is invalid")
-    }
-    // @ts-ignore TODO: some type work here
-    return { password, accountData: decryptedData }
-  }
-
-  /* Interactive Mode */
-  let sucessfulPassword: string
-  let decryptedData
-  let attempts = 0
-
-  while (attempts < 3) {
-    const answers = await inquirer.prompt([
-      {
-        type: 'password',
-        name: 'password',
-        message: 'Enter password to decrypt keyMaterial:',
-        mask: '*',
-      }
-    ])
-
-    try {
-      decryptedData = decrypt(keyMaterial, answers.password)
-      //@ts-ignore
-      if (!isEntropyAccountData(decryptedData)) {
-        throw new Error("Failed to decrypt keyMaterial or decrypted keyMaterial is invalid")
-      }
-
-      sucessfulPassword = answers.password
-      break
-    } catch (error) {
-      console.error("Incorrect password. Try again")
-      attempts++
-      if (attempts >= 3) {
-        throw new Error("Failed to decrypt keyMaterial after 3 attempts.")
-      }
-    }
-  }
-
-  return {
-    password: sucessfulPassword,
-    accountData: decryptedData as EntropyAccountData
   }
 }
 

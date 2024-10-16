@@ -111,7 +111,6 @@ Arguments:
   address                    Account address whose balance you want to query
 
 Options:
-  -p, --password <password>  Password for the account
   -e, --endpoint <endpoint>  Runs entropy with the given endpoint and ignores network endpoints in
                              config. Can also be given a stored endpoint name from config eg: `entropy
                              --endpoint test-net`. (default: "ws://testnet.entropy.xyz:9944/", env:
