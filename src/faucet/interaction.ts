@@ -5,7 +5,10 @@ import { EntropyFaucet } from "./main"
 import { print } from "src/common/utils"
 
 let chosenVerifyingKeys = []
-const amount = "10000000000"
+// Sending only 1e10 BITS does not allow user's to register after receiving funds
+// there are limits in place to ensure user's are leftover with a certain balance in their accounts
+// increasing amount send here, will allow user's to register right away
+const amount = "20000000000"
 // context for logging file
 const FLOW_CONTEXT = 'ENTROPY_FAUCET_INTERACTION'
 export async function entropyFaucet (entropy: Entropy, options, logger: EntropyLogger) {
@@ -35,6 +38,7 @@ async function sendMoneyFromRandomFaucet (entropy: Entropy, endpoint: string, ve
     chosenVerifyingKeys.push(chosenVerifyingKey)
     if (error.message.includes('FaucetError') || chosenVerifyingKeys.length === verifyingKeys.length) {
       console.error('ERR::', error.message)
+      chosenVerifyingKeys = []
       return
     } else {
       // Check for non faucet errors (FaucetError) and retry faucet
