@@ -38,7 +38,6 @@ async function sendMoneyFromRandomFaucet (entropy: Entropy, endpoint: string, ve
     chosenVerifyingKeys.push(chosenVerifyingKey)
     if (error.message.includes('FaucetError') || chosenVerifyingKeys.length === verifyingKeys.length) {
       console.error('ERR::', error.message)
-      chosenVerifyingKeys = []
       return
     } else {
       // Check for non faucet errors (FaucetError) and retry faucet
