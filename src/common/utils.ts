@@ -1,5 +1,3 @@
-import { decodeAddress, encodeAddress } from "@polkadot/keyring"
-import { hexToU8a, isHex } from "@polkadot/util"
 import { Buffer } from 'buffer'
 import { EntropyAccountConfig } from "../config/types"
 
@@ -8,15 +6,21 @@ export function stripHexPrefix (str: string): string {
   return str
 }
 
+export function stringify (thing, indent = 2) {
+  return (typeof thing === 'object')
+    ? JSON.stringify(thing, replacer, indent)
+    : thing
+}
+
 export function replacer (key, value) {
-  if(value instanceof Uint8Array ){
+  if (value instanceof Uint8Array) {
     return Buffer.from(value).toString('base64')
   }
   else return value
 }
 
 export function print (...args) {
-  console.log(...args)
+  console.log(...args.map(arg => stringify(arg)))
 }
 
 // hardcoding for now instead of querying chain
@@ -48,17 +52,7 @@ export function buf2hex (buffer: ArrayBuffer): string {
   return Buffer.from(buffer).toString("hex")
 }
 
-export function isValidSubstrateAddress (address: any) {
-  try {
-    encodeAddress(isHex(address) ? hexToU8a(address) : decodeAddress(address))
-
-    return true
-  } catch (error) {
-    return false
-  }
-}
-
-export function accountChoices (accounts: EntropyAccountConfig[]) {
+export function generateAccountChoices (accounts: EntropyAccountConfig[]) {
   return accounts
     .map((account) => ({
       name: `${account.name} (${account.address})`,
@@ -67,10 +61,15 @@ export function accountChoices (accounts: EntropyAccountConfig[]) {
 }
 
 export function accountChoicesWithOther (accounts: EntropyAccountConfig[]) {
-  return accountChoices(accounts)
+  return generateAccountChoices(accounts)
     .concat([{ name: "Other", value: null }])
 }
 
-export function getSelectedAccount (accounts: EntropyAccountConfig[], address: string) {
-  return accounts.find(account => account.address === address)
+export function findAccountByAddressOrName (accounts: EntropyAccountConfig[], aliasOrAddress: string) {
+  if (!aliasOrAddress || !aliasOrAddress.length) throw Error('account name or address required')
+
+  return (
+    accounts.find(account => account.address === aliasOrAddress) ||
+    accounts.find(account => account.name === aliasOrAddress)
+  )
 }
