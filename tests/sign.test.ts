@@ -20,3 +20,18 @@ test('Sign - signMessageWithAdapters', async (t) => {
   t.end()
 })
 
+test('Sign - signMessageWithAdapters without verifying key', async (t) => {
+  const { entropy } = await setupTest(t)
+  const signService = new EntropySign(entropy, endpoint)
+
+  // should fail and return exi
+  await signService.signMessageWithAdapters({ msg: "heyo!" })
+    .then(() => t.fail('Signing should fail, user has not registered yet'))
+    .catch((err) => {
+      t.match(err.toString(), /TypeError/, 'Sign failed, user needs to register first')
+      return
+    })
+
+  t.end()
+})
+
