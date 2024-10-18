@@ -3,7 +3,7 @@ import test from 'tape'
 import { promiseRunner, charlieStashSeed, setupTest } from './testing-utils'
 import { EntropyProgram } from '../src/program/main'
 
-const networkType = 'two-nodes'
+const networkType = 'four-nodes'
 const endpoint = 'ws://127.0.0.1:9944'
 
 test('program', async t => {
