@@ -78,7 +78,7 @@ test('Account - import', async t => {
   t.end()
 })
 
-const networkType = 'two-nodes'
+const networkType = 'four-nodes'
 const endpoint = 'ws://127.0.0.1:9944'
 
 test('Account - Register: Default Program', async (t) => {

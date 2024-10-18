@@ -1,7 +1,7 @@
 import { Test } from 'tape'
 import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
 // @ts-ignore
-import { spinNetworkUp, spinNetworkDown, } from "@entropyxyz/sdk/testing"
+import { spinNetworkUp, spinNetworkDown, jumpStartNetwork } from "@entropyxyz/sdk/testing"
 // @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
 
@@ -52,6 +52,7 @@ export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entro
   })
 
   await run('entropy ready', entropy.ready)
+  await run('jump-start network', jumpStartNetwork(entropy))
 
   return { entropy, run, endpoint }
 }
