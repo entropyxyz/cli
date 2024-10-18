@@ -1,5 +1,5 @@
 import Entropy from '@entropyxyz/sdk'
-import { Option } from 'commander'
+import { Command, Option } from 'commander'
 import { findAccountByAddressOrName, stringify } from './utils'
 import * as config from '../config'
 import { initializeEntropy } from './initializeEntropy'
@@ -42,7 +42,7 @@ export function endpointOption () {
     // NOTE: argParser is only run IF an option is provided, so this cannot be 'test-net'
 }
 
-export function accountOption () {
+export function accountOption (program?: Command) {
   const storedConfig = getConfigOrNull()
 
   return new Option(
@@ -54,6 +54,9 @@ export function accountOption () {
   )
     .env('ENTROPY_ACCOUNT')
     .argParser(async (account) => {
+      if (account === '-h' || account === '--help') {
+        program.help()
+      }
       if (storedConfig && storedConfig.selectedAccount !== account) {
         // Updated selected account in config with new address from this option
         await config.set({
