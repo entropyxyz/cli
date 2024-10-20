@@ -43,14 +43,6 @@ export function endpointOption () {
     // or ENTROPY_ENDPOINT env set
 }
 
-export function passwordOption (description?: string) {
-  return new Option(
-    '-p, --password <string>',
-    description || 'Password for the account'
-  )
-    .hideHelp(true)
-}
-
 export function accountOption () {
   const storedConfig = getConfigOrNull()
 
@@ -84,17 +76,12 @@ export function accountOption () {
     .default(storedConfig?.selectedAccount)
 }
 
-export async function loadEntropy (addressOrName: string, endpoint: string, password?: string): Promise<Entropy> {
+export async function loadEntropy (addressOrName: string, endpoint: string): Promise<Entropy> {
   const accounts = getConfigOrNull()?.accounts || []
   const selectedAccount = findAccountByAddressOrName(accounts, addressOrName)
   if (!selectedAccount) throw new Error(`No account with name or address: "${addressOrName}"`)
 
-  // check if data is encrypted + we have a password
-  if (typeof selectedAccount.data === 'string' && !password) {
-    throw new Error('AuthError: This account requires a password, add --password <password>')
-  }
-
-  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint, password })
+  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint })
   if (!entropy?.keyring?.accounts?.registration?.pair) {
     throw new Error("Signer keypair is undefined or not properly initialized.")
   }

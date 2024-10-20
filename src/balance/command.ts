@@ -2,7 +2,7 @@ import { Command } from "commander";
 import Entropy from "@entropyxyz/sdk";
 
 import { EntropyBalance } from "./main";
-import { cliWrite, endpointOption, loadEntropy, passwordOption } from "../common/utils-cli";
+import { endpointOption, cliWrite, loadEntropy } from "../common/utils-cli";
 import { findAccountByAddressOrName } from "../common/utils";
 import * as config from "../config";
 
@@ -12,7 +12,6 @@ export function entropyBalanceCommand () {
     .description('Command to retrieive the balance of an account on the Entropy Network')
     .argument('account <address|name>', 'Account address whose balance you want to query')
     .addOption(endpointOption())
-    .addOption(passwordOption())
     .action(async (account, opts) => {
       const entropy: Entropy = await loadEntropy(account, opts.endpoint)
       const BalanceService = new EntropyBalance(entropy, opts.endpoint)

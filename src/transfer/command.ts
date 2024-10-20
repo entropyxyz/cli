@@ -1,5 +1,5 @@
 import { Command } from "commander"
-import { accountOption, endpointOption, passwordOption, loadEntropy } from "../common/utils-cli"
+import { accountOption, endpointOption, loadEntropy } from "src/common/utils-cli"
 import { EntropyTransfer } from "./main"
 
 export function entropyTransferCommand () {
@@ -10,7 +10,6 @@ export function entropyTransferCommand () {
     .argument('amount', 'Amount of funds to be moved (in "tokens")')
     .addOption(accountOption())
     .addOption(endpointOption())
-    .addOption(passwordOption('Password for the source account (if required)'))
     .action(async (destination, amount, opts) => {
       // TODO: destination as <name|address> ?
       const entropy = await loadEntropy(opts.account, opts.endpoint)
