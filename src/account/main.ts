@@ -66,42 +66,5 @@ export class EntropyAccount extends EntropyBase {
 
     this.logger.debug(`registering with params: ${registerParams}`, 'REGISTER')
     return this.entropy.register(registerParams)
-      // NOTE: if "register" fails for any reason, core currently leaves the chain in a "polluted"
-      // state. To fix this we manually "prune" the dirty registration transaction.
-      .catch(async error => {
-        await this.pruneRegistration()
-        throw error
-      })
-  }
-
-  /* PRIVATE */
-
-  private async pruneRegistration () {
-    return new Promise((resolve, reject) => {
-      this.entropy.substrate.tx.registry.pruneRegistration()
-        .signAndSend(this.entropy.keyring.accounts.registration.pair, ({ status, dispatchError }) => {
-          if (dispatchError) {
-            let msg: string
-            if (dispatchError.isModule) {
-              // for module errors, we have the section indexed, lookup
-              const decoded = this.entropy.substrate.registry.findMetaError(
-                dispatchError.asModule
-              )
-              const { docs, name, section } = decoded
-  
-              msg = `${section}.${name}: ${docs.join(' ')}`
-            } else {
-              // Other, CannotLookup, BadOrigin, no extra info
-              msg = dispatchError.toString()
-            }
-            const error = Error(msg)
-            this.logger.error('There was an issue pruning registration', error)
-            return reject(error)
-          }
-          if (status.isFinalized) {
-            resolve(status)
-          }
-        })
-    })
   }
 }

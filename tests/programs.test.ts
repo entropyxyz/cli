@@ -1,13 +1,15 @@
 import test from 'tape'
+import { jumpStartNetwork } from '@entropyxyz/sdk/testing'
 
-import { promiseRunner, charlieStashSeed, setupTest } from './testing-utils'
+import { promiseRunner, eveSeed, setupTest } from './testing-utils'
 import { EntropyProgram } from '../src/program/main'
 
 const networkType = 'four-nodes'
 const endpoint = 'ws://127.0.0.1:9944'
 
 test('program', async t => {
-  const { run, entropy } = await setupTest(t, { seed: charlieStashSeed, networkType })
+  const { run, entropy } = await setupTest(t, { seed: eveSeed, networkType })
+  await run('jump-start network', jumpStartNetwork(entropy))
   await run('register', entropy.register()) // TODO: consider removing this in favour of just testing add
 
   const program = new EntropyProgram(entropy, endpoint)
@@ -34,7 +36,7 @@ test('program', async t => {
     const run = promiseRunner(t)
 
     const programsBeforeAdd = await run('get programs initial', getPrograms())
-    t.equal(programsBeforeAdd.length, 1, 'charlie has 1 program')
+    t.equal(programsBeforeAdd.length, 1, 'eve has 1 program')
 
     await run(
       'adding program',
@@ -44,7 +46,7 @@ test('program', async t => {
       })
     )
     const programsAfterAdd = await run('get programs after add', getPrograms())
-    t.equal(programsAfterAdd.length, 2, 'charlie has 2 programs')
+    t.equal(programsAfterAdd.length, 2, 'eve has 2 programs')
 
     t.end()
   })
@@ -53,7 +55,7 @@ test('program', async t => {
     const run = promiseRunner(t)
 
     const programsBeforeRemove = await run('get programs initial', getPrograms())
-    t.equal(programsBeforeRemove.length, 2, 'charlie has 2 programs')
+    t.equal(programsBeforeRemove.length, 2, 'eve has 2 programs')
 
     await run(
       'removing noop program',
@@ -63,7 +65,7 @@ test('program', async t => {
       })
     )
     const programsAfterRemove = await run('get programs initial', getPrograms())
-    t.equal(programsAfterRemove.length, 1, 'charlie has 1 less program')
+    t.equal(programsAfterRemove.length, 1, 'eve has 1 less program')
 
     t.end()
   })
@@ -72,11 +74,11 @@ test('program', async t => {
     const run = promiseRunner(t)
 
     const programs = await run(
-      'get charlie programs',
+      'get eve programs',
       program.list({ verifyingKey })
     )
 
-    t.equal(programs.length, 1, 'charlie has 1 program')
+    t.equal(programs.length, 1, 'eve has 1 program')
 
     t.end()
   })

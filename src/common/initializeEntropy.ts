@@ -100,10 +100,6 @@ export const initializeEntropy = async ({ keyMaterial, endpoint, configPath }: I
     if (!entropy?.keyring?.accounts?.registration?.seed) {
       throw new Error("Keys are undefined")
     }
-
-    await entropy.substrate.tx.registry.jumpStartNetwork()
-      .signAndSend(entropy.keyring.accounts.registration.pair)
-
     
     return entropy
   } catch (error) {

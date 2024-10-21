@@ -52,7 +52,6 @@ export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entro
   })
 
   await run('entropy ready', entropy.ready)
-  await run('jump-start network', jumpStartNetwork(entropy))
 
   return { entropy, run, endpoint }
 }

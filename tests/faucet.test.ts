@@ -1,5 +1,6 @@
 import test from 'tape'
-import { charlieStashSeed, setupTest } from './testing-utils'
+import { eveSeed, setupTest } from './testing-utils'
+import { jumpStartNetwork } from '@entropyxyz/sdk/testing'
 import { stripHexPrefix } from '../src/common/utils'
 import { readFileSync } from 'fs'
 import { EntropyBalance } from '../src/balance/main'
@@ -9,7 +10,8 @@ import { LOCAL_PROGRAM_HASH } from '../src/faucet/utils'
 import { EntropyAccount } from '../src/account/main'
 
 async function setupAndFundFaucet (t, naynayEntropy) {
-  const { run, entropy, endpoint } = await setupTest(t, { seed: charlieStashSeed })
+  const { run, entropy, endpoint } = await setupTest(t, { seed: eveSeed })
+  await run('jump-start network', jumpStartNetwork(entropy))
   const accountService = new EntropyAccount(entropy, endpoint)
   const transferService = new EntropyTransfer(entropy, endpoint)
   const faucetService = new EntropyFaucet(naynayEntropy, endpoint)
@@ -40,7 +42,7 @@ async function setupAndFundFaucet (t, naynayEntropy) {
   t.equal(faucetProgramPointer, LOCAL_PROGRAM_HASH, 'Program pointer matches')
 
   // register with faucet program
-  await run('Register Faucet Program for charlie stash', accountService.register(
+  await run('Register Faucet Program for eve', accountService.register(
     { 
       programModAddress: entropy.keyring.accounts.registration.address,
       programData: [{ program_pointer: faucetProgramPointer, program_config: userConfig }]
