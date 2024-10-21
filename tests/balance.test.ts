@@ -3,7 +3,7 @@ import test from 'tape'
 import { setupTest, charlieStashAddress as richAddress } from './testing-utils'
 import { EntropyBalance } from '../src/balance/main'
 
-const networkType = 'two-nodes'
+const networkType = 'four-nodes'
 
 test('getBalance + getBalances', async (t) => {
   const { run, entropy, endpoint } = await setupTest(t, { networkType })
