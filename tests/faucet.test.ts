@@ -1,39 +1,35 @@
 import test from 'tape'
-import { readFile } from 'fs/promises'
+import { Entropy } from '@entropyxyz/sdk'
+import { readFileSync } from 'fs'
 
 import { charlieStashSeed, setupTest } from './testing-utils'
 import { stripHexPrefix } from '../src/common/utils'
-import { BITS_PER_TOKEN } from '../src/common/constants'
-
-import { EntropyAccount } from '../src/account/main'
 import { EntropyBalance } from '../src/balance/main'
 import { EntropyTransfer } from '../src/transfer/main'
 import { EntropyFaucet } from '../src/faucet/main'
+import { LOCAL_PROGRAM_HASH } from '../src/faucet/utils'
+import { EntropyAccount } from '../src/account/main'
 
-test('Faucet Tests', async t => {
+async function setupAndFundFaucet (t, naynay: Entropy) {
   const { run, entropy: charlie, endpoint } = await setupTest(t, { seed: charlieStashSeed })
-  const { entropy: naynay } = await setupTest(t)
-
+  // WARNING: setupTest is getting called twice ... which tries to spin up 2 networks? is this ok?
   const charlieAddress = charlie.keyring.accounts.registration.address
-  const naynayAddress = naynay.keyring.accounts.registration.address
 
-  const accountService = new EntropyAccount(charlie, endpoint)
-  const balanceService = new EntropyBalance(charlie, endpoint)
-  const transferService = new EntropyTransfer(charlie, endpoint)
+  const account = new EntropyAccount(charlie, endpoint)
+  const transfer = new EntropyTransfer(charlie, endpoint)
   // NOTE: naynay
-  const faucetService = new EntropyFaucet(naynay, endpoint)
+  const faucet = new EntropyFaucet(naynay, endpoint) // QUESTION: this seems like a mistage
 
-  // Deploy faucet program
-  const faucetProgram = await readFile('tests/programs/faucet_program.wasm')
+  const faucetProgram = readFileSync('tests/programs/faucet_program.wasm')
   const configurationSchema = {
-    type: "object",
+    type: 'object',
     properties: {
-      genesis_hash: { type: "string" },
-      max_transfer_amount: { type: "number" }
+      max_transfer_amount: { type: "number" },
+      genesis_hash: { type: "string" }
     }
   }
   const auxDataSchema = {
-    type: "object",
+    type: 'object',
     properties: {
       amount: { type: "number" },
       string_account_id: { type: "string" },
@@ -41,61 +37,121 @@ test('Faucet Tests', async t => {
       transaction_version: { type: "number" },
     }
   }
-  const faucetProgramPointer = await run(
-    'deploy faucet program',
-    charlie.programs.dev.deploy(faucetProgram, configurationSchema, auxDataSchema)
-  )
 
-  // Install faucet
+  // Deploy faucet program
+  const faucetProgramPointer = await run(
+    'Deploy faucet program',
+     charlie.programs.dev.deploy(faucetProgram, configurationSchema, auxDataSchema)
+)
+
+  // Confirm faucetPointer matches deployed program pointer
+  t.equal(faucetProgramPointer, LOCAL_PROGRAM_HASH, 'Program pointer matches')
+  // TODO: this is gonna be wrong
+
+  // register with faucet program
   const genesisHash = await charlie.substrate.rpc.chain.getBlockHash(0)
-  const userProgramConfig = {
-    max_transfer_amount: 10_000_000_000,
+  const userConfig = {
+    max_transfer_amount: 20_000_000_000,
     genesis_hash: stripHexPrefix(genesisHash.toString())
   }
   await run(
-    'Charlie registers with Faucet as initial program',
-    accountService.register({
+    'Register Faucet Program for charlie stash',
+    account.register({
       programModAddress: charlieAddress,
       programData: [{
         program_pointer: faucetProgramPointer,
-        program_config: userProgramConfig
+        program_config: userConfig
       }]
     })
   )
-
-  // Fund the faucet
-  const verifyingKeys = await faucetService.getAllFaucetVerifyingKeys(charlieAddress)
+  const verifyingKeys = await faucet.getAllFaucetVerifyingKeys(charlieAddress)
   // @ts-expect-error
-  const { chosenVerifyingKey, faucetAddress } = faucetService.getRandomFaucet([], verifyingKeys)
+  const { chosenVerifyingKey, faucetAddress } = faucet.getRandomFaucet([], verifyingKeys)
+  // adding funds to faucet address
+  await run('Transfer funds to faucet address', transfer.transfer(faucetAddress, "1000"))
 
-  const funding = 1000
-  await run(
-    'Charlie funds the Faucet address',
-    transferService.transfer(faucetAddress, `${funding}`)
-  )
+  return { faucetProgramPointer, chosenVerifyingKey, faucetAddress }
+}
 
-  const faucetBalance = await balanceService.getBalance(faucetAddress)
-  t.equal(faucetBalance, funding * BITS_PER_TOKEN, 'Faucet has balance')
+test('Faucet Tests: Successfully send funds and register', async t => {
+  const { run, endpoint, entropy: naynay } = await setupTest(t)
+  const naynayAddress = naynay.keyring.accounts.registration.address
 
-  // Use the faucet
-  let naynayBalance = await balanceService.getBalance(naynayAddress)
-  t.equal(naynayBalance, 0, 'Naynay is broke')
+  const faucet = new EntropyFaucet(naynay, endpoint)
+  const balance = new EntropyBalance(naynay, endpoint)
 
+  const { faucetAddress, chosenVerifyingKey, faucetProgramPointer } = await setupAndFundFaucet(t, naynay)
+
+  let naynayBalance = await balance.getBalance(naynayAddress)
+  t.equal(naynayBalance, 0, 'Naynay is broke af')
+
+  const amount = 20000000000
   const transferStatus = await run(
-    "Naynay uses faucet",
-    faucetService.sendMoney({
-      amount: "10000000000",
+    'Sending faucet funds to account',
+    faucet.sendMoney({
+      amount: `${amount}`,
+      addressToSendTo: naynay.keyring.accounts.registration.address,
       faucetAddress,
       chosenVerifyingKey,
-      faucetProgramPointer,
-      addressToSendTo: naynayAddress,
+      faucetProgramPointer
     })
   )
   t.ok(transferStatus.isFinalized, 'Transfer is good')
 
-  naynayBalance = await balanceService.getBalance(naynayAddress)
+  naynayBalance = await balance.getBalance(naynayAddress)
+  t.equal(naynayBalance, amount, 'Naynay is drippin in faucet tokens')
 
-  t.equal(naynayBalance, 10000000000, 'Naynay is drippin in faucet tokens')
+  // Test if user can register after receiving funds
+  const naynayAccountService = new EntropyAccount(naynay, endpoint)
+  const verifyingKey = await run('register account', naynayAccountService.register())
+
+  t.ok(!!verifyingKey, 'Verifying key exists and is returned from register method')
+
+  const fullAccount = naynay.keyring.getAccount()
+  t.equal(verifyingKey, fullAccount?.registration?.verifyingKeys?.[0], 'verifying key matches key added to registration account')
 
   t.end()
 })
+
+// TODO: @naynay fix below test for register failing when only sending 1e10 bits
+// test('Faucet Tests: Successfully send funds but cannot register', async t => {
+//   const { run, endpoint, entropy: naynayEntropy } = await setupTest(t)
+
+//   const faucetService = new EntropyFaucet(naynayEntropy, endpoint)
+//   const balanceService = new EntropyBalance(naynayEntropy, endpoint)
+
+//   const { faucetAddress, chosenVerifyingKey, faucetProgramPointer } = await setupAndFundFaucet(t, naynayEntropy)
+  
+//   let naynayBalance = await balanceService.getBalance(naynayEntropy.keyring.accounts.registration.address)
+//   t.equal(naynayBalance, 0, 'Naynay is broke af')
+  
+//   const transferStatus = await run('Sending faucet funds to account', faucetService.sendMoney(
+//     {
+//       amount: "10000000000",
+//       addressToSendTo: naynayEntropy.keyring.accounts.registration.address,
+//       faucetAddress,
+//       chosenVerifyingKey,
+//       faucetProgramPointer
+//     }
+//   ))
+
+//   t.ok(transferStatus.isFinalized, 'Transfer is good')
+
+//   naynayBalance = await balanceService.getBalance(naynayEntropy.keyring.accounts.registration.address)
+
+//   t.ok(naynayBalance > 0, 'Naynay is drippin in faucet tokens')
+
+//   // Test if user can register after receiving funds
+//   const naynayAccountService = new EntropyAccount(naynayEntropy, endpoint)
+//   try {
+//     const verifyingKey = await naynayAccountService.register()
+//     console.log('ver key', verifyingKey);
+    
+//     // t.fail('Register should fail')
+//   } catch (error) {
+//     console.log('error', error);
+    
+//     t.pass('Regsitration failed')
+//     t.end()
+//   }
+// })

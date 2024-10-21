@@ -31,13 +31,11 @@ export class EntropyAccount extends EntropyBase {
 
     const data = fullAccount
     delete admin.pair
-    // const encryptedData = password ? passwordFlow.encrypt(data, password) : data
     
     return {
       name,
       address: admin.address,
       data
-      // data: encryptedData // TODO: replace once password input is added back
     }
   }
 

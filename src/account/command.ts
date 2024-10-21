@@ -4,7 +4,7 @@ import { EntropyAccount } from "./main";
 import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from "./utils";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
-import { cliWrite, accountOption, endpointOption, loadEntropy, passwordOption } from "../common/utils-cli";
+import { cliWrite, accountOption, endpointOption, loadEntropy } from "../common/utils-cli";
 
 export function entropyAccountCommand () {
   return new Command('account')
@@ -19,7 +19,6 @@ function entropyAccountCreate () {
   return new Command('create')
     .alias('new')
     .description('Create a new entropy account from scratch. Output is JSON of form {name, address}')
-    .addOption(passwordOption())
     .argument('<name>', 'A user friendly name for your new account.')
     .addOption(
       new Option(
@@ -44,7 +43,6 @@ function entropyAccountCreate () {
 function entropyAccountImport () {
   return new Command('import')
     .description('Import an existing entropy account from seed. Output is JSON of form {name, address}')
-    .addOption(passwordOption())
     .argument('<name>', 'A user friendly name for your new account.')
     .argument('<seed>', 'The seed for the account you are importing')
     .addOption(
@@ -72,7 +70,6 @@ function entropyAccountList () {
     .alias('ls')
     .description('List all accounts. Output is JSON of form [{ name, address, verifyingKeys }]')
     .action(async () => {
-      // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
       const storedConfig = await config.get()
       const accounts = EntropyAccount.list(storedConfig)
       cliWrite(accounts)
@@ -84,7 +81,6 @@ function entropyAccountList () {
 function entropyAccountRegister () {
   return new Command('register')
     .description('Register an entropy account with a program')
-    .addOption(passwordOption())
     .addOption(endpointOption())
     .addOption(accountOption())
     // Removing these options for now until we update the design to accept program configs
