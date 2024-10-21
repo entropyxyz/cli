@@ -20,20 +20,22 @@ export async function selectAndPersistNewAccount (newAccount: EntropyAccountConf
   accounts.push(newAccount)
   await config.set({
     ...storedConfig,
-    selectedAccount: newAccount.address
+    selectedAccount: newAccount.name
   })
 }
 
 export async function addVerifyingKeyToAccountAndSelect (verifyingKey: string, accountNameOrAddress: string) {
   const storedConfig = await config.get()
-  const account = findAccountByAddressOrName(storedConfig.accounts, accountNameOrAddress)
+  const { accounts } = storedConfig
+
+  const account = findAccountByAddressOrName(accounts, accountNameOrAddress)
   if (!account) throw Error(`Unable to persist verifyingKey "${verifyingKey}" to unknown account "${accountNameOrAddress}"`)
 
   // persist to config, set selectedAccount
   account.data.registration.verifyingKeys.push(verifyingKey)
   await config.set({
     ...storedConfig,
-    selectedAccount: account.address
+    setSelectedAccount: account.name
   })
 }
 

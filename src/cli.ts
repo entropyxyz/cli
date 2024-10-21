@@ -28,11 +28,13 @@ program
       .env('DEV_MODE')
       .hideHelp()
   )
+
   .addCommand(entropyBalanceCommand())
   .addCommand(entropyAccountCommand())
   .addCommand(entropyTransferCommand())
   .addCommand(entropySignCommand())
   .addCommand(entropyProgramCommand())
+
   .action(async (opts: EntropyTuiOptions) => {
     const { account, endpoint } = opts
     const entropy = account
