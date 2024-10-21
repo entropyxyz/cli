@@ -4,9 +4,9 @@ import { mkdirp } from 'mkdirp'
 import { join, dirname } from 'path'
 import envPaths from 'env-paths'
 
-
 import allMigrations from './migrations'
-import { replacer } from 'src/common/utils'
+import { serialize, deserialize } from './encoding'
+import { EntropyConfig, EntropyAccountConfig } from './types'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
 const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
@@ -35,9 +35,10 @@ function hasRunMigration (config: any, version: number) {
 
 export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG_PATH) {
   const currentConfig = await get(configPath)
-    .catch(async (err) => {
-      if (err && err.code !== 'ENOENT') throw err
+    .catch(async (err ) => {
+      if (isDangerousReadError(err)) throw err
 
+      // If there is no current config, try loading the old one
       const oldConfig = await get(oldConfigPath).catch(noop) // drop errors
       if (oldConfig) {
         // move the config
@@ -54,19 +55,48 @@ export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG
     await set(newConfig, configPath)
   }
 }
-function noop () {}
 
 export async function get (configPath = CONFIG_PATH) {
-  const configBuffer = await readFile(configPath)
-  return JSON.parse(configBuffer.toString())
+  return readFile(configPath, 'utf-8')
+    .then(deserialize)
 }
 
 export function getSync (configPath = CONFIG_PATH) {
-  const configBuffer = readFileSync(configPath, 'utf8')
-  return JSON.parse(configBuffer)
+  const configStr = readFileSync(configPath, 'utf8')
+  return deserialize(configStr)
 }
 
-export async function set (config = {}, configPath = CONFIG_PATH) {
+export async function set (config: EntropyConfig, configPath = CONFIG_PATH) {
+  assertConfigPath(configPath)
+
   await mkdirp(dirname(configPath))
-  await writeFile(configPath, JSON.stringify(config, replacer))
+  await writeFile(configPath, serialize(config))
+}
+
+export async function setSelectedAccount (account: EntropyAccountConfig, configPath = CONFIG_PATH) {
+  const storedConfig = await get(configPath)
+
+  if (storedConfig.selectedAccount === account.name) return storedConfig
+  // no need for update
+
+  const newConfig = {
+    ...storedConfig,
+    selectedAccount: account.name
+  }
+  await set(newConfig, configPath)
+  return newConfig
+}
+
+/* util */
+function noop () {}
+function assertConfigPath (configPath: string) {
+  if (!configPath.endsWith('.json')) {
+    throw Error(`configPath must be of form *.json, got ${configPath}`)
+  }
+}
+export function isDangerousReadError (err: any) {
+  // file not found:
+  if (err.code === 'ENOENT') return false
+
+  return true
 }
