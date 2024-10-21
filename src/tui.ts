@@ -19,11 +19,7 @@ async function setupConfig () {
 
   // set selectedAccount if we can
   if (!storedConfig.selectedAccount && storedConfig.accounts.length) {
-    await config.set({
-      ...storedConfig,
-      selectedAccount: storedConfig.accounts[0].address
-    })
-    storedConfig = await config.get()
+    storedConfig = await config.setSelectedAccount(storedConfig.accounts[0])
   }
 
   return storedConfig
