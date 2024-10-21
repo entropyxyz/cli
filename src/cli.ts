@@ -20,7 +20,6 @@ const program = new Command()
 program
   .name('entropy')
   .description('CLI interface for interacting with entropy.xyz. Running this binary without any commands or arguments starts a text-based interface.')
-
   .addOption(
     new Option(
       '-d, --dev',
