@@ -1,5 +1,4 @@
 import test from 'tape'
-import { Entropy } from '@entropyxyz/sdk'
 import { readFileSync } from 'fs'
 
 import { charlieStashSeed, setupTest } from './testing-utils'
@@ -10,15 +9,14 @@ import { EntropyFaucet } from '../src/faucet/main'
 import { LOCAL_PROGRAM_HASH } from '../src/faucet/utils'
 import { EntropyAccount } from '../src/account/main'
 
-async function setupAndFundFaucet (t, naynay: Entropy) {
+async function setupAndFundFaucet (t) {
   const { run, entropy: charlie, endpoint } = await setupTest(t, { seed: charlieStashSeed })
-  // WARNING: setupTest is getting called twice ... which tries to spin up 2 networks? is this ok?
+  // NOTE: there is some spin-up-network but it's idempotent!
   const charlieAddress = charlie.keyring.accounts.registration.address
 
   const account = new EntropyAccount(charlie, endpoint)
   const transfer = new EntropyTransfer(charlie, endpoint)
-  // NOTE: naynay
-  const faucet = new EntropyFaucet(naynay, endpoint) // QUESTION: this seems like a mistage
+  const faucet = new EntropyFaucet(charlie, endpoint)
 
   const faucetProgram = readFileSync('tests/programs/faucet_program.wasm')
   const configurationSchema = {
@@ -80,7 +78,7 @@ test('Faucet Tests: Successfully send funds and register', async t => {
   const faucet = new EntropyFaucet(naynay, endpoint)
   const balance = new EntropyBalance(naynay, endpoint)
 
-  const { faucetAddress, chosenVerifyingKey, faucetProgramPointer } = await setupAndFundFaucet(t, naynay)
+  const { faucetAddress, chosenVerifyingKey, faucetProgramPointer } = await setupAndFundFaucet(t)
 
   let naynayBalance = await balance.getBalance(naynayAddress)
   t.equal(naynayBalance, 0, 'Naynay is broke af')
