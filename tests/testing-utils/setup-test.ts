@@ -18,10 +18,11 @@ interface SetupTestOpts {
 }
 const NETWORK_TYPE_DEFAULT = 'four-nodes'
 let counter = 0
+const CONFIG_PATH = `/tmp/entropy-cli-${Date.now()}_${counter++}.json`
 
 export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entropy: Entropy; run: any; endpoint: string }> {
   const {
-    configPath = `/tmp/entropy-cli-${Date.now()}_${counter++}.json`,
+    configPath = CONFIG_PATH,
     networkType = NETWORK_TYPE_DEFAULT,
     seed = makeSeed(),
     endpoint = 'ws://127.0.0.1:9944',
