@@ -1,5 +1,5 @@
 import test from 'tape'
-import { wasmGlobalsReady } from '@entropyxyz/sdk'
+import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
 // @ts-ignore
 import { isValidSubstrateAddress } from '@entropyxyz/sdk/utils'
 import { jumpStartNetwork } from '@entropyxyz/sdk/testing'
@@ -80,60 +80,59 @@ test('Account - import', async t => {
   t.end()
 })
 
-const networkType = 'four-nodes'
 const endpoint = 'ws://127.0.0.1:9944'
 
+async function fundAccount (t, entropy: Entropy) {
+  const { entropy: charlie } = await setupTest(t, { seed: charlieStashSeed })
+  const transfer = new EntropyTransfer(charlie, endpoint)
+
+  await transfer.transfer(entropy.keyring.accounts.registration.address, "1000")
+}
+
+
 test('Account - Register: Default Program', async (t) => {
-  const { run, entropy } = await setupTest(t, { networkType, seed: charlieStashSeed })
-  // Naynay entropy instance required here as @JesseAbram brought to attn that running jumpstart using the charlie seed will result in errors.
-  // the error found here was: RpcError: 1014: Priority is too low: (4471 vs 4471): The transaction has too low priority to replace another transaction already in the pool.
-  // which indicated a potential nonce issue, where the solution would be to manually wait for ~50 blocks to make any subsequent calls to the network. However,
-  // using naynay instance (fresh seed) jump start and the subsequent calls to the network (i.e register), the flow worked without issues.
-  const { entropy: naynay } = await setupTest(t, { networkType })
+  const { run, entropy: naynay } = await setupTest(t)
+  // NOTE: we fund a new account "naynay" because jumpStart has problems with charlie (T_T)
+  await run('fund naynay', fundAccount(t, naynay))
 
-  const accountService = new EntropyAccount(naynay, endpoint)
-  const transferService = new EntropyTransfer(entropy, endpoint)
-
-  // use of charlie seed is solely to transfer funds to the naynay (fresh seed) instance. these funds will be used for the jumpstart and register call
-  await run('transferring funds', transferService.transfer(naynay.keyring.accounts.registration.address, "1000"))
+  // use of charlie seed is solely to transfer funds to the naynay (fresh seed) instance.
+  // these funds will be used for the jumpstart and register call
   await run('jump-start network', jumpStartNetwork(naynay))
 
-  const verifyingKey = await run('register account', accountService.register())
+  const account = new EntropyAccount(naynay, endpoint)
+  const verifyingKey = await run('register account', account.register())
 
   const fullAccount = naynay.keyring.getAccount()
-
   t.equal(verifyingKey, fullAccount?.registration?.verifyingKeys?.[0], 'verifying key matches key added to registration account')
 
   t.end()
 })
 
 test('Account - Register: Barebones Program', async t => {
-  const { run, entropy } = await setupTest(t, { networkType, seed: eveSeed })
-  const { entropy: naynay } = await setupTest(t, { networkType })
-  // await run('jump-start network', jumpStartNetwork(entropy))
+  const { run, entropy: naynay } = await setupTest(t)
+  await run('fund naynay', fundAccount(t, naynay))
+  // NOTE: we fund a new account "naynay" because jumpStart has problems with charlie (T_T)
+
   const dummyProgram: any = readFileSync(
     new URL('./programs/template_barebones.wasm', import.meta.url)
   )
 
-  const accountService = new EntropyAccount(naynay, endpoint)
-  const transferService = new EntropyTransfer(entropy, endpoint)
-
-  await run('transferring funds', transferService.transfer(naynay.keyring.accounts.registration.address, "1000"))
   await run('jump-start network', jumpStartNetwork(naynay))
+
+  const account = new EntropyAccount(naynay, endpoint)
   const pointer = await run(
     'deploy program',
-    entropy.programs.dev.deploy(dummyProgram)
+    naynay.programs.dev.deploy(dummyProgram)
   )
   const verifyingKey = await run(
-    'register - using custom params',
-    accountService.register({
-      programModAddress: entropy.keyring.accounts.registration.address,
+    'register account - with custom params',
+    account.register({
+      programModAddress: naynay.keyring.accounts.registration.address,
       programData: [{ program_pointer: pointer, program_config: '0x' }],
     })
   )
 
   const fullAccount = naynay.keyring.getAccount()
-
   t.equal(verifyingKey, fullAccount?.registration?.verifyingKeys?.[0], 'verifying key matches key added to registration account')
 
   t.end()
