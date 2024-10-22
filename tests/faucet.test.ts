@@ -46,7 +46,6 @@ async function setupAndFundFaucet (t) {
   // hash, and use those here
   const LOCAL_PROGRAM_HASH = '0x55e250f4031546d15c6491c3610d58ca1a74e216b4bd612b42aed8f56b05b559'
   t.equal(faucetProgramPointer, LOCAL_PROGRAM_HASH, 'Program pointer matches')
-  // TODO: this is gonna be wrong
 
   // register with faucet program
   const genesisHash = await charlie.substrate.rpc.chain.getBlockHash(0)
@@ -75,6 +74,7 @@ async function setupAndFundFaucet (t) {
 
 test('Faucet Tests: Successfully send funds and register', async t => {
   const { run, endpoint, entropy: naynay } = await setupTest(t)
+  console.log(('faucet set up'))
   const naynayAddress = naynay.keyring.accounts.registration.address
 
   const faucet = new EntropyFaucet(naynay, endpoint)
