@@ -23,3 +23,18 @@ test('Sign - signMessageWithAdapters', async (t) => {
   t.end()
 })
 
+test('Sign - signMessageWithAdapters (no verifying key)', async (t) => {
+  const { entropy } = await setupTest(t)
+  const signService = new EntropySign(entropy, endpoint)
+
+  const description = 'Unregistered user gets error when they try to sign.'
+  await signService.signMessageWithAdapters({ msg: "heyo!" })
+    .then(() => t.fail(description))
+    .catch((err) => {
+      t.match(err.message, /Cannot read properties of undefined/, description)
+      return
+    })
+
+  t.end()
+})
+

@@ -20,7 +20,7 @@ test('Account - list', async t => {
     address: charlieStashAddress,
     data: {
       seed: charlieStashSeed,
-      admin: {
+      registration: {
         verifyingKeys: ['this-is-a-verifying-key'],
         seed: charlieStashSeed,
         address: charlieStashAddress,
@@ -43,7 +43,7 @@ test('Account - list', async t => {
   t.deepEqual(accountsArray, [{
     name: account.name,
     address: account.address,
-    verifyingKeys: account?.data?.admin?.verifyingKeys
+    verifyingKeys: account?.data?.registration?.verifyingKeys
   }])
 
   // Resetting accounts on config to test for empty list
