@@ -6,7 +6,6 @@ import { stripHexPrefix } from '../src/common/utils'
 import { EntropyBalance } from '../src/balance/main'
 import { EntropyTransfer } from '../src/transfer/main'
 import { EntropyFaucet } from '../src/faucet/main'
-import { LOCAL_PROGRAM_HASH } from '../src/faucet/utils'
 import { EntropyAccount } from '../src/account/main'
 
 async function setupAndFundFaucet (t) {
@@ -43,6 +42,9 @@ async function setupAndFundFaucet (t) {
 )
 
   // Confirm faucetPointer matches deployed program pointer
+  // TODO: when we re-deploy the testnet we should record the schema that got deployed, and the
+  // hash, and use those here
+  const LOCAL_PROGRAM_HASH = '0x55e250f4031546d15c6491c3610d58ca1a74e216b4bd612b42aed8f56b05b559'
   t.equal(faucetProgramPointer, LOCAL_PROGRAM_HASH, 'Program pointer matches')
   // TODO: this is gonna be wrong
 
