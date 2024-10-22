@@ -73,3 +73,10 @@ export function findAccountByAddressOrName (accounts: EntropyAccountConfig[], al
     accounts.find(account => account.name === aliasOrAddress)
   )
 }
+
+export async function jumpStartNetwork (entropy) {
+  await entropy.substrate.tx.registry.jumpStartNetwork()
+    .signAndSend(entropy.keyring.accounts.registration.pair)
+  
+  return
+}

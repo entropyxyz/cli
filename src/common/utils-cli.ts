@@ -82,8 +82,6 @@ export async function loadEntropy (addressOrName: string, endpoint: string): Pro
   if (!selectedAccount) throw new Error(`No account with name or address: "${addressOrName}"`)
 
   const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint })
-  await entropy.substrate.tx.registry.jumpStartNetwork()
-    .signAndSend(entropy.keyring.accounts.registration.pair)
 
   if (!entropy?.keyring?.accounts?.registration?.pair) {
     throw new Error("Signer keypair is undefined or not properly initialized.")

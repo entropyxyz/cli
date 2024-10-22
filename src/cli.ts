@@ -4,7 +4,7 @@
 import { Command, Option } from 'commander'
 
 import { EntropyTuiOptions } from './types'
-import { loadEntropy } from './common/utils-cli'
+import { endpointOption, loadEntropy } from './common/utils-cli'
 import * as config from './config'
 
 import launchTui from './tui'
@@ -28,6 +28,7 @@ program
       .env('DEV_MODE')
       .hideHelp()
   )
+  .addOption(endpointOption())
   .addCommand(entropyBalanceCommand())
   .addCommand(entropyAccountCommand())
   .addCommand(entropyTransferCommand())

@@ -3,7 +3,7 @@ import Entropy from '@entropyxyz/sdk'
 import * as config from './config'
 import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
-import { print } from './common/utils'
+import { jumpStartNetwork, print } from './common/utils'
 import { loadEntropy } from './common/utils-cli'
 import { EntropyLogger } from './common/logger'
 
@@ -43,6 +43,15 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
     'Deploy Program',
     'User Programs',
   ]
+
+  const devChoices = [
+    'Jump Start Network',
+    // 'Create and Fund Faucet(s)'
+  ]
+
+  if (options.dev) {
+    choices = [...choices, ...devChoices]
+  }
 
   // assign exit so its last
   choices = [...choices, 'Exit']
@@ -129,8 +138,14 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
         .catch(err => console.error('There was an error with program dev', err))
       break
     }
+    case 'Jump Start Network': {
+      await jumpStartNetwork(entropy)
+        .catch(err => console.error('There was an issue jumpstarting the network', err))
+      break
+    }
     default: {
-      throw Error(`unsupported choice: ${answers.choice}`)
+      console.error('Unsupported Action:' + answers.choice)
+      break
     }
     }
   }
