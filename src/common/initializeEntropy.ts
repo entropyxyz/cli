@@ -66,10 +66,6 @@ export const initializeEntropy = async ({ keyMaterial, endpoint, configPath }: I
     if(!storedKeyring) {
       const keyring = new Keyring({ ...accountData, debug: true })
       keyring.accounts.on('account-update', async (newAccountData) => {
-        console.log('Has been called...');
-        console.log('new data', newAccountData);
-        console.log('config path', configPath);
-        
         const store = await config.get(configPath)
         store.accounts = store.accounts.map((account) => {
           if (account.address === store.selectedAccount) {
