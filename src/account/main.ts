@@ -8,7 +8,7 @@ import { AccountCreateParams, AccountImportParams, AccountRegisterParams } from 
 
 import { EntropyBase } from "../common/entropy-base";
 import { formatDispatchError } from "../common/utils";
-import { EntropyAccountConfig } from "../config/types";
+import { EntropyAccountConfig, EntropyAccountConfigFormatted } from "../config/types";
 
 export class EntropyAccount extends EntropyBase {
   constructor (entropy: Entropy, endpoint: string) {
@@ -20,26 +20,28 @@ export class EntropyAccount extends EntropyBase {
     return EntropyAccount.import({ name, seed, path })
   }
 
+  // WARNING: #create depends on #import => be careful modifying this function
   static async import ({ name, seed, path }: AccountImportParams ): Promise<EntropyAccountConfig> {
-    // WARNING: #create currently depends on this => be careful modifying this function
-
     await wasmGlobalsReady()
     const keyring = new Keyring({ seed, path, debug: true })
+
     const fullAccount = keyring.getAccount()
     // TODO: sdk should create account on constructor
-    const { admin } = keyring.getAccount()
+    const data = fixData(fullAccount)
+    const maybeEncryptedData = data
+    // const maybeEncryptedData = password ? passwordFlow.encrypt(data, password) : data
 
-    const data = fullAccount
+    const { admin } = keyring.getAccount()
     delete admin.pair
-    
+
     return {
       name,
       address: admin.address,
-      data
+      data: maybeEncryptedData,
     }
   }
 
-  static list ({ accounts }: { accounts: EntropyAccountConfig[] }) {
+  static list ({ accounts }: { accounts: EntropyAccountConfig[] }): EntropyAccountConfigFormatted[] {
     if (!accounts.length)
       throw new Error(
         'AccountsError: There are currently no accounts available, please create or import a new account using the Manage Accounts feature'
@@ -48,7 +50,7 @@ export class EntropyAccount extends EntropyBase {
     return accounts.map((account: EntropyAccountConfig) => ({
       name: account.name,
       address: account.address,
-      verifyingKeys: account?.data?.admin?.verifyingKeys
+      verifyingKeys: account?.data?.registration?.verifyingKeys || []
     }))
   }
 
@@ -92,4 +94,37 @@ export class EntropyAccount extends EntropyBase {
         })
     })
   }
+}
+
+// TODO: there is a bug in SDK that is munting this data
+function fixData (data) {
+  if (data.admin?.pair) {
+    const { addressRaw, secretKey, publicKey } = data.admin.pair
+    Object.assign(data.admin.pair, {
+      addressRaw: objToUint8Array(addressRaw),
+      secretKey: objToUint8Array(secretKey),
+      publicKey: objToUint8Array(publicKey)
+    })
+  }
+
+  if (data.registration?.pair) {
+    const { addressRaw, secretKey, publicKey } = data.registration.pair
+    Object.assign(data.registration.pair, {
+      addressRaw: objToUint8Array(addressRaw),
+      secretKey: objToUint8Array(secretKey),
+      publicKey: objToUint8Array(publicKey)
+    })
+  }
+
+  return data
+}
+
+function objToUint8Array (input) {
+  if (input instanceof Uint8Array) return input
+
+  const values: any = Object.entries(input)
+    .sort((a, b) => Number(a[0]) - Number(b[0])) // sort entries by keys
+    .map(entry => entry[1])
+
+  return new Uint8Array(values)
 }
