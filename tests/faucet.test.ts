@@ -9,12 +9,12 @@ import { EntropyFaucet } from '../src/faucet/main'
 import { LOCAL_PROGRAM_HASH } from '../src/faucet/utils'
 import { EntropyAccount } from '../src/account/main'
 
-async function setupAndFundFaucet (t, naynayEntropy) {
+async function setupAndFundFaucet (t) {
   const { run, entropy, endpoint } = await setupTest(t, { seed: eveSeed })
   await run('jump-start network', jumpStartNetwork(entropy))
   const accountService = new EntropyAccount(entropy, endpoint)
   const transferService = new EntropyTransfer(entropy, endpoint)
-  const faucetService = new EntropyFaucet(naynayEntropy, endpoint)
+  const faucetService = new EntropyFaucet(entropy, endpoint)
 
   const faucetProgram = readFileSync('tests/programs/faucet_program.wasm')
 
@@ -63,7 +63,7 @@ test('Faucet Tests: Successfully send funds and register', async t => {
   const faucetService = new EntropyFaucet(naynayEntropy, endpoint)
   const balanceService = new EntropyBalance(naynayEntropy, endpoint)
 
-  const { faucetAddress, chosenVerifyingKey, faucetProgramPointer } = await setupAndFundFaucet(t, naynayEntropy)
+  const { faucetAddress, chosenVerifyingKey, faucetProgramPointer } = await setupAndFundFaucet(t)
   
   let naynayBalance = await balanceService.getBalance(naynayEntropy.keyring.accounts.registration.address)
   t.equal(naynayBalance, 0, 'Naynay is broke af')
