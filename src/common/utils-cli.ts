@@ -39,7 +39,8 @@ export function endpointOption () {
       return endpoint
     })
     .default('ws://testnet.entropy.xyz:9944/')
-    // NOTE: argParser is only run IF an option is provided, so this cannot be 'test-net'
+    // NOTE: default cannot be "test-net" as argParser only runs if the -e/--endpoint flag
+    // or ENTROPY_ENDPOINT env set
 }
 
 export function accountOption () {
