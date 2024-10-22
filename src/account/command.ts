@@ -4,7 +4,7 @@ import { EntropyAccount } from "./main";
 import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from "./utils";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
-import { accountOption, configOption, endpointOption, passwordOption, cliWrite, loadEntropy } from "../common/utils-cli";
+import { accountOption, configOption, endpointOption, cliWrite, loadEntropy } from "../common/utils-cli";
 
 export function entropyAccountCommand () {
   return new Command('account')
@@ -13,6 +13,9 @@ export function entropyAccountCommand () {
     .addCommand(entropyAccountImport())
     .addCommand(entropyAccountList())
     .addCommand(entropyAccountRegister())
+    // .addCommand(entropyAccountAlias())
+    // IDEA: support aliases for remote accounts (those we don't have seeds for)
+    // this would make transfers safer/ easier from CLI
 }
 
 function entropyAccountCreate () {
@@ -27,7 +30,6 @@ function entropyAccountCreate () {
         'Derivation path'
       ).default(ACCOUNTS_CONTENT.path.default)
     )
-    .addOption(passwordOption())
     .action(async (name, opts) => {
       const { config: configPath, path } = opts
       const newAccount = await EntropyAccount.create({ name, path })
@@ -36,7 +38,8 @@ function entropyAccountCreate () {
 
       cliWrite({
         name: newAccount.name,
-        address: newAccount.address
+        address: newAccount.address,
+        verifyingKeys: []
       })
       process.exit(0)
     })
@@ -45,7 +48,6 @@ function entropyAccountCreate () {
 function entropyAccountImport () {
   return new Command('import')
     .description('Import an existing entropy account from seed. Output is JSON of form {name, address}')
-    .addOption(passwordOption())
     .argument('<name>', 'A user friendly name for your new account.')
     .argument('<seed>', 'The seed for the account you are importing')
     .addOption(configOption())
@@ -63,7 +65,8 @@ function entropyAccountImport () {
 
       cliWrite({
         name: newAccount.name,
-        address: newAccount.address
+        address: newAccount.address,
+        verifyingKeys: []
       })
       process.exit(0)
     })
@@ -75,10 +78,14 @@ function entropyAccountList () {
     .description('List all accounts. Output is JSON of form [{ name, address, verifyingKeys }]')
     .addOption(configOption())
     .action(async (opts) => {
-      const { config: configPath } = opts
-      // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
-      const storedConfig = await config.get(configPath)
-      const accounts = EntropyAccount.list(storedConfig)
+      const accounts = await config.get(opts.config)
+        .then(storedConfig => EntropyAccount.list(storedConfig))
+        .catch((err) => {
+          if (err.message.includes('currently no accounts')) return []
+
+          throw err
+        })
+
       cliWrite(accounts)
       process.exit(0)
     })
@@ -91,7 +98,6 @@ function entropyAccountRegister () {
     .addOption(accountOption())
     .addOption(configOption())
     .addOption(endpointOption())
-    .addOption(passwordOption())
     // Removing these options for now until we update the design to accept program configs
     // .addOption(
     //   new Option(

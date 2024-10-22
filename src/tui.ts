@@ -34,6 +34,7 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
 
   let choices = [
     'Manage Accounts',
+    'Entropy Faucet',
     'Balance',
     'Register',
     'Sign',
@@ -42,12 +43,6 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
     'Deploy Program',
     'User Programs',
   ]
-
-  const devChoices = [
-    'Entropy Faucet',
-  ]
-
-  if (options.dev) choices = [...choices, ...devChoices]
 
   // assign exit so its last
   choices = [...choices, 'Exit']
@@ -61,15 +56,22 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
   // Entropy is undefined on initial install, after user creates their first account,
   // entropy should be loaded
   if (storedConfig.selectedAccount && !entropy) {
-    entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint)
+    entropy = await loadEntropy({
+      account: storedConfig.selectedAccount,
+      config: storedConfig,
+      endpoint: options.endpoint
+    })
   }
   // If the selected account changes within the TUI we need to reset the entropy instance being used
   const currentAccount = entropy?.keyring?.accounts?.registration?.address
   if (currentAccount && currentAccount !== storedConfig.selectedAccount) {
     await entropy.close()
-    entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint);
+    entropy = await loadEntropy({
+      account: storedConfig.selectedAccount,
+      config: storedConfig,
+      endpoint: options.endpoint
+    })
   }
-  
 
   const answers = await inquirer.prompt([{
     type: 'list',

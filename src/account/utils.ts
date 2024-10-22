@@ -37,7 +37,7 @@ export async function addVerifyingKeyToAccountAndSelect (configPath, verifyingKe
   await config.set(
     {
       ...storedConfig,
-      selectedAccount: account.address
+      setSelectedAccount: account.name
     },
     configPath
   )

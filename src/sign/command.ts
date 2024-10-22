@@ -1,5 +1,5 @@
 import { Command, /* Option */ } from 'commander'
-import { accountOption, configOption, endpointOption, passwordOption, cliWrite, loadEntropy } from '../common/utils-cli'
+import { accountOption, configOption, endpointOption, cliWrite, loadEntropy } from '../common/utils-cli'
 import { EntropySign } from './main'
 
 export function entropySignCommand () {
@@ -9,7 +9,6 @@ export function entropySignCommand () {
     .addOption(accountOption())
     .addOption(configOption())
     .addOption(endpointOption())
-    .addOption(passwordOption('Password for the source account (if required)'))
     // .addOption(
     //   new Option(
     //     '-r, --raw',

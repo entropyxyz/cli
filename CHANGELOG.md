@@ -54,6 +54,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - removed flows/manage-accounts/*/*.ts directory with file restructure
 - removed flows/register/*.ts directory with file restructure
 - removed flow/entropyFaucet/*.ts directory with file restructure
+- added faucet to main menu for TUI
 
 
 ### Broke

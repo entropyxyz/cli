@@ -1,12 +1,17 @@
 const PREFIX = 'data:application/UI8A;base64,'
 // was a UInt8Array, but is stored as base64
 
-export function serialize (config) {
+export function serialize (config: object) {
   return JSON.stringify(config, replacer, 2)
 }
 
-export function deserialize (config) {
-  return JSON.parse(config, reviver)
+export function deserialize (config: string) {
+  try {
+    return JSON.parse(config, reviver)
+  } catch (err) {
+    console.log('broken config:', config)
+    throw err
+  }
 }
 
 function replacer (_key: string, value: any) {

@@ -28,15 +28,17 @@ program
       .env('DEV_MODE')
       .hideHelp()
   )
+
   .addCommand(entropyBalanceCommand())
   .addCommand(entropyAccountCommand())
   .addCommand(entropyTransferCommand())
   .addCommand(entropySignCommand())
   .addCommand(entropyProgramCommand())
+
   .action(async (opts: EntropyTuiOptions) => {
     const { account, endpoint } = opts
     const entropy = account
-      ? await loadEntropy(account, config.CONFIG_PATH, endpoint)
+      ? await loadEntropy({ account, config: config.CONFIG_PATH, endpoint })
       : undefined
     // NOTE:
     // - on initial startup you have no account

@@ -82,7 +82,7 @@ export async function entropyRegister (entropy: Entropy, endpoint: string, store
 
   print("Attempting to register the address:", account.address)
   const verifyingKey = await accountService.register()
-  await addVerifyingKeyToAccountAndSelect(verifyingKey, account.address)
+  await addVerifyingKeyToAccountAndSelect(config.CONFIG_PATH, verifyingKey, account.address)
 
   print("Your address", account.address, "has been successfully registered.")
 }

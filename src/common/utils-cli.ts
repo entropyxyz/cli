@@ -45,15 +45,8 @@ export function endpointOption () {
       return endpoint
     })
     .default('ws://testnet.entropy.xyz:9944/')
-    // NOTE: argParser is only run IF an option is provided, so this cannot be 'test-net'
-}
-
-export function passwordOption (description?: string) {
-  return new Option(
-    '-p, --password <string>',
-    description || 'Password for the account'
-  )
-    .hideHelp(true)
+    // NOTE: default cannot be "test-net" as argParser only runs if the -e/--endpoint flag
+    // or ENTROPY_ENDPOINT env set
 }
 
 export function accountOption () {
@@ -105,24 +98,17 @@ export async function loadEntropy (
     account: addressOrName,
     config: configPath,
     endpoint,
-    password
   }: {
     account: string,
     config: string,
     endpoint: string,
-    password?: string
   }
 ): Promise<Entropy> {
   const accounts = getConfigOrNull(configPath)?.accounts || []
   const selectedAccount = findAccountByAddressOrName(accounts, addressOrName)
   if (!selectedAccount) throw new Error(`No account with name or address: "${addressOrName}"`)
 
-  // check if data is encrypted + we have a password
-  if (typeof selectedAccount.data === 'string' && !password) {
-    throw new Error('AuthError: This account requires a password, add --password <password>')
-  }
-
-  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint, password })
+  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint })
   if (!entropy?.keyring?.accounts?.registration?.pair) {
     throw new Error("Signer keypair is undefined or not properly initialized.")
   }
