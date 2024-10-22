@@ -4,7 +4,7 @@ import { EntropyAccount } from "./main";
 import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from "./utils";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
-import { cliWrite, accountOption, endpointOption, loadEntropy } from "../common/utils-cli";
+import { accountOption, endpointOption, cliWrite, loadEntropy } from "../common/utils-cli";
 
 export function entropyAccountCommand () {
   return new Command('account')
@@ -13,6 +13,9 @@ export function entropyAccountCommand () {
     .addCommand(entropyAccountImport())
     .addCommand(entropyAccountList())
     .addCommand(entropyAccountRegister())
+    // .addCommand(entropyAccountAlias())
+    // IDEA: support aliases for remote accounts (those we don't have seeds for)
+    // this would make transfers safer/ easier from CLI
 }
 
 function entropyAccountCreate () {
@@ -34,7 +37,8 @@ function entropyAccountCreate () {
 
       cliWrite({
         name: newAccount.name,
-        address: newAccount.address
+        address: newAccount.address,
+        verifyingKeys: []
       })
       process.exit(0)
     })
@@ -59,7 +63,8 @@ function entropyAccountImport () {
 
       cliWrite({
         name: newAccount.name,
-        address: newAccount.address
+        address: newAccount.address,
+        verifyingKeys: []
       })
       process.exit(0)
     })
@@ -70,8 +75,15 @@ function entropyAccountList () {
     .alias('ls')
     .description('List all accounts. Output is JSON of form [{ name, address, verifyingKeys }]')
     .action(async () => {
-      const storedConfig = await config.get()
-      const accounts = EntropyAccount.list(storedConfig)
+      // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
+      const accounts = await config.get()
+        .then(storedConfig => EntropyAccount.list(storedConfig))
+        .catch((err) => {
+          if (err.message.includes('currently no accounts')) return []
+
+          throw err
+        })
+
       cliWrite(accounts)
       process.exit(0)
     })
@@ -81,8 +93,8 @@ function entropyAccountList () {
 function entropyAccountRegister () {
   return new Command('register')
     .description('Register an entropy account with a program')
-    .addOption(endpointOption())
     .addOption(accountOption())
+    .addOption(endpointOption())
     // Removing these options for now until we update the design to accept program configs
     // .addOption(
     //   new Option(
