@@ -12,8 +12,8 @@ import { EntropyAccount } from '../src/account/main'
 async function setupAndFundFaucet (t) {
   const { run, entropy, endpoint } = await setupTest(t, { seed: eveSeed })
   await run('jump-start network', jumpStartNetwork(entropy))
-  const transfer = new EntropyTransfer(entropy, endpoint)
   const account = new EntropyAccount(entropy, endpoint)
+  const transfer = new EntropyTransfer(entropy, endpoint)
   const faucet = new EntropyFaucet(entropy, endpoint)
 
   // Deploy faucet program

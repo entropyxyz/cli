@@ -95,8 +95,6 @@ test('Account - Register: Default Program', async (t) => {
   // NOTE: we fund a new account "naynay" because jumpStart has problems with charlie (T_T)
   await run('fund naynay', fundAccount(t, naynay))
 
-  // use of charlie seed is solely to transfer funds to the naynay (fresh seed) instance.
-  // these funds will be used for the jumpstart and register call
   await run('jump-start network', jumpStartNetwork(naynay))
 
   const account = new EntropyAccount(naynay, endpoint)
