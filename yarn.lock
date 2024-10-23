@@ -26,10 +26,10 @@
   resolved "https://registry.yarnpkg.com/@entropyxyz/entropy-protocol-web/-/entropy-protocol-web-0.2.0.tgz#b9478438386fefb4b821dbac95ec81d251d2dd55"
   integrity sha512-lLa/lLNJnwH1R8fJvLlUn1kw7d4Rbnt9LjhUC69HKxkU69J+bw/EY6fAjBnpVbgNmqCnYpf/DBLtMyOayZeNDQ==
 
-"@entropyxyz/sdk@0.3.0-0":
-  version "0.3.0-0"
-  resolved "https://registry.yarnpkg.com/@entropyxyz/sdk/-/sdk-0.3.0-0.tgz#d9627695f36048634d45edd575a6ee24e8c56c1b"
-  integrity sha512-VD905H++2GKv9kQRl55oz9zrg2NytzO7Pgtn2LXmvrXGjiH8+s0SKwWeh3xDvc5dUh2fQepFOWYZw3uhZePgnA==
+"@entropyxyz/sdk@0.3.0-1":
+  version "0.3.0-1"
+  resolved "https://registry.yarnpkg.com/@entropyxyz/sdk/-/sdk-0.3.0-1.tgz#115e02a10fa9339618ad82c9cd5f542f2e064004"
+  integrity sha512-o/hP1zcD7X9v7LGnoSTIHvPGV3PBj6+3JwagdpK5lcCotVBC5lGAefXq6xXxSQpXjzqVBdmm4IHNUpuKHG8mMA==
   dependencies:
     "@entropyxyz/entropy-protocol-nodejs" "^0.2.0"
     "@entropyxyz/entropy-protocol-web" "^0.2.0"
@@ -4004,3 +4004,15 @@ yocto-queue@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
+
+yocto-spinner@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/yocto-spinner/-/yocto-spinner-0.1.1.tgz#bc3b841ebd74f8ec4bc9d36eddf025d3841cda9f"
+  integrity sha512-vb6yztJdmbX9BwiR2NlKim7roGM5xFFhiTO6UstNiKBnh8NT6uFNjpXYC6DWTnLgRRyHh2nDNEM8kLHSRLw4kg==
+  dependencies:
+    yoctocolors "^2.1.1"
+
+yoctocolors@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/yoctocolors/-/yoctocolors-2.1.1.tgz#e0167474e9fbb9e8b3ecca738deaa61dd12e56fc"
+  integrity sha512-GQHQqAopRhwU8Kt1DDM8NjibDXHC8eoh1erhGAJPEyveY9qqVeXvVikNKrDz69sHowPMorbPUrH/mx8c50eiBQ==

@@ -43,6 +43,31 @@ export function endpointOption () {
     // or ENTROPY_ENDPOINT env set
 }
 
+export function tuiEndpointOption () {
+  return new Option(
+    '-et, --tui-endpoint <url>',
+    [
+      'Runs entropy with the given endpoint and ignores network endpoints in config.',
+      'Can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`.'
+    ].join(' ')
+  )
+    .env('ENTROPY_ENDPOINT')
+    .argParser(aliasOrEndpoint => {
+      /* see if it's a raw endpoint */
+      if (aliasOrEndpoint.match(/^wss?:\/\//)) return aliasOrEndpoint
+
+      /* look up endpoint-alias */
+      const storedConfig = getConfigOrNull()
+      const endpoint = storedConfig?.endpoints?.[aliasOrEndpoint]
+      if (!endpoint) throw Error('unknown endpoint alias: ' + aliasOrEndpoint)
+
+      return endpoint
+    })
+    .default('ws://testnet.entropy.xyz:9944/')
+    // NOTE: default cannot be "test-net" as argParser only runs if the -e/--endpoint flag
+    // or ENTROPY_ENDPOINT env set
+}
+
 export function accountOption () {
   const storedConfig = getConfigOrNull()
 
@@ -82,8 +107,6 @@ export async function loadEntropy (addressOrName: string, endpoint: string): Pro
   if (!selectedAccount) throw new Error(`No account with name or address: "${addressOrName}"`)
 
   const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint })
-  await entropy.substrate.tx.registry.jumpStartNetwork()
-    .signAndSend(entropy.keyring.accounts.registration.pair)
 
   if (!entropy?.keyring?.accounts?.registration?.pair) {
     throw new Error("Signer keypair is undefined or not properly initialized.")
