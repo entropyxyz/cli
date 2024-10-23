@@ -13,6 +13,7 @@ import { entropyBalance } from './balance/interaction'
 import { entropyTransfer } from './transfer/interaction'
 import { entropyFaucet } from './faucet/interaction'
 import { entropyProgram, entropyProgramDev } from './program/interaction'
+import yoctoSpinner from 'yocto-spinner'
 
 async function setupConfig () {
   let storedConfig = await config.get()
@@ -45,7 +46,7 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
   ]
 
   const devChoices = [
-    'Jump Start Network',
+    'Jumpstart Network',
     // 'Create and Fund Faucet(s)'
   ]
 
@@ -58,8 +59,10 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
 
   main(entropy, choices, options, logger)
 }
+const loader = yoctoSpinner()
 
 async function main (entropy: Entropy, choices, options, logger: EntropyLogger) {
+  if (loader.isSpinning) loader.stop()
   const storedConfig = await setupConfig()
 
   // Entropy is undefined on initial install, after user creates their first account,
@@ -138,9 +141,29 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
         .catch(err => console.error('There was an error with program dev', err))
       break
     }
-    case 'Jump Start Network': {
-      await jumpStartNetwork(entropy)
-        .catch(err => console.error('There was an issue jumpstarting the network', err))
+    case 'Jumpstart Network': {
+      // TO-DO: possibly move this to it's own directory similar to the other actions
+      // could create a new system directory for system/network level functionality
+      // i.e jumpstarting, deploy faucet, etc.
+      loader.text = 'Jumpstarting Network...'
+      try {
+        loader.start()
+        const jumpStartStatus = await jumpStartNetwork(entropy, options.endpoint)
+          
+        if (jumpStartStatus.isFinalized) {
+          loader.clear()
+          loader.success('Network jumpstarted!')
+          // running into an issue where the loader displays the success message but the return to main menu
+          // prompt does not display, so for now exiting process
+          process.exit(0)
+        }
+      } catch (error) {
+        loader.text = 'Jumpstart Failed'
+        loader.stop()
+        loader.clear()
+        console.error('There was an issue jumpstarting the network', error);
+        process.exit(1)
+      }
       break
     }
     default: {
