@@ -75,7 +75,7 @@ test('Faucet Tests: Successfully send funds and register', async t => {
   const transferStatus = await run(
     'Sending faucet funds to account',
     faucet.sendMoney({
-      amount: `${20000000000}`,
+      amount: `${amount}`,
       addressToSendTo: naynay.keyring.accounts.registration.address,
       faucetAddress,
       chosenVerifyingKey,
