@@ -11,6 +11,7 @@ let chosenVerifyingKeys = []
 // increasing amount send here, will allow user's to register right away
 const amount = "20000000000"
 // context for logging file
+const FLOW_CONTEXT = 'ENTROPY_FAUCET_INTERACTION'
 const SPINNER_TEXT =  'Funding account…'
 const faucetSpinner = yoctoSpinner()
 export async function entropyFaucet (entropy: Entropy, options, logger: EntropyLogger) {
