@@ -51,7 +51,7 @@ export function tuiEndpointOption () {
       'Can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`.'
     ].join(' ')
   )
-    .env('ENTROPY_ENDPOINT')
+    .env('ENTROPY_TUI_ENDPOINT')
     .argParser(aliasOrEndpoint => {
       /* see if it's a raw endpoint */
       if (aliasOrEndpoint.match(/^wss?:\/\//)) return aliasOrEndpoint
