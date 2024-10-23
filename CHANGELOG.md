@@ -42,6 +42,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
   - new: './src/faucet/utils.ts' - utilities and helper methods for all things faucet
   - new: './src/faucet/interaction.ts' - main entrypoint for TUI flows
   - new: './src/faucet/command.ts' - main entrypoint for CLI flows
+  - new: package added - yocto-spinner for adding loading spinners to the cli
 
 ### Changed
 
@@ -55,7 +56,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - removed flows/register/*.ts directory with file restructure
 - removed flow/entropyFaucet/*.ts directory with file restructure
 - added faucet to main menu for TUI
-
+- updated faucet to use loading spinner to indicate to user the progress of the transfer
 
 ### Broke
 
