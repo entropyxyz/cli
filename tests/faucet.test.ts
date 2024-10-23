@@ -90,7 +90,7 @@ test('Faucet Tests: Successfully send funds and register', async t => {
   t.equal(naynayBalance, 20000000000, 'Naynay is drippin in faucet tokens')
 
   // Test if user can register after receiving funds
-  const naynayAccountService = new EntropyAccount(naynay, endpoint)
+  const account = new EntropyAccount(naynay, endpoint)
   const verifyingKey = await run('register account', naynayAccountService.register())
 
   t.ok(!!verifyingKey, 'Verifying key exists and is returned from register method')
