@@ -20,7 +20,7 @@ function getConfigOrNull () {
 
 export function endpointOption () {
   return new Option(
-    '-e, --endpoint <endpoint>',
+    '-e, --endpoint <url>',
     [
       'Runs entropy with the given endpoint and ignores network endpoints in config.',
       'Can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`.'
@@ -39,34 +39,41 @@ export function endpointOption () {
       return endpoint
     })
     .default('ws://testnet.entropy.xyz:9944/')
-    // NOTE: argParser is only run IF an option is provided, so this cannot be 'test-net'
+    // NOTE: default cannot be "test-net" as argParser only runs if the -e/--endpoint flag
+    // or ENTROPY_ENDPOINT env set
 }
 
 export function accountOption () {
   const storedConfig = getConfigOrNull()
 
   return new Option(
-    '-a, --account <accountAddressOrName>',
+    '-a, --account <name|address>',
     [
       'Sets the account for the session.',
       'Defaults to the last set account (or the first account if one has not been set before).'
     ].join(' ')
   )
     .env('ENTROPY_ACCOUNT')
-    .argParser(async (account) => {
-      if (storedConfig && storedConfig.selectedAccount !== account) {
-        // Updated selected account in config with new address from this option
-        await config.set({
-          ...storedConfig,
-          selectedAccount: account
-        })
-      }
+    .argParser(addressOrName => {
+      // We try to map addressOrName to an account we have stored
+      if (!storedConfig) return addressOrName
 
-      return account
+      const account = findAccountByAddressOrName(storedConfig.accounts, addressOrName)
+      if (!account) return addressOrName
+
+      // If we find one, we set this account as the future default
+      config.setSelectedAccount(account)
+      // NOTE: argParser cannot be an async function, so we cannot await this call
+      // WARNING: this will lead to a race-condition if functions are called in quick succession
+      // and assume the selectedAccount has been persisted
+      //
+      // RISK: doesn't seem likely as most of our functions will await at slow other steps....
+      // SOLUTION: write a scynchronous version?
+
+      // We finally return the account name to be as consistent as possible (using name, not address)
+      return account.name
     })
     .default(storedConfig?.selectedAccount)
-    // TODO: display the *name* not address
-    // TODO: standardise whether selectedAccount is name or address.
 }
 
 export async function loadEntropy (addressOrName: string, endpoint: string): Promise<Entropy> {
