@@ -19,11 +19,17 @@ const program = new Command()
 /* no command */
 program
   .name('entropy')
-  .description('CLI interface for interacting with entropy.xyz. Running this binary without any commands or arguments starts a text-based interface.')
+  .description([
+    'CLI interface for interacting with entropy.xyz.',
+    'Running this binary without any commands or arguments starts a text-based interface.'
+  ].join(' '))
   .addOption(
     new Option(
       '-d, --dev',
-      'Runs entropy in a developer mode uses the dev endpoint as the main endpoint and allows for faucet option to be available in the main menu'
+      [
+        'Runs entropy in a developer mode uses the dev endpoint as the main endpoint and',
+        'allows for faucet option to be available in the main menu'
+      ].join(' ')
     )
       .env('DEV_MODE')
       .hideHelp()
@@ -42,7 +48,8 @@ program
       : undefined
     // NOTE:
     // - on initial startup you have no account
-    // - no custom config for the TUI at moment (opt.name collisions)
+    // - no custom config for the TUI at moment
+    //     - option name collisions, see: https://github.com/tj/commander.js/issues/2260
     launchTui(entropy, opts)
   })
   .hook('preAction', async (thisCommand, actionCommand) => {
