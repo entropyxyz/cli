@@ -113,7 +113,7 @@ Arguments:
 Options:
   -e, --endpoint <endpoint>  Runs entropy with the given endpoint and ignores network endpoints in
                              config. Can also be given a stored endpoint name from config eg: `entropy
-                             --endpoint test-net`. (default: "ws://testnet.entropy.xyz:9944/", env:
+                             --endpoint test-net`. (default: "wss://testnet.entropy.xyz/", env:
                              ENDPOINT)
   -h, --help                 display help for command
 ```

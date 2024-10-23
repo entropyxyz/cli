@@ -38,7 +38,7 @@ export function endpointOption () {
 
       return endpoint
     })
-    .default('ws://testnet.entropy.xyz:9944/')
+    .default('wss://testnet.entropy.xyz/')
     // NOTE: default cannot be "test-net" as argParser only runs if the -e/--endpoint flag
     // or ENTROPY_ENDPOINT env set
 }
@@ -63,7 +63,7 @@ export function tuiEndpointOption () {
 
       return endpoint
     })
-    .default('ws://testnet.entropy.xyz:9944/')
+    .default('wss://testnet.entropy.xyz/')
     // NOTE: default cannot be "test-net" as argParser only runs if the -e/--endpoint flag
     // or ENTROPY_ENDPOINT env set
 }
