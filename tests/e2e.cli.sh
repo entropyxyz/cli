@@ -9,7 +9,8 @@
 # Run
 #   $ yarn build && ./tests/e2e.cli.sh
 
-rm ~/.config/entropy-cryptography/entropy-cli.json
+CURRENT_DATE=$(date +%s%N)
+export ENTROPY_CONFIG="/tmp/entropy-cli-${CURRENT_DATE}.e2e.json"
 
 print () {
   COLOR='\033[0;35m'
