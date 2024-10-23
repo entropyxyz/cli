@@ -91,7 +91,7 @@ test('Faucet Tests: Successfully send funds and register', async t => {
 
   // Test if user can register after receiving funds
   const account = new EntropyAccount(naynay, endpoint)
-  const verifyingKey = await run('register account', naynayAccountService.register())
+  const verifyingKey = await run('register account', account.register())
 
   t.ok(!!verifyingKey, 'Verifying key exists and is returned from register method')
 
