@@ -10,7 +10,7 @@ import { EntropyAccount } from '../src/account/main'
 
 async function setupAndFundFaucet (t) {
   const { run, entropy: charlie, endpoint } = await setupTest(t, { seed: charlieStashSeed })
-  // NOTE: there is some spin-up-network but it's idempotent!
+  // NOTE: setupTest calles spinUpNetwork, but it's idempotent = chill!
   const charlieAddress = charlie.keyring.accounts.registration.address
 
   const account = new EntropyAccount(charlie, endpoint)
