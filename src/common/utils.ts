@@ -1,6 +1,7 @@
-import { Buffer } from 'buffer'
-import { join } from 'path'
-import { homedir } from 'os'
+import { Buffer } from 'node:buffer'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
+
 import { EntropyAccountConfig } from "../config/types"
 
 export function stripHexPrefix (str: string): string {

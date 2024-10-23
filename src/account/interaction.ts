@@ -35,7 +35,7 @@ export async function entropyAccount (endpoint: string, storedConfig: EntropyCon
       ? await EntropyAccount.import({ seed, name, path })
       : await EntropyAccount.create({ name, path })
 
-    await selectAndPersistNewAccount(config.CONFIG_PATH, newAccount)
+    await selectAndPersistNewAccount(config.CONFIG_PATH_DEFAULT, newAccount)
     return
   }
 
@@ -82,7 +82,7 @@ export async function entropyRegister (entropy: Entropy, endpoint: string, store
 
   print("Attempting to register the address:", account.address)
   const verifyingKey = await accountService.register()
-  await addVerifyingKeyToAccountAndSelect(config.CONFIG_PATH, verifyingKey, account.address)
+  await addVerifyingKeyToAccountAndSelect(config.CONFIG_PATH_DEFAULT, verifyingKey, account.address)
 
   print("Your address", account.address, "has been successfully registered.")
 }

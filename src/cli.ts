@@ -4,7 +4,6 @@
 import { Command, Option } from 'commander'
 
 import { EntropyTuiOptions } from './types'
-import { loadEntropy } from './common/utils-cli'
 import * as config from './config'
 
 import launchTui from './tui'
@@ -42,15 +41,10 @@ program
   .addCommand(entropyProgramCommand())
 
   .action(async (opts: EntropyTuiOptions) => {
-    const { account, endpoint } = opts
-    const entropy = account
-      ? await loadEntropy({ account, config: config.CONFIG_PATH, endpoint })
-      : undefined
     // NOTE:
-    // - on initial startup you have no account
-    // - no custom config for the TUI at moment
-    //     - option name collisions, see: https://github.com/tj/commander.js/issues/2260
-    launchTui(entropy, opts)
+    // because of option name collisions (https://github.com/entropyxyz/cli/issues/265)
+    // we currently do not support options [account, endpoint, config] in Tui
+    launchTui(opts)
   })
   .hook('preAction', async (thisCommand, actionCommand) => {
     const { config: configPath } = actionCommand.opts()

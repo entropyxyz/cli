@@ -1,9 +1,11 @@
 import inquirer from 'inquirer'
 import Entropy from '@entropyxyz/sdk'
 import * as config from './config'
+import { CONFIG_PATH_DEFAULT } from './config'
 import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
 import { print } from './common/utils'
+import { ENTROPY_ENDPOINT_DEFAULT } from './common/constants'
 import { loadEntropy } from './common/utils-cli'
 import { EntropyLogger } from './common/logger'
 
@@ -14,25 +16,27 @@ import { entropyTransfer } from './transfer/interaction'
 import { entropyFaucet } from './faucet/interaction'
 import { entropyProgram, entropyProgramDev } from './program/interaction'
 
-async function setupConfig () {
-  let storedConfig = await config.get()
-
-  // set selectedAccount if we can
-  if (!storedConfig.selectedAccount && storedConfig.accounts.length) {
-    storedConfig = await config.setSelectedAccount(storedConfig.accounts[0])
+// tui = text user interface
+export default async function tui (opts: EntropyTuiOptions) {
+  const options = {
+    ...opts,
+    config: CONFIG_PATH_DEFAULT,
+    endpoint: ENTROPY_ENDPOINT_DEFAULT
   }
 
-  return storedConfig
-}
-
-// tui = text user interface
-export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
   const logger = new EntropyLogger('TUI', options.endpoint)
   console.clear()
   console.log(logo) // the Entropy logo
   logger.debug(options)
 
-  let choices = [
+  const storedConfig = await setupConfig(options.config)
+  const entropy = await loadEntropy({
+    account: storedConfig.selectedAccount,
+    config: storedConfig,
+    endpoint: options.endpoint
+  })
+
+  const choices = [
     'Manage Accounts',
     'Entropy Faucet',
     'Balance',
@@ -42,19 +46,29 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
     // TODO: design programs in TUI (merge deploy+user programs)
     'Deploy Program',
     'User Programs',
+    'Exit'
   ]
 
-  // assign exit so its last
-  choices = [...choices, 'Exit']
 
   main(entropy, choices, options, logger)
 }
 
-async function main (entropy: Entropy, choices, options, logger: EntropyLogger) {
-  const storedConfig = await setupConfig()
+async function setupConfig (configPath) {
+  let storedConfig = await config.get(configPath)
 
-  // Entropy is undefined on initial install, after user creates their first account,
-  // entropy should be loaded
+  // set selectedAccount if we can
+  if (!storedConfig.selectedAccount && storedConfig.accounts.length) {
+    storedConfig = await config.setSelectedAccount(storedConfig.accounts[0])
+  }
+
+  return storedConfig
+}
+
+async function main (entropy: Entropy, choices, options, logger: EntropyLogger) {
+  const storedConfig = await setupConfig(options.config)
+
+  // Entropy is undefined on initial install
+  // However, after user creates their first account, entropy can be loaded
   if (storedConfig.selectedAccount && !entropy) {
     entropy = await loadEntropy({
       account: storedConfig.selectedAccount,
@@ -62,7 +76,8 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
       endpoint: options.endpoint
     })
   }
-  // If the selected account changes within the TUI we need to reset the entropy instance being used
+
+  // If the selected account changes within the TUI we reload entropy to use that account
   const currentAccount = entropy?.keyring?.accounts?.registration?.address
   if (currentAccount && currentAccount !== storedConfig.selectedAccount) {
     await entropy.close()

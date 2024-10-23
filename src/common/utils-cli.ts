@@ -1,8 +1,11 @@
 import Entropy from '@entropyxyz/sdk'
 import { Option } from 'commander'
+
 import { absolutePath, findAccountByAddressOrName, stringify } from './utils'
-import * as config from '../config'
 import { initializeEntropy } from './initializeEntropy'
+import * as config from '../config'
+import { EntropyConfig } from "../config/types";
+import { ENTROPY_ENDPOINT_DEFAULT } from '../common/constants'
 
 export function cliWrite (result) {
   const prettyResult = stringify(result, 0)
@@ -27,32 +30,10 @@ export function endpointOption () {
     ].join(' ')
   )
     .env('ENTROPY_ENDPOINT')
-    .argParser(aliasOrEndpoint => {
-      /* see if it's a raw endpoint */
-      if (aliasOrEndpoint.match(/^wss?:\/\//)) return aliasOrEndpoint
-
-      /* look up endpoint-alias */
-      const storedConfig = getConfigOrNull()
-      // WIP: ... ahhh, we need --config
-      //
-      // ideas:
-      // - do arg-parsing actions in e.g. loadEntropy
-      // - try to mutate opts state in a gook :skull: 
-      //
-      const endpoint = storedConfig?.endpoints?.[aliasOrEndpoint]
-      if (!endpoint) throw Error('unknown endpoint alias: ' + aliasOrEndpoint)
-
-      return endpoint
-    })
-    .default('ws://testnet.entropy.xyz:9944/')
-    // NOTE: default cannot be "test-net" as argParser only runs if the -e/--endpoint flag
-    // or ENTROPY_ENDPOINT env set
+    .default(ENTROPY_ENDPOINT_DEFAULT)
 }
 
 export function accountOption () {
-  // WIP: ... ahhh, we need --config
-  const storedConfig = getConfigOrNull()
-
   return new Option(
     '-a, --account <name|address>',
     [
@@ -61,26 +42,6 @@ export function accountOption () {
     ].join(' ')
   )
     .env('ENTROPY_ACCOUNT')
-    .argParser(addressOrName => {
-      // We try to map addressOrName to an account we have stored
-      if (!storedConfig) return addressOrName
-
-      const account = findAccountByAddressOrName(storedConfig.accounts, addressOrName)
-      if (!account) return addressOrName
-
-      // If we find one, we set this account as the future default
-      config.setSelectedAccount(account)
-      // NOTE: argParser cannot be an async function, so we cannot await this call
-      // WARNING: this will lead to a race-condition if functions are called in quick succession
-      // and assume the selectedAccount has been persisted
-      //
-      // RISK: doesn't seem likely as most of our functions will await at slow other steps....
-      // SOLUTION: write a scynchronous version?
-
-      // We finally return the account name to be as consistent as possible (using name, not address)
-      return account.name
-    })
-    .default(storedConfig?.selectedAccount)
 }
 
 export function configOption () {
@@ -90,28 +51,54 @@ export function configOption () {
   )
     .env('ENTROPY_CONFIG')
     .argParser(configPath => absolutePath(configPath))
-    .default(config.CONFIG_PATH)
+    .default(config.CONFIG_PATH_DEFAULT)
 }
 
-export async function loadEntropy (
-  {
-    account: addressOrName,
-    config: configPath,
-    endpoint,
-  }: {
-    account: string,
-    config: string,
-    endpoint: string,
-  }
-): Promise<Entropy> {
-  const accounts = getConfigOrNull(configPath)?.accounts || []
-  const selectedAccount = findAccountByAddressOrName(accounts, addressOrName)
-  if (!selectedAccount) throw new Error(`No account with name or address: "${addressOrName}"`)
+export async function loadEntropy (options: {
+  account: string,
+  config: string,
+  endpoint: string,
+}): Promise<Entropy> {
+  const storedConfig = getConfigOrNull(options.config)
 
-  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint })
+  const account = parseAccountOption(storedConfig, options.account)
+  // if this account is not the default selectedAccount, make it so
+  if (storedConfig.selectedAccount !== account.name) {
+    await config.set({
+      ...storedConfig,
+      selectedAccount: account.name
+    })
+  }
+
+  const endpoint = parseEndpointOption(storedConfig, options.endpoint)
+
+  const entropy = await initializeEntropy({ keyMaterial: account.data, endpoint })
   if (!entropy?.keyring?.accounts?.registration?.pair) {
     throw new Error("Signer keypair is undefined or not properly initialized.")
   }
 
   return entropy
 }
+
+function parseEndpointOption (config: EntropyConfig, aliasOrEndpoint: string) {
+  // if raw endpoint
+  if (aliasOrEndpoint.match(/^wss?:\/\//)) {
+    return aliasOrEndpoint
+  }
+  // else an alias
+  else {
+    const endpoint = config.endpoints[aliasOrEndpoint]
+    if (!endpoint) throw Error('unknown endpoint alias: ' + aliasOrEndpoint)
+
+    return endpoint
+  }
+}
+
+function parseAccountOption (config: EntropyConfig, addressOrName: string) {
+  const accounts = config?.accounts || []
+  const account = findAccountByAddressOrName(accounts, addressOrName)
+  if (!account) throw new Error(`No account with name or address: "${addressOrName}"`)
+
+  return account
+}
+

@@ -11,7 +11,7 @@ import { EntropyConfig, EntropyAccountConfig } from './types'
 const paths = envPaths('entropy-cryptography', { suffix: '' })
 const OLD_CONFIG_PATH = join(process.env.HOME, '.entropy-cli.config')
 
-export const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
+export const CONFIG_PATH_DEFAULT = join(paths.config, 'entropy-cli.json')
 export const VERSION = 'migration-version'
 
 export function migrateData (migrations, currentConfig = {}) {
@@ -33,7 +33,7 @@ function hasRunMigration (config: any, version: number) {
   return Number(currentVersion) >= Number(version)
 }
 
-export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG_PATH) {
+export async function init (configPath = CONFIG_PATH_DEFAULT, oldConfigPath = OLD_CONFIG_PATH) {
   const currentConfig = await get(configPath)
     .catch(async (err ) => {
       if (isDangerousReadError(err)) throw err
@@ -56,24 +56,24 @@ export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG
   }
 }
 
-export async function get (configPath = CONFIG_PATH) {
+export async function get (configPath = CONFIG_PATH_DEFAULT) {
   return readFile(configPath, 'utf-8')
     .then(deserialize)
 }
 
-export function getSync (configPath = CONFIG_PATH) {
+export function getSync (configPath = CONFIG_PATH_DEFAULT) {
   const configStr = readFileSync(configPath, 'utf8')
   return deserialize(configStr)
 }
 
-export async function set (config: EntropyConfig, configPath = CONFIG_PATH) {
+export async function set (config: EntropyConfig, configPath = CONFIG_PATH_DEFAULT) {
   assertConfigPath(configPath)
 
   await mkdirp(dirname(configPath))
   await writeFile(configPath, serialize(config))
 }
 
-export async function setSelectedAccount (account: EntropyAccountConfig, configPath = CONFIG_PATH) {
+export async function setSelectedAccount (account: EntropyAccountConfig, configPath = CONFIG_PATH_DEFAULT) {
   const storedConfig = await get(configPath)
 
   if (storedConfig.selectedAccount === account.name) return storedConfig
