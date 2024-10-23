@@ -61,20 +61,20 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
 }
 const loader = yoctoSpinner()
 
-async function main (entropy: Entropy, choices, options, logger: EntropyLogger) {
+async function main (entropy: Entropy, choices: string[], options: EntropyTuiOptions, logger: EntropyLogger) {
   if (loader.isSpinning) loader.stop()
   const storedConfig = await setupConfig()
 
   // Entropy is undefined on initial install, after user creates their first account,
   // entropy should be loaded
   if (storedConfig.selectedAccount && !entropy) {
-    entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint)
+    entropy = await loadEntropy(storedConfig.selectedAccount, options.tuiEndpoint)
   }
   // If the selected account changes within the TUI we need to reset the entropy instance being used
   const currentAccount = entropy?.keyring?.accounts?.registration?.address
   if (currentAccount && currentAccount !== storedConfig.selectedAccount) {
     await entropy.close()
-    entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint);
+    entropy = await loadEntropy(storedConfig.selectedAccount, options.tuiEndpoint);
   }
   
 
@@ -100,26 +100,26 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
 
     switch (answers.choice) {
     case 'Manage Accounts': {
-      const response = await entropyAccount(options.endpoint, storedConfig)
+      const response = await entropyAccount(options.tuiEndpoint, storedConfig)
       if (response === 'exit') { returnToMain = true }
       break
     }
     case 'Register': {
-      await entropyRegister(entropy, options.endpoint, storedConfig)
+      await entropyRegister(entropy, options.tuiEndpoint, storedConfig)
       break
     }
     case 'Balance': {
-      await entropyBalance(entropy, options.endpoint, storedConfig)
+      await entropyBalance(entropy, options.tuiEndpoint, storedConfig)
         .catch(err => console.error('There was an error retrieving balance', err))
       break
     }
     case 'Transfer': {
-      await entropyTransfer(entropy, options.endpoint)
+      await entropyTransfer(entropy, options.tuiEndpoint)
         .catch(err => console.error('There was an error sending the transfer', err))
       break
     }
     case 'Sign': {
-      await entropySign(entropy, options.endpoint)
+      await entropySign(entropy, options.tuiEndpoint)
         .catch(err => console.error('There was an issue with signing', err))
       break
     }
@@ -132,12 +132,12 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
       break
     }
     case 'User Programs': {
-      await entropyProgram(entropy, options.endpoint)
+      await entropyProgram(entropy, options.tuiEndpoint)
         .catch(err => console.error('There was an error with programs', err))
       break
     }
     case 'Deploy Program': {
-      await entropyProgramDev(entropy, options.endpoint)
+      await entropyProgramDev(entropy, options.tuiEndpoint)
         .catch(err => console.error('There was an error with program dev', err))
       break
     }
@@ -148,7 +148,7 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
       loader.text = 'Jumpstarting Network...'
       try {
         loader.start()
-        const jumpStartStatus = await jumpStartNetwork(entropy, options.endpoint)
+        const jumpStartStatus = await jumpStartNetwork(entropy, options.tuiEndpoint)
           
         if (jumpStartStatus.isFinalized) {
           loader.clear()
