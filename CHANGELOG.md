@@ -76,7 +76,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 ### Broke
 
 - network now uses `four-nodes` docker setup
-  - requires an update to `/etc/hosts` for local testsing, should include line:
+  - requires an update to `/etc/hosts` for local testing, should include line:
     ```
     127.0.0.1 alice-tss-server bob-tss-server charlie-tss-server dave-tss-server
     ```
