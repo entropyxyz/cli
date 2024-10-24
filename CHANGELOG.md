@@ -13,78 +13,121 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 ## [0.0.4] Carnage - 2024-10-23 (entropy-core compatibility: 0.3.0)
 
 ### Added
-- new: 'src/flows/register/register.ts' - service file for register pure function
-- new: './src/flows/manage-accounts/helpers/create-account.ts' - new helper file to house the pure function used to create a new entropy account
-- update: './tests/manage-accounts.test.ts' - added test for create account pure function
-- update: './src/common/utils.ts' - removed isValidSubstrateAddress and imported the method in from the sdk
-- new: './tests/user-program-management.test.ts' - unit tests file for user program management flows
-  - added test for adding a user program
-  - added test for viewing a user program
-  - added test for removing a user program
-- new: './src/flows/user-program-management/add.ts' - service file for adding user program pure function
-- new: 'src/flows/user-program-management/helpers/questions.ts' - utility helper file for all the different inquirer questions used
-- new: 'src/flows/user-program-management/types.ts' - user program management method types
-- new: 'src/flows/user-program-management/view.ts' - service file for pure functions of viewing user programs
-- new: 'src/flows/user-program-management/helpers/utils.ts' - utility helper file for user program management specific methods
-- new: './src/flows/user-program-management/remove.ts' - service file for removing user program pure function
-- new: './src/common/entropy-base.ts' - base abstract class for new command classes
-- new: './src/balance' - new file structure for our CLI/TUI flows
-  - new: './src/balance/main.ts' - main entry file for balance command for tui/cli
-  - new: './src/balance/utils.ts' - utilities and helper methods for all things balance
-- new: './src/transfer' - new file structure for our CLI/TUI flows
-  - new: './src/transfer/main.ts' - main entry file for transfer command for tui/cli
-  - new: './src/transfer/utils.ts' - utilities and helper methods for all things transfer
-- new: './src/account' - new file structure for our CLI/TUI flows
-  - new: './src/account/main.ts' - main entry file for accounts command for tui/cli
-  - new: './src/account/utils.ts' - utilities and helper methods for all things accounts
-- new: './src/faucet' - new file structure for our CLI/TUI flows
-  - new: './src/faucet/main.ts' - main entry file for faucet methods used for command and interaction files
-  - new: './src/faucet/utils.ts' - utilities and helper methods for all things faucet
-  - new: './src/faucet/interaction.ts' - main entrypoint for TUI flows
-  - new: './src/faucet/command.ts' - main entrypoint for CLI flows
-  - new: package added - yocto-spinner for adding loading spinners to the cli
-  - new: added new menu item for TUI to trigger a jumpstart to the network (needs to only be run once)
+
+- programmatic CLI commands
+  - new: `entropy account create`
+  - new: `entropy account import`
+  - new: `entropy account list`
+  - new: `entropy account register`
+  - new: `entropy program deploy`
+
+- TUI
+  - new: added faucet to main menu for TUI
+  - updated faucet to use loading spinner to indicate to user the progress of the transfer
+  - new: menu item to trigger a jumpstart to the network (needs to be run once for fresh test networks)
+
+- documentation
+  - updated: `./README.md`
+  - new: `./src/README.md` - an guide to the source of the project
+  - new: `./src/_template/*` - an example "domain" with lots of notes
+
+- tests
+  - new: `./tests/account.test.ts` - tests for `./src/account/`
+  - updated: `./tests/balance.test.ts` - tests for `./src/balance/`
+  - new: `./tests/common.test.ts` - tests for `./src/common/`
+  - updated: `./tests/config.test.ts` - tests for `./src/config/`
+  - new: `./tests/e2e.cli.sh` - a shell script which is an early test for programmatic usage
+
+  - new: `./tests/faucet.test.ts` - tests `./src/faucet/`
+  - new: `./tests/global.test.ts` - 
+  - new: `./tests/program.test.ts` - tests for `./src/program/`
+
+- programs
+  - new: `./tests/programs/faucet_program.wasm` - the faucet program!
+
+- packages
+  - new: `yocto-spinner` for adding loading spinners to the cli
+  - some minor package updates
+
+- github actions
+  - new: CLA action
 
 ### Changed
 
-- folder name for user programs to match the kebab-case style for folder namespace
-- updated SDK version to v0.2.3
+- updated SDK version to v0.3.0 (entropy-core 0.3.0)
+  - updated us to use `four-nodes` docker setup
 - logger to handle nested contexts for better organization of logs
-- merged user + dev program folders + tests
-- removed flows/balance/*.ts directory with file restructure
-- removed flows/entropyTransfer/*.ts directory with file restructure
-- removed flows/manage-accounts/*/*.ts directory with file restructure
-- removed flows/register/*.ts directory with file restructure
-- removed flow/entropyFaucet/*.ts directory with file restructure
-- added faucet to main menu for TUI
-- updated faucet to use loading spinner to indicate to user the progress of the transfer
+- update: `./src/common/utils.ts` - removed isValidSubstrateAddress and imported the method in from the sdk
+- file restructure:
+  - removed: `src/flows/*`
+  - added
+    - `./src/common/entropy-base.ts` - base abstract class for all our domains `main.js` files
+    - `./src/_template` - docs explaining the new file structure pattern
+    - `./src/account` - new file structure for our CLI/TUI flows
+      - NOTE: this contains register flow
+    - `./src/balance` - new file structure for our CLI/TUI flows
+    - `./src/faucet` - new file structure for our CLI/TUI flows
+    - `./src/program` - new file structure for our CLI/TUI flows
+      - NOTE: this merges user-program + dev-program domains into a single domain
+    - `./src/sign` - new file structure for our CLI/TUI flows
+    - `./src/transfer` - new file structure for our CLI/TUI flows
+- folder name for user programs to match the kebab-case style for folder namespace
 
 ### Broke
 
-- deploying programs with TUI
-    - now requires a `*.wasm` file for `bytecode`
-    - now requires a `*.json` file path for `configurationSchema`
-    - now requires a `*.json` file path for `auxillaryDataSchema`
+- network now uses `four-nodes` docker setup
+  - requires an update to `/etc/hosts` for local testsing, should include line:
+    ```
+    127.0.0.1 alice-tss-server bob-tss-server charlie-tss-server dave-tss-server
+    ```
+- for programmatic CLI
+  - change account listing:
+    - old: `entropy list`
+    - new: `entropy account list [options]`
+  - changed transfer:
+    - old: `entropy transfer [options] <source> <destination> <amount>`
+    - new: `entropy transfer [options] <destination> <amount>`
+  - changed env: `ENDPOINT` => `ENTROPY_ENDPOINT`
 
+- for TUI
+  - "endpoint" configuration has changed
+    - see `entropy --help`
+      - change flag: `--endpoint` => `--tui-endpiont`
+      - change env: `ENTROPY_ENDPOINT` => `ENTROPY_TUI_ENDPOINT`
+    - This is because of [collisions we were seeing](https://github.com/entropyxyz/cli/issues/265) with `commander` flags.
+    - Does not effect programmatic CLI usage
+    - We may revert this in a future release.
+  - deploying programs now requires
+    - `*.wasm` file for `bytecode`
+    - `*.json` file path for `configurationSchema`
+    - `*.json` file path for `auxillaryDataSchema`
 
 ## [0.0.3] Blade - 2024-07-17 (entropy-core compatibility: 0.2.0)
 
 ### Fixed
+
 - HOT-FIX programmatic balance error [183](https://github.com/entropyxyz/cli/pull/183)
 
 ## [0.0.2] AntMan - 2024-07-12 (entropy-core compatibility: 0.2.0)
 
 ### Added
-- new: './src/flows/balance/balance.ts' - service file separated out of main flow containing the pure functions to perform balance requests for one or multiple addresses
-- new: './tests/balance.test.ts' - new unit tests file for balance pure functions
-- new: './src/common/logger.ts' - utility file consisting of the logger used throughout the entropy cli
-- new: './src/common/masking.ts' - utility helper file for EntropyLogger, used to mask private data in the payload (message) of the logging method
+
+- new: `./src/flows/balance/balance.ts` - service file separated out of main flow containing the pure functions to perform balance requests for one or multiple addresses
+- new: `./tests/balance.test.ts` - new unit tests file for balance pure functions
+- new: `./src/common/logger.ts` - utility file consisting of the logger used throughout the entropy cli
+- new: `./src/common/masking.ts` - utility helper file for EntropyLogger, used to mask private data in the payload (message) of the logging method
+
 ### Fixed
+
 - keyring retrieval method was incorrectly returning the default keyring when no keyring was found, which is not the intended flow
+
 ### Changed
+
 - conditional when initializing entropy object to only error if no seed AND admin account is not found in the account data, new unit test caught bug with using OR condition
+
 ### Broke
 
 ### Meta/Dev
+
 - new: `./dev/README.md`
 - `./.github`: their is now a check list you should fill out for creating a PR
