@@ -1,27 +1,40 @@
 import { Test } from 'tape'
 import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+
 // @ts-ignore
-import { spinNetworkUp, spinNetworkDown, } from "@entropyxyz/sdk/testing"
+import { spinNetworkUp, spinNetworkDown, jumpStartNetwork } from "@entropyxyz/sdk/testing"
 // @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
 
 import { initializeEntropy } from '../../src/common/initializeEntropy'
 import * as config from '../../src/config'
-import { makeSeed, promiseRunner, sleep } from './'
+import { makeSeed, promiseRunner } from './'
 
 interface SetupTestOpts {
   configPath?: string
   networkType?: string
-  seed?: string,
+  seed?: string
+  endpoint?: string
+  createAccountOnly?: boolean
 }
-const NETWORK_TYPE_DEFAULT = 'two-nodes'
-let counter = 0
 
-export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entropy: Entropy; run: any }> {
+const NETWORK_TYPE_DEFAULT = 'four-nodes'
+let count = 0
+function uniqueConfigPath () {
+  return join(
+    tmpdir(),
+    `entropy-cli-${Date.now()}_${count++}.json`
+  )
+}
+
+export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entropy: Entropy; run: any; endpoint: string }> {
   const {
-    configPath = `/tmp/entropy-cli-${Date.now()}_${counter++}.json`,
+    configPath = uniqueConfigPath(),
     networkType = NETWORK_TYPE_DEFAULT,
-    seed = makeSeed()
+    seed = makeSeed(),
+    endpoint = 'ws://127.0.0.1:9944',
   } = opts || {}
 
   const run = promiseRunner(t)
@@ -38,18 +51,17 @@ export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entro
 
   await run('config.init', config.init(configPath))
 
-  // TODO: remove this after new SDK is published
-  await sleep(process.env.GITHUB_WORKSPACE ? 30_000 : 5_000)
   // To follow the same way we initiate entropy within the cli we must go through the same process of creating an initial keyring
   // as done in src/flows/manage-accounts/new-key.ts
   const keyring = new Keyring({ seed, debug: true })
   const entropy = await initializeEntropy({
+    // @ts-expect-error
     keyMaterial: keyring.getAccount(),
-    endpoint: 'ws://127.0.0.1:9944',
+    endpoint,
     configPath
   })
 
   await run('entropy ready', entropy.ready)
 
-  return { entropy, run }
+  return { entropy, run, endpoint }
 }

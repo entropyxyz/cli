@@ -1,22 +1,27 @@
-import { decodeAddress, encodeAddress } from "@polkadot/keyring"
-import { hexToU8a, isHex } from "@polkadot/util"
 import { Buffer } from 'buffer'
 import { EntropyAccountConfig } from "../config/types"
+import { EntropyLogger } from './logger'
 
 export function stripHexPrefix (str: string): string {
   if (str.startsWith('0x')) return str.slice(2)
   return str
 }
 
+export function stringify (thing, indent = 2) {
+  return (typeof thing === 'object')
+    ? JSON.stringify(thing, replacer, indent)
+    : thing
+}
+
 export function replacer (key, value) {
-  if(value instanceof Uint8Array ){
+  if (value instanceof Uint8Array) {
     return Buffer.from(value).toString('base64')
   }
   else return value
 }
 
 export function print (...args) {
-  console.log(...args)
+  console.log(...args.map(arg => stringify(arg)))
 }
 
 // hardcoding for now instead of querying chain
@@ -48,17 +53,7 @@ export function buf2hex (buffer: ArrayBuffer): string {
   return Buffer.from(buffer).toString("hex")
 }
 
-export function isValidSubstrateAddress (address: any) {
-  try {
-    encodeAddress(isHex(address) ? hexToU8a(address) : decodeAddress(address))
-
-    return true
-  } catch (error) {
-    return false
-  }
-}
-
-export function accountChoices (accounts: EntropyAccountConfig[]) {
+export function generateAccountChoices (accounts: EntropyAccountConfig[]) {
   return accounts
     .map((account) => ({
       name: `${account.name} (${account.address})`,
@@ -67,10 +62,44 @@ export function accountChoices (accounts: EntropyAccountConfig[]) {
 }
 
 export function accountChoicesWithOther (accounts: EntropyAccountConfig[]) {
-  return accountChoices(accounts)
+  return generateAccountChoices(accounts)
     .concat([{ name: "Other", value: null }])
 }
 
-export function getSelectedAccount (accounts: EntropyAccountConfig[], address: string) {
-  return accounts.find(account => account.address === address)
+export function findAccountByAddressOrName (accounts: EntropyAccountConfig[], aliasOrAddress: string) {
+  if (!aliasOrAddress || !aliasOrAddress.length) throw Error('account name or address required')
+
+  return (
+    accounts.find(account => account.address === aliasOrAddress) ||
+    accounts.find(account => account.name === aliasOrAddress)
+  )
+}
+
+export async function jumpStartNetwork (entropy, endpoint): Promise<any> {
+  const logger = new EntropyLogger('JUMPSTART_NETWORK', endpoint)
+  return new Promise((resolve, reject) => {
+    entropy.substrate.tx.registry.jumpStartNetwork()
+      .signAndSend(entropy.keyring.accounts.registration.pair, ({ status, dispatchError }) => {
+        if (dispatchError) {
+          let msg: string
+          if (dispatchError.isModule) {
+            // for module errors, we have the section indexed, lookup
+            const decoded = entropy.substrate.registry.findMetaError(
+              dispatchError.asModule
+            )
+            const { docs, name, section } = decoded
+
+            msg = `${section}.${name}: ${docs.join(' ')}`
+          } else {
+            // Other, CannotLookup, BadOrigin, no extra info
+            msg = dispatchError.toString()
+          }
+          const error = Error(msg)
+          logger.error('There was an issue jump starting the network', error)
+          return reject(error)
+        }
+
+        if (status.isFinalized) resolve(status)
+      })
+  })
 }

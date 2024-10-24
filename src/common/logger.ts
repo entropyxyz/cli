@@ -1,6 +1,7 @@
 import envPaths from 'env-paths'
 import { join } from 'path'
 import * as winston from 'winston'
+import { replacer } from './utils'
 import { maskPayload } from './masking'
 import { EntropyLoggerOptions } from 'src/types'
 
@@ -38,7 +39,7 @@ export class EntropyLogger {
       winston.format.splat(),
       // Uses safe-stable-stringify to finalize full object message as string
       // (prevents circular references from crashing)
-      winston.format.json(),
+      winston.format.json({ replacer }),
     );
 
     if (isTesting) {
@@ -88,27 +89,27 @@ export class EntropyLogger {
   }
 
   // maps to winston:error
-  public error (description: string, error: Error): void {
-    this.writeLogMsg('error', error?.message || error, this.context, description, error.stack);
+  error (description: string, error: Error, context?: string): void {
+    this.writeLogMsg('error', error?.message || error, context, description, error.stack);
   }
 
   // maps to winston:info
-  public log (message: any, context?: string): void {
+  log (message: any, context?: string): void {
     this.writeLogMsg('info', message, context);
   }
 
   // maps to winston:warn
-  public warn (message: any, context?: string): void {
+  warn (message: any, context?: string): void {
     this.writeLogMsg('warn', message, context);
   }
 
   // maps to winston:debug
-  public debug (message: any, context?: string): void {
+  debug (message: any, context?: string): void {
     this.writeLogMsg('debug', message, context);
   }
 
   // maps to winston:verbose
-  public verbose (message: any, context?: string): void {
+  verbose (message: any, context?: string): void {
     this.writeLogMsg('verbose', message, context);
   }
 
@@ -116,11 +117,10 @@ export class EntropyLogger {
     this.winstonLogger.log({
       level,
       message: maskPayload(message),
-      context: context || this.context,
+      context: context ? `${this.context}:${context}` : this.context,
       endpoint: this.endpoint,
       description,
       stack,
     });
   }
-
 }
