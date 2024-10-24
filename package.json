@@ -6,8 +6,8 @@
   "scripts": {
     "start": "yarn build:global && entropy",
     "start:debug": "DEBUG=@entropyxyz/cli yarn start",
-    "build": "tsup",
-    "build:global": "tsup && npm install -g",
+    "build": "source ./node_modules/@entropyxyz/sdk/dev/bin/ENTROPY_CORE_VERSION.sh && tsup",
+    "build:global": "yarn build && npm install -g",
     "lint": "eslint . --ext .ts --fix",
     "test": "yarn test:types && yarn build:global && yarn test:ts && yarn test:only",
     "test:only": "./dev/bin/test-only.sh",

@@ -4,6 +4,8 @@ import { findAccountByAddressOrName, stringify } from './utils'
 import * as config from '../config'
 import { initializeEntropy } from './initializeEntropy'
 
+const entropyPackage = require('../../package.json')
+
 export function cliWrite (result) {
   const prettyResult = stringify(result, 0)
   process.stdout.write(prettyResult)
@@ -16,6 +18,24 @@ function getConfigOrNull () {
     if (config.isDangerousReadError(err)) throw err
     return null
   }
+}
+
+export function versionOption () {
+  const { version } = entropyPackage
+
+  return new Option(
+    '-v, --version',
+    'Displays the current running version of Entropy CLI'
+  ).argParser(() => version)
+}
+
+export function coreVersion () {
+  const coreVersion = process.env.ENTROPY_CORE_VERSION.split('-')[1]
+
+  return new Option(
+    '-cv, --core-version',
+    'Displays the current running version of the Entropy Protocol'
+  ).argParser(() => coreVersion)
 }
 
 export function endpointOption () {
