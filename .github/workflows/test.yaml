@@ -15,6 +15,7 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-22.04
+    shell: bash
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,13 +25,10 @@ jobs:
         run: yarn --network-timeout 180000
       - name: Typecheck
         run: yarn run test:types
-        shell: bash
       - name: Build
         run: yarn run build
-        shell: bash
       - name: Add TSS server host mappings
         run: |
           echo "127.0.0.1 alice-tss-server bob-tss-server charlie-tss-server dave-tss-server" | sudo tee -a /etc/hosts
       - name: Test
         run: yarn run test
-        shell: bash
