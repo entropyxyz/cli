@@ -1,11 +1,14 @@
 import test from 'tape'
-import { EntropySign } from '../src/sign/main'
+import { jumpStartNetwork } from '@entropyxyz/sdk/testing'
 
-import { setupTest, charlieStashSeed } from './testing-utils'
+import { EntropySign } from '../src/sign/main'
+import { setupTest, eveSeed } from './testing-utils'
+
 const endpoint = 'ws://127.0.0.1:9944'
 
 test('Sign - signMessageWithAdapters', async (t) => {
-  const { run, entropy } = await setupTest(t, { seed: charlieStashSeed })
+  const { run, entropy } = await setupTest(t, { seed: eveSeed })
+  await run('jump-start network', jumpStartNetwork(entropy))
   const signService = new EntropySign(entropy, endpoint)
 
   await run('register', entropy.register())

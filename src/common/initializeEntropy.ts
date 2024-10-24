@@ -96,11 +96,10 @@ export const initializeEntropy = async ({ keyMaterial, endpoint, configPath }: I
 
     const entropy = new Entropy({ keyring: selectedAccount, endpoint })
     await entropy.ready
-
+    
     if (!entropy?.keyring?.accounts?.registration?.seed) {
       throw new Error("Keys are undefined")
     }
-
     
     return entropy
   } catch (error) {
