@@ -15,6 +15,9 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 ### Added
 - new: option to display cli and core version
 
+### Changes
+- ascii art print out now shows up to date core version based, coming from SDK
+
 ## [0.0.4] Carnage - 2024-10-23 (entropy-core compatibility: 0.3.0)
 
 ### Added
