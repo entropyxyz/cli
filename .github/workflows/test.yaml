@@ -24,10 +24,13 @@ jobs:
         run: yarn --network-timeout 180000
       - name: Typecheck
         run: yarn run test:types
+        shell: bash
       - name: Build
         run: yarn run build
+        shell: bash
       - name: Add TSS server host mappings
         run: |
           echo "127.0.0.1 alice-tss-server bob-tss-server charlie-tss-server dave-tss-server" | sudo tee -a /etc/hosts
       - name: Test
         run: yarn run test
+        shell: bash
