@@ -4,7 +4,7 @@
 import { Command, Option } from 'commander'
 
 import { EntropyTuiOptions } from './types'
-import { loadEntropy, tuiEndpointOption } from './common/utils-cli'
+import { coreVersion, loadEntropy, tuiEndpointOption, versionOption } from './common/utils-cli'
 import * as config from './config'
 
 import launchTui from './tui'
@@ -13,6 +13,7 @@ import { entropyTransferCommand } from './transfer/command'
 import { entropySignCommand } from './sign/command'
 import { entropyBalanceCommand } from './balance/command'
 import { entropyProgramCommand } from './program/command'
+import { print } from './common/utils'
 
 const program = new Command()
 
@@ -29,6 +30,8 @@ program
       .hideHelp()
   )
   .addOption(tuiEndpointOption())
+  .addOption(versionOption())
+  .addOption(coreVersion())
   .addCommand(entropyBalanceCommand())
   .addCommand(entropyAccountCommand())
   .addCommand(entropyTransferCommand())
@@ -36,10 +39,17 @@ program
   .addCommand(entropyProgramCommand())
 
   .action(async (opts: EntropyTuiOptions) => {
-    const { account, tuiEndpoint } = opts
+    const { account, tuiEndpoint, version, coreVersion } = opts
     const entropy = account
       ? await loadEntropy(account, tuiEndpoint)
       : undefined
+    if (version) {
+      print(`v${version}`)
+      process.exit(0)
+    } else if (coreVersion) {
+      print(coreVersion)
+      process.exit(0)
+    }
     // NOTE: on initial startup you have no account
     launchTui(entropy, opts)
   })

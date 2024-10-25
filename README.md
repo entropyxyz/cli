@@ -83,6 +83,8 @@ Options:
                                                       "ws://testnet.entropy.xyz:9944/", env: ENDPOINT)
 
   -h, --help                                          display help for command
+  -v, --version                                       display current cli version
+  -cv, --core-version                                 display current core protocol version
 
 Commands:
   list|ls                                             List all accounts. Output is JSON of form [{ name,
