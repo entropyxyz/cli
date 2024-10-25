@@ -10,14 +10,6 @@ The format extends [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Version header format: `[version] Name - year-month-day (entropy-core compatibility: version [range])`
 
-## [UNRELEASED]
-
-### Added
-- new: option to display cli and core version
-
-### Changes
-- ascii art print out now shows up to date core version based, coming from SDK
-
 ## [0.0.4] Carnage - 2024-10-23 (entropy-core compatibility: 0.3.0)
 
 ### Added
@@ -52,6 +44,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
   - new: './src/faucet/command.ts' - main entrypoint for CLI flows
   - new: package added - yocto-spinner for adding loading spinners to the cli
   - new: added new menu item for TUI to trigger a jumpstart to the network (needs to only be run once)
+- new: option to display cli and core version
 
 ### Changed
 
@@ -66,6 +59,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - removed flow/entropyFaucet/*.ts directory with file restructure
 - added faucet to main menu for TUI
 - updated faucet to use loading spinner to indicate to user the progress of the transfer
+- ascii art print out now shows up to date core version based, coming from SDK
 
 ### Broke
 
