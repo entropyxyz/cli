@@ -77,10 +77,12 @@ CLI interface for interacting with entropy.xyz. Running this binary without any 
 interface.
 
 Options:
- -et, --tui-endpoint <url>                   Runs entropy with the given endpoint and ignores network endpoints in config.
-                                             Can also be given a stored endpoint name from config eg: `entropy --endpoint
-                                             test-net`. (default: "wss://testnet.entropy.xyz/", env: ENTROPY_TUI_ENDPOINT)
- -h, --help                                  display help for command
+  -et, --tui-endpoint <url>                   Runs entropy with the given endpoint and ignores network endpoints in config.
+                                              Can also be given a stored endpoint name from config eg: `entropy --endpoint
+                                              test-net`. (default: "wss://testnet.entropy.xyz/", env: ENTROPY_TUI_ENDPOINT)
+  -h, --help                                  Display help for command
+  -v, --version                               Display current cli version
+  -cv, --core-version                         Display current core protocol version
 
 Commands:
  balance [options] <account <address|name>>  Command to retrieive the balance of an account on the Entropy Network

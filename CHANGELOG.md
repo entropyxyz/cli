@@ -20,6 +20,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
   - new: `entropy account list`
   - new: `entropy account register`
   - new: `entropy program deploy`
+  - new: option to display cli and core version
 
 - TUI
   - new: added faucet to main menu for TUI
@@ -72,6 +73,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
     - `./src/sign` - new file structure for our CLI/TUI flows
     - `./src/transfer` - new file structure for our CLI/TUI flows
 - folder name for user programs to match the kebab-case style for folder namespace
+- ascii art print out now shows up to date core version based, coming from SDK
 
 ### Broke
 
