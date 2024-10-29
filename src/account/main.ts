@@ -7,7 +7,7 @@ import { FLOW_CONTEXT } from "./constants";
 import { AccountCreateParams, AccountImportParams, AccountRegisterParams } from "./types";
 
 import { EntropyBase } from "../common/entropy-base";
-import { EntropyAccountConfig } from "../config/types";
+import { EntropyAccountConfig, EntropyAccountConfigFormatted } from "../config/types";
 
 export class EntropyAccount extends EntropyBase {
   constructor (entropy: Entropy, endpoint: string) {
@@ -19,28 +19,28 @@ export class EntropyAccount extends EntropyBase {
     return EntropyAccount.import({ name, seed, path })
   }
 
+  // WARNING: #create depends on #import => be careful modifying this function
   static async import ({ name, seed, path }: AccountImportParams ): Promise<EntropyAccountConfig> {
-    // WARNING: #create currently depends on this => be careful modifying this function
-
     await wasmGlobalsReady()
     const keyring = new Keyring({ seed, path, debug: true })
+
     const fullAccount = keyring.getAccount()
     // TODO: sdk should create account on constructor
-    const { admin } = keyring.getAccount()
+    const data = fixData(fullAccount)
+    const maybeEncryptedData = data
+    // const maybeEncryptedData = password ? passwordFlow.encrypt(data, password) : data
 
-    const data = fullAccount
+    const { admin } = keyring.getAccount()
     delete admin.pair
-    // const encryptedData = password ? passwordFlow.encrypt(data, password) : data
-    
+
     return {
       name,
       address: admin.address,
-      data
-      // data: encryptedData // TODO: replace once password input is added back
+      data: maybeEncryptedData,
     }
   }
 
-  static list ({ accounts }: { accounts: EntropyAccountConfig[] }) {
+  static list ({ accounts }: { accounts: EntropyAccountConfig[] }): EntropyAccountConfigFormatted[] {
     if (!accounts.length)
       throw new Error(
         'AccountsError: There are currently no accounts available, please create or import a new account using the Manage Accounts feature'
@@ -49,7 +49,7 @@ export class EntropyAccount extends EntropyBase {
     return accounts.map((account: EntropyAccountConfig) => ({
       name: account.name,
       address: account.address,
-      verifyingKeys: account?.data?.admin?.verifyingKeys
+      verifyingKeys: account?.data?.registration?.verifyingKeys || []
     }))
   }
 
@@ -66,65 +66,40 @@ export class EntropyAccount extends EntropyBase {
       }
       : undefined
 
+    this.logger.debug(`registering with params: ${registerParams}`, 'REGISTER')
     return this.entropy.register(registerParams)
-      // NOTE: if "register" fails for any reason, core currently leaves the chain in a "polluted"
-      // state. To fix this we manually "prune" the dirty registration transaction.
-      .catch(async error => {
-        await this.pruneRegistration()
-        throw error
-      })
   }
+}
 
-  // WATCH: should this be extracted to interaction.ts?
-  async registerAccount (account: EntropyAccountConfig, registerParams?: AccountRegisterParams): Promise<EntropyAccountConfig> {
-    this.logger.debug(
-      [
-        `registering account: ${account.address}`,
-        // @ts-expect-error Type export of ChildKey still not available from SDK
-        `to keyring: ${this.entropy.keyring.getLazyLoadAccountProxy('registration').pair.address}`
-      ].join(', '),
-      'REGISTER'
-    )
-    // Register params to be defined from user input (arguments/options or inquirer prompts)
-    try {
-      const verifyingKey = await this.register(registerParams)
-      // NOTE: this mutation triggers events in Keyring
-      account.data.registration.verifyingKeys.push(verifyingKey)
-      return account
-    } catch (error) {
-      this.logger.error('There was a problem registering', error)
-      throw error
-    }
-  }
-
-  /* PRIVATE */
-
-  private async pruneRegistration () {
-    return new Promise((resolve, reject) => {
-      this.entropy.substrate.tx.registry.pruneRegistration()
-        .signAndSend(this.entropy.keyring.accounts.registration.pair, ({ status, dispatchError }) => {
-          if (dispatchError) {
-            let msg: string
-            if (dispatchError.isModule) {
-              // for module errors, we have the section indexed, lookup
-              const decoded = this.entropy.substrate.registry.findMetaError(
-                dispatchError.asModule
-              )
-              const { docs, name, section } = decoded
-  
-              msg = `${section}.${name}: ${docs.join(' ')}`
-            } else {
-              // Other, CannotLookup, BadOrigin, no extra info
-              msg = dispatchError.toString()
-            }
-            const error = Error(msg)
-            this.logger.error('There was an issue pruning registration', error)
-            return reject(error)
-          }
-          if (status.isFinalized) {
-            resolve(status)
-          }
-        })
+// TODO: there is a bug in SDK that is munting this data
+function fixData (data) {
+  if (data.admin?.pair) {
+    const { addressRaw, secretKey, publicKey } = data.admin.pair
+    Object.assign(data.admin.pair, {
+      addressRaw: objToUint8Array(addressRaw),
+      secretKey: objToUint8Array(secretKey),
+      publicKey: objToUint8Array(publicKey)
     })
   }
+
+  if (data.registration?.pair) {
+    const { addressRaw, secretKey, publicKey } = data.registration.pair
+    Object.assign(data.registration.pair, {
+      addressRaw: objToUint8Array(addressRaw),
+      secretKey: objToUint8Array(secretKey),
+      publicKey: objToUint8Array(publicKey)
+    })
+  }
+
+  return data
+}
+
+function objToUint8Array (input) {
+  if (input instanceof Uint8Array) return input
+
+  const values: any = Object.entries(input)
+    .sort((a, b) => Number(a[0]) - Number(b[0])) // sort entries by keys
+    .map(entry => entry[1])
+
+  return new Uint8Array(values)
 }

@@ -2,7 +2,7 @@ import inquirer from "inquirer";
 import Entropy from "@entropyxyz/sdk";
 
 import { EntropyAccount } from './main'
-import { selectAndPersistNewAccount } from "./utils";
+import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from "./utils";
 import { findAccountByAddressOrName, print } from "../common/utils"
 import { EntropyConfig } from "../config/types";
 import * as config from "../config";
@@ -45,10 +45,7 @@ export async function entropyAccount (endpoint: string, storedConfig: EntropyCon
       return
     }
     const { selectedAccount } = await inquirer.prompt(accountSelectQuestions(accounts))
-    await config.set({
-      ...storedConfig,
-      selectedAccount: selectedAccount.address
-    })
+    await config.setSelectedAccount(selectedAccount)
 
     print('Current selected account is ' + selectedAccount)
     return
@@ -77,16 +74,15 @@ export async function entropyRegister (entropy: Entropy, endpoint: string, store
   const accountService = new EntropyAccount(entropy, endpoint)
 
   const { accounts, selectedAccount } = storedConfig
-  const currentAccount = findAccountByAddressOrName(accounts, selectedAccount)
-  if (!currentAccount) {
+  const account = findAccountByAddressOrName(accounts, selectedAccount)
+  if (!account) {
     print("No account selected to register")
-    return;
+    return
   }
-  print("Attempting to register the address:", currentAccount.address)
-  const updatedAccount = await accountService.registerAccount(currentAccount)
-  const arrIdx = accounts.indexOf(currentAccount)
-  accounts.splice(arrIdx, 1, updatedAccount)
-  print("Your address", updatedAccount.address, "has been successfully registered.")
 
-  return { accounts, selectedAccount }
+  print("Attempting to register the address:", account.address)
+  const verifyingKey = await accountService.register()
+  await addVerifyingKeyToAccountAndSelect(verifyingKey, account.address)
+
+  print("Your address", account.address, "has been successfully registered.")
 }

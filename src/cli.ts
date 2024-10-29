@@ -4,7 +4,7 @@
 import { Command, Option } from 'commander'
 
 import { EntropyTuiOptions } from './types'
-import { accountOption, endpointOption, loadEntropy } from './common/utils-cli'
+import { coreVersion, loadEntropy, tuiEndpointOption, versionOption } from './common/utils-cli'
 import * as config from './config'
 
 import launchTui from './tui'
@@ -13,6 +13,7 @@ import { entropyTransferCommand } from './transfer/command'
 import { entropySignCommand } from './sign/command'
 import { entropyBalanceCommand } from './balance/command'
 import { entropyProgramCommand } from './program/command'
+import { print } from './common/utils'
 
 const program = new Command()
 
@@ -20,8 +21,6 @@ const program = new Command()
 program
   .name('entropy')
   .description('CLI interface for interacting with entropy.xyz. Running this binary without any commands or arguments starts a text-based interface.')
-  .addOption(accountOption())
-  .addOption(endpointOption())
   .addOption(
     new Option(
       '-d, --dev',
@@ -30,16 +29,27 @@ program
       .env('DEV_MODE')
       .hideHelp()
   )
+  .addOption(tuiEndpointOption())
+  .addOption(versionOption())
+  .addOption(coreVersion())
   .addCommand(entropyBalanceCommand())
   .addCommand(entropyAccountCommand())
   .addCommand(entropyTransferCommand())
   .addCommand(entropySignCommand())
   .addCommand(entropyProgramCommand())
+
   .action(async (opts: EntropyTuiOptions) => {
-    const { account, endpoint } = opts
+    const { account, tuiEndpoint, version, coreVersion } = opts
     const entropy = account
-      ? await loadEntropy(account, endpoint)
+      ? await loadEntropy(account, tuiEndpoint)
       : undefined
+    if (version) {
+      print(`v${version}`)
+      process.exit(0)
+    } else if (coreVersion) {
+      print(coreVersion)
+      process.exit(0)
+    }
     // NOTE: on initial startup you have no account
     launchTui(entropy, opts)
   })

@@ -75,8 +75,11 @@ export async function entropyProgram (entropy: Entropy, endpoint: string) {
       const byteArray = encoder.encode(programConfigJson)
       const programConfigHex = u8aToHex(byteArray)
 
-      // WIP this is broken
-      await program.add({ programPointer: programPointerToAdd, programConfig: programConfigHex })
+      // WIP - broken, needs programConfigPath
+      await program.add({
+        programPointer: programPointerToAdd,
+        programConfig: programConfigHex
+      })
 
       print("Program added successfully.")
     } catch (error) {

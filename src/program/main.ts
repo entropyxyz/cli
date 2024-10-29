@@ -62,17 +62,13 @@ export class EntropyProgram extends EntropyBase {
 
   async get (programPointer: string): Promise<any> {
     this.logger.debug(`program pointer: ${programPointer}`, `${FLOW_CONTEXT}::PROGRAM_PRESENCE_CHECK`);
-    return this.entropy.programs.dev.getProgramInfo(programPointer)
-    // TODO: after next SDK release
-    // return this.entropy.programs.dev.get(programPointer)
+    return this.entropy.programs.dev.get(programPointer)
   }
 
   async listDeployed () {
     // QUESTION: does the CLI ever want to take in an address?
     const address = this.entropy.keyring.accounts.registration.address
-    return this.entropy.programs.dev.get(address)
-    // TODO: after next SDK release
-    // return this.entropy.programs.dev.getByDeployer(address)
+    return this.entropy.programs.dev.getByDeployer(address)
   }
 }
 

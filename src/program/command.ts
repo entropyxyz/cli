@@ -26,21 +26,21 @@ function entropyProgramDeploy () {
       'Requires funds.'
     ].join(' '))
     .argument(
-      'bytecode', 
+      '<bytecode>', 
       [
         'The path to your program bytecode.',
         'Must be a .wasm file.'
       ].join(' ')
     )
     .argument(
-      'configurationSchema',
+      '<configurationSchema>',
       [
         'The path to the JSON Schema for validating configurations passed in by users installing this program.',
         'Must be a .json file.'
       ].join(' ')
     )
     .argument(
-      'auxillaryDataSchema',
+      '<auxillaryDataSchema>',
       [
         'The path to the JSON Schema for validating auxillary data passed to the program on calls to "sign".',
         'Must be a .json file.'

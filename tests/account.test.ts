@@ -1,15 +1,17 @@
 import test from 'tape'
-import { wasmGlobalsReady } from '@entropyxyz/sdk'
+import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
 // @ts-ignore
 import { isValidSubstrateAddress } from '@entropyxyz/sdk/utils'
+import { jumpStartNetwork } from '@entropyxyz/sdk/testing'
 // @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
 import { randomAsHex } from '@polkadot/util-crypto'
 import { EntropyAccount } from '../src/account/main'
+import { EntropyTransfer } from '../src/transfer/main'
 import { EntropyAccountConfig, EntropyConfig } from '../src/config/types'
 import * as config from '../src/config'
 import { promiseRunner, setupTest } from './testing-utils'
-import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
+import { charlieStashAddress, charlieStashSeed, eveSeed } from './testing-utils/constants'
 import { readFileSync } from 'fs'
 
 test('Account - list', async t => {
@@ -18,7 +20,7 @@ test('Account - list', async t => {
     address: charlieStashAddress,
     data: {
       seed: charlieStashSeed,
-      admin: {
+      registration: {
         verifyingKeys: ['this-is-a-verifying-key'],
         seed: charlieStashSeed,
         address: charlieStashAddress,
@@ -32,7 +34,7 @@ test('Account - list', async t => {
       dev: 'ws://127.0.0.1:9944',
       'test-net': 'wss://testnet.entropy.xyz',
     },
-    selectedAccount: account.address,
+    selectedAccount: account.name,
     'migration-version': '0'
   }
 
@@ -41,7 +43,7 @@ test('Account - list', async t => {
   t.deepEqual(accountsArray, [{
     name: account.name,
     address: account.address,
-    verifyingKeys: account?.data?.admin?.verifyingKeys
+    verifyingKeys: account?.data?.registration?.verifyingKeys
   }])
 
   // Resetting accounts on config to test for empty list
@@ -78,44 +80,58 @@ test('Account - import', async t => {
   t.end()
 })
 
-const networkType = 'two-nodes'
 const endpoint = 'ws://127.0.0.1:9944'
 
+async function fundAccount (t, entropy: Entropy) {
+  const { entropy: charlie } = await setupTest(t, { seed: charlieStashSeed })
+  const transfer = new EntropyTransfer(charlie, endpoint)
+
+  await transfer.transfer(entropy.keyring.accounts.registration.address, "1000")
+}
+
+
 test('Account - Register: Default Program', async (t) => {
-  const { run, entropy } = await setupTest(t, { networkType, seed: charlieStashSeed })
-  const accountService = new EntropyAccount(entropy, endpoint)
+  const { run, entropy: naynay } = await setupTest(t)
+  // NOTE: we fund a new account "naynay" because jumpStart has problems with charlie (T_T)
+  await run('fund naynay', fundAccount(t, naynay))
 
-  const verifyingKey = await run('register account', accountService.register())
+  await run('jump-start network', jumpStartNetwork(naynay))
 
-  const fullAccount = entropy.keyring.getAccount()
+  const account = new EntropyAccount(naynay, endpoint)
+  const verifyingKey = await run('register account', account.register())
 
+  const fullAccount = naynay.keyring.getAccount()
   t.equal(verifyingKey, fullAccount?.registration?.verifyingKeys?.[0], 'verifying key matches key added to registration account')
 
   t.end()
 })
 
 test('Account - Register: Barebones Program', async t => {
-  const { run, entropy } = await setupTest(t, { networkType, seed: charlieStashSeed })
+  const { run, entropy: naynay } = await setupTest(t)
+  await run('fund naynay', fundAccount(t, naynay))
+  // NOTE: we fund a new account "naynay" because jumpStart has problems with charlie (T_T)
+
   const dummyProgram: any = readFileSync(
     new URL('./programs/template_barebones.wasm', import.meta.url)
   )
+
+  await run('jump-start network', jumpStartNetwork(naynay))
+
+  const account = new EntropyAccount(naynay, endpoint)
   const pointer = await run(
     'deploy program',
-    entropy.programs.dev.deploy(dummyProgram)
+    naynay.programs.dev.deploy(dummyProgram)
   )
-
-  const accountService = new EntropyAccount(entropy, endpoint)
   const verifyingKey = await run(
-    'register - using custom params',
-    accountService.register({
-      programModAddress: entropy.keyring.accounts.registration.address,
+    'register account - with custom params',
+    account.register({
+      programModAddress: naynay.keyring.accounts.registration.address,
       programData: [{ program_pointer: pointer, program_config: '0x' }],
     })
   )
 
-  const fullAccount = entropy.keyring.getAccount()
-
-  t.equal(verifyingKey, fullAccount?.registration?.verifyingKeys?.[1], 'verifying key matches key added to registration account')
+  const fullAccount = naynay.keyring.getAccount()
+  t.equal(verifyingKey, fullAccount?.registration?.verifyingKeys?.[0], 'verifying key matches key added to registration account')
 
   t.end()
 })
