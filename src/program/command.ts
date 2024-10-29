@@ -115,7 +115,7 @@ function entropyProgramAdd () {
       await program.add({
         programPointer,
         programConfigPath,
-        verifyingKey: opts['verifying-key'] // WARNING: check this is working
+        verifyingKey: opts.verifyingKey
       })
 
       process.exit(0)
@@ -128,8 +128,6 @@ function entropyProgramRemove () {
     .alias('rm')
     .description('Remove a program from an account (specified by a verifyingKey)')
     .argument('<programPointer>', 'The pointer for the program you want to remove.')
-    .argument('<programPointer>', 'The pointer for the program interface.')
-    .argument('[programConfigPath]', 'The path to the config to apply to the program. Must be a .json file')
     .addOption(accountOption())
     .addOption(endpointOption())
     .addOption(verifyingKeyOption())
@@ -140,8 +138,8 @@ function entropyProgramRemove () {
 
       await program.remove({
         programPointer,
-        programModKey: opts['program-mod-key'],
-        verifyingKey: opts['verifying-key'] // WARNING: check this is working
+        programModKey: opts.programModKey,
+        verifyingKey: opts.verifyingKey
       })
 
       process.exit(0)

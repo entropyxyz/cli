@@ -29,7 +29,7 @@ export function versionOption () {
   ).argParser(() => version)
 }
 
-export function coreVersion () {
+export function coreVersionOption () {
   const coreVersion = process.env.ENTROPY_CORE_VERSION.split('-')[1]
 
   return new Option(
@@ -123,7 +123,10 @@ export function accountOption () {
 
 export function verifyingKeyOption () {
   return new Option(
-    '-vk, --verifying-key',
+    '-vk, --verifying-key <key>',
+    // WARNING: -vk seems to collide with -v (error: unknown option '-k')
+    //
+    // --verifying-key works though
     [
       'The verifying key to perform this function with.'
     ].join(' ')
@@ -132,7 +135,7 @@ export function verifyingKeyOption () {
 
 export function programModKeyOption () {
   return new Option(
-    '-pmk, --program-mod-key',
+    '-pmk, --program-mod-key <key>',
     [
       'The programModKey to perform this function with.'
     ].join(' ')

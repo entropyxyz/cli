@@ -4,7 +4,7 @@
 import { Command, Option } from 'commander'
 
 import { EntropyTuiOptions } from './types'
-import { coreVersion, loadEntropy, tuiEndpointOption, versionOption } from './common/utils-cli'
+import { coreVersionOption, loadEntropy, tuiEndpointOption, versionOption } from './common/utils-cli'
 import * as config from './config'
 
 import launchTui from './tui'
@@ -31,7 +31,8 @@ program
   )
   .addOption(tuiEndpointOption())
   .addOption(versionOption())
-  .addOption(coreVersion())
+  .addOption(coreVersionOption())
+
   .addCommand(entropyBalanceCommand())
   .addCommand(entropyAccountCommand())
   .addCommand(entropyTransferCommand())
