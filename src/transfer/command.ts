@@ -6,8 +6,8 @@ export function entropyTransferCommand () {
   const transferCommand = new Command('transfer')
   transferCommand
     .description('Transfer funds between two Entropy accounts.') // TODO: name the output
-    .argument('destination', 'Account address funds will be sent to')
-    .argument('amount', 'Amount of funds to be moved (in "tokens")')
+    .argument('<destination>', 'Account address funds will be sent to')
+    .argument('<amount>', 'Amount of funds to be moved (in "tokens")')
     .addOption(accountOption())
     .addOption(endpointOption())
     .action(async (destination, amount, opts) => {
