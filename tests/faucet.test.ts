@@ -75,7 +75,6 @@ async function setupAndFundFaucet (t) {
 
 test('Faucet Tests: Successfully send funds and register', async t => {
   const { faucetAddress, chosenVerifyingKey, faucetProgramPointer } = await setupAndFundFaucet(t)
-  console.log(('faucet set up'))
 
   const { run, endpoint, entropy: naynay } = await setupTest(t)
   const naynayAddress = naynay.keyring.accounts.registration.address
