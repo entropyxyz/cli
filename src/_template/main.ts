@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import Entropy from "@entropyxyz/sdk";
 import { EntropyBase } from "../common/entropy-base";
 
