@@ -16,7 +16,7 @@ import { EntropyBalance } from '../src/balance/main'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
 import { EntropyAccountData } from '../src/config/types'
 
-const networkType = 'two-nodes'
+const networkType = 'four-nodes'
 const endpoint = 'ws://127.0.0.1:9944'
 
 test('Transfer', async (t) => {

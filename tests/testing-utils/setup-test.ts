@@ -1,7 +1,10 @@
 import { Test } from 'tape'
 import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+
 // @ts-ignore
-import { spinNetworkUp, spinNetworkDown, } from "@entropyxyz/sdk/testing"
+import { spinNetworkUp, spinNetworkDown, jumpStartNetwork } from "@entropyxyz/sdk/testing"
 // @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
 
@@ -16,12 +19,19 @@ interface SetupTestOpts {
   endpoint?: string
   createAccountOnly?: boolean
 }
-const NETWORK_TYPE_DEFAULT = 'two-nodes'
-let counter = 0
+
+const NETWORK_TYPE_DEFAULT = 'four-nodes'
+let count = 0
+function uniqueConfigPath () {
+  return join(
+    tmpdir(),
+    `entropy-cli-${Date.now()}_${count++}.json`
+  )
+}
 
 export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entropy: Entropy; run: any; endpoint: string }> {
   const {
-    configPath = `/tmp/entropy-cli-${Date.now()}_${counter++}.json`,
+    configPath = uniqueConfigPath(),
     networkType = NETWORK_TYPE_DEFAULT,
     seed = makeSeed(),
     endpoint = 'ws://127.0.0.1:9944',

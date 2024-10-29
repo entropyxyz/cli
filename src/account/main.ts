@@ -7,7 +7,6 @@ import { FLOW_CONTEXT } from "./constants";
 import { AccountCreateParams, AccountImportParams, AccountRegisterParams } from "./types";
 
 import { EntropyBase } from "../common/entropy-base";
-import { formatDispatchError } from "../common/utils";
 import { EntropyAccountConfig, EntropyAccountConfigFormatted } from "../config/types";
 
 export class EntropyAccount extends EntropyBase {
@@ -69,30 +68,6 @@ export class EntropyAccount extends EntropyBase {
 
     this.logger.debug(`registering with params: ${registerParams}`, 'REGISTER')
     return this.entropy.register(registerParams)
-      // NOTE: if "register" fails for any reason, core currently leaves the chain in a "polluted"
-      // state. To fix this we manually "prune" the dirty registration transaction.
-      .catch(async error => {
-        await this.pruneRegistration()
-        throw error
-      })
-  }
-
-  /* PRIVATE */
-
-  private async pruneRegistration () {
-    return new Promise((resolve, reject) => {
-      this.entropy.substrate.tx.registry.pruneRegistration()
-        .signAndSend(this.entropy.keyring.accounts.registration.pair, ({ status, dispatchError }) => {
-          if (dispatchError) {
-            const error = formatDispatchError(this.entropy, dispatchError)
-            this.logger.error('There was an issue pruning registration', error)
-            return reject(error)
-          }
-          if (status.isFinalized) {
-            resolve(status)
-          }
-        })
-    })
   }
 }
 
