@@ -42,7 +42,7 @@ test('program', async t => {
       'adding program',
       program.add({
         programPointer: programPointer1,
-        programConfig: ''
+        programConfigPath: undefined
       })
     )
     const programsAfterAdd = await run('get programs after add', getPrograms())

@@ -21,9 +21,11 @@ export class EntropyProgram extends EntropyBase {
   // QUESTION: change the signature to "required + opts"?
   // i.e.
   // async add (programPointer, { programConfigPath, verifyingKey }): Promise<void> {
-    const programConfig = programConfigPath
-      ? await loadFile(programConfigPath, 'json')
-      : undefined
+    let programConfig = undefined
+    if (programConfigPath) {
+      const programConfigJson = await loadFile(programConfigPath, 'json')
+      programConfig = jsonToHex(programConfigJson)
+    }
 
     return this.entropy.programs.add(
       {
@@ -34,9 +36,10 @@ export class EntropyProgram extends EntropyBase {
     )
   }
 
-  async remove ({ programPointer, verifyingKey }: EntropyProgramRemoveParams): Promise<any> {
+  async remove ({ programPointer, programModKey, verifyingKey }: EntropyProgramRemoveParams): Promise<any> {
     return this.entropy.programs.remove(
       programPointer,
+      programModKey,
       verifyingKey
     )
   }

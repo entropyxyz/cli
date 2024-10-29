@@ -1,12 +1,17 @@
 import Entropy from "@entropyxyz/sdk"
 import inquirer from "inquirer"
-import { u8aToHex } from "@polkadot/util"
+import envPaths from "env-paths"
+import { join } from "node:path"
+import { writeFile } from "node:fs/promises"
+// import { u8aToHex } from "@polkadot/util"
 
 import { displayPrograms, addQuestions, getProgramPointerInput, verifyingKeyQuestion } from "./utils";
 import { EntropyProgram } from "./main";
 import { print } from "../common/utils"
 
 let verifyingKey: string;
+
+const paths = envPaths('entropy-cryptography', { suffix: '' })
 
 export async function entropyProgram (entropy: Entropy, endpoint: string) {
   const actionChoice = await inquirer.prompt([
@@ -71,14 +76,15 @@ export async function entropyProgram (entropy: Entropy, endpoint: string) {
     try {
       const { programPointerToAdd, programConfigJson } = await inquirer.prompt(addQuestions)
 
-      const encoder = new TextEncoder()
-      const byteArray = encoder.encode(programConfigJson)
-      const programConfigHex = u8aToHex(byteArray)
+      // NOTE: 'interaction' lets you use an editor to enter programConfigJSON (seems nice!).
+      // program.add expects a path (programConfigPath). I didn't want to make a sloppy API
+      // which supports maybe this maybe that, so instead write this json to a tmp file!
+      const tmpPath = join(paths.temp, `config-${Date.now()}.json`)
+      await writeFile(tmpPath, programConfigJson)
 
-      // WIP - broken, needs programConfigPath
       await program.add({
         programPointer: programPointerToAdd,
-        programConfig: programConfigHex
+        programConfigPath: tmpPath
       })
 
       print("Program added successfully.")
