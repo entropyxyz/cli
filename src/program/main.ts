@@ -39,7 +39,7 @@ export class EntropyProgram extends EntropyBase {
   async remove ({ programPointer, programModKey, verifyingKey }: EntropyProgramRemoveParams): Promise<any> {
     return this.entropy.programs.remove(
       programPointer,
-      programModKey,
+      programModKey || verifyingKey,
       verifyingKey
     )
   }

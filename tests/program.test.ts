@@ -1,4 +1,5 @@
 import test from 'tape'
+// @ts-expect-error
 import { jumpStartNetwork } from '@entropyxyz/sdk/testing'
 
 import { promiseRunner, eveSeed, setupTest } from './testing-utils'
