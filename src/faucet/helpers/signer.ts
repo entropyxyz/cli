@@ -43,7 +43,7 @@ export default class FaucetSigner implements Signer {
     const signature = await this.#entropy.sign({
       sigRequestHash: u8aToHex(raw),
       // @ts-ignore
-      hash: { custom: 0 }, // TODO: hash should be a string? why is this an object?
+      hash: { custom: 0 }, // NOTE: this is the custom hashing algo used for the faucet program.
       auxiliaryData: [auxData],
       signatureVerifyingKey: this.chosenVerifyingKey
     })

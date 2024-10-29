@@ -1,8 +1,9 @@
 import test from 'tape'
 import { readFileSync } from 'fs'
+// @ts-expect-error : type export...
+import { jumpStartNetwork } from '@entropyxyz/sdk/testing'
 
 import { eveSeed, setupTest } from './testing-utils'
-import { jumpStartNetwork } from '@entropyxyz/sdk/testing'
 import { stripHexPrefix } from '../src/common/utils'
 import { EntropyBalance } from '../src/balance/main'
 import { EntropyTransfer } from '../src/transfer/main'
@@ -38,13 +39,12 @@ async function setupAndFundFaucet (t) {
   const faucetProgramPointer = await run(
     'Deploy faucet program',
      entropy.programs.dev.deploy(faucetProgram, configurationSchema, auxDataSchema)
-)
+  )
 
-  // Confirm faucetPointer matches deployed program pointer
-  // TODO: when we re-deploy the testnet we should record the schema that got deployed, and the
-  // hash, and use those here
-  const LOCAL_PROGRAM_HASH = '0x55e250f4031546d15c6491c3610d58ca1a74e216b4bd612b42aed8f56b05b559'
-  t.equal(faucetProgramPointer, LOCAL_PROGRAM_HASH, 'Program pointer matches')
+  const POINTER = '0x3a1d45fecdee990925286ccce71f78693ff2bb27eae62adf8cfb7d3d61e142aa'
+  // TODO: record the schema deployed to testnet for faucet, as this will help
+  // us have a deterministic pointer (which we can test against)
+  t.equal(faucetProgramPointer, POINTER, 'Program pointer matches')
 
   // Register with faucet program
   const genesisHash = await entropy.substrate.rpc.chain.getBlockHash(0)
