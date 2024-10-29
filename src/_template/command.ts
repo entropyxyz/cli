@@ -1,8 +1,8 @@
 import { Command } from "commander"
+
 import { EntropyDance } from "./main"
 import { loadByteCode, loadDanceConfig } from "./utils"
-
-import { accountOption, endpointOption, loadEntropy, cliWrite } from "../common/utils-cli"
+import { accountOption, endpointOption, cliWrite } from "../common/utils-cli"
 
 /*
   This file is responsible for building up the commands related to our domain

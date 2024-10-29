@@ -7,7 +7,3 @@ export const FAUCET_PROGRAM_MOD_KEY = '5GWamxgW4XWcwGsrUynqnFq2oNZPqNXQhMDfgNH9x
 // this is differnt from tests because the fauce that is live now was lazily deployed without schemas
 // TO-DO: update this when faucet is deployed properly 
 export const TESTNET_PROGRAM_HASH = '0x12af0bd1f2d91f12e34aeb07ea622c315dbc3c2bdc1e25ff98c23f1e61106c77'
-// Hash with max send of 1e10
-// export const LOCAL_PROGRAM_HASH = '0x5fa0536818acaa380b0c349c8e887bf269d593a47e30c8e31de53a75d327f7b1'
-// Hash with max send of 2e10
-export const LOCAL_PROGRAM_HASH = '0x2eaf750c4fa0fe125ca8a9d4037c0c0608b57ae70d6586dc6acdfcb4e9872deb'
