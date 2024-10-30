@@ -4,8 +4,6 @@ import { findAccountByAddressOrName, stringify } from './utils'
 import * as config from '../config'
 import { initializeEntropy } from './initializeEntropy'
 
-const entropyPackage = require('../../package.json')
-
 export function cliWrite (result) {
   const prettyResult = stringify(result, 0)
   process.stdout.write(prettyResult)
@@ -20,24 +18,6 @@ function getConfigOrNull () {
   }
 }
 
-export function versionOption () {
-  const { version } = entropyPackage
-
-  return new Option(
-    '-v, --version',
-    'Displays the current running version of Entropy CLI'
-  ).argParser(() => version)
-}
-
-export function coreVersion () {
-  const coreVersion = process.env.ENTROPY_CORE_VERSION.split('-')[1]
-
-  return new Option(
-    '-cv, --core-version',
-    'Displays the current running version of the Entropy Protocol'
-  ).argParser(() => coreVersion)
-}
-
 export function endpointOption () {
   return new Option(
     '-e, --endpoint <url>',
@@ -47,31 +27,6 @@ export function endpointOption () {
     ].join(' ')
   )
     .env('ENTROPY_ENDPOINT')
-    .argParser(aliasOrEndpoint => {
-      /* see if it's a raw endpoint */
-      if (aliasOrEndpoint.match(/^wss?:\/\//)) return aliasOrEndpoint
-
-      /* look up endpoint-alias */
-      const storedConfig = getConfigOrNull()
-      const endpoint = storedConfig?.endpoints?.[aliasOrEndpoint]
-      if (!endpoint) throw Error('unknown endpoint alias: ' + aliasOrEndpoint)
-
-      return endpoint
-    })
-    .default('wss://testnet.entropy.xyz/')
-    // NOTE: default cannot be "test-net" as argParser only runs if the -e/--endpoint flag
-    // or ENTROPY_ENDPOINT env set
-}
-
-export function tuiEndpointOption () {
-  return new Option(
-    '-et, --tui-endpoint <url>',
-    [
-      'Runs entropy with the given endpoint and ignores network endpoints in config.',
-      'Can also be given a stored endpoint name from config eg: `entropy --endpoint test-net`.'
-    ].join(' ')
-  )
-    .env('ENTROPY_TUI_ENDPOINT')
     .argParser(aliasOrEndpoint => {
       /* see if it's a raw endpoint */
       if (aliasOrEndpoint.match(/^wss?:\/\//)) return aliasOrEndpoint

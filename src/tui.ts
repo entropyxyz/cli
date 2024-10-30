@@ -1,10 +1,13 @@
+import { Command, Option } from 'commander'
 import inquirer from 'inquirer'
 import Entropy from '@entropyxyz/sdk'
+import yoctoSpinner from 'yocto-spinner'
+
 import * as config from './config'
 import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
 import { jumpStartNetwork, print } from './common/utils'
-import { loadEntropy } from './common/utils-cli'
+import { loadEntropy, accountOption, endpointOption } from './common/utils-cli'
 import { EntropyLogger } from './common/logger'
 
 import { entropyAccount, entropyRegister } from './account/interaction'
@@ -13,21 +16,49 @@ import { entropyBalance } from './balance/interaction'
 import { entropyTransfer } from './transfer/interaction'
 import { entropyFaucet } from './faucet/interaction'
 import { entropyProgram, entropyProgramDev } from './program/interaction'
-import yoctoSpinner from 'yocto-spinner'
 
-async function setupConfig () {
-  let storedConfig = await config.get()
+const packageVersion = 'v' + require('../package.json').version
+const coreVersion = process.env.ENTROPY_CORE_VERSION.split('-')[1]
 
-  // set selectedAccount if we can
-  if (!storedConfig.selectedAccount && storedConfig.accounts.length) {
-    storedConfig = await config.setSelectedAccount(storedConfig.accounts[0])
-  }
+export function entropyTuiCommand () {
+  return new Command('tui')
+    .description('An interactive Text User Interface (TUI), a nice entry point for learning.')
 
-  return storedConfig
+    .option('-v, --version', 'Displays the current running version of Entropy CLI')
+    .option('-cv, --core-version', 'Displays the current running version of the Entropy Protocol')
+    .addOption(accountOption())
+    .addOption(endpointOption())
+    .addOption(
+      new Option(
+        '-d, --dev',
+        'Runs entropy in a developer mode uses the dev endpoint as the main endpoint and allows for faucet option to be available in the main menu'
+      )
+        .env('DEV_MODE')
+        .hideHelp()
+    )
+
+    .action(async (opts: EntropyTuiOptions) => {
+      if (opts.version) {
+        print(packageVersion)
+        process.exit(0)
+      }
+      if (opts.coreVersion) {
+        print(coreVersion)
+        process.exit(0)
+      }
+
+      const { account, endpoint } = opts
+      const entropy = account
+        ? await loadEntropy(account, endpoint)
+        : undefined
+        // NOTE: on initial startup you have no account
+
+      launchTui(entropy, opts)
+    })
 }
 
 // tui = text user interface
-export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
+function launchTui (entropy: Entropy, options: EntropyTuiOptions) {
   const logger = new EntropyLogger('TUI', options.endpoint)
   console.clear()
   console.log(logo) // the Entropy logo
@@ -59,7 +90,18 @@ export default function tui (entropy: Entropy, options: EntropyTuiOptions) {
 
   main(entropy, choices, options, logger)
 }
+
 const loader = yoctoSpinner()
+async function setupConfig () {
+  let storedConfig = await config.get()
+
+  // set selectedAccount if we can
+  if (!storedConfig.selectedAccount && storedConfig.accounts.length) {
+    storedConfig = await config.setSelectedAccount(storedConfig.accounts[0])
+  }
+
+  return storedConfig
+}
 
 async function main (entropy: Entropy, choices: string[], options: EntropyTuiOptions, logger: EntropyLogger) {
   if (loader.isSpinning) loader.stop()
