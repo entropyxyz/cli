@@ -22,7 +22,7 @@ const coreVersion = process.env.ENTROPY_CORE_VERSION.split('-')[1]
 
 export function entropyTuiCommand () {
   return new Command('tui')
-    .description('An interactive Text User Interface (TUI), a nice entry point for learning.')
+    .description('TUI (text user interface) for interacting with entropy.xyz. A good place to start.')
 
     .option('-v, --version', 'Displays the current running version of Entropy CLI')
     .option('-cv, --core-version', 'Displays the current running version of the Entropy Protocol')
@@ -55,6 +55,11 @@ export function entropyTuiCommand () {
 
       launchTui(entropy, opts)
     })
+}
+
+export function tuiHelp () {
+  return entropyTuiCommand().helpInformation()
+    .replace('Usage: tui', 'Usage: entropy')
 }
 
 // tui = text user interface
