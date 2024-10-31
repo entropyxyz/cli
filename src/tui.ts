@@ -17,15 +17,10 @@ import { entropyTransfer } from './transfer/interaction'
 import { entropyFaucet } from './faucet/interaction'
 import { entropyProgram, entropyProgramDev } from './program/interaction'
 
-const packageVersion = 'v' + require('../package.json').version
-const coreVersion = process.env.ENTROPY_CORE_VERSION.split('-')[1]
-
 export function entropyTuiCommand () {
   return new Command('tui')
-    .description('TUI (text user interface) for interacting with entropy.xyz. A good place to start.')
+    .description('Text-based User Interface (interactive)')
 
-    .option('-v, --version', 'Displays the current running version of Entropy CLI')
-    .option('-cv, --core-version', 'Displays the current running version of the Entropy Protocol')
     .addOption(accountOption())
     .addOption(endpointOption())
     .addOption(
@@ -36,34 +31,17 @@ export function entropyTuiCommand () {
         .env('DEV_MODE')
         .hideHelp()
     )
-
-    .action(async (opts: EntropyTuiOptions) => {
-      if (opts.version) {
-        print(packageVersion)
-        process.exit(0)
-      }
-      if (opts.coreVersion) {
-        print(coreVersion)
-        process.exit(0)
-      }
-
-      const { account, endpoint } = opts
-      const entropy = account
-        ? await loadEntropy(account, endpoint)
-        : undefined
-        // NOTE: on initial startup you have no account
-
-      launchTui(entropy, opts)
-    })
-}
-
-export function tuiHelp () {
-  return entropyTuiCommand().helpInformation()
-    .replace('Usage: tui', 'Usage: entropy')
+    .action(tuiAction)
 }
 
 // tui = text user interface
-function launchTui (entropy: Entropy, options: EntropyTuiOptions) {
+export async function tuiAction (options: EntropyTuiOptions) {
+  const { account, endpoint } = options
+  const entropy = account
+    ? await loadEntropy(account, endpoint)
+    : undefined
+    // NOTE: on initial startup you have no account
+
   const logger = new EntropyLogger('TUI', options.endpoint)
   console.clear()
   console.log(logo) // the Entropy logo
