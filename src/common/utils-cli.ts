@@ -78,10 +78,7 @@ export function accountOption () {
 
 export function verifyingKeyOption () {
   return new Option(
-    '-vk, --verifying-key <key>',
-    // WARNING: -vk seems to collide with -v (error: unknown option '-k')
-    //
-    // --verifying-key works though
+    '-k, --verifying-key <key>',
     [
       'The verifying key to perform this function with.'
     ].join(' ')
@@ -90,7 +87,7 @@ export function verifyingKeyOption () {
 
 export function programModKeyOption () {
   return new Option(
-    '-pmk, --program-mod-key <key>',
+    '-p, --program-mod-key <key>',
     [
       'The programModKey to perform this function with.'
     ].join(' ')
