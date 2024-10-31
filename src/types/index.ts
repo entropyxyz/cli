@@ -1,7 +1,10 @@
 export interface EntropyTuiOptions {
   account: string
   endpoint: string
+  tuiEndpoint: string
   dev: boolean
+  version: string
+  coreVersion: string
 }
 
 type EntropyLoggerLogLevel = 'error' | 'warn' | 'info' | 'debug'

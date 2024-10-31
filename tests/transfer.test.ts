@@ -10,12 +10,13 @@ import {
 } from './testing-utils'
 
 import { initializeEntropy } from '../src/common/initializeEntropy'
+import { BITS_PER_TOKEN } from "../src/common/constants";
 import { EntropyTransfer } from '../src/transfer/main'
 import { EntropyBalance } from '../src/balance/main'
 import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
 import { EntropyAccountData } from '../src/config/types'
 
-const networkType = 'two-nodes'
+const networkType = 'four-nodes'
 const endpoint = 'ws://127.0.0.1:9944'
 
 test('Transfer', async (t) => {
@@ -70,7 +71,7 @@ test('Transfer', async (t) => {
     'getBalance (naynay)',
     balanceService.getBalance(naynayAddress)
   )
-  const expected = Number(inputAmount) * 1e10
+  const expected = Number(inputAmount) * BITS_PER_TOKEN
   t.equal(naynayBalance, expected,'naynay is rolling in it!')
 
   t.end()

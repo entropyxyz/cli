@@ -55,7 +55,10 @@ export class EntropySign extends EntropyBase {
       const signatureHexString = u8aToHex(signature)
       this.logger.log(`Signature: ${signatureHexString}`)
 
-      return { signature: signatureHexString, verifyingKey: this.entropy.signingManager.verifyingKey }
+      return {
+        signature: signatureHexString,
+        verifyingKey: this.entropy.signingManager.verifyingKey
+      }
     } catch (error) {
       this.logger.error('Error signing message', error)
       throw error
