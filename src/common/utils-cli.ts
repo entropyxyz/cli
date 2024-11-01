@@ -76,6 +76,24 @@ export function accountOption () {
     .default(storedConfig?.selectedAccount)
 }
 
+export function verifyingKeyOption () {
+  return new Option(
+    '-k, --verifying-key <key>',
+    [
+      'The verifying key to perform this function with.'
+    ].join(' ')
+  )
+}
+
+export function programModKeyOption () {
+  return new Option(
+    '-p, --program-mod-key <key>',
+    [
+      'The programModKey to perform this function with.'
+    ].join(' ')
+  )
+}
+
 export async function loadEntropy (addressOrName: string, endpoint: string): Promise<Entropy> {
   const accounts = getConfigOrNull()?.accounts || []
   const selectedAccount = findAccountByAddressOrName(accounts, addressOrName)
