@@ -23,7 +23,7 @@ printf "
 
 # Check each alias
 for ALIAS in "${ALIASES[@]}"; do
-  resolved_ip=$(getent hosts "$ALIAS" | awk '{ print $1 }')
+  resolved_ip=$(grep "$ALIAS" /etc/hosts | awk '{ print $1 }')
 
   if [ "$resolved_ip" == "$EXPECTED_IP" ]; then
     printf "   ${GREEN}✓${NC} ${ALIAS}\n"
