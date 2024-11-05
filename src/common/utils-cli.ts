@@ -1,6 +1,6 @@
 import Entropy from '@entropyxyz/sdk'
 import { Option } from 'commander'
-import { findAccountByAddressOrName, stringify } from './utils'
+import { findAccountByAddressOrName, print, stringify } from './utils'
 import * as config from '../config'
 import { initializeEntropy } from './initializeEntropy'
 
@@ -57,6 +57,16 @@ export function accountOption () {
     .argParser(addressOrName => {
       // We try to map addressOrName to an account we have stored
       if (!storedConfig) return addressOrName
+
+      const availableAccounts = {}
+      storedConfig.accounts.forEach(acct => availableAccounts[acct.name] = acct.address)
+      if (!Object.keys(availableAccounts).includes(addressOrName) || !Object.values(availableAccounts).includes(addressOrName)) {
+        print('=============AVAILABLE ACCOUNTS==============')
+        print(availableAccounts)
+        print('=============================================\n')
+        console.error(`AccountError: [${addressOrName}] is not a valid argument for the account option. Please use one of the aliases or addresses as shown above\n`)
+        process.exit(1)
+      }
 
       const account = findAccountByAddressOrName(storedConfig.accounts, addressOrName)
       if (!account) return addressOrName
