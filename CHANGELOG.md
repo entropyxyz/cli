@@ -15,14 +15,17 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 ### Added
 
 - programmatic CLI commands
+  - changed: `entropy` now list help for commands you could launch
   - new: `entropy account create`
   - new: `entropy account import`
   - new: `entropy account list`
   - new: `entropy account register`
   - new: `entropy program deploy`
-  - new: option to display cli and core version
+  - new: `entropy -v` or `entropy --version` displays CLI version
+  - new: `entropy -cv` or `entropy --core-version` displays entropy core version
 
 - TUI
+  - added: `entropy tui` - this is now the default way to launch the TUI
   - new: added faucet to main menu for TUI
   - updated faucet to use loading spinner to indicate to user the progress of the transfer
   - new: menu item to trigger a jumpstart to the network (needs to be run once for fresh test networks)
@@ -94,6 +97,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
   - changed env: `ENDPOINT` => `ENTROPY_ENDPOINT`
 
 - for TUI
+  - `entropy` now displays help, must now use `entropy tui` to launch TUI
   - "endpoint" configuration has changed
     - see `entropy --help`
       - change flag: `--endpoint` => `--tui-endpiont`
