@@ -24,11 +24,20 @@ export async function entropySign (entropy: Entropy, endpoint: string) {
   //   return
   // }
   // case 'Sign With Adapter': {
-  const { msg } = await getMsgFromUser(inquirer)
-  const { signature, verifyingKey } = await signingService.signMessageWithAdapters({ msg })
-  print('msg to be signed:', msg)
-  print('verifying key:', verifyingKey)
-  print('signature:', signature)
+  try {
+    const { msg } = await getMsgFromUser(inquirer)
+    const { signature, verifyingKey } = await signingService.signMessageWithAdapters({ msg })
+    print('msg to be signed:', msg)
+    print('verifying key:', verifyingKey)
+    print('signature:', signature)
+    return
+  } catch (error) {
+    if (!entropy.signingManager.verifyingKey) {
+      console.error('Please register your Entropy account before signing');
+      return 'exit'
+    }
+    throw error
+  }
   //  return
   // }
   // case 'Exit to Main Menu': 

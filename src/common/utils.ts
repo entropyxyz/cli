@@ -1,5 +1,7 @@
+import { Entropy } from '@entropyxyz/sdk'
 import { Buffer } from 'buffer'
 import { EntropyAccountConfig } from "../config/types"
+import { EntropyLogger } from './logger'
 
 export function stripHexPrefix (str: string): string {
   if (str.startsWith('0x')) return str.slice(2)
@@ -72,4 +74,38 @@ export function findAccountByAddressOrName (accounts: EntropyAccountConfig[], al
     accounts.find(account => account.address === aliasOrAddress) ||
     accounts.find(account => account.name === aliasOrAddress)
   )
+}
+
+export function formatDispatchError (entropy: Entropy, dispatchError) {
+  let msg: string
+  if (dispatchError.isModule) {
+    // for module errors, we have the section indexed, lookup
+    const decoded = entropy.substrate.registry.findMetaError(
+      dispatchError.asModule
+    )
+    const { docs, name, section } = decoded
+
+    msg = `${section}.${name}: ${docs.join(' ')}`
+  } else {
+    // Other, CannotLookup, BadOrigin, no extra info
+    msg = dispatchError.toString()
+  }
+
+  return Error(msg)
+}
+
+export async function jumpStartNetwork (entropy, endpoint): Promise<any> {
+  const logger = new EntropyLogger('JUMPSTART_NETWORK', endpoint)
+  return new Promise((resolve, reject) => {
+    entropy.substrate.tx.registry.jumpStartNetwork()
+      .signAndSend(entropy.keyring.accounts.registration.pair, ({ status, dispatchError }) => {
+        if (dispatchError) {
+          const error = formatDispatchError(entropy, dispatchError)
+          logger.error('There was an issue jump starting the network', error)
+          return reject(error)
+        }
+
+        if (status.isFinalized) resolve(status)
+      })
+  })
 }
