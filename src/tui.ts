@@ -1,12 +1,13 @@
+import { Command, Option } from 'commander'
 import inquirer from 'inquirer'
 import Entropy from '@entropyxyz/sdk'
+import yoctoSpinner from 'yocto-spinner'
+
 import * as config from './config'
-import { CONFIG_PATH_DEFAULT } from './config'
 import { EntropyTuiOptions } from './types'
 import { logo } from './common/ascii'
-import { print } from './common/utils'
-import { ENTROPY_ENDPOINT_DEFAULT } from './common/constants'
-import { loadEntropy } from './common/utils-cli'
+import { jumpStartNetwork, print } from './common/utils'
+import { loadEntropy, accountOption, endpointOption, configOption } from './common/utils-cli'
 import { EntropyLogger } from './common/logger'
 
 import { entropyAccount, entropyRegister } from './account/interaction'
@@ -16,27 +17,39 @@ import { entropyTransfer } from './transfer/interaction'
 import { entropyFaucet } from './faucet/interaction'
 import { entropyProgram, entropyProgramDev } from './program/interaction'
 
-// tui = text user interface
-export default async function tui (opts: EntropyTuiOptions) {
-  const options = {
-    ...opts,
-    config: CONFIG_PATH_DEFAULT,
-    endpoint: ENTROPY_ENDPOINT_DEFAULT
-  }
+export function entropyTuiCommand () {
+  return new Command('tui')
+    .description('Text-based User Interface (interactive)')
 
-  const logger = new EntropyLogger('TUI', options.endpoint)
+    .addOption(accountOption())
+    .addOption(endpointOption())
+    .addOption(configOption())
+    .addOption(
+      new Option(
+        '-d, --dev',
+        'Runs entropy in a developer mode uses the dev endpoint as the main endpoint and allows for faucet option to be available in the main menu'
+      )
+        .env('DEV_MODE')
+        .hideHelp()
+    )
+    .action(tuiAction)
+}
+
+// tui = text user interface
+export async function tuiAction (opts: EntropyTuiOptions) {
+  const logger = new EntropyLogger('TUI', opts.endpoint)
   console.clear()
   console.log(logo) // the Entropy logo
-  logger.debug(options)
+  logger.debug(opts)
 
-  const storedConfig = await setupConfig(options.config)
+  const storedConfig = await setupConfig(opts.config)
   const entropy = await loadEntropy({
     account: storedConfig.selectedAccount,
     config: storedConfig,
-    endpoint: options.endpoint
+    endpoint: opts.endpoint
   })
 
-  const choices = [
+  let choices = [
     'Manage Accounts',
     'Entropy Faucet',
     'Balance',
@@ -46,13 +59,24 @@ export default async function tui (opts: EntropyTuiOptions) {
     // TODO: design programs in TUI (merge deploy+user programs)
     'Deploy Program',
     'User Programs',
-    'Exit'
   ]
 
+  const devChoices = [
+    'Jumpstart Network',
+    // 'Create and Fund Faucet(s)'
+  ]
 
-  main(entropy, choices, options, logger)
+  if (opts.dev) {
+    choices = [...choices, ...devChoices]
+  }
+
+  // assign exit so its last
+  choices = [...choices, 'Exit']
+
+  main(entropy, choices, opts, logger)
 }
 
+const loader = yoctoSpinner()
 async function setupConfig (configPath) {
   let storedConfig = await config.get(configPath)
 
@@ -65,6 +89,7 @@ async function setupConfig (configPath) {
 }
 
 async function main (entropy: Entropy, choices, options, logger: EntropyLogger) {
+  if (loader.isSpinning) loader.stop()
   const storedConfig = await setupConfig(options.config)
 
   // Entropy is undefined on initial install
@@ -110,26 +135,26 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
 
     switch (answers.choice) {
     case 'Manage Accounts': {
-      const response = await entropyAccount(options.endpoint, storedConfig)
+      const response = await entropyAccount(options.tuiEndpoint, storedConfig)
       if (response === 'exit') { returnToMain = true }
       break
     }
     case 'Register': {
-      await entropyRegister(entropy, options.endpoint, storedConfig)
+      await entropyRegister(entropy, options.tuiEndpoint, storedConfig)
       break
     }
     case 'Balance': {
-      await entropyBalance(entropy, options.endpoint, storedConfig)
+      await entropyBalance(entropy, options.tuiEndpoint, storedConfig)
         .catch(err => console.error('There was an error retrieving balance', err))
       break
     }
     case 'Transfer': {
-      await entropyTransfer(entropy, options.endpoint)
+      await entropyTransfer(entropy, options.tuiEndpoint)
         .catch(err => console.error('There was an error sending the transfer', err))
       break
     }
     case 'Sign': {
-      await entropySign(entropy, options.endpoint)
+      await entropySign(entropy, options.tuiEndpoint)
         .catch(err => console.error('There was an issue with signing', err))
       break
     }
@@ -142,17 +167,43 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
       break
     }
     case 'User Programs': {
-      await entropyProgram(entropy, options.endpoint)
+      await entropyProgram(entropy, options.tuiEndpoint)
         .catch(err => console.error('There was an error with programs', err))
       break
     }
     case 'Deploy Program': {
-      await entropyProgramDev(entropy, options.endpoint)
+      await entropyProgramDev(entropy, options.tuiEndpoint)
         .catch(err => console.error('There was an error with program dev', err))
       break
     }
+    case 'Jumpstart Network': {
+      // TO-DO: possibly move this to it's own directory similar to the other actions
+      // could create a new system directory for system/network level functionality
+      // i.e jumpstarting, deploy faucet, etc.
+      loader.text = 'Jumpstarting Network...'
+      try {
+        loader.start()
+        const jumpStartStatus = await jumpStartNetwork(entropy, options.tuiEndpoint)
+
+        if (jumpStartStatus.isFinalized) {
+          loader.clear()
+          loader.success('Network jumpstarted!')
+          // running into an issue where the loader displays the success message but the return to main menu
+          // prompt does not display, so for now exiting process
+          process.exit(0)
+        }
+      } catch (error) {
+        loader.text = 'Jumpstart Failed'
+        loader.stop()
+        loader.clear()
+        console.error('There was an issue jumpstarting the network', error);
+        process.exit(1)
+      }
+      break
+    }
     default: {
-      throw Error(`unsupported choice: ${answers.choice}`)
+      console.error('Unsupported Action:' + answers.choice)
+      break
     }
     }
   }

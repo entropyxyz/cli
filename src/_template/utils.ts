@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { PROMPT } from "./constants"
 
 export async function loadByteCode (path) {

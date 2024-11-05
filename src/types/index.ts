@@ -1,9 +1,7 @@
 export interface EntropyTuiOptions {
-  /*
-   * NOTE: we can't currently set account, endpoint, see cli.ts notes
-   */
-  // account: string
-  // endpoint: string
+  account: string
+  endpoint: string
+  config: string
   dev: boolean
 }
 

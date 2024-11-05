@@ -80,6 +80,24 @@ export async function loadEntropy (options: {
   return entropy
 }
 
+export function verifyingKeyOption () {
+  return new Option(
+    '-k, --verifying-key <key>',
+    [
+      'The verifying key to perform this function with.'
+    ].join(' ')
+  )
+}
+
+export function programModKeyOption () {
+  return new Option(
+    '-p, --program-mod-key <key>',
+    [
+      'The programModKey to perform this function with.'
+    ].join(' ')
+  )
+}
+
 function parseEndpointOption (config: EntropyConfig, aliasOrEndpoint: string) {
   // if raw endpoint
   if (aliasOrEndpoint.match(/^wss?:\/\//)) {

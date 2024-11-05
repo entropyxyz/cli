@@ -17,7 +17,16 @@ export class EntropyProgram extends EntropyBase {
 
   // User Methods:
 
-  async add ({ programPointer, programConfig, verifyingKey }: EntropyProgramAddParams): Promise<void> {
+  async add ({ programPointer, programConfigPath, verifyingKey }: EntropyProgramAddParams): Promise<void> {
+  // QUESTION: change the signature to "required + opts"?
+  // i.e.
+  // async add (programPointer, { programConfigPath, verifyingKey }): Promise<void> {
+    let programConfig = undefined
+    if (programConfigPath) {
+      const programConfigJson = await loadFile(programConfigPath, 'json')
+      programConfig = jsonToHex(programConfigJson)
+    }
+
     return this.entropy.programs.add(
       {
         program_pointer: programPointer,
@@ -27,9 +36,10 @@ export class EntropyProgram extends EntropyBase {
     )
   }
 
-  async remove ({ programPointer, verifyingKey }: EntropyProgramRemoveParams): Promise<any> {
+  async remove ({ programPointer, programModKey, verifyingKey }: EntropyProgramRemoveParams): Promise<any> {
     return this.entropy.programs.remove(
       programPointer,
+      programModKey || verifyingKey,
       verifyingKey
     )
   }
@@ -55,13 +65,13 @@ export class EntropyProgram extends EntropyBase {
 
   async get (programPointer: string): Promise<any> {
     this.logger.debug(`program pointer: ${programPointer}`, `${FLOW_CONTEXT}::PROGRAM_PRESENCE_CHECK`);
-    return this.entropy.programs.dev.getProgramInfo(programPointer)
+    return this.entropy.programs.dev.get(programPointer)
   }
 
   async listDeployed () {
+    // QUESTION: does the CLI ever want to take in an address?
     const address = this.entropy.keyring.accounts.registration.address
-    // QUESTION: will we always be wanting this address?
-    return this.entropy.programs.dev.get(address)
+    return this.entropy.programs.dev.getByDeployer(address)
   }
 }
 

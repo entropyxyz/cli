@@ -5,7 +5,7 @@ import { EntropySign } from './main'
 export function entropySignCommand () {
   const signCommand = new Command('sign')
     .description('Sign a message using the Entropy network. Output is a JSON { verifyingKey, signature }')
-    .argument('msg', 'Message you would like to sign (string)')
+    .argument('<msg>', 'Message you would like to sign (string)')
     .addOption(accountOption())
     .addOption(configOption())
     .addOption(endpointOption())

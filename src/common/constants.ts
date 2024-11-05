@@ -1,4 +1,8 @@
-
-
-export const ENTROPY_ENDPOINT_DEFAULT = 'ws://testnet.entropy.xyz:9944/'
-// TODO: update this to be wss?
+export const ENTROPY_ENDPOINT_DEFAULT = 'wss://testnet.entropy.xyz:9944/'
+/* 
+  A "bit" is the smallest indivisible unit of account value we track.
+  A "token" is the human readable unit of value value
+  This constant is then "the number of bits that make up 1 token", or said differently
+  "how many decimal places our token has".
+*/
+export const BITS_PER_TOKEN = 1e10

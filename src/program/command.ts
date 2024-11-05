@@ -1,18 +1,25 @@
 import { Command } from 'commander'
 
 import { EntropyProgram } from './main'
-import { accountOption, configOption, endpointOption, cliWrite, loadEntropy } from '../common/utils-cli'
+import {
+  accountOption, endpointOption, configOption, verifyingKeyOption, programModKeyOption,
+  cliWrite, loadEntropy
+} from '../common/utils-cli'
+
+async function programService (opts) {
+  const entropy = await loadEntropy(opts)
+  return new EntropyProgram(entropy, opts.endpoint)
+}
 
 export function entropyProgramCommand () {
   return new Command('program')
     .description('Commands for working with programs deployed to the Entropy Network')
     .addCommand(entropyProgramDeploy())
-    // TODO:
-    // .addCommand(entropyProgramGet())
-    // .addCommand(entropyProgramListDeployed())
-    // .addCommand(entropyProgramAdd())
-    // .addCommand(entropyProgramRemove())
-    // .addCommand(entropyProgramList())
+    .addCommand(entropyProgramGet())
+    .addCommand(entropyProgramListDeployed())
+    .addCommand(entropyProgramAdd())
+    .addCommand(entropyProgramRemove())
+    .addCommand(entropyProgramList())
 }
 
 function entropyProgramDeploy () {
@@ -22,21 +29,21 @@ function entropyProgramDeploy () {
       'Requires funds.'
     ].join(' '))
     .argument(
-      'bytecode', 
+      '<bytecode>', 
       [
         'The path to your program bytecode.',
         'Must be a .wasm file.'
       ].join(' ')
     )
     .argument(
-      'configurationSchema',
+      '<configurationSchema>',
       [
         'The path to the JSON Schema for validating configurations passed in by users installing this program.',
         'Must be a .json file.'
       ].join(' ')
     )
     .argument(
-      'auxillaryDataSchema',
+      '<auxillaryDataSchema>',
       [
         'The path to the JSON Schema for validating auxillary data passed to the program on calls to "sign".',
         'Must be a .json file.'
@@ -47,8 +54,7 @@ function entropyProgramDeploy () {
     .addOption(endpointOption())
 
     .action(async (bytecodePath, configurationSchemaPath, auxillaryDataSchemaPath, opts) => { // eslint-disable-line
-      const entropy = await loadEntropy(opts)
-      const program = new EntropyProgram(entropy, opts.endpoint)
+      const program = await programService(opts)
 
       const pointer = await program.deploy({
         bytecodePath,
@@ -59,4 +65,102 @@ function entropyProgramDeploy () {
 
       process.exit(0)
     })
+}
+
+function entropyProgramGet () {
+  return new Command('get')
+    .description('Get a program interface by it\'s pointer.')
+    .argument('programPointer', 'The pointer for the program interface.')
+    .addOption(accountOption())
+    .addOption(endpointOption())
+
+    .action(async (programPointer, opts) => { // eslint-disable-line
+      const program = await programService(opts)
+
+      const programInterface = await program.get(programPointer)
+      cliWrite(programInterface)
+
+      process.exit(0)
+    })
+}
+
+function entropyProgramListDeployed () {
+  // QUESTION - don't really like the camelCase here, what do we reckon?
+  return new Command('listDeployed')
+    .description('Get a list of all programs the current account has deployed')
+    .addOption(accountOption())
+    .addOption(endpointOption())
+
+    .action(async (opts) => { // eslint-disable-line
+      const program = await programService(opts)
+
+      const list = await program.listDeployed()
+      cliWrite(list)
+
+      process.exit(0)
+    })
+}
+
+function entropyProgramAdd () {
+  return new Command('add')
+    .description('Add a program to the current account')
+    .argument('<programPointer>', 'The pointer for the program interface.')
+    .argument('[programConfigPath]', 'The path to the config to apply to the program. Must be a .json file')
+    .addOption(accountOption())
+    .addOption(endpointOption())
+    .addOption(verifyingKeyOption())
+
+    .action(async (programPointer, programConfigPath, opts) => { // eslint-disable-line
+      const program = await programService(opts)
+
+      await program.add({
+        programPointer,
+        programConfigPath,
+        verifyingKey: opts.verifyingKey
+      })
+
+      process.exit(0)
+    })
+}
+
+
+function entropyProgramRemove () {
+  return new Command('remove')
+    .alias('rm')
+    .description('Remove a program from an account (specified by a verifyingKey)')
+    .argument('<programPointer>', 'The pointer for the program you want to remove.')
+    .addOption(accountOption())
+    .addOption(endpointOption())
+    .addOption(verifyingKeyOption())
+    .addOption(programModKeyOption())
+
+    .action(async (programPointer, opts) => { // eslint-disable-line
+      const program = await programService(opts)
+
+      await program.remove({
+        programPointer,
+        programModKey: opts.programModKey,
+        verifyingKey: opts.verifyingKey
+      })
+
+      process.exit(0)
+    })
+}
+
+function entropyProgramList () {
+  return new Command('list')
+    .alias('ls')
+    .description('List all the programs (an associated config) added to a particular verifyingKey.')
+    .argument('<verifyingKey>', 'The verifyingKey being queried.')
+    .addOption(accountOption())
+    .addOption(endpointOption())
+
+    .action(async (verifyingKey, opts) => { // eslint-disable-line
+      const program = await programService(opts)
+
+      await program.list({ verifyingKey })
+
+      process.exit(0)
+    })
+
 }

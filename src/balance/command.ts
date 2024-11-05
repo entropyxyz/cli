@@ -10,7 +10,10 @@ export function entropyBalanceCommand () {
   const balanceCommand = new Command('balance')
   balanceCommand
     .description('Command to retrieive the balance of an account on the Entropy Network')
-    .argument('account <address|name>', 'Account address whose balance you want to query')
+    .argument('account <address|name>', [
+      'The address an account address whose balance you want to query.',
+      'Can also be the human-readable name of one of your accounts'
+    ].join(' '))
     .addOption(configOption())
     .addOption(endpointOption())
     .action(async (account, opts) => {
