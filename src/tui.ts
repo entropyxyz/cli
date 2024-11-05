@@ -45,7 +45,7 @@ export async function tuiAction (opts: EntropyTuiOptions) {
   const storedConfig = await setupConfig(opts.config)
   const entropy = await loadEntropy({
     account: storedConfig.selectedAccount,
-    config: storedConfig,
+    config: opts.config,
     endpoint: opts.endpoint
   })
 
@@ -97,7 +97,7 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
   if (storedConfig.selectedAccount && !entropy) {
     entropy = await loadEntropy({
       account: storedConfig.selectedAccount,
-      config: storedConfig,
+      config: options.config,
       endpoint: options.endpoint
     })
   }
@@ -108,7 +108,7 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     await entropy.close()
     entropy = await loadEntropy({
       account: storedConfig.selectedAccount,
-      config: storedConfig,
+      config: options.config,
       endpoint: options.endpoint
     })
   }
