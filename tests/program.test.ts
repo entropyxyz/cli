@@ -1,4 +1,5 @@
 import test from 'tape'
+// @ts-expect-error
 import { jumpStartNetwork } from '@entropyxyz/sdk/testing'
 
 import { promiseRunner, eveSeed, setupTest } from './testing-utils'
@@ -42,7 +43,7 @@ test('program', async t => {
       'adding program',
       program.add({
         programPointer: programPointer1,
-        programConfig: ''
+        programConfigPath: undefined
       })
     )
     const programsAfterAdd = await run('get programs after add', getPrograms())

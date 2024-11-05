@@ -28,10 +28,10 @@ There are two ways to interact with this CLI:
 
 ### Text-based user interface
 
-You can use this tool interactively by calling the `entropy` executable without any arguments or options:
+You can use this tool interactively by calling:
 
 ```bash
-entropy
+entropy tui
 ```
 
 This command will bring you to the main menu:
@@ -73,24 +73,23 @@ entropy --help
 ```output
 Usage: entropy [options] [command]
 
-CLI interface for interacting with entropy.xyz. Running this binary without any commands or arguments starts a text-based
-interface.
+CLI interface for interacting with entropy.xyz.
 
 Options:
-  -et, --tui-endpoint <url>                   Runs entropy with the given endpoint and ignores network endpoints in config.
-                                              Can also be given a stored endpoint name from config eg: `entropy --endpoint
-                                              test-net`. (default: "wss://testnet.entropy.xyz/", env: ENTROPY_TUI_ENDPOINT)
-  -h, --help                                  Display help for command
-  -v, --version                               Display current cli version
-  -cv, --core-version                         Display current core protocol version
+  -v, --version                              Displays the current running version of Entropy CLI
+  -cv, --core-version                        Displays the current running version of the Entropy Protocol
+  -h, --help                                 display help for command
 
 Commands:
- balance [options] <account <address|name>>  Command to retrieive the balance of an account on the Entropy Network
- account                                     Commands to work with accounts on the Entropy Network
- transfer [options] <destination> <amount>   Transfer funds between two Entropy accounts.
- sign [options] <msg>                        Sign a message using the Entropy network. Output is a JSON { verifyingKey,
-                                             signature }
- program                                     Commands for working with programs deployed to the Entropy Network
+  tui [options]                              Text-based User Interface (interactive)
+  account                                    Commands to work with accounts on the Entropy Network
+  sign [options] <msg>                       Sign a message using the Entropy network. Output is a JSON {
+                                             verifyingKey, signature }
+  balance [options] <account>                Command to retrieive the balance of an account on the Entropy
+                                             Network
+  transfer [options] <destination> <amount>  Transfer funds between two Entropy accounts.
+  program                                    Commands for working with programs deployed to the Entropy
+                                             Network
 ```
 
 **Command-specific help**:
@@ -165,18 +164,12 @@ If you want to make changes to this CLI tool, you should install it by following
 
    This command pulls in the necessary packages and builds the CLI locally.
 
-1. Run the CLI using `yarn`:
-
-   ```shell
-   yarn start
-   ```
-
 1. Start the CLI:
 
    For an interactive text user interface:
 
    ```bash
-   yarn start
+   yarn start tui
    ```
 
    You should now see the main menu:
@@ -201,48 +194,34 @@ If you want to make changes to this CLI tool, you should install it by following
    ```
 
    ```output
-   yarn run v1.22.1
-   $ yarn build:global && entropy --help
-   $ tsup && npm install -g
-   CLI Building entry: src/cli.ts
-   CLI Using tsconfig: tsconfig.json
-   CLI tsup v6.7.0
-   CLI Using tsup config: /home/mixmix/projects/ENTROPY/cli/tsup.config.ts
-   CLI Target: es2022
-   CLI Cleaning output folder
-   ESM Build start
-   ESM dist/cli.js 576.07 KB
-   ESM ⚡️ Build success in 38ms
-   DTS Build start
-   DTS ⚡️ Build success in 985ms
-   DTS dist/cli.d.ts 21.00 B
+   ...
 
-   up to date in 234ms
    Usage: entropy [options] [command]
 
-   CLI interface for interacting with entropy.xyz. Running this binary without any commands or arguments starts a text-based
-   interface.
+   CLI interface for interacting with entropy.xyz.
 
    Options:
-     -et, --tui-endpoint <url>                   Runs entropy with the given endpoint and ignores network endpoints in config.
-                                                 Can also be given a stored endpoint name from config eg: `entropy --endpoint
-                                                 test-net`. (default: "wss://testnet.entropy.xyz/", env: ENTROPY_TUI_ENDPOINT)
-     -h, --help                                  display help for command
+     -v, --version                              Displays the current running version of Entropy CLI
+     -cv, --core-version                        Displays the current running version of the Entropy Protocol
+     -h, --help                                 display help for command
 
    Commands:
-     balance [options] <account <address|name>>  Command to retrieive the balance of an account on the Entropy Network
-     account                                     Commands to work with accounts on the Entropy Network
-     transfer [options] <destination> <amount>   Transfer funds between two Entropy accounts.
-     sign [options] <msg>                        Sign a message using the Entropy network. Output is a JSON { verifyingKey,
-                                                 signature }
-     program                                     Commands for working with programs deployed to the Entropy Network
-   Done in 2.06s.
+     tui [options]                              Text-based User Interface (interactive)
+     account                                    Commands to work with accounts on the Entropy Network
+     sign [options] <msg>                       Sign a message using the Entropy network. Output is a JSON {
+                                                verifyingKey, signature }
+     balance [options] <account>                Command to retrieive the balance of an account on the Entropy
+                                                Network
+     transfer [options] <destination> <amount>  Transfer funds between two Entropy accounts.
+     program                                    Commands for working with programs deployed to the Entropy
+                                                Network
+   Done in 2.16s.
    ```
 
    You can see more detail on specific commands using `--help` e.g.
 
    ```bash
-
+   entropy transfer --help
    ```
 
 ## Support
