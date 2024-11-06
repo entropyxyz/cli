@@ -10,6 +10,7 @@ The format extends [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Version header format: `[version] Name - year-month-day (entropy-core compatibility: version [range])`
 
+
 ## [0.1.0] Carnage - 2024-10-23 (entropy-core compatibility: 0.3.0)
 
 ### Added
