@@ -67,6 +67,7 @@ export function getSync (configPath = CONFIG_PATH_DEFAULT) {
 }
 
 export async function set (config: EntropyConfig, configPath = CONFIG_PATH_DEFAULT) {
+  assertConfig(config)
   assertConfigPath(configPath)
 
   await mkdirp(dirname(configPath))
@@ -89,6 +90,30 @@ export async function setSelectedAccount (account: EntropyAccountConfig, configP
 
 /* util */
 function noop () {}
+function assertConfig (config: any) {
+  if (
+    !config ||
+    typeof config !== 'object'
+  ) {
+    throw Error('Config#set: config must be an object')
+  }
+
+  if (!Array.isArray(config.accounts)) {
+    throw Error('Config#set: config must have "accounts"')
+  }
+
+  if (!config.endpoints) {
+    throw Error('Config#set: config must have "endpoints"')
+  }
+
+  if (typeof config.selectedAccount !== 'string') {
+    throw Error('Config#set: config must have "selectedAccount"')
+  }
+
+  if (typeof config['migration-version'] !== 'number') {
+    throw Error('Config#set: config must have "migration-version"')
+  }
+}
 function assertConfigPath (configPath: string) {
   if (!configPath.endsWith('.json')) {
     throw Error(`configPath must be of form *.json, got ${configPath}`)
