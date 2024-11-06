@@ -1,6 +1,6 @@
 import test from 'tape'
 import { readFileSync } from 'fs'
-// @ts-expect-error : type export...
+// @ts-ignore
 import { jumpStartNetwork } from '@entropyxyz/sdk/testing'
 
 import { eveSeed, setupTest } from './testing-utils'
