@@ -89,7 +89,7 @@ test('config - get', async t => {
     })
 })
 
-test.only('config - set', async t => {
+test('config - set', async t => {
   const configPath = makeTmpPath()
 
   {
