@@ -60,16 +60,15 @@ export function accountOption () {
 
       const availableAccounts = {}
       storedConfig.accounts.forEach(acct => availableAccounts[acct.name] = acct.address)
-      if (!Object.keys(availableAccounts).includes(addressOrName) || !Object.values(availableAccounts).includes(addressOrName)) {
+
+      const account = findAccountByAddressOrName(storedConfig.accounts, addressOrName)
+      if (!account) {
         print('=============AVAILABLE ACCOUNTS==============')
         print(availableAccounts)
         print('=============================================\n')
-        console.error(`AccountError: [${addressOrName}] is not a valid argument for the account option. Please use one of the aliases or addresses as shown above\n`)
+        console.error(`AccountError: [${addressOrName}] is not a valid argument for the account option. Please use one of the aliases or addresses as shown below\n`)
         process.exit(1)
       }
-
-      const account = findAccountByAddressOrName(storedConfig.accounts, addressOrName)
-      if (!account) return addressOrName
 
       // If we find one, we set this account as the future default
       config.setSelectedAccount(account)
