@@ -82,6 +82,10 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 
 ### Broke
 
+- config migration : remove all `verifyingKeys` from accounts
+    - network reset means that while all account keys are preserved, all state such as verifyingKeys is lost
+    - we want users to maintain the accounts they have set up, but reset the state that will no longer work
+
 - network now uses `four-nodes` docker setup
   - requires an update to `/etc/hosts` for local testing, should include line:
     ```
