@@ -1,7 +1,7 @@
 import Entropy from "@entropyxyz/sdk";
 import { EntropyBase } from "../common/entropy-base";
 import { blake2AsHex, encodeAddress } from "@polkadot/util-crypto";
-import { FAUCET_PROGRAM_MOD_KEY, TESTNET_PROGRAM_HASH } from "./utils";
+import { FAUCET_PROGRAM_MOD_KEY, FAUCET_PROGRAM_POINTER } from "./utils";
 import { EntropyBalance } from "src/balance/main";
 import { EntropyProgram } from "src/program/main";
 import FaucetSigner from "./helpers/signer";
@@ -68,7 +68,7 @@ export class EntropyFaucet extends EntropyBase {
       addressToSendTo,
       faucetAddress,
       chosenVerifyingKey,
-      faucetProgramPointer = TESTNET_PROGRAM_HASH
+      faucetProgramPointer = FAUCET_PROGRAM_POINTER
     }: SendMoneyParams
   ): Promise<any> {
     const balanceService = new EntropyBalance(this.entropy, this.endpoint)
