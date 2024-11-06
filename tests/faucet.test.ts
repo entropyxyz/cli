@@ -9,6 +9,7 @@ import { EntropyBalance } from '../src/balance/main'
 import { EntropyTransfer } from '../src/transfer/main'
 import { EntropyFaucet } from '../src/faucet/main'
 import { EntropyAccount } from '../src/account/main'
+import { FAUCET_PROGRAM_POINTER } from '../src/faucet/utils'
 
 async function setupAndFundFaucet (t) {
   const { run, entropy, endpoint } = await setupTest(t, { seed: eveSeed })
@@ -41,10 +42,9 @@ async function setupAndFundFaucet (t) {
      entropy.programs.dev.deploy(faucetProgram, configurationSchema, auxDataSchema)
   )
 
-  const POINTER = '0x3a1d45fecdee990925286ccce71f78693ff2bb27eae62adf8cfb7d3d61e142aa'
   // TODO: record the schema deployed to testnet for faucet, as this will help
   // us have a deterministic pointer (which we can test against)
-  t.equal(faucetProgramPointer, POINTER, 'Program pointer matches')
+  t.equal(faucetProgramPointer, FAUCET_PROGRAM_POINTER, 'Program pointer matches')
 
   // Register with faucet program
   const genesisHash = await entropy.substrate.rpc.chain.getBlockHash(0)
