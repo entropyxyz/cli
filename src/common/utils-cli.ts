@@ -1,6 +1,6 @@
 import Entropy from '@entropyxyz/sdk'
 import { Option } from 'commander'
-import { findAccountByAddressOrName, stringify } from './utils'
+import { bold, findAccountByAddressOrName, print, stringify } from './utils'
 import * as config from '../config'
 import { initializeEntropy } from './initializeEntropy'
 
@@ -59,7 +59,11 @@ export function accountOption () {
       if (!storedConfig) return addressOrName
 
       const account = findAccountByAddressOrName(storedConfig.accounts, addressOrName)
-      if (!account) return addressOrName
+      if (!account) {
+        console.error(`AccountError: [${addressOrName}] is not a valid argument for the account option.`)
+        print(bold('!! Available accounts can be found using entropy account list || entropy account ls !!'))
+        process.exit(1)
+      }
 
       // If we find one, we set this account as the future default
       config.setSelectedAccount(account)
