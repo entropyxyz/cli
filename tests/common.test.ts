@@ -55,7 +55,7 @@ test('common/masking', async (t) => {
   t.end()
 })
 
-test.only('common/utils', (t) => {
+test('common/utils', (t) => {
   t.equal(
     absolutePath('/tmp/things.json'),
     '/tmp/things.json',

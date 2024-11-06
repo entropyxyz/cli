@@ -5,12 +5,29 @@
 # Dependencies
 #   - internet connection
 #   - jq - see https://jqlang.github.io/jq
+#   - an entropy testnet:
+#       ```
+#       git clone git@github.com:entropyxyz/sdk.git
+#       cd sdk
+#       ./dev/bin/spin-up.sh four-nodes
+#       ./dev/bin/spin-down.sh four-nodes  (later)
+#       ````
 #
-# Run
-#   $ yarn build && ./tests/e2e.cli.sh
+# Build + isntall the CLI:
+#   ```
+#   yarn build
+#   npm install -g
+#   ```
+#
+# Run the tests:
+#   ```
+#   ./tests/e2e.cli.sh
+#   ```
+#
 
 CURRENT_DATE=$(date +%s%N)
 export ENTROPY_CONFIG="/tmp/entropy-cli-${CURRENT_DATE}.e2e.json"
+export ENTROPY_ENDPOINT=dev
 
 print () {
   COLOR='\033[0;35m'
@@ -28,7 +45,7 @@ print "account create"
 entropy account create naynay | jq
 
 print "account import"
-entropy account import faucet 0x358f394d157e31be23313a1500f5e2c8871e514e530a35aa5c05334be7a39ba6 | jq
+entropy account import faucet 0x66256c4e2f90e273bf387923a9a7860f2e9f47a1848d6263de512f7fb110fc08 | jq
 
 print "account list"
 entropy account list | jq
@@ -41,7 +58,7 @@ print "balance (name)"
 entropy balance naynay
 
 print "balance (address)"
-entropy balance 5CqJyjALDFz4sKjQgK8NXBQGHCWAiV63xXn2Dye393Y6Vghz
+entropy balance 5Ck5SLSHYac6WFt5UZRSsdJjwmpSZq85fd5TRNAdZQVzEAPT
 
 
 
@@ -75,7 +92,7 @@ print "// SIGN ////////////////////////////////////////////////////"
 
 
 print "entropy sign"
-entropy sign -a naynay "some content!\nNICE&SIMPLE"
+entropy sign -a naynay "some content!\nNICE&SIMPLE" | jq
 
 
 
