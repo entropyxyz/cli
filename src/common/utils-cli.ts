@@ -1,6 +1,6 @@
 import Entropy from '@entropyxyz/sdk'
 import { Option } from 'commander'
-import { findAccountByAddressOrName, print, stringify } from './utils'
+import { bold, findAccountByAddressOrName, print, stringify } from './utils'
 import * as config from '../config'
 import { initializeEntropy } from './initializeEntropy'
 
@@ -58,15 +58,10 @@ export function accountOption () {
       // We try to map addressOrName to an account we have stored
       if (!storedConfig) return addressOrName
 
-      const availableAccounts = {}
-      storedConfig.accounts.forEach(acct => availableAccounts[acct.name] = acct.address)
-
       const account = findAccountByAddressOrName(storedConfig.accounts, addressOrName)
       if (!account) {
-        print('=============AVAILABLE ACCOUNTS==============')
-        print(availableAccounts)
-        print('=============================================\n')
-        console.error(`AccountError: [${addressOrName}] is not a valid argument for the account option. Please use one of the aliases or addresses as shown below\n`)
+        console.error(`AccountError: [${addressOrName}] is not a valid argument for the account option.`)
+        print(bold('!! Available accounts can be found using entropy account list || entropy account ls !!'))
         process.exit(1)
       }
 
