@@ -2,6 +2,7 @@ import inquirer from "inquirer";
 import Entropy from "@entropyxyz/sdk";
 
 import { EntropyAccount } from './main'
+import { EntropyTuiOptions } from '../types'
 import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from "./utils";
 import { findAccountByAddressOrName, print } from "../common/utils"
 import { EntropyConfig } from "../config/types";
@@ -16,7 +17,7 @@ import {
 /*
  * @returns partialConfigUpdate | "exit" | undefined
  */
-export async function entropyAccount (endpoint: string, storedConfig: EntropyConfig) {
+export async function entropyAccount (opts: EntropyTuiOptions, storedConfig: EntropyConfig) {
   const { accounts } = storedConfig
   const { interactionChoice } = await inquirer.prompt(accountManageQuestions)
 
@@ -46,7 +47,7 @@ export async function entropyAccount (endpoint: string, storedConfig: EntropyCon
     }
     const { selectedAccount } = await inquirer.prompt(accountSelectQuestions(accounts))
 
-    await config.setSelectedAccount(selectedAccount)
+    await config.setSelectedAccount(selectedAccount, opts.config)
 
     print('Current selected account is:')
     print({ name: selectedAccount.name, address: selectedAccount.address })
@@ -72,8 +73,8 @@ export async function entropyAccount (endpoint: string, storedConfig: EntropyCon
   }
 }
 
-export async function entropyRegister (entropy: Entropy, endpoint: string, storedConfig: EntropyConfig): Promise<Partial<EntropyConfig>> {
-  const accountService = new EntropyAccount(entropy, endpoint)
+export async function entropyRegister (entropy: Entropy, opts: EntropyTuiOptions, storedConfig: EntropyConfig): Promise<Partial<EntropyConfig>> {
+  const accountService = new EntropyAccount(entropy, opts.endpoint)
 
   const { accounts, selectedAccount } = storedConfig
   const account = findAccountByAddressOrName(accounts, selectedAccount)

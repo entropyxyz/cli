@@ -1,12 +1,14 @@
 import inquirer from "inquirer"
-import { print } from "../common/utils"
+
 import { EntropyTransfer } from "./main"
 import { transferInputQuestions } from "./utils"
-import { setupProgress } from "src/common/progress"
+import { print } from "../common/utils"
+import { setupProgress } from "../common/progress"
+import { EntropyTuiOptions } from '../types'
 
-export async function entropyTransfer (entropy, endpoint) {
+export async function entropyTransfer (entropy, opts: EntropyTuiOptions) {
   const progressTracker = setupProgress('Transferring Funds')
-  const transferService = new EntropyTransfer(entropy, endpoint)
+  const transferService = new EntropyTransfer(entropy, opts.endpoint)
   const { amount, recipientAddress } = await inquirer.prompt(transferInputQuestions)
   await transferService.transfer(recipientAddress, amount, progressTracker)
   print('')

@@ -20,7 +20,7 @@ export function entropyBalanceCommand () {
       const entropy: Entropy = await loadEntropy({ account, ...opts })
       const BalanceService = new EntropyBalance(entropy, opts.endpoint)
 
-      const { accounts } = await config.get()
+      const { accounts } = await config.get(opts.config)
       const address = findAccountByAddressOrName(accounts, account)?.address
 
       const balance = await BalanceService.getBalance(address)

@@ -1,9 +1,11 @@
 import Entropy from "@entropyxyz/sdk"
 import yoctoSpinner from 'yocto-spinner';
+
 import { EntropyLogger } from '../common/logger'
+import { print } from "../common/utils"
 import { TESTNET_PROGRAM_HASH } from "./utils"
 import { EntropyFaucet } from "./main"
-import { print } from "src/common/utils"
+import { EntropyTuiOptions } from '../types'
 
 let chosenVerifyingKeys = []
 // Sending only 1e10 BITS does not allow user's to register after receiving funds
@@ -14,19 +16,19 @@ const amount = "20000000000"
 const FLOW_CONTEXT = 'ENTROPY_FAUCET_INTERACTION'
 const SPINNER_TEXT =  'Funding account…'
 const faucetSpinner = yoctoSpinner()
-export async function entropyFaucet (entropy: Entropy, options, logger: EntropyLogger) {
+
+export async function entropyFaucet (entropy: Entropy, opts: EntropyTuiOptions, logger: EntropyLogger) {
   faucetSpinner.text = SPINNER_TEXT
   if (faucetSpinner.isSpinning) {
     faucetSpinner.stop()
   }
-  const { endpoint } = options
   if (!entropy.registrationManager.signer.pair) {
     throw new Error("Keys are undefined")
   }
-  const faucetService = new EntropyFaucet(entropy, endpoint)
+  const faucetService = new EntropyFaucet(entropy, opts.endpoint)
   const verifyingKeys = await faucetService.getAllFaucetVerifyingKeys()
   // @ts-expect-error
-  return sendMoneyFromRandomFaucet(entropy, options.endpoint, verifyingKeys, logger)
+  return sendMoneyFromRandomFaucet(entropy, opts.endpoint, verifyingKeys, logger)
 }
 
 // Method that takes in the initial list of verifying keys (to avoid multiple calls to the rpc) and recursively retries each faucet until

@@ -54,23 +54,30 @@ export function configOption () {
     .default(config.CONFIG_PATH_DEFAULT)
 }
 
-export async function loadEntropy (options: {
+export async function loadEntropy (opts: {
   account: string,
   config: string,
   endpoint: string,
 }): Promise<Entropy> {
-  const storedConfig = getConfigOrNull(options.config)
+  const storedConfig = getConfigOrNull(opts.config)
+  // NOTE: (mix) we expect config to be initialised (see hook in cli)
+  // ...there was some reason we wanted to preserve a `null` state,
+  // but I can't recall if it's still relevant, and we need to check
+  // the downstream ramifications of it being `null`
 
-  const account = parseAccountOption(storedConfig, options.account)
+  const account = parseAccountOption(storedConfig, opts.account)
   // if this account is not the default selectedAccount, make it so
   if (storedConfig.selectedAccount !== account.name) {
-    await config.set({
-      ...storedConfig,
-      selectedAccount: account.name
-    })
+    await config.set(
+      {
+        ...storedConfig,
+        selectedAccount: account.name
+      },
+      opts.config
+    )
   }
 
-  const endpoint = parseEndpointOption(storedConfig, options.endpoint)
+  const endpoint = parseEndpointOption(storedConfig, opts.endpoint)
 
   const entropy = await initializeEntropy({ keyMaterial: account.data, endpoint })
   if (!entropy?.keyring?.accounts?.registration?.pair) {

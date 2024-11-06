@@ -33,7 +33,7 @@ function hasRunMigration (config: any, version: number) {
   return Number(currentVersion) >= Number(version)
 }
 
-export async function init (configPath = CONFIG_PATH_DEFAULT, oldConfigPath = OLD_CONFIG_PATH) {
+export async function init (configPath: string, oldConfigPath = OLD_CONFIG_PATH) {
   const currentConfig = await get(configPath)
     .catch(async (err ) => {
       if (isDangerousReadError(err)) throw err
@@ -56,17 +56,17 @@ export async function init (configPath = CONFIG_PATH_DEFAULT, oldConfigPath = OL
   }
 }
 
-export async function get (configPath = CONFIG_PATH_DEFAULT) {
+export async function get (configPath) {
   return readFile(configPath, 'utf-8')
     .then(deserialize)
 }
 
-export function getSync (configPath = CONFIG_PATH_DEFAULT) {
+export function getSync (configPath) {
   const configStr = readFileSync(configPath, 'utf8')
   return deserialize(configStr)
 }
 
-export async function set (config: EntropyConfig, configPath = CONFIG_PATH_DEFAULT) {
+export async function set (config: EntropyConfig, configPath: string) {
   assertConfig(config)
   assertConfigPath(configPath)
 
@@ -74,7 +74,7 @@ export async function set (config: EntropyConfig, configPath = CONFIG_PATH_DEFAU
   await writeFile(configPath, serialize(config))
 }
 
-export async function setSelectedAccount (account: EntropyAccountConfig, configPath = CONFIG_PATH_DEFAULT) {
+export async function setSelectedAccount (account: EntropyAccountConfig, configPath: string) {
   const storedConfig = await get(configPath)
 
   if (storedConfig.selectedAccount === account.name) return storedConfig

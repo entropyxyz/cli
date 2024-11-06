@@ -77,28 +77,28 @@ export async function tuiAction (opts: EntropyTuiOptions) {
 }
 
 const loader = yoctoSpinner()
-async function setupConfig (configPath) {
+async function setupConfig (configPath: string) {
   let storedConfig = await config.get(configPath)
 
   // set selectedAccount if we can
   if (!storedConfig.selectedAccount && storedConfig.accounts.length) {
-    storedConfig = await config.setSelectedAccount(storedConfig.accounts[0])
+    storedConfig = await config.setSelectedAccount(storedConfig.accounts[0], configPath)
   }
 
   return storedConfig
 }
 
-async function main (entropy: Entropy, choices, options, logger: EntropyLogger) {
+async function main (entropy: Entropy, choices, opts: EntropyTuiOptions, logger: EntropyLogger) {
   if (loader.isSpinning) loader.stop()
-  const storedConfig = await setupConfig(options.config)
+  const storedConfig = await setupConfig(opts.config)
 
   // Entropy is undefined on initial install
   // However, after user creates their first account, entropy can be loaded
   if (storedConfig.selectedAccount && !entropy) {
     entropy = await loadEntropy({
       account: storedConfig.selectedAccount,
-      config: options.config,
-      endpoint: options.endpoint
+      config: opts.config,
+      endpoint: opts.endpoint
     })
   }
 
@@ -111,8 +111,8 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     await entropy.close()
     entropy = await loadEntropy({
       account: storedConfig.selectedAccount,
-      config: options.config,
-      endpoint: options.endpoint
+      config: opts.config,
+      endpoint: opts.endpoint
     })
   }
 
@@ -138,44 +138,44 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
 
     switch (answers.choice) {
     case 'Manage Accounts': {
-      const response = await entropyAccount(options.endpoint, storedConfig)
+      const response = await entropyAccount(opts, storedConfig)
       if (response === 'exit') { returnToMain = true }
       break
     }
     case 'Register': {
-      await entropyRegister(entropy, options.endpoint, storedConfig)
+      await entropyRegister(entropy, opts, storedConfig)
       break
     }
     case 'Balance': {
-      await entropyBalance(entropy, options.endpoint, storedConfig)
+      await entropyBalance(entropy, opts, storedConfig)
         .catch(err => console.error('There was an error retrieving balance', err))
       break
     }
     case 'Transfer': {
-      await entropyTransfer(entropy, options.endpoint)
+      await entropyTransfer(entropy, opts)
         .catch(err => console.error('There was an error sending the transfer', err))
       break
     }
     case 'Sign': {
-      await entropySign(entropy, options.endpoint)
+      await entropySign(entropy, opts)
         .catch(err => console.error('There was an issue with signing', err))
       break
     }
     case 'Entropy Faucet': {
       try {
-        await entropyFaucet(entropy, options, logger)
+        await entropyFaucet(entropy, opts, logger)
       } catch (error) {
         console.error('There was an issue with running the faucet', error);
       }
       break
     }
     case 'User Programs': {
-      await entropyProgram(entropy, options.endpoint)
+      await entropyProgram(entropy, opts)
         .catch(err => console.error('There was an error with programs', err))
       break
     }
     case 'Deploy Program': {
-      await entropyProgramDev(entropy, options.endpoint)
+      await entropyProgramDev(entropy, opts)
         .catch(err => console.error('There was an error with program dev', err))
       break
     }
@@ -186,7 +186,7 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
       loader.text = 'Jumpstarting Network...'
       try {
         loader.start()
-        const jumpStartStatus = await jumpStartNetwork(entropy, options.endpoint)
+        const jumpStartStatus = await jumpStartNetwork(entropy, opts.endpoint)
 
         if (jumpStartStatus.isFinalized) {
           loader.clear()
@@ -219,7 +219,7 @@ async function main (entropy: Entropy, choices, options, logger: EntropyLogger) 
     }]))
   }
 
-  if (returnToMain) main(entropy, choices, options, logger)
+  if (returnToMain) main(entropy, choices, opts, logger)
   else {
     print('Have a nice day')
     process.exit()
