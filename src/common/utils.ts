@@ -28,6 +28,10 @@ export function print (...args) {
   console.log(...args.map(arg => stringify(arg)))
 }
 
+export function bold (text) {
+  return `\x1b[1m${text}\x1b[0m`
+}
+
 // hardcoding for now instead of querying chain
 const DECIMALS = 10
 const PREFIX = '0x'

@@ -15,7 +15,6 @@
     "test:ts": "yarn removedb && ./dev/bin/test-ts.sh",
     "test:types": "tsc --project tsconfig.json",
     "prepare": "husky",
-    "postinstall": "husky",
     "prepack": "pinst --disable",
     "postpack": "pinst --enable",
     "link:sdk": "yarn link @entropyxyz/sdk",

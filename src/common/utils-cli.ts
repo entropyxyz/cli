@@ -1,7 +1,7 @@
 import Entropy from '@entropyxyz/sdk'
 import { Option } from 'commander'
 
-import { absolutePath, findAccountByAddressOrName, stringify } from './utils'
+import { absolutePath, bold, findAccountByAddressOrName, print, stringify } from './utils'
 import { initializeEntropy } from './initializeEntropy'
 import * as config from '../config'
 import { EntropyConfig } from "../config/types";
@@ -115,7 +115,12 @@ function parseEndpointOption (config: EntropyConfig, aliasOrEndpoint: string) {
 function parseAccountOption (config: EntropyConfig, addressOrName: string) {
   const accounts = config?.accounts || []
   const account = findAccountByAddressOrName(accounts, addressOrName)
-  if (!account) throw new Error(`No account with name or address: "${addressOrName}"`)
+
+  if (!account) {
+    console.error(`AccountError: No account with name or address "${addressOrName}"`)
+    print(bold('!! Available accounts can be found using `entropy account list` !!'))
+    process.exit(1)
+  }
 
   return account
 }
