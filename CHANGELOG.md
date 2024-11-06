@@ -29,6 +29,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
   - new: added faucet to main menu for TUI
   - updated faucet to use loading spinner to indicate to user the progress of the transfer
   - new: menu item to trigger a jumpstart to the network (needs to be run once for fresh test networks)
+  - new: added colours to the logs for easier reading
 
 - documentation
   - updated: `./README.md`
@@ -77,6 +78,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
     - `./src/transfer` - new file structure for our CLI/TUI flows
 - folder name for user programs to match the kebab-case style for folder namespace
 - ascii art print out now shows up to date core version based, coming from SDK
+- updated how errors are handled with the register, the process will no longer exit and allow user's to continue using the CLI
 
 ### Broke
 
