@@ -12,7 +12,7 @@ import {
   accountNewQuestions,
   accountSelectQuestions
 } from "./utils"
-import { ERROR_RED, INFO_BLUE, SUCCESS_GREEN } from "src/common/constants";
+import { ERROR_RED } from "src/common/constants";
 
 /*
  * @returns partialConfigUpdate | "exit" | undefined
@@ -77,16 +77,16 @@ export async function entropyRegister (entropy: Entropy, endpoint: string, store
   const { accounts, selectedAccount } = storedConfig
   const account = findAccountByAddressOrName(accounts, selectedAccount)
   if (!account) {
-    print(INFO_BLUE + "No account selected to register")
+    print("No account selected to register")
     return
   }
 
-  print(INFO_BLUE + "Attempting to register the address:", account.address)
+  print("Attempting to register the address:", account.address)
   try {
     const verifyingKey = await accountService.register()
     await addVerifyingKeyToAccountAndSelect(verifyingKey, account.address)
 
-    print(SUCCESS_GREEN + "Your address", account.address, "has been successfully registered.")
+    print("Your address", account.address, "has been successfully registered.")
   } catch (error) {
     const endpointErrorMessageToMatch = 'Extrinsic registry.register expects 3 arguments, got 2'
     // const insufficientFeesErrorMessageToMatch = ''
