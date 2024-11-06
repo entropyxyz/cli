@@ -61,7 +61,7 @@ export class EntropyAccount extends EntropyBase {
     }
     const registerParams = programModAddress && programData
       ? {
-        programDeployer: programModAddress,
+        programModAddress,
         programData
       }
       : undefined

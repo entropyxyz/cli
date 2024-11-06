@@ -35,7 +35,7 @@ export async function addVerifyingKeyToAccountAndSelect (verifyingKey: string, a
   account.data.registration.verifyingKeys.push(verifyingKey)
   await config.set({
     ...storedConfig,
-    setSelectedAccount: account.name
+    selectedAccount: account.name
   })
 }
 

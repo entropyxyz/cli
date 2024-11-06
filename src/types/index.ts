@@ -1,7 +1,6 @@
 export interface EntropyTuiOptions {
   account: string
   endpoint: string
-  tuiEndpoint: string
   dev: boolean
   version: string
   coreVersion: string
