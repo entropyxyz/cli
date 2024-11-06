@@ -2,6 +2,7 @@ import { Command, Option } from 'commander'
 import inquirer from 'inquirer'
 import Entropy from '@entropyxyz/sdk'
 import yoctoSpinner from 'yocto-spinner'
+import { promisify } from 'node:util'
 
 import * as config from './config'
 import { EntropyTuiOptions } from './types'
@@ -37,14 +38,19 @@ export function entropyTuiCommand () {
 // tui = text user interface
 export async function tuiAction (options: EntropyTuiOptions) {
   const { account, endpoint } = options
-  const entropy = account
-    ? await loadEntropy(account, endpoint)
-    : undefined
+  const promiseEntropy = account
+    ? loadEntropy(account, endpoint)
+    : Promise.resolve(undefined)
     // NOTE: on initial startup you have no account
 
   const logger = new EntropyLogger('TUI', options.endpoint)
   console.clear()
-  console.log(logo) // the Entropy logo
+  const lines = logo.split('\n')
+  const lineTime = 1800 / lines.length
+  for (const line of lines) {
+    console.log(line)
+    await promisify(setTimeout)(lineTime)
+  }
   logger.debug(options)
 
   let choices = [
@@ -71,6 +77,7 @@ export async function tuiAction (options: EntropyTuiOptions) {
   // assign exit so its last
   choices = [...choices, 'Exit']
 
+  const entropy = await promiseEntropy
   main(entropy, choices, options, logger)
 }
 
