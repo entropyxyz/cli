@@ -92,15 +92,32 @@ test('config - get', async t => {
 test('config - set', async t => {
   const configPath = makeTmpPath()
 
-  const config = {
-    dog: true,
-    secretKey: makeKey()
+  {
+    const message = 'set does not allow empty config'
+    // @ts-expect-error : wrong types
+    await set(undefined, configPath)
+      .then(() => t.fail(message))
+      .catch(err => {
+        t.match(err.message, /config must be an object/, message)
+      })
   }
-  // @ts-expect-error : this is a breaking test
-  await set(config, configPath)
-  const actual = await get(configPath)
 
-  t.deepEqual(config, actual, 'set works')
+  {
+    const config = {
+      accounts: [{
+        name: 'dog'
+      }],
+      selectedAccount: 'dog',
+      endpoints: {},
+      'migration-version': 1200
+    }
+    // @ts-expect-error : wrong types
+    await set(config, configPath)
+
+    const actual = await get(configPath)
+    t.deepEqual(config, actual, 'set works')
+  }
+
   t.end()
 })
 
