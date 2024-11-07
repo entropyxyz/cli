@@ -32,12 +32,10 @@ switch (direction) {
 
 
 async function testNetworkUp () {
-  spinner = yoctoSpinner({
-    spinner: {
-      interval: process.env.GITHUB_WORKSPACE ? 10000 : 100
-    }
-  })
-  spinner.start()
+  if (!process.env.GITHUB_WORKSPACE) {
+    spinner = yoctoSpinner()
+    spinner.start()
+  }
   const run = promiseRunner(spinner)
 
   // Nodes up
@@ -74,12 +72,10 @@ async function testNetworkUp () {
 }
 
 async function testNetworkDown () {
-  spinner = yoctoSpinner({
-    spinner: {
-      interval: process.env.GITHUB_WORKSPACE ? 10000 : 100
-    }
-  })
-  spinner.start()
+  if (!process.env.GITHUB_WORKSPACE) {
+    spinner = yoctoSpinner()
+    spinner.start()
+  }
   const run = promiseRunner(spinner)
 
   // Nodes up
@@ -115,17 +111,29 @@ async function getJumpstartStatus (entropy) {
 
 function promiseRunner (spinner) {
   return async function run (msg, promise) {
-    spinner.text = msg
-    spinner.start()
     let count = 0
-    const interval = setInterval(() => {
-      spinner.text = `${msg} (${++count}s)`
-    }, 1000)
+    let interval
+
+    if (spinner) {
+      spinner.text = msg
+      spinner.start()
+      interval = setInterval(() => {
+        spinner.text = `${msg} (${++count}s)`
+      }, 1000)
+    } else {
+      interval = setInterval(() => {
+        if (++count % 30 === 0) {
+          console.log(`${msg} (${count}s)`)
+        }
+      }, 1000)
+    }
 
     return promise
       .then(() => {
-        spinner.stop()
-        spinner.clear()
+        if (spinner) {
+          spinner.stop()
+          spinner.clear()
+        }
         console.log(`${green('✓')} ${msg} (${count}s)`)
       })
       .finally(() => clearInterval(interval))
