@@ -9,7 +9,7 @@
     "build": "./dev/bin/build.sh",
     "build:global": "yarn build && npm install -g",
     "lint": "eslint . --ext .ts --fix",
-    "test": "yarn test:types && yarn build && yarn test:hosts && yarn test:network:up && yarn test:ts && yarn test:network:down && yarn test:only",
+    "test": "yarn test:types && yarn build:global && yarn test:hosts && yarn test:network:up && yarn test:ts && yarn test:network:down && yarn test:only",
     "test:hosts": "./dev/bin/test-hosts.sh",
     "test:only": "./dev/bin/test-only.sh",
     "test:ts": "./dev/bin/test-ts.sh",

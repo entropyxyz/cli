@@ -2,6 +2,7 @@ import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
 import { Keyring } from '@entropyxyz/sdk/keys'
 import { spinNetworkUp, spinNetworkDown, jumpStartNetwork } from '@entropyxyz/sdk/testing'
 import yoctoSpinner from 'yocto-spinner'
+import { promisify } from 'node:util'
 
 import { eveSeed } from './constants.mjs'
 
@@ -54,6 +55,10 @@ async function testNetworkUp () {
   })
 
   await run('set up entropy client', entropy.ready)
+
+  if (process.env.GITHUB_WORKSPACE) {
+    await run('pause', promisify(setTimeout)(10000))
+  }
 
   // Jump-start
   const status = await getJumpstartStatus(entropy)
