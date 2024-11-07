@@ -1,18 +1,20 @@
 import test from 'tape'
+import { readFileSync } from 'fs'
 import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
 // @ts-ignore
 import { isValidSubstrateAddress } from '@entropyxyz/sdk/utils'
+// @ts-ignore
 import { jumpStartNetwork } from '@entropyxyz/sdk/testing'
 // @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
 import { randomAsHex } from '@polkadot/util-crypto'
+
 import { EntropyAccount } from '../src/account/main'
 import { EntropyTransfer } from '../src/transfer/main'
 import { EntropyAccountConfig, EntropyConfig } from '../src/config/types'
 import * as config from '../src/config'
 import { promiseRunner, setupTest } from './testing-utils'
-import { charlieStashAddress, charlieStashSeed, eveSeed } from './testing-utils/constants'
-import { readFileSync } from 'fs'
+import { charlieStashAddress, charlieStashSeed, eveSeed } from './testing-utils/constants.mjs'
 
 test('Account - list', async t => {
   const account: EntropyAccountConfig = {
