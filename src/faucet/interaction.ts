@@ -3,7 +3,7 @@ import yoctoSpinner from 'yocto-spinner';
 
 import { EntropyLogger } from '../common/logger'
 import { print } from "../common/utils"
-import { TESTNET_PROGRAM_HASH } from "./utils"
+import { FAUCET_PROGRAM_POINTER } from "./utils"
 import { EntropyFaucet } from "./main"
 import { EntropyTuiOptions } from '../types'
 
@@ -44,7 +44,7 @@ async function sendMoneyFromRandomFaucet (entropy: Entropy, endpoint: string, ve
     const randomFaucet = faucetService.getRandomFaucet(chosenVerifyingKeys, verifyingKeys)
     chosenVerifyingKey = randomFaucet.chosenVerifyingKey
     const { faucetAddress } = randomFaucet
-    await faucetService.sendMoney({ amount, addressToSendTo: selectedAccountAddress, faucetAddress, chosenVerifyingKey, faucetProgramPointer: TESTNET_PROGRAM_HASH })
+    await faucetService.sendMoney({ amount, addressToSendTo: selectedAccountAddress, faucetAddress, chosenVerifyingKey, faucetProgramPointer: FAUCET_PROGRAM_POINTER })
     // reset chosen keys after successful transfer
     if (faucetSpinner.isSpinning) faucetSpinner.stop()
     chosenVerifyingKeys = []

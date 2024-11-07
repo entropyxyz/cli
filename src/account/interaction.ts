@@ -13,6 +13,7 @@ import {
   accountNewQuestions,
   accountSelectQuestions
 } from "./utils"
+import { ERROR_RED } from "src/common/constants";
 
 /*
  * @returns partialConfigUpdate | "exit" | undefined
@@ -84,8 +85,18 @@ export async function entropyRegister (entropy: Entropy, opts: EntropyTuiOptions
   }
 
   print("Attempting to register the address:", account.address)
-  const verifyingKey = await accountService.register()
-  await addVerifyingKeyToAccountAndSelect(config.CONFIG_PATH_DEFAULT, verifyingKey, account.address)
+  try {
+    const verifyingKey = await accountService.register()
+    await addVerifyingKeyToAccountAndSelect(opts.config, verifyingKey, account.address)
 
-  print("Your address", account.address, "has been successfully registered.")
+    print("Your address", account.address, "has been successfully registered.")
+  } catch (error) {
+    const endpointErrorMessageToMatch = 'Extrinsic registry.register expects 3 arguments, got 2'
+    // const insufficientFeesErrorMessageToMatch = ''
+    if (error.message.includes(endpointErrorMessageToMatch)) {
+      console.error(ERROR_RED + 'GenericError: Incompatible endpoint, expected core version 0.3.0, got 0.2.0')
+      return
+    }
+    console.error(ERROR_RED + 'Register Error:', error.message);
+  }
 }

@@ -102,18 +102,21 @@ async function main (entropy: Entropy, choices, opts: EntropyTuiOptions, logger:
     })
   }
 
-  // If the selected account changes within the TUI we reload entropy to use that account
-  const currentAccount = findAccountByAddressOrName(
-    storedConfig.accounts,
-    entropy?.keyring?.accounts?.registration?.address
-  )
-  if (currentAccount && currentAccount.name !== storedConfig.selectedAccount) {
-    await entropy.close()
-    entropy = await loadEntropy({
-      account: storedConfig.selectedAccount,
-      config: opts.config,
-      endpoint: opts.endpoint
-    })
+  // If the selected account changes within the TUI we need to reset the entropy instance being used
+  const currentAddress = entropy?.keyring?.accounts?.registration?.address
+  if (currentAddress) {
+    const currentAccount = findAccountByAddressOrName(
+      storedConfig.accounts,
+      currentAddress
+    )
+    if (currentAccount && currentAccount.name !== storedConfig.selectedAccount) {
+      await entropy.close()
+      entropy = await loadEntropy({
+        account: storedConfig.selectedAccount,
+        config: opts.config,
+        endpoint: opts.endpoint
+      })
+    }
   }
 
   const answers = await inquirer.prompt([{

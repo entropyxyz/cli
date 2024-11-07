@@ -10,7 +10,15 @@ The format extends [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Version header format: `[version] Name - year-month-day (entropy-core compatibility: version [range])`
 
-## [0.0.4] Carnage - 2024-10-23 (entropy-core compatibility: 0.3.0)
+
+## [0.1.1] Deadpool - 2024-11-06 (entropy-core compatibility: 0.3.0)
+
+### Fixed
+
+- TUI had a bug where it errored for fresh configs on statup
+
+
+## [0.1.0] Carnage - 2024-11-06 (entropy-core compatibility: 0.3.0)
 
 ### Added
 
@@ -29,6 +37,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
   - new: added faucet to main menu for TUI
   - updated faucet to use loading spinner to indicate to user the progress of the transfer
   - new: menu item to trigger a jumpstart to the network (needs to be run once for fresh test networks)
+  - new: added colours to the logs for easier reading
 
 - documentation
   - updated: `./README.md`
@@ -77,8 +86,13 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
     - `./src/transfer` - new file structure for our CLI/TUI flows
 - folder name for user programs to match the kebab-case style for folder namespace
 - ascii art print out now shows up to date core version based, coming from SDK
+- updated how errors are handled with the register, the process will no longer exit and allow user's to continue using the CLI
 
 ### Broke
+
+- config migration : remove all `verifyingKeys` from accounts
+    - network reset means that while all account keys are preserved, all state such as verifyingKeys is lost
+    - we want users to maintain the accounts they have set up, but reset the state that will no longer work
 
 - network now uses `four-nodes` docker setup
   - requires an update to `/etc/hosts` for local testing, should include line:
