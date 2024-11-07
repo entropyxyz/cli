@@ -123,8 +123,8 @@ function promiseRunner (spinner) {
         spinner.text = `${msg} (${++count}s)`
       }, 1000)
     } else {
+      console.log(`${msg}...`)
       interval = setInterval(() => {
-        console.log(`${msg}...`)
         if (++count % 30 === 0) {
           console.log(`${msg} (${count}s)`)
         }
