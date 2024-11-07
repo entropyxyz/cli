@@ -32,7 +32,11 @@ switch (direction) {
 
 
 async function testNetworkUp () {
-  spinner = yoctoSpinner()
+  spinner = yoctoSpinner({
+    spinner: {
+      interval: process.env.GITHUB_WORKSPACE ? 10000 : 100
+    }
+  })
   spinner.start()
   const run = promiseRunner(spinner)
 
@@ -70,7 +74,11 @@ async function testNetworkUp () {
 }
 
 async function testNetworkDown () {
-  spinner = yoctoSpinner()
+  spinner = yoctoSpinner({
+    spinner: {
+      interval: process.env.GITHUB_WORKSPACE ? 10000 : 100
+    }
+  })
   spinner.start()
   const run = promiseRunner(spinner)
 
