@@ -2,6 +2,7 @@ import { Command, Option } from 'commander'
 import inquirer from 'inquirer'
 import Entropy from '@entropyxyz/sdk'
 import yoctoSpinner from 'yocto-spinner'
+import { promisify } from 'node:util'
 
 import * as config from './config'
 import { EntropyTuiOptions } from './types'
@@ -43,9 +44,28 @@ export async function tuiAction (options: EntropyTuiOptions) {
     // NOTE: on initial startup you have no account
 
   const logger = new EntropyLogger('TUI', options.endpoint)
-  console.clear()
-  console.log(logo)
   logger.debug(options)
+
+  console.clear()
+  const lines = logo.split('\n')
+  let i = 0
+  while (i < 100) {
+    const newLogo = lines.map((line, lineNum) => {
+      const lineChars = line.split('')
+
+      if (lineChars?.[i - lineNum] === '@') {
+        lineChars[i - lineNum] = '*'
+      }
+
+      return lineChars
+        .slice(0, Math.max(0, i - lineNum))
+        .join('')
+    }).join('\n')
+    console.clear()
+    console.log(newLogo)
+    i++
+    await promisify(setTimeout)(10)
+  }
 
   let choices = [
     'Manage Accounts',
