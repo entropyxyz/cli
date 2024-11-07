@@ -2,11 +2,12 @@ import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
 import { Keyring } from '@entropyxyz/sdk/keys'
 import { spinNetworkUp, spinNetworkDown, jumpStartNetwork } from '@entropyxyz/sdk/testing'
 import yoctoSpinner from 'yocto-spinner'
-import { promisify } from 'node:util'
+// import { promisify } from 'node:util'
 
 import { eveSeed } from './constants.mjs'
 
 const NETWORK_TYPE_DEFAULT = 'four-nodes'
+const SPACER = '   '
 let spinner
 
 const [_, __, direction] = process.argv
@@ -58,9 +59,9 @@ async function testNetworkUp () {
 
   await run('set up entropy client', entropy.ready)
 
-  if (process.env.GITHUB_WORKSPACE) {
-    await run('pause', promisify(setTimeout)(10000))
-  }
+  // if (process.env.GITHUB_WORKSPACE) {
+  //   await run('pause', promisify(setTimeout)(10000))
+  // }
 
   // Jump-start
   const status = await getJumpstartStatus(entropy)
@@ -70,7 +71,7 @@ async function testNetworkUp () {
       break
 
     case 'Done':
-      console.log(`${green('✓')} jump start network (0s)`)
+      console.log(`${SPACER}${green('✓')} jump start network (0s)`)
       break
 
     default:
@@ -130,10 +131,10 @@ function promiseRunner (spinner) {
         spinner.text = `${msg} (${++count}s)`
       }, 1000)
     } else {
-      console.log(`${msg}...`)
+      console.log(`${SPACER}${msg}...`)
       interval = setInterval(() => {
         if (++count % 30 === 0) {
-          console.log(`${msg} (${count}s)`)
+          console.log(`${SPACER}${msg} (${count}s)`)
         }
       }, 1000)
     }
@@ -144,7 +145,7 @@ function promiseRunner (spinner) {
           spinner.stop()
           spinner.clear()
         }
-        console.log(`${green('✓')} ${msg} (${count}s)`)
+        console.log(`${SPACER}${green('✓')} ${msg} (${count}s)`)
       })
       .finally(() => clearInterval(interval))
   }
