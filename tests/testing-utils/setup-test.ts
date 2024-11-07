@@ -1,12 +1,9 @@
 import { Test } from 'tape'
 import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-
-// @ts-ignore
-import { spinNetworkUp, spinNetworkDown } from "@entropyxyz/sdk/testing"
 // @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
 import { initializeEntropy } from '../../src/common/initializeEntropy'
 import * as config from '../../src/config'
@@ -36,7 +33,8 @@ export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entro
   const run = promiseRunner(t)
 
   await run('config.init', config.init(configPath))
-  await run('wasm', wasmGlobalsReady())
+  await wasmGlobalsReady()
+    .catch(err => t.error(err))
 
   // To follow the same way we initiate entropy within the cli we must go through the same process of creating an initial keyring
   // as done in src/flows/manage-accounts/new-key.ts
@@ -48,6 +46,10 @@ export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entro
   })
 
   await run('entropy ready', entropy.ready)
+
+  t.teardown(async () => {
+    await entropy.close()
+  })
 
   return { entropy, run, endpoint }
 }

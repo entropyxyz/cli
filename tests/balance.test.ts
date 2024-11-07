@@ -3,13 +3,11 @@ import test from 'tape'
 import { setupTest, charlieStashAddress as richAddress } from './testing-utils'
 import { EntropyBalance } from '../src/balance/main'
 
-const networkType = 'four-nodes'
-
 test('getBalance + getBalances', async (t) => {
-  const { run, entropy, endpoint } = await setupTest(t, { networkType })
+  const { run, entropy, endpoint } = await setupTest(t)
   const balanceService = new EntropyBalance(entropy, endpoint)
   const newAddress = entropy.keyring.accounts.registration.address
-  
+
   /* getBalance */
   const newAddressBalance = await run(
     'getBalance (newSeed)',

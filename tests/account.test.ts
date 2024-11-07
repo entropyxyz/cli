@@ -4,8 +4,6 @@ import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
 // @ts-ignore
 import { isValidSubstrateAddress } from '@entropyxyz/sdk/utils'
 // @ts-ignore
-import { jumpStartNetwork } from '@entropyxyz/sdk/testing'
-// @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
 import { randomAsHex } from '@polkadot/util-crypto'
 
@@ -97,8 +95,6 @@ test('Account - Register: Default Program', async (t) => {
   // NOTE: we fund a new account "naynay" because jumpStart has problems with charlie (T_T)
   await run('fund naynay', fundAccount(t, naynay))
 
-  await run('jump-start network', jumpStartNetwork(naynay))
-
   const account = new EntropyAccount(naynay, endpoint)
   const verifyingKey = await run('register account', account.register())
 
@@ -116,8 +112,6 @@ test('Account - Register: Barebones Program', async t => {
   const dummyProgram: any = readFileSync(
     new URL('./programs/template_barebones.wasm', import.meta.url)
   )
-
-  await run('jump-start network', jumpStartNetwork(naynay))
 
   const account = new EntropyAccount(naynay, endpoint)
   const pointer = await run(

@@ -1,7 +1,5 @@
 import test from 'tape'
 import { readFileSync } from 'fs'
-// @ts-ignore
-import { jumpStartNetwork } from '@entropyxyz/sdk/testing'
 
 import { eveSeed, setupTest } from './testing-utils'
 import { stripHexPrefix } from '../src/common/utils'
@@ -13,7 +11,6 @@ import { FAUCET_PROGRAM_POINTER } from '../src/faucet/utils'
 
 async function setupAndFundFaucet (t) {
   const { run, entropy, endpoint } = await setupTest(t, { seed: eveSeed })
-  await run('jump-start network', jumpStartNetwork(entropy))
 
   const account = new EntropyAccount(entropy, endpoint)
   const transfer = new EntropyTransfer(entropy, endpoint)

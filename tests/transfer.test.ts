@@ -1,37 +1,23 @@
 import test from 'tape'
-import { wasmGlobalsReady } from '@entropyxyz/sdk'
 // @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
 import { 
   makeSeed,
   promiseRunner,
-  spinNetworkUp,
-  spinNetworkDown
 } from './testing-utils'
 
 import { initializeEntropy } from '../src/common/initializeEntropy'
 import { BITS_PER_TOKEN } from "../src/common/constants";
 import { EntropyTransfer } from '../src/transfer/main'
 import { EntropyBalance } from '../src/balance/main'
-import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants'
 import { EntropyAccountData } from '../src/config/types'
+import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants.mjs'
 
-const networkType = 'four-nodes'
 const endpoint = 'ws://127.0.0.1:9944'
 
 test('Transfer', async (t) => {
   /* Setup */
   const run = promiseRunner(t)
-  await run('wasm', wasmGlobalsReady())
-  await run('network up', spinNetworkUp(networkType))
-  // this gets called after all tests are run
-  t.teardown(async () => {
-    await naynayEntropy.close()
-    await charlieEntropy.close()
-    await spinNetworkDown(networkType).catch((error) =>
-      console.error('Error while spinning network down', error.message)
-    )
-  })
 
   const charlieKeyring = new Keyring({ seed: charlieStashSeed, debug: true })
   const charlieEntropy = await initializeEntropy({ keyMaterial: charlieKeyring.getAccount() as EntropyAccountData, endpoint, })
