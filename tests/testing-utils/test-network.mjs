@@ -44,16 +44,16 @@ async function testNetworkUp () {
     spinNetworkUp(NETWORK_TYPE_DEFAULT)
   )
 
+  await wasmGlobalsReady()
+
   // Entropy Client
   const keyring = new Keyring({ seed: eveSeed })
   const entropy = new Entropy({
     endpoint: 'ws://127.0.0.1:9944',
     keyring: keyring
   })
-  await run(
-    'set up entropy client',
-    Promise.all([ wasmGlobalsReady(), entropy.ready ])
-  )
+
+  await run('set up entropy client', entropy.ready)
 
   // Jump-start
   const status = await getJumpstartStatus(entropy)
@@ -90,8 +90,10 @@ async function testNetworkDown () {
 // utils
 
 function success () {
-  spinner.clear()
-  spinner.stop()
+  if (spinner) {
+    spinner.clear()
+    spinner.stop()
+  }
   process.exit(0)
 }
 
@@ -122,6 +124,7 @@ function promiseRunner (spinner) {
       }, 1000)
     } else {
       interval = setInterval(() => {
+        console.log(`${msg}...`)
         if (++count % 30 === 0) {
           console.log(`${msg} (${count}s)`)
         }
