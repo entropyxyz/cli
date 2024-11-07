@@ -28,6 +28,8 @@ switch (direction) {
     handleError(
       Error(`unknown direction "${direction}" (choose "up" or "down")`)
     )
+
+  console.log('\n')
 }
 
 
