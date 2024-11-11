@@ -33,7 +33,7 @@ for ALIAS in "${ALIASES[@]}"; do
   fi
 done
 
-echo ""
+echo ''
 
 # Exit with an error code if any alias is incorrect
 if [ $ERROR -ne 0 ]; then

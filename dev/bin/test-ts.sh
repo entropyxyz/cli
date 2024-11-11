@@ -21,3 +21,6 @@ else
     npx tsx $t | tap-spec;
   done
 fi
+
+echo ''
+echo ''
