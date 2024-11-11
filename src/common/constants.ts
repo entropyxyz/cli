@@ -1,4 +1,4 @@
-export const ENTROPY_ENDPOINT_DEFAULT = 'ws://testnet.entropy.xyz:9944/'
+export const ENTROPY_ENDPOINT_DEFAULT = 'wss://testnet.entropy.xyz/'
 
 /* 
   A "bit" is the smallest indivisible unit of account value we track.

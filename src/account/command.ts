@@ -5,6 +5,7 @@ import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from ".
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
 import { accountOption, configOption, endpointOption, cliWrite, loadEntropy } from "../common/utils-cli";
+import { ERROR_RED } from "src/common/constants";
 
 export function entropyAccountCommand () {
   return new Command('account')
@@ -112,14 +113,22 @@ function entropyAccountRegister () {
     //   )
     // )
     .action(async (opts) => {
-      // NOTE: loadEntropy throws if it can't find opts.account
-      const entropy: Entropy = await loadEntropy(opts)
-      const accountService = new EntropyAccount(entropy, opts.endpoint)
+      try {
+        // NOTE: loadEntropy throws if it can't find opts.account
+        const entropy: Entropy = await loadEntropy(opts)
+        if (!entropy) throw new Error('AccountError: There are currently no available accounts, please create one before trying to register.')
+        console.log({ entropy });
+        
+        const accountService = new EntropyAccount(entropy, opts.endpoint)
 
-      const verifyingKey = await accountService.register()
-      await addVerifyingKeyToAccountAndSelect(opts.config, verifyingKey, opts.account)
+        const verifyingKey = await accountService.register()
+        await addVerifyingKeyToAccountAndSelect(opts.config, verifyingKey, opts.account)
 
-      cliWrite(verifyingKey)
-      process.exit(0)
+        cliWrite(verifyingKey)
+        process.exit(0)
+      } catch (error) {
+        console.error(ERROR_RED + error.message)
+        process.exit(1)
+      }
     })
 }
