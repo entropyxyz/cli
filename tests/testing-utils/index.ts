@@ -9,7 +9,7 @@ export {
   spinNetworkDown,
 }
 
-export * from './constants'
+export * from './constants.mjs'
 export * from './setup-test'
 
 /* Promise wrapper function of [exec](https://nodejs.org/api/child_process.html#child_processexeccommand-options-callback)

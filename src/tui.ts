@@ -5,7 +5,7 @@ import yoctoSpinner from 'yocto-spinner'
 
 import * as config from './config'
 import { EntropyTuiOptions } from './types'
-import { logo } from './common/ascii'
+import { printLogo } from './common/ascii'
 import { jumpStartNetwork, print, findAccountByAddressOrName } from './common/utils'
 import { loadEntropy, accountOption, endpointOption, configOption } from './common/utils-cli'
 import { EntropyLogger } from './common/logger'
@@ -38,17 +38,23 @@ export function entropyTuiCommand () {
 // tui = text user interface
 export async function tuiAction (opts: EntropyTuiOptions) {
   const logger = new EntropyLogger('TUI', opts.endpoint)
-  console.clear()
-  console.log(logo) // the Entropy logo
   logger.debug(opts)
 
   const storedConfig = await setupConfig(opts.config)
+  // TODO: what if there is no config?
 
-  const entropy = await loadEntropy({
+  const entropyPromise = loadEntropy({
     account: storedConfig.selectedAccount,
     config: opts.config,
     endpoint: opts.endpoint
   })
+
+  console.clear()
+  await printLogo()
+
+  loader.start()
+  const entropy = await entropyPromise
+  loader.stop()
 
   let choices = [
     'Manage Accounts',

@@ -158,7 +158,8 @@ function entropyProgramList () {
     .action(async (verifyingKey, opts) => { // eslint-disable-line
       const program = await programService(opts)
 
-      await program.list({ verifyingKey })
+      const programs = await program.list({ verifyingKey })
+      cliWrite(programs)
 
       process.exit(0)
     })

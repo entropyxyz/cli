@@ -10,6 +10,19 @@ The format extends [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Version header format: `[version] Name - year-month-day (entropy-core compatibility: version [range])`
 
+## [0.m.p] Echo - YYYY-MM-DD (entropy-core compatibility: 0.3.0)
+
+### Fixed
+
+- programmatic CLI
+  - `entropy program list` now prints output! [#298](https://github.com/entropyxyz/cli/pull/298)
+
+### Added 
+
+- TUI
+  - animation on tui load (while entropy loads) [#288](https://github.com/entropyxyz/cli/pull/288)
+
+
 
 ## [0.1.1] Deadpool - 2024-11-06 (entropy-core compatibility: 0.3.0)
 
