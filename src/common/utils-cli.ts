@@ -72,7 +72,7 @@ export async function loadEntropy (opts: {
   if (!account) return
   
   // if this account is not the default selectedAccount, make it so
-  if (storedConfig.selectedAccount !== account?.name || storedConfig.selectedAccount !== account?.address) {
+  if (storedConfig.selectedAccount !== account.name) {
     await config.set(
       {
         ...storedConfig,
