@@ -7,6 +7,7 @@ import { EntropyProgram } from "src/program/main";
 import FaucetSigner from "./helpers/signer";
 import { SendMoneyParams } from "./types";
 import { formatDispatchError } from "src/common/utils";
+import { EntropyAccount } from "src/account/main";
 
 const FLOW_CONTEXT = 'ENTROPY-FAUCET'
 
@@ -43,8 +44,8 @@ export class EntropyFaucet extends EntropyBase {
   }
 
   async getAllFaucetVerifyingKeys (programModKey = FAUCET_PROGRAM_MOD_KEY) {
-    return this.entropy.substrate.query.registry.modifiableKeys(programModKey)
-      .then(res => res.toJSON())
+    const accountService = new EntropyAccount(this.entropy, this.endpoint)
+    return accountService.getVerifyingKeys(programModKey)
   }
 
   // To handle overloading the individual faucet, multiple faucet accounts have been generated, and here is

@@ -2,9 +2,9 @@ import inquirer from "inquirer";
 import Entropy from "@entropyxyz/sdk";
 
 import { EntropyAccount } from './main'
-import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from "./utils";
+import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect, completeImport } from "./utils";
 import { findAccountByAddressOrName, print } from "../common/utils"
-import { EntropyConfig } from "../config/types";
+import { EntropyAccountConfig, EntropyConfig } from "../config/types";
 import * as config from "../config";
 
 import { 
@@ -17,7 +17,7 @@ import { ERROR_RED } from "src/common/constants";
 /*
  * @returns partialConfigUpdate | "exit" | undefined
  */
-export async function entropyAccount (endpoint: string, storedConfig: EntropyConfig) {
+export async function entropyAccount (storedConfig: EntropyConfig, endpoint?: string) {
   const { accounts } = storedConfig
   const { interactionChoice } = await inquirer.prompt(accountManageQuestions)
 
@@ -32,9 +32,13 @@ export async function entropyAccount (endpoint: string, storedConfig: EntropyCon
       seed = seed.split('#debug')[0]
     }
 
-    const newAccount = seed
-      ? await EntropyAccount.import({ seed, name, path })
-      : await EntropyAccount.create({ name, path })
+    let newAccount: EntropyAccountConfig
+    if (seed) {
+      const partiallyImportedAccount = await EntropyAccount.import({ seed, name, path })
+      newAccount = await completeImport(partiallyImportedAccount, endpoint)
+    } else {
+      newAccount = await EntropyAccount.create({ name, path })
+    }
 
     await selectAndPersistNewAccount(newAccount)
     return
@@ -87,6 +91,11 @@ export async function entropyRegister (entropy: Entropy, endpoint: string, store
   try {
     const verifyingKey = await accountService.register()
     await addVerifyingKeyToAccountAndSelect(verifyingKey, account.address)
+    const fullAccount = await entropy.keyring.getAccount()
+    const newverifyingkeys = await accountService.getVerifyingKeys(fullAccount.registration.address)
+    
+    console.log({ regkeys: fullAccount.registration.verifyingKeys, devkeys: fullAccount.deviceKey.verifyingKeys, adminkeys: fullAccount.admin.verifyingKeys });
+    console.log({ newverifyingkeys })
 
     print("Your address", account.address, "has been successfully registered.")
   } catch (error) {

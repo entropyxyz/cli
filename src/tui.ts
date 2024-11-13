@@ -134,7 +134,7 @@ async function main (entropy: Entropy, choices: string[], options: EntropyTuiOpt
 
     switch (answers.choice) {
     case 'Manage Accounts': {
-      const response = await entropyAccount(options.endpoint, storedConfig)
+      const response = await entropyAccount(storedConfig, options.endpoint)
       if (response === 'exit') { returnToMain = true }
       break
     }

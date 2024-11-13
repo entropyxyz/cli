@@ -2,6 +2,8 @@ import { ACCOUNTS_CONTENT } from './constants';
 import { EntropyAccountConfig } from "../config/types";
 import * as config from "../config";
 import { generateAccountChoices, findAccountByAddressOrName } from '../common/utils';
+import { EntropyAccount } from './main';
+import { initializeEntropy } from 'src/common/initializeEntropy';
 
 export async function selectAndPersistNewAccount (newAccount: EntropyAccountConfig) {
   const storedConfig = await config.get()
@@ -93,3 +95,14 @@ export const accountManageQuestions = [
     choices: ACCOUNTS_CONTENT.interactionChoice.choices
   }
 ]
+
+export async function completeImport (newAccount: EntropyAccountConfig, endpoint: string) {
+  const entropy = await initializeEntropy({ keyMaterial: newAccount.data, endpoint })
+  const accountService = new EntropyAccount(entropy, endpoint)
+
+  const verifyingKeys = await accountService.getVerifyingKeys(newAccount.address)
+  newAccount.data.admin.verifyingKeys = verifyingKeys as string[]
+  newAccount.data.registration.verifyingKeys = verifyingKeys as string[]
+
+  return newAccount
+}
