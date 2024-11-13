@@ -12,6 +12,10 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 
 ## [0.m.p] Echo - YYYY-MM-DD (entropy-core compatibility: 0.3.0)
 
+### Fixed
+
+- programmatic CLI
+  - `entropy program list` now prints output! [#298](https://github.com/entropyxyz/cli/pull/298)
 
 ### Added 
 
