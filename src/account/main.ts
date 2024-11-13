@@ -53,6 +53,11 @@ export class EntropyAccount extends EntropyBase {
     }))
   }
 
+  async getVerifyingKeys (address: string) {
+    return this.entropy.substrate.query.registry.modifiableKeys(address)
+      .then(result => result.toJSON())
+  }
+
   async register (params?: AccountRegisterParams): Promise<string> {
     let programModAddress: string
     let programData: any
