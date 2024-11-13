@@ -36,7 +36,7 @@ export async function entropyAccount (opts: EntropyTuiOptions, storedConfig: Ent
       ? await EntropyAccount.import({ seed, name, path })
       : await EntropyAccount.create({ name, path })
 
-    await selectAndPersistNewAccount(config.CONFIG_PATH_DEFAULT, newAccount)
+    await selectAndPersistNewAccount(opts.config, newAccount)
     return
   }
 
