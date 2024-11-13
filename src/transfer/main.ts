@@ -1,8 +1,8 @@
 import Entropy from "@entropyxyz/sdk";
 
 import { EntropyBase } from "../common/entropy-base";
-import { formatDispatchError } from "../common/utils";
-import { BITS_PER_TOKEN } from "../common/constants";
+import { formatDispatchError, getTokenDetails } from "../common/utils";
+import { TOKENS_PER_BITS } from "../common/utils";
 import { TransferOptions } from "./types";
 
 const FLOW_CONTEXT = 'ENTROPY_TRANSFER'
@@ -17,15 +17,16 @@ export class EntropyTransfer extends EntropyBase {
   // - converting `amount` (string => BigInt)
   // - progress callbacks (optional)
 
-  async transfer (toAddress: string, amount: string, progress?: { start: ()=>void, stop: ()=>void }) {
-    const formattedAmount = BigInt(Number(amount) * BITS_PER_TOKEN)
+  async transfer (toAddress: string, amountInBits: string, progress?: { start: ()=>void, stop: ()=>void }) {
+    const { decimals } = await getTokenDetails(this.entropy)
+    const tokens = BigInt(Number(amountInBits) * TOKENS_PER_BITS(decimals))
 
     if (progress) progress.start()
     try {
       await this.rawTransfer({
         from: this.entropy.keyring.accounts.registration.pair,
         to: toAddress,
-        amount: formattedAmount
+        tokens
       })
       if (progress) return progress.stop()
     } catch (error) {
@@ -35,13 +36,13 @@ export class EntropyTransfer extends EntropyBase {
   }
 
   private async rawTransfer (payload: TransferOptions): Promise<any> {
-    const { from, to, amount } = payload
+    const { from, to, tokens } = payload
 
     return new Promise((resolve, reject) => {
       // WARN: await signAndSend is dangerous as it does not resolve
       // after transaction is complete :melt:
       this.entropy.substrate.tx.balances
-        .transferAllowDeath(to, amount)
+        .transferAllowDeath(to, tokens)
         // @ts-ignore
         .signAndSend(from, ({ status, dispatchError }) => {
           if (dispatchError) {

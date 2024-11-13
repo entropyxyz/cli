@@ -113,3 +113,26 @@ export async function jumpStartNetwork (entropy, endpoint): Promise<any> {
       })
   })
 }
+
+export async function getTokenDetails (entropy): Promise<{ decimals: number, symbol: string }> {
+  const chainProperties = await entropy.substrate.rpc.system.properties()
+  const decimals = chainProperties.tokenDecimals.toHuman()[0]
+  const symbol = chainProperties.tokenSymbol.toHuman()[0]
+
+  return { decimals: parseInt(decimals), symbol }
+}
+
+/* 
+  A "token" is the smallest indivisible unit of account value we track.
+  A "BIT" is the human readable unit of value value
+  This constant is then "the number of tokens that make up 1 BITS", or said differently
+  "how many decimal places our BITS has".
+*/
+export const TOKENS_PER_BITS = (decimals: number): number => {
+  return Math.pow(10, decimals)
+  
+}
+
+export function tokensToBits (numOfTokens: number, decimals: number) {
+  return parseFloat((numOfTokens / TOKENS_PER_BITS(decimals)).toFixed(4))
+}
