@@ -132,7 +132,7 @@ function parseAccountOption (config: EntropyConfig, addressOrName: string) {
     console.error(ERROR_RED + `AccountError: No account with name or address "${addressOrName}"`)
     print(bold('!! Available accounts can be found using `entropy account list` !!'))
     process.exit(1)
-  } else if (!config.accounts.length && !account) {
+  } else if (!accounts.length && !account) {
     // console.error(ERROR_RED + 'AccountError: There are currently no accounts available to use')
     // print(bold("Please create a new account or import an existing account to continue."))
     return
