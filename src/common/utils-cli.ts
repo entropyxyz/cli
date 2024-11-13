@@ -128,7 +128,7 @@ function parseAccountOption (config: EntropyConfig, addressOrName: string) {
   const accounts = config?.accounts || []
   const account = findAccountByAddressOrName(accounts, addressOrName)
 
-  if (config.accounts.length && !account) {
+  if (accounts.length && !account) {
     console.error(ERROR_RED + `AccountError: No account with name or address "${addressOrName}"`)
     print(bold('!! Available accounts can be found using `entropy account list` !!'))
     process.exit(1)
