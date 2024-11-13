@@ -8,7 +8,7 @@ export function entropyTransferCommand () {
   transferCommand
     .description('Transfer funds between two Entropy accounts.') // TODO: name the output
     .argument('<destination>', 'Account address funds will be sent to')
-    .argument('<amount>', 'Amount of funds to be moved (in "BITS")')
+    .argument('<amount>', 'Amount of funds (in "BITS") to be moved')
     .addOption(accountOption())
     .addOption(endpointOption())
     .action(async (destination, amount, opts) => {
