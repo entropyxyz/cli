@@ -2,11 +2,10 @@ import { Command, Option } from 'commander'
 import inquirer from 'inquirer'
 import Entropy from '@entropyxyz/sdk'
 import yoctoSpinner from 'yocto-spinner'
-import { promisify } from 'node:util'
 
 import * as config from './config'
 import { EntropyTuiOptions } from './types'
-import { logo } from './common/ascii'
+import { printLogo } from './common/ascii'
 import { jumpStartNetwork, print, findAccountByAddressOrName } from './common/utils'
 import { loadEntropy, accountOption, endpointOption } from './common/utils-cli'
 import { EntropyLogger } from './common/logger'
@@ -36,36 +35,20 @@ export function entropyTuiCommand () {
 }
 
 // tui = text user interface
-export async function tuiAction (options: EntropyTuiOptions) {
-  const { account, endpoint } = options
-  const entropy = account
-    ? await loadEntropy(account, endpoint)
-    : undefined
-    // NOTE: on initial startup you have no account
+export async function tuiAction (opts: EntropyTuiOptions) {
+  const logger = new EntropyLogger('TUI', opts.endpoint)
+  logger.debug(opts)
 
-  const logger = new EntropyLogger('TUI', options.endpoint)
-  logger.debug(options)
+  const entropyPromise = opts.account
+    ? loadEntropy(opts.account, opts.endpoint)
+    : Promise.resolve(undefined)
 
   console.clear()
-  const lines = logo.split('\n')
-  let i = 0
-  while (i < 100) {
-    const newLogo = lines.map((line, lineNum) => {
-      const lineChars = line.split('')
+  await printLogo()
 
-      if (lineChars?.[i - lineNum] === '@') {
-        lineChars[i - lineNum] = '*'
-      }
-
-      return lineChars
-        .slice(0, Math.max(0, i - lineNum))
-        .join('')
-    }).join('\n')
-    console.clear()
-    console.log(newLogo)
-    i++
-    await promisify(setTimeout)(10)
-  }
+  loader.start()
+  const entropy = await entropyPromise
+  loader.stop()
 
   let choices = [
     'Manage Accounts',
@@ -84,14 +67,14 @@ export async function tuiAction (options: EntropyTuiOptions) {
     // 'Create and Fund Faucet(s)'
   ]
 
-  if (options.dev) {
+  if (opts.dev) {
     choices = [...choices, ...devChoices]
   }
 
   // assign exit so its last
   choices = [...choices, 'Exit']
 
-  main(entropy, choices, options, logger)
+  main(entropy, choices, opts, logger)
 }
 
 const loader = yoctoSpinner()
