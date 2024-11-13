@@ -5,7 +5,7 @@ import { absolutePath, bold, findAccountByAddressOrName, print, stringify } from
 import { initializeEntropy } from './initializeEntropy'
 import * as config from '../config'
 import { EntropyConfig } from "../config/types";
-import { ENTROPY_ENDPOINT_DEFAULT, ERROR_RED } from '../common/constants'
+import { ENTROPY_ENDPOINT_DEFAULT } from '../common/constants'
 
 export function cliWrite (result) {
   const prettyResult = stringify(result, 0)
@@ -62,15 +62,15 @@ export async function loadEntropy (opts: {
   endpoint: string,
 }): Promise<Entropy> {
   const storedConfig = getConfigOrNull(opts.config)
-  
   // NOTE: (mix) we expect config to be initialised (see hook in cli)
   // ...there was some reason we wanted to preserve a `null` state,
   // but I can't recall if it's still relevant, and we need to check
   // the downstream ramifications of it being `null`
+  if (!storedConfig) throw Error('no config!!') // TEMP
 
   const account = parseAccountOption(storedConfig, opts.account)
   if (!account) return
-  
+
   // if this account is not the default selectedAccount, make it so
   if (storedConfig.selectedAccount !== account.name) {
     await config.set(
@@ -125,17 +125,17 @@ function parseEndpointOption (config: EntropyConfig, aliasOrEndpoint: string) {
 }
 
 function parseAccountOption (config: EntropyConfig, addressOrName: string) {
-  const accounts = config?.accounts || []
-  const account = findAccountByAddressOrName(accounts, addressOrName)
-
-  if (accounts.length && !account) {
-    console.error(ERROR_RED + `AccountError: No account with name or address "${addressOrName}"`)
-    print(bold('!! Available accounts can be found using `entropy account list` !!'))
-    process.exit(1)
-  } else if (!accounts.length && !account) {
-    // console.error(ERROR_RED + 'AccountError: There are currently no accounts available to use')
+  if (!config?.accounts?.length) {
+    // print.error(ERROR_RED + 'AccountError: There are currently no accounts available to use')
     // print(bold("Please create a new account or import an existing account to continue."))
     return
+  }
+
+  const account = findAccountByAddressOrName(config.accounts, addressOrName)
+  if (!account) {
+    print.error(`AccountError: No account with name or address "${addressOrName}"`)
+    print(bold('!! Available accounts can be found using `entropy account list` !!'))
+    process.exit(1)
   }
 
   return account

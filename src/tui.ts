@@ -43,7 +43,7 @@ export async function tuiAction (opts: EntropyTuiOptions) {
   logger.debug(opts)
 
   const storedConfig = await setupConfig(opts.config)
-  
+
   const entropy = await loadEntropy({
     account: storedConfig.selectedAccount,
     config: opts.config,

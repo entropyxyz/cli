@@ -1,11 +1,12 @@
 import Entropy from "@entropyxyz/sdk"
 import { Command, Option } from 'commander'
+
 import { EntropyAccount } from "./main";
 import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from "./utils";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
 import { accountOption, configOption, endpointOption, cliWrite, loadEntropy } from "../common/utils-cli";
-import { ERROR_RED } from "src/common/constants";
+import { print } from "../common/utils"
 
 export function entropyAccountCommand () {
   return new Command('account')
@@ -118,7 +119,7 @@ function entropyAccountRegister () {
         const entropy: Entropy = await loadEntropy(opts)
         if (!entropy) throw new Error('AccountError: There are currently no available accounts, please create one before trying to register.')
         console.log({ entropy });
-        
+
         const accountService = new EntropyAccount(entropy, opts.endpoint)
 
         const verifyingKey = await accountService.register()
@@ -127,7 +128,8 @@ function entropyAccountRegister () {
         cliWrite(verifyingKey)
         process.exit(0)
       } catch (error) {
-        console.error(ERROR_RED + error.message)
+        // TODO: this should be cliWriteError
+        print.error(error.message)
         process.exit(1)
       }
     })

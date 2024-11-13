@@ -24,8 +24,24 @@ export function replacer (key, value) {
   else return value
 }
 
+
 export function print (...args) {
   console.log(...args.map(arg => stringify(arg)))
+}
+
+// ASCII color codes
+const GREEN = '\u001b[32m'
+const RED = '\u001b[31m'
+const BLUE = '\u001b[34m'
+const RESET = '\u001b[0m'
+print.success = function printSuccess (...args) {
+  return print(GREEN, ...args, RESET)
+}
+print.error = function printError (...args) {
+  return print(RED, ...args, RESET)
+}
+print.info = function printInfo (...args) {
+  return print(BLUE, ...args, RESET)
 }
 
 export function bold (text) {

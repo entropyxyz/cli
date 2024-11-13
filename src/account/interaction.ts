@@ -13,7 +13,6 @@ import {
   accountNewQuestions,
   accountSelectQuestions
 } from "./utils"
-import { ERROR_RED } from "src/common/constants";
 
 /*
  * @returns partialConfigUpdate | "exit" | undefined
@@ -94,9 +93,9 @@ export async function entropyRegister (entropy: Entropy, opts: EntropyTuiOptions
     const endpointErrorMessageToMatch = 'Extrinsic registry.register expects 3 arguments, got 2'
     // const insufficientFeesErrorMessageToMatch = ''
     if (error.message.includes(endpointErrorMessageToMatch)) {
-      console.error(ERROR_RED + 'GenericError: Incompatible endpoint, expected core version 0.3.0, got 0.2.0')
+      print.error('GenericError: Incompatible endpoint, expected core version 0.3.0, got 0.2.0')
       return
     }
-    console.error(ERROR_RED + 'Register Error:', error.message);
+    print.error('Register Error:', error.message)
   }
 }
