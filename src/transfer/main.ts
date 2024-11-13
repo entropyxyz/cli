@@ -1,8 +1,7 @@
 import Entropy from "@entropyxyz/sdk";
 
 import { EntropyBase } from "../common/entropy-base";
-import { formatDispatchError, getTokenDetails } from "../common/utils";
-import { TOKENS_PER_BITS } from "../common/utils";
+import { bitsToTokens, formatDispatchError, getTokenDetails } from "../common/utils";
 import { TransferOptions } from "./types";
 
 const FLOW_CONTEXT = 'ENTROPY_TRANSFER'
@@ -19,7 +18,7 @@ export class EntropyTransfer extends EntropyBase {
 
   async transfer (toAddress: string, amountInBits: string, progress?: { start: ()=>void, stop: ()=>void }) {
     const { decimals } = await getTokenDetails(this.entropy)
-    const tokens = BigInt(Number(amountInBits) * TOKENS_PER_BITS(decimals))
+    const tokens = bitsToTokens(Number(amountInBits), decimals)
 
     if (progress) progress.start()
     try {

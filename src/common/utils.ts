@@ -2,6 +2,7 @@ import { Entropy } from '@entropyxyz/sdk'
 import { Buffer } from 'buffer'
 import { EntropyAccountConfig } from "../config/types"
 import { EntropyLogger } from './logger'
+import { TokenDetails } from 'src/types'
 
 export function stripHexPrefix (str: string): string {
   if (str.startsWith('0x')) return str.slice(2)
@@ -114,12 +115,15 @@ export async function jumpStartNetwork (entropy, endpoint): Promise<any> {
   })
 }
 
-export async function getTokenDetails (entropy): Promise<{ decimals: number, symbol: string }> {
+// caching details to reduce number of calls made to the rpc endpoint
+let tokenDetails: TokenDetails
+export async function getTokenDetails (entropy): Promise<TokenDetails> {
+  if (tokenDetails) return tokenDetails
   const chainProperties = await entropy.substrate.rpc.system.properties()
   const decimals = chainProperties.tokenDecimals.toHuman()[0]
   const symbol = chainProperties.tokenSymbol.toHuman()[0]
-
-  return { decimals: parseInt(decimals), symbol }
+  tokenDetails = { decimals: parseInt(decimals), symbol }
+  return tokenDetails
 }
 
 /* 
@@ -128,11 +132,18 @@ export async function getTokenDetails (entropy): Promise<{ decimals: number, sym
   This constant is then "the number of tokens that make up 1 BITS", or said differently
   "how many decimal places our BITS has".
 */
-export const TOKENS_PER_BITS = (decimals: number): number => {
-  return Math.pow(10, decimals)
-  
+export const tokensPerBits = (decimals: number): number => {
+  return Math.pow(10, decimals) 
 }
 
 export function tokensToBits (numOfTokens: number, decimals: number) {
-  return parseFloat((numOfTokens / TOKENS_PER_BITS(decimals)).toFixed(4))
+  return numOfTokens / tokensPerBits(decimals)
+}
+
+export function bitsToTokens (numOfBits: number, decimals: number): bigint {
+  return BigInt(numOfBits * tokensPerBits(decimals))
+}
+
+export function round (num: number, decimals: number = 4): number {
+  return parseFloat(num.toFixed(decimals))
 }

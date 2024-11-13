@@ -1,6 +1,6 @@
 import test from 'tape'
 
-import { TOKENS_PER_BITS } from "../src/common/utils";
+import { tokensPerBits } from "../src/common/utils";
 import { EntropyTransfer } from '../src/transfer/main'
 import { EntropyBalance } from '../src/balance/main'
 import { promiseRunner, setupTest } from './testing-utils'
@@ -44,7 +44,7 @@ test('Transfer', async (t) => {
     'getBalance (naynay)',
     balanceService.getBalance(naynayAddress)
   )
-  const expected = Number(inputAmount) * TOKENS_PER_BITS(DEFAULT_TOKEN_DECIMALS)
+  const expected = Number(inputAmount) * tokensPerBits(DEFAULT_TOKEN_DECIMALS)
   t.equal(naynayBalance, expected, 'naynay is rolling in it!')
 
   t.end()

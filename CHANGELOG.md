@@ -14,15 +14,29 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 
 ### Fixed
 
-- programmatic CLI
+- Shared
+  - amount units are now correct! [#306](https://github.com/entropyxyz/cli/pull/306)
+    - 1 token = 0.00000000001 BITS
+    - 1 BITS = 10000000000 tokens
+- Programmatic CLI
   - `entropy program list` now prints output! [#298](https://github.com/entropyxyz/cli/pull/298)
 
-### Added 
+### Added
 
+- Shared
+  - new methods for conversion and other math operations [#306](https://github.com/entropyxyz/cli/pull/306)
+    - BITS => tokens
+    - Tokens => BITS
+    - rounding to a specific number of decimal places
+    - tokens per bits calculation
+  - new method to pull token details from chain, and cache the results [#306](https://github.com/entropyxyz/cli/pull/306)
 - TUI
   - animation on tui load (while entropy loads) [#288](https://github.com/entropyxyz/cli/pull/288)
 
+### Changed
 
+- Shared
+  - Balance now displays the number of BITS to the nearest 4 decimal places [#306](https://github.com/entropyxyz/cli/pull/306)
 
 ## [0.1.1] Deadpool - 2024-11-06 (entropy-core compatibility: 0.3.0)
 
