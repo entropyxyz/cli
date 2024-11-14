@@ -34,7 +34,7 @@ export async function loadEntropy (opts: LoadEntropyOpts): Promise<Entropy> {
   if (!storedConfig) throw Error('no config!!') // TEMP: want to see if we hit this!
 
   // Account
-  let account = resolveAccount(storedConfig, opts.account)
+  let account = resolveAccount(storedConfig, opts.account || storedConfig.selectedAccount)
   account = await setupRegistrationSubAccount(account, opts.config) // TODO: remove this later
   assertAccountData(account.data)
 
@@ -89,7 +89,7 @@ function resolveEndpoint (config: EntropyConfig, aliasOrEndpoint: string) {
   }
 }
 
-function resolveAccount (config: EntropyConfig, addressOrName?: string): EntropyConfigAccount|null {
+function resolveAccount (config: EntropyConfig, addressOrName: string): EntropyConfigAccount|null {
   if (!config.accounts) throw Error('no accounts')
 
   const account = findAccountByAddressOrName(config.accounts, addressOrName)

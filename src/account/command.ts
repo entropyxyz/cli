@@ -119,7 +119,6 @@ function entropyAccountRegister () {
         // NOTE: loadEntropy throws if it can't find opts.account
         const entropy: Entropy = await loadEntropy(opts)
         if (!entropy) throw new Error('AccountError: There are currently no available accounts, please create one before trying to register.')
-        console.log({ entropy });
 
         const accountService = new EntropyAccount(entropy, opts.endpoint)
 

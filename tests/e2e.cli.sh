@@ -36,6 +36,9 @@ print () {
   echo -e "${COLOR}> $1${RESET}"
 }
 
+print "Entropy Config:"
+print $ENTROPY_CONFIG
+
 print "// ACCOUNT /////////////////////////////////////////////////"
 
 print "account ls"
