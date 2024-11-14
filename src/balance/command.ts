@@ -6,6 +6,7 @@ import { endpointOption, cliWrite, loadEntropy } from "../common/utils-cli";
 import { findAccountByAddressOrName } from "../common/utils";
 import * as config from "../config";
 import { EntropyAccountConfig } from "src/config/types";
+import { formattedBalances } from "./utils";
 
 export function entropyBalanceCommand () {
   const balanceCommand = new Command('balance')
@@ -30,9 +31,8 @@ export function entropyBalanceCommand () {
       if (opts.all) {
         // Balances for all admin accounts
         const addresses: string[] = accounts.map((acct: EntropyAccountConfig) => acct.address)
-        const allBalancesObject = await BalanceService.getBalances(addresses)
-        const balancesArr = Object.keys(allBalancesObject).map(key => `${key} => ${allBalancesObject[key].balance} BITS`)
-        cliWrite(JSON.stringify(balancesArr, null, 2))
+        const balances = formattedBalances(await BalanceService.getBalances(addresses))
+        cliWrite(balances)
       } else {
         // Balance for singular account
         const address = findAccountByAddressOrName(accounts, account)?.address
