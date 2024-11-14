@@ -7,7 +7,8 @@ import * as config from './config'
 import { EntropyTuiOptions } from './types'
 import { printLogo } from './common/ascii'
 import { jumpStartNetwork, print, findAccountByAddressOrName } from './common/utils'
-import { loadEntropy, accountOption, endpointOption } from './common/utils-cli'
+import { accountOption, endpointOption } from './common/utils-cli'
+import { loadEntropy } from "./common/load-entropy"
 import { EntropyLogger } from './common/logger'
 
 import { entropyAccount, entropyRegister } from './account/interaction'
@@ -39,8 +40,12 @@ export async function tuiAction (opts: EntropyTuiOptions) {
   const logger = new EntropyLogger('TUI', opts.endpoint)
   logger.debug(opts)
 
+  // @ts-expect-error Types will align in custom-config PR
+  opts.config = config.CONFIG_PATH // TEMP
+
   const entropyPromise = opts.account
-    ? loadEntropy(opts.account, opts.endpoint)
+    // @ts-expect-error Types will align in custom-config PR
+    ? loadEntropy(opts)
     : Promise.resolve(undefined)
 
   console.clear()
@@ -96,7 +101,11 @@ async function main (entropy: Entropy, choices: string[], options: EntropyTuiOpt
   // Entropy is undefined on initial install, after user creates their first account,
   // entropy should be loaded
   if (storedConfig.selectedAccount && !entropy) {
-    entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint)
+    entropy = await loadEntropy({
+      account: storedConfig.selectedAccount,
+      config: config.CONFIG_PATH,
+      endpoint: options.endpoint
+    })
   }
 
   // If the selected account changes within the TUI we need to reset the entropy instance being used
@@ -108,7 +117,11 @@ async function main (entropy: Entropy, choices: string[], options: EntropyTuiOpt
     )
     if (currentAccount && currentAccount.name !== storedConfig.selectedAccount) {
       await entropy.close()
-      entropy = await loadEntropy(storedConfig.selectedAccount, options.endpoint);
+      entropy = await loadEntropy({
+        account: storedConfig.selectedAccount,
+        config: config.CONFIG_PATH,
+        endpoint: options.endpoint
+      })
     }
   }
 

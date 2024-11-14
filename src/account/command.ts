@@ -4,7 +4,8 @@ import { EntropyAccount } from "./main";
 import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from "./utils";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
-import { accountOption, endpointOption, cliWrite, loadEntropy } from "../common/utils-cli";
+import { accountOption, endpointOption, cliWrite } from "../common/utils-cli";
+import { loadEntropy } from "../common/load-entropy"
 
 export function entropyAccountCommand () {
   return new Command('account')
@@ -110,7 +111,7 @@ function entropyAccountRegister () {
     // )
     .action(async (opts) => {
       // NOTE: loadEntropy throws if it can't find opts.account
-      const entropy: Entropy = await loadEntropy(opts.account, opts.endpoint)
+      const entropy: Entropy = await loadEntropy(opts)
       const accountService = new EntropyAccount(entropy, opts.endpoint)
 
       const verifyingKey = await accountService.register()

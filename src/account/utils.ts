@@ -1,9 +1,9 @@
 import { ACCOUNTS_CONTENT } from './constants';
-import { EntropyAccountConfig } from "../config/types";
+import { EntropyConfigAccount } from "../config/types";
 import * as config from "../config";
 import { generateAccountChoices, findAccountByAddressOrName } from '../common/utils';
 
-export async function selectAndPersistNewAccount (newAccount: EntropyAccountConfig) {
+export async function selectAndPersistNewAccount (newAccount: EntropyConfigAccount) {
   const storedConfig = await config.get()
   const { accounts } = storedConfig
 
@@ -78,7 +78,7 @@ export const accountNewQuestions = [
   },
 ]
 
-export const accountSelectQuestions = (accounts: EntropyAccountConfig[]) => [{
+export const accountSelectQuestions = (accounts: EntropyConfigAccount[]) => [{
   type: 'list',
   name: ACCOUNTS_CONTENT.selectAccount.name,
   message: ACCOUNTS_CONTENT.selectAccount.message,
