@@ -13,9 +13,34 @@ interface LoadEntropyOpts {
   endpoint: string
 }
 
+
+// WIP
+//
+// Problem: tests needed "initializeEntropy"...
+// this loadEntropy assumes an account has already been set up right
+//
+// Solution ideas:
+// 1. perhaps just extract that for tests
+//   - not great for proving it all works same as production?
+//
+// 2. provide "config" getter/setter as an argument for loadEntropy
+//   - would still have to ensure config has account installed?
+//
+//   interface ConfigGetterSetter {
+//     set: Function
+//     get: Function
+//   }
+//
+// 3. just use existing functions to write account into config in correct form?
+//   - recurssive probelms for AccountService?
+
+
 export async function loadEntropy (opts: LoadEntropyOpts): Promise<Entropy> {
   const logger = new EntropyLogger('loadEntropy', opts.endpoint)
-  opts.config = config.CONFIG_PATH // TEMP: remove in subsequent PR
+  // TEMP: remove in subsequent PR
+  if (!opts.config) {
+    opts.config = config.CONFIG_PATH
+  }
 
   const storedConfig = await config.get(opts.config)
   if (!storedConfig) throw Error('no config!!') // TEMP: want to see if we hit this!
@@ -49,17 +74,6 @@ export async function loadEntropy (opts: LoadEntropyOpts): Promise<Entropy> {
   await entropy.ready
 
   return entropy
-
-  // catch(err => {
-  //   const logger = new EntropyLogger('initializeEntropy', opts.endpoint)
-
-  //   logger.error('Error while initializing entropy', err)
-  //   console.error(err.message)
-  //   if (err.message.includes('TimeError')) {
-  //     process.exit(1)
-  //   }
-  //   else throw err
-  // })
 }
 
 function resolveEndpoint (config: EntropyConfig, aliasOrEndpoint: string) {

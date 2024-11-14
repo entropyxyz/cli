@@ -5,7 +5,7 @@ import Keyring from '@entropyxyz/sdk/keys'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { initializeEntropy } from '../../src/common/initializeEntropy'
+import { loadEntropy } from '../../src/common/load-entropy'
 import * as config from '../../src/config'
 import { makeSeed, promiseRunner } from './'
 
@@ -36,13 +36,11 @@ export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entro
   await wasmGlobalsReady()
     .catch(err => t.error(err))
 
-  // To follow the same way we initiate entropy within the cli we must go through the same process of creating an initial keyring
-  // as done in src/flows/manage-accounts/new-key.ts
   const keyring = new Keyring({ seed, debug: true })
-  const entropy = await initializeEntropy({
+  const entropy = await loadEntropy({
     keyMaterial: keyring.getAccount(),
+    config: configPath
     endpoint,
-    configPath
   })
 
   await run('entropy ready', entropy.ready)
