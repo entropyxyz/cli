@@ -22,7 +22,8 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - TUI
   - animation on tui load (while entropy loads) [#288](https://github.com/entropyxyz/cli/pull/288)
 
-
+- Programmatic CLI
+  - added option for users to view all balances of admin accounts in the config [#310](https://github.com/entropyxyz/cli/pull/310)
 
 ## [0.1.1] Deadpool - 2024-11-06 (entropy-core compatibility: 0.3.0)
 
