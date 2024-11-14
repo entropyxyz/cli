@@ -33,12 +33,12 @@ export async function loadEntropy (opts: LoadEntropyOpts): Promise<Entropy> {
   const storedConfig = await config.get(opts.config)
   if (!storedConfig) throw Error('no config!!') // TEMP: want to see if we hit this!
 
-  let account = parseAccountOption(storedConfig, opts.account)
-  const endpoint = parseEndpointOption(storedConfig, opts.endpoint)
+  // Account
+  let account = resolveAccount(storedConfig, opts.account)
+  account = await setupRegistrationSubAccount(account, opts.config) // TODO: remove this later
+  assertAccountData(account.data)
 
-  account = await setupRegistrationSubAccount(account, opts.config)
-
-  // Setup: selected account
+  // Selected Account
   if (storedConfig.selectedAccount !== account.name) {
     await config.set(
       {
@@ -49,21 +49,17 @@ export async function loadEntropy (opts: LoadEntropyOpts): Promise<Entropy> {
     )
   }
 
+  // Endpoint
+  const endpoint = resolveEndpoint(storedConfig, opts.endpoint)
 
-
+  // Keyring
   await wasmGlobalsReady()
   const keyring = await getKeyring(account, opts.config)
   logger.debug(keyring)
 
+  // Entropy
   const entropy = new Entropy({ keyring, endpoint })
   await entropy.ready
-
-  if (!entropy?.keyring?.accounts?.registration?.seed) {
-    throw new Error("Keys are undefined")
-  }
-  if (!entropy?.keyring?.accounts?.registration?.pair) {
-    throw new Error("Signer keypair is undefined or not properly initialized.")
-  }
 
   return entropy
 
@@ -77,12 +73,9 @@ export async function loadEntropy (opts: LoadEntropyOpts): Promise<Entropy> {
   //   }
   //   else throw err
   // })
-
-
-  return entropy
 }
 
-function parseEndpointOption (config: EntropyConfig, aliasOrEndpoint: string) {
+function resolveEndpoint (config: EntropyConfig, aliasOrEndpoint: string) {
   // if raw endpoint
   if (aliasOrEndpoint.match(/^wss?:\/\//)) {
     return aliasOrEndpoint
@@ -96,7 +89,7 @@ function parseEndpointOption (config: EntropyConfig, aliasOrEndpoint: string) {
   }
 }
 
-function parseAccountOption (config: EntropyConfig, addressOrName?: string): EntropyConfigAccount|null {
+function resolveAccount (config: EntropyConfig, addressOrName?: string): EntropyConfigAccount|null {
   if (!config.accounts) throw Error('no accounts')
 
   const account = findAccountByAddressOrName(config.accounts, addressOrName)
@@ -107,52 +100,50 @@ function parseAccountOption (config: EntropyConfig, addressOrName?: string): Ent
     process.exit(1)
   }
 
-  assertAccountData(account.data)
-
   // there are accounts, we found a match
   return account
 }
 
-async function setupRegistrationSubAccount (account, configPath: string) {
-  // TODO: move this to account create/import?
+async function setupRegistrationSubAccount (account: EntropyConfigAccount, configPath: string) {
   if (account.data.registration) return account
 
-  account.data.registration = account.data.admin
-  account.data.registration.used = true // TODO: check if this is used
-
-  const storedConfig = await config.get(configPath)
-  storedConfig.accounts = storedConfig.accounts.map((account) => {
-    if (account.address === account.admin.address) {
-      return {
-        ...account,
-        data: account.data,
+  const newAccount = {
+    ...account,
+    data: {
+      ...account.data,
+      registration: {
+        ...account.data.admin,
+        used: true // TODO: check if this is used
       }
     }
-    return account
+  }
+
+  const storedConfig = await config.get(configPath)
+  // update that account => newAccount
+  storedConfig.accounts = storedConfig.accounts.map((thisAccount) => {
+    return (thisAccount.address === newAccount.address)
+      ? newAccount
+      : account
   })
   await config.set(storedConfig, configPath)
 
   return account
 }
 
-
-
-// Cache of keyrings
-const keyrings = {
-  default: undefined // this is the "selected account" keyring
-}
+const keyringCache = {}
 async function getKeyring (account: EntropyConfigAccount, configPath: string) {
   const { address } =  account.data.admin || {}
   if (!address) throw new Error('Cannot load keyring, no admin address')
 
-  let keyring = keyrings[address]
-  if (!keyring) {
-    keyring = new Keyring({ ...account.data, debug: true })
+  if (keyringCache[address]) return keyringCache[address]
+  else {
+    const keyring = new Keyring({ ...account.data, debug: true })
 
-    // Setup: persistence of changes
-    keyring.accounts.on('account-update', async (newAccountData) => {
+    // Set up persistence of changes
+    keyring.accounts.on('account-update', async (newAccountData: EntropyConfigAccountData) => {
+      // NOTE: this is vulnerable to concurrent writes => race conditions
       const storedConfig = await config.get(configPath)
-      storedConfig.accounts = storedConfig.accounts.map((account) => {
+      storedConfig.accounts = storedConfig.accounts.map((account: EntropyConfigAccount) => {
         if (account.address === storedConfig.selectedAccount) {
           return {
             ...account,
@@ -165,24 +156,26 @@ async function getKeyring (account: EntropyConfigAccount, configPath: string) {
       await config.set(storedConfig, configPath)
     })
 
-    keyrings[keyring.getAccount().admin.address] = keyring
-    // TODO: fix in sdk: admin should be on keyring.accounts by default
-    // WANT: keyrings[keyring.admin.address] = keyring
-  }
+    // cache
+    keyringCache[address] = keyring
 
-  return keyring
+    return keyring
+  }
 }
 
-interface InitializeEntropyOpts {
-  accountData: EntropyConfigAccountData,
-  config: string,
-  endpoint: string,
-}
+// TODO: replace with JSON schema
+function assertAccountData (data: EntropyConfigAccountData) {
+  if (isEntropyAccountData(data)) return
 
-function assertAccountData (account: EntropyConfigAccountData) {
-  if (!isEntropyAccountData(account)) {
-    throw Error('Invalid account - must contain seed and admin')
+  if (!data?.registration?.seed) {
+    throw new Error("Registration seed undefined.")
   }
+  // @ts-ignore  QUESTION: why is "pair" not on EntropyAccount
+  if (!data?.registration?.pair) {
+    throw new Error("Registration Signer keypair is undefined.")
+  }
+
+  throw Error('Invalid account data - must contain keys seed, admin, registration')
 }
 
 function isEntropyAccountData (maybeAccountData: any) {
@@ -190,6 +183,7 @@ function isEntropyAccountData (maybeAccountData: any) {
     maybeAccountData &&
     typeof maybeAccountData === 'object' &&
     'seed' in maybeAccountData &&
-    'admin' in maybeAccountData
+    'admin' in maybeAccountData &&
+    'registration' in maybeAccountData
   )
 }

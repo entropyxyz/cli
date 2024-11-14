@@ -1,5 +1,7 @@
 import { Command } from "commander"
-import { accountOption, configOption, endpointOption, loadEntropy } from "../common/utils-cli"
+import { accountOption, configOption, endpointOption } from "../common/utils-cli"
+import { loadEntropy } from '../common/load-entropy'
+
 import { EntropyTransfer } from "./main"
 
 export function entropyTransferCommand () {

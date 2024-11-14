@@ -5,7 +5,8 @@ import { EntropyAccount } from "./main";
 import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from "./utils";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
-import { accountOption, configOption, endpointOption, cliWrite, loadEntropy } from "../common/utils-cli";
+import { accountOption, configOption, endpointOption, cliWrite } from "../common/utils-cli";
+import { loadEntropy } from '../common/load-entropy'
 import { print } from "../common/utils"
 
 export function entropyAccountCommand () {

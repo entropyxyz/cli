@@ -1,5 +1,6 @@
 import { Command, /* Option */ } from 'commander'
-import { accountOption, configOption, endpointOption, cliWrite, loadEntropy } from '../common/utils-cli'
+import { accountOption, configOption, endpointOption, cliWrite } from '../common/utils-cli'
+import { loadEntropy } from '../common/load-entropy'
 import { EntropySign } from './main'
 
 export function entropySignCommand () {

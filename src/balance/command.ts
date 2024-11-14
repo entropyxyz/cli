@@ -2,8 +2,9 @@ import { Command } from "commander";
 import Entropy from "@entropyxyz/sdk";
 
 import { EntropyBalance } from "./main";
-import { configOption, endpointOption, loadEntropy, cliWrite } from "../common/utils-cli";
+import { configOption, endpointOption, cliWrite } from "../common/utils-cli";
 import { findAccountByAddressOrName } from "../common/utils";
+import { loadEntropy } from '../common/load-entropy'
 import * as config from "../config";
 
 export function entropyBalanceCommand () {
