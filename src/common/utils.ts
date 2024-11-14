@@ -3,8 +3,8 @@ import { Buffer } from 'node:buffer'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import { EntropyAccountConfig } from "../config/types"
 import { EntropyLogger } from './logger'
+import { EntropyConfigAccount } from '../config/types'
 
 export function stripHexPrefix (str: string): string {
   if (str.startsWith('0x')) return str.slice(2)
@@ -77,7 +77,7 @@ export function buf2hex (buffer: ArrayBuffer): string {
   return Buffer.from(buffer).toString("hex")
 }
 
-export function generateAccountChoices (accounts: EntropyAccountConfig[]) {
+export function generateAccountChoices (accounts: EntropyConfigAccount[]) {
   return accounts
     .map((account) => ({
       name: `${account.name} (${account.address})`,
@@ -85,12 +85,12 @@ export function generateAccountChoices (accounts: EntropyAccountConfig[]) {
     }))
 }
 
-export function accountChoicesWithOther (accounts: EntropyAccountConfig[]) {
+export function accountChoicesWithOther (accounts: EntropyConfigAccount[]) {
   return generateAccountChoices(accounts)
     .concat([{ name: "Other", value: null }])
 }
 
-export function findAccountByAddressOrName (accounts: EntropyAccountConfig[], aliasOrAddress: string) {
+export function findAccountByAddressOrName (accounts: EntropyConfigAccount[], aliasOrAddress: string) {
   if (!accounts.length) return
   if (!aliasOrAddress || !aliasOrAddress.length) throw Error('account name or address required')
 

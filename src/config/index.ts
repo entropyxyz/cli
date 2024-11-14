@@ -6,7 +6,7 @@ import envPaths from 'env-paths'
 
 import allMigrations from './migrations'
 import { serialize, deserialize } from './encoding'
-import { EntropyConfig, EntropyAccountConfig } from './types'
+import { EntropyConfig, EntropyConfigAccount } from './types'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
 const OLD_CONFIG_PATH = join(process.env.HOME, '.entropy-cli.config')
@@ -74,7 +74,15 @@ export async function set (config: EntropyConfig, configPath: string) {
   await writeFile(configPath, serialize(config))
 }
 
-export async function setSelectedAccount (account: EntropyAccountConfig, configPath: string) {
+// type ConfigMutation = (config: EntropyConfig) => EntropyConfig
+// export async function mutate (configPath: string, mutation: ConfigMutation): Promise<EntropyConfig> {
+//   const storedConfig = await get(configPath)
+//   const newConfig = mutation(storedConfig)
+//   await set(newConfig, configPath)
+//   return storedConfig
+// }
+
+export async function setSelectedAccount (account: EntropyConfigAccount, configPath: string) {
   const storedConfig = await get(configPath)
 
   if (storedConfig.selectedAccount === account.name) return storedConfig

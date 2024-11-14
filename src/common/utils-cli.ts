@@ -1,24 +1,12 @@
-import Entropy from '@entropyxyz/sdk'
 import { Option } from 'commander'
 
-import { absolutePath, bold, findAccountByAddressOrName, print, stringify } from './utils'
-import { initializeEntropy } from './initializeEntropy'
+import { absolutePath, stringify } from './utils'
 import * as config from '../config'
-import { EntropyConfig } from "../config/types";
 import { ENTROPY_ENDPOINT_DEFAULT } from '../common/constants'
 
 export function cliWrite (result) {
   const prettyResult = stringify(result, 0)
   process.stdout.write(prettyResult)
-}
-
-function getConfigOrNull (configPath) {
-  try {
-    return config.getSync(configPath)
-  } catch (err) {
-    if (config.isDangerousReadError(err)) throw err
-    return null
-  }
 }
 
 export function endpointOption () {
@@ -56,42 +44,6 @@ export function configOption () {
     .default(config.CONFIG_PATH_DEFAULT)
 }
 
-export async function loadEntropy (opts: {
-  account: string,
-  config: string,
-  endpoint: string,
-}): Promise<Entropy> {
-  const storedConfig = getConfigOrNull(opts.config)
-  // NOTE: (mix) we expect config to be initialised (see hook in cli)
-  // ...there was some reason we wanted to preserve a `null` state,
-  // but I can't recall if it's still relevant, and we need to check
-  // the downstream ramifications of it being `null`
-  if (!storedConfig) throw Error('no config!!') // TEMP
-
-  const account = parseAccountOption(storedConfig, opts.account)
-  if (!account) return
-
-  // if this account is not the default selectedAccount, make it so
-  if (storedConfig.selectedAccount !== account.name) {
-    await config.set(
-      {
-        ...storedConfig,
-        selectedAccount: account.name
-      },
-      opts.config
-    )
-  }
-
-  const endpoint = parseEndpointOption(storedConfig, opts.endpoint)
-
-  const entropy = await initializeEntropy({ keyMaterial: account.data, endpoint })
-  if (!entropy?.keyring?.accounts?.registration?.pair) {
-    throw new Error("Signer keypair is undefined or not properly initialized.")
-  }
-
-  return entropy
-}
-
 export function verifyingKeyOption () {
   return new Option(
     '-k, --verifying-key <key>',
@@ -108,36 +60,5 @@ export function programModKeyOption () {
       'The programModKey to perform this function with.'
     ].join(' ')
   )
-}
-
-function parseEndpointOption (config: EntropyConfig, aliasOrEndpoint: string) {
-  // if raw endpoint
-  if (aliasOrEndpoint.match(/^wss?:\/\//)) {
-    return aliasOrEndpoint
-  }
-  // else an alias
-  else {
-    const endpoint = config.endpoints[aliasOrEndpoint]
-    if (!endpoint) throw Error('unknown endpoint alias: ' + aliasOrEndpoint)
-
-    return endpoint
-  }
-}
-
-function parseAccountOption (config: EntropyConfig, addressOrName: string) {
-  if (!config?.accounts?.length) {
-    // print.error(ERROR_RED + 'AccountError: There are currently no accounts available to use')
-    // print(bold("Please create a new account or import an existing account to continue."))
-    return
-  }
-
-  const account = findAccountByAddressOrName(config.accounts, addressOrName)
-  if (!account) {
-    print.error(`AccountError: No account with name or address "${addressOrName}"`)
-    print(bold('!! Available accounts can be found using `entropy account list` !!'))
-    process.exit(1)
-  }
-
-  return account
 }
 

@@ -41,7 +41,6 @@ export async function tuiAction (opts: EntropyTuiOptions) {
   logger.debug(opts)
 
   const storedConfig = await setupConfig(opts.config)
-  // TODO: what if there is no config?
 
   const entropyPromise = loadEntropy({
     account: storedConfig.selectedAccount,
@@ -84,6 +83,8 @@ export async function tuiAction (opts: EntropyTuiOptions) {
 }
 
 const loader = yoctoSpinner()
+// Loads the config, AND tries to ensure a selectedAccount is set
+// NOTE: this should disappear with TUI Redesign
 async function setupConfig (configPath: string) {
   let storedConfig = await config.get(configPath)
 

@@ -1,5 +1,5 @@
 export interface EntropyConfig {
-  accounts: EntropyAccountConfig[]
+  accounts: EntropyConfigAccount[]
   endpoints: {
     dev: string;
     'test-net': string
@@ -9,21 +9,21 @@ export interface EntropyConfig {
   'migration-version': string
 }
 
-export interface EntropyAccountConfig {
+export interface EntropyConfigAccount {
   name: string
   address: string
-  data: EntropyAccountData
+  data: EntropyConfigAccountData
 }
 
 // Safe output format
-export interface EntropyAccountConfigFormatted {
+export interface EntropyConfigAccountFormatted {
   name: string
   address: string
   verifyingKeys: string[]
 }
 
 // TODO: document this whole thing
-export interface EntropyAccountData {
+export interface EntropyConfigAccountData {
   debug?: boolean
   seed: string
   admin?: EntropyAccount
