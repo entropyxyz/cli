@@ -1,3 +1,7 @@
+import { decodeAddress } from '@polkadot/util-crypto'
+import { u8aToHex } from '@polkadot/util'
+// @ts-expect-error
+import { isValidSubstrateAddress } from '@entropyxyz/sdk/utils'
 import { ACCOUNTS_CONTENT } from './constants';
 import { EntropyAccountConfig } from "../config/types";
 import * as config from "../config";
@@ -93,3 +97,32 @@ export const accountManageQuestions = [
     choices: ACCOUNTS_CONTENT.interactionChoice.choices
   }
 ]
+
+function formatKeyValue (key, value, width = 20) {
+  // Pad the key to a fixed width, ensuring the space between key and value is aligned
+  const paddedKey = key.padEnd(width)
+  return `${paddedKey}${value}`
+}
+
+function formatAccountDataForPrint (accountData: { key: string, value: string }[]) {
+  return accountData.map(entry => formatKeyValue(entry.key, entry.value)).join('\n')
+}
+
+function getPublicKeyFromAddress (address: string) {
+  if (!isValidSubstrateAddress(address)) throw Error('AddressError: Address provided is not a valid substrate address')
+  const publicKey = decodeAddress(address);
+  return u8aToHex(publicKey);
+}
+
+export function generateAccountDataForPrint (newAccount: EntropyAccountConfig) {
+  const publicKey = getPublicKeyFromAddress(newAccount.address)
+  const accountData = [
+    { key: 'Secret seed:', value: newAccount.data.seed },
+    { key: 'Public key (hex):', value: publicKey },
+    { key: 'AccountID:', value: publicKey },
+    { key: 'Public key (SS58):', value: newAccount.address },
+    { key: 'SS58 Address:', value: newAccount.address },
+  ]
+
+  return formatAccountDataForPrint(accountData)
+}
