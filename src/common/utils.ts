@@ -127,21 +127,21 @@ export async function getTokenDetails (entropy): Promise<TokenDetails> {
 }
 
 /* 
-  A "token" is the smallest indivisible unit of account value we track.
-  A "BIT" is the human readable unit of value value
-  This constant is then "the number of tokens that make up 1 BITS", or said differently
+  A "nanoBITS" is the smallest indivisible unit of account value we track.
+  A "BITS" is the human readable unit of value value
+  This constant is then "the number of nanoBITS that make up 1 BITS", or said differently
   "how many decimal places our BITS has".
 */
-export const tokensPerBits = (decimals: number): number => {
+export const nanoBitsPerBits = (decimals: number): number => {
   return Math.pow(10, decimals) 
 }
 
-export function tokensToBits (numOfTokens: number, decimals: number) {
-  return numOfTokens / tokensPerBits(decimals)
+export function nanoBitsToBits (numOfNanoBits: number, decimals: number) {
+  return numOfNanoBits / nanoBitsPerBits(decimals)
 }
 
-export function bitsToTokens (numOfBits: number, decimals: number): bigint {
-  return BigInt(numOfBits * tokensPerBits(decimals))
+export function bitsToNanoBits (numOfBits: number, decimals: number): bigint {
+  return BigInt(numOfBits * nanoBitsPerBits(decimals))
 }
 
 export function round (num: number, decimals: number = 4): number {

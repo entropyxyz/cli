@@ -4,5 +4,5 @@ import { Pair } from '@entropyxyz/sdk/keys'
 export interface TransferOptions { 
   from: Pair
   to: string
-  tokens: bigint
+  nanoBits: bigint
 }

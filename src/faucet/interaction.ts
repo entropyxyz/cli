@@ -6,11 +6,11 @@ import { EntropyFaucet } from "./main"
 import { print } from "src/common/utils"
 
 let chosenVerifyingKeys = []
-// Sending only 1e10 TOKENS does not allow user's to register after receiving funds
+// Sending only 1e10 nanoBITS does not allow user's to register after receiving funds
 // there are limits in place to ensure user's are leftover with a certain balance in their accounts
 // increasing amount send here, will allow user's to register right away
 
-// 2 BITS
+// 2 BITS = 2e10 nanoBITS
 const amount = "20000000000"
 // context for logging file
 const FLOW_CONTEXT = 'ENTROPY_FAUCET_INTERACTION'
