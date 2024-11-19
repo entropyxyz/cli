@@ -14,10 +14,13 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 
 ### Fixed
 
+<<<<<<< HEAD
 - Shared
   - amount units are now correct! [#306](https://github.com/entropyxyz/cli/pull/306)
     - 1 nanoBITS = 0.00000000001 BITS
     - 1 BITS = 10000000000 nanoBITS
+=======
+>>>>>>> dev
 - Programmatic CLI
   - `entropy program list` now prints output! [#298](https://github.com/entropyxyz/cli/pull/298)
 
@@ -33,7 +36,14 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - TUI
   - animation on tui load (while entropy loads) [#288](https://github.com/entropyxyz/cli/pull/288)
 
+<<<<<<< HEAD
 ### Changed
+=======
+### Changes
+
+- Shared
+  - updated return data displayed to user on account creation (create or import) [#311](https://github.com/entropyxyz/cli/pull/311)
+>>>>>>> dev
 
 - Shared
   - Balance now displays the number of BITS to the nearest 4 decimal places [#306](https://github.com/entropyxyz/cli/pull/306)

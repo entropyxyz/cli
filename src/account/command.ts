@@ -1,7 +1,7 @@
 import Entropy from "@entropyxyz/sdk"
 import { Command, Option } from 'commander'
 import { EntropyAccount } from "./main";
-import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from "./utils";
+import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect, generateAccountDataForPrint } from "./utils";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
 import { accountOption, endpointOption, cliWrite, loadEntropy } from "../common/utils-cli";
@@ -35,11 +35,8 @@ function entropyAccountCreate () {
 
       await selectAndPersistNewAccount(newAccount)
 
-      cliWrite({
-        name: newAccount.name,
-        address: newAccount.address,
-        verifyingKeys: []
-      })
+      cliWrite(generateAccountDataForPrint(newAccount))
+
       process.exit(0)
     })
 }
