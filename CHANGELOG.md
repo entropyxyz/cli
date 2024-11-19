@@ -14,7 +14,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 
 ### Fixed
 
-- programmatic CLI
+- Programmatic CLI
   - `entropy program list` now prints output! [#298](https://github.com/entropyxyz/cli/pull/298)
 
 ### Added 
@@ -24,6 +24,12 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 
 - Programmatic CLI
   - added option for users to view all balances of admin accounts in the config [#310](https://github.com/entropyxyz/cli/pull/310)
+  
+### Changes
+
+- Shared
+  - updated return data displayed to user on account creation (create or import) [#311](https://github.com/entropyxyz/cli/pull/311)
+
 
 ## [0.1.1] Deadpool - 2024-11-06 (entropy-core compatibility: 0.3.0)
 
