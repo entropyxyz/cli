@@ -1,11 +1,10 @@
 import { Test } from 'tape'
 import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
 // @ts-ignore
-import Keyring from '@entropyxyz/sdk/keys'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { loadEntropy } from '../../src/common/load-entropy'
+import { loadEntropyTest } from '../../src/common/load-entropy'
 import * as config from '../../src/config'
 import { makeSeed, promiseRunner } from './'
 
@@ -36,11 +35,9 @@ export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entro
   await wasmGlobalsReady()
     .catch(err => t.error(err))
 
-  const keyring = new Keyring({ seed, debug: true })
-  const entropy = await loadEntropy({
-    keyMaterial: keyring.getAccount(),
-    config: configPath
+  const entropy = await loadEntropyTest({
     endpoint,
+    seed
   })
 
   await run('entropy ready', entropy.ready)

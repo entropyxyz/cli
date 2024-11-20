@@ -114,7 +114,7 @@ function getPublicKeyFromAddress (address: string) {
   return u8aToHex(publicKey);
 }
 
-export function generateAccountDataForPrint (newAccount: EntropyAccountConfig) {
+export function generateAccountDataForPrint (newAccount: EntropyConfigAccount) {
   const publicKey = getPublicKeyFromAddress(newAccount.address)
   const accountData = [
     { key: 'Secret seed:', value: newAccount.data.seed },

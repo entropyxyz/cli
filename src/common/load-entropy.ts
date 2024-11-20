@@ -1,72 +1,142 @@
-import { Entropy, wasmGlobalsReady } from "@entropyxyz/sdk"
+import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
 // @ts-ignore
-import { Keyring } from "@entropyxyz/sdk/keys"
+import { Keyring } from '@entropyxyz/sdk/keys'
+import { promisify } from 'node:util'
 
 import { findAccountByAddressOrName, print, bold } from './utils'
-import * as config from '../config'
+import { EntropyLogger } from './logger'
+import * as fsConfig from '../config'
 import { EntropyConfig, EntropyConfigAccount, EntropyConfigAccountData } from '../config/types'
-import { EntropyLogger } from "./logger"
+import { migrateData } from '../config'
+import { migrations } from '../config/migrations'
 
-interface LoadEntropyOpts {
-  account?: string, // may be empty
-  config: string, // path to config file
+interface LoadEntropyCliOpts {
+  account?: string // account address OR name
   endpoint: string
+  config: string // configPath
+}
+export async function loadEntropyCli (opts: LoadEntropyCliOpts) {
+  return loadEntropy({
+    ...opts,
+    config: {
+      async get () {
+        return fsConfig.get(opts.config)
+      },
+      async set (config: EntropyConfig) {
+        return fsConfig.set(config, opts.config)
+      }
+    }
+  })
+    .catch(err => {
+      console.error("Loading Entropy failed:")
+      console.error(err)
+      process.exit(1)
+    })
 }
 
+interface LoadEntropyTuiOpts {
+  account?: string // account address OR name
+  endpoint: string
+  config: string // configPath
+}
+export async function loadEntropyTui (opts: LoadEntropyTuiOpts) {
+  return loadEntropy({
+    ...opts,
+    config: {
+      async get () {
+        return fsConfig.get(opts.config)
+      },
+      async set (config: EntropyConfig) {
+        return fsConfig.set(config, opts.config)
+      }
+    }
+  })
+    .catch(err => {
+      console.error(`Loading Entropy account "${opts.account}" failed:`)
+      console.error(err)
+      // NOTE: deliberately does not exit process
+      // TODO: decide how to handle error...
+      throw err
+    })
+}
 
-// WIP
-//
-// Problem: tests needed "initializeEntropy"...
-// this loadEntropy assumes an account has already been set up right
-//
-// Solution ideas:
-// 1. perhaps just extract that for tests
-//   - not great for proving it all works same as production?
-//
-// 2. provide "config" getter/setter as an argument for loadEntropy
-//   - would still have to ensure config has account installed?
-//
-//   interface ConfigGetterSetter {
-//     set: Function
-//     get: Function
-//   }
-//
-// 3. just use existing functions to write account into config in correct form?
-//   - recurssive probelms for AccountService?
+interface LoadEntropyTestOpts {
+  endpoint: string
+  seed: string
+}
+export async function loadEntropyTest (opts: LoadEntropyTestOpts) {
+  // set up initial state
+  let config = migrateData(migrations, {})
 
+  const keyring = new Keyring({ seed: opts.seed, debug: true })
+  const account = keyring.getAccount()
+  config.accounts.push({
+    name: 'test-account',
+    address: account.admind.address,
+    data: account
+  })
+  config.selectedAccount = 'test-account'
 
-export async function loadEntropy (opts: LoadEntropyOpts): Promise<Entropy> {
-  const logger = new EntropyLogger('loadEntropy', opts.endpoint)
-  // TEMP: remove in subsequent PR
-  if (!opts.config) {
-    opts.config = config.CONFIG_PATH
-  }
+  print(config)
 
-  const storedConfig = await config.get(opts.config)
+  return loadEntropy({
+    ...opts,
+    config: {
+      async get () {
+        await shortTimeout()
+        return config
+      },
+      async set (newConfig: EntropyConfig) {
+        config = newConfig
+        await shortTimeout()
+      }
+    }
+  })
+}
+async function shortTimeout (scale = 100) {
+  return promisify(setTimeout)(10 + Math.floor(scale * Math.random()))
+}
+
+/* INTERNALS */
+
+interface LoadEntropyOpts {
+  account?: string
+  endpoint: string
+  config: ConfigGetterSetter
+}
+interface ConfigGetterSetter {
+  get: () => Promise<EntropyConfig>
+  set: (config: EntropyConfig) => Promise<void>
+}
+
+// This expects a config getter/setter, and just throws errors it hits
+// Higher level functions are expected to define getter/setter and error handling
+// DO NOT EXPORT
+async function loadEntropy (opts: LoadEntropyOpts): Promise<Entropy> {
+  const storedConfig = await opts.config.get()
   if (!storedConfig) throw Error('no config!!') // TEMP: want to see if we hit this!
 
   // Account
-  let account = resolveAccount(storedConfig, opts.account || storedConfig.selectedAccount)
-  account = await setupRegistrationSubAccount(account, opts.config) // TODO: remove this later
+  let account = resolveAccount(storedConfig, opts.account)
+  // TODO: remove this later
+  account = await setupRegistrationSubAccount(account, opts.config)
   assertAccountData(account.data)
 
   // Selected Account
   if (storedConfig.selectedAccount !== account.name) {
-    await config.set(
-      {
-        ...storedConfig,
-        selectedAccount: account.name
-      },
-      opts.config
-    )
+    await opts.config.set({
+      ...storedConfig,
+      selectedAccount: account.name
+    })
   }
 
   // Endpoint
   const endpoint = resolveEndpoint(storedConfig, opts.endpoint)
+  const logger = new EntropyLogger('loadEntropy', endpoint)
 
   // Keyring
   await wasmGlobalsReady()
-  const keyring = await getKeyring(account, opts.config)
+  const keyring = await loadKeyring(account, opts.config) // NOTE: handles persistence
   logger.debug(keyring)
 
   // Entropy
@@ -90,10 +160,10 @@ function resolveEndpoint (config: EntropyConfig, aliasOrEndpoint: string) {
   }
 }
 
-function resolveAccount (config: EntropyConfig, addressOrName: string): EntropyConfigAccount|null {
+function resolveAccount (config: EntropyConfig, addressOrName?: string): EntropyConfigAccount|null {
   if (!config.accounts) throw Error('no accounts')
 
-  const account = findAccountByAddressOrName(config.accounts, addressOrName)
+  const account = findAccountByAddressOrName(config.accounts, addressOrName || config.selectedAccount)
   if (!account) {
     // there are accounts, but not match found
     print(`AccountError: No account with name or address "${addressOrName}"`)
@@ -105,7 +175,7 @@ function resolveAccount (config: EntropyConfig, addressOrName: string): EntropyC
   return account
 }
 
-async function setupRegistrationSubAccount (account: EntropyConfigAccount, configPath: string) {
+async function setupRegistrationSubAccount (account: EntropyConfigAccount, config: ConfigGetterSetter) {
   if (account.data.registration) return account
 
   const newAccount = {
@@ -119,20 +189,20 @@ async function setupRegistrationSubAccount (account: EntropyConfigAccount, confi
     }
   }
 
-  const storedConfig = await config.get(configPath)
+  const storedConfig = await config.get()
   // update that account => newAccount
   storedConfig.accounts = storedConfig.accounts.map((thisAccount) => {
     return (thisAccount.address === newAccount.address)
       ? newAccount
       : account
   })
-  await config.set(storedConfig, configPath)
+  await config.set(storedConfig)
 
   return account
 }
 
 const keyringCache = {}
-async function getKeyring (account: EntropyConfigAccount, configPath: string) {
+async function loadKeyring (account: EntropyConfigAccount, config: ConfigGetterSetter) {
   const { address } =  account.data.admin || {}
   if (!address) throw new Error('Cannot load keyring, no admin address')
 
@@ -141,20 +211,21 @@ async function getKeyring (account: EntropyConfigAccount, configPath: string) {
     const keyring = new Keyring({ ...account.data, debug: true })
 
     // Set up persistence of changes
+    // NOTE: this is currently vulnerable to concurrent writes => race conditions
     keyring.accounts.on('account-update', async (newAccountData: EntropyConfigAccountData) => {
-      // NOTE: this is vulnerable to concurrent writes => race conditions
-      const storedConfig = await config.get(configPath)
-      storedConfig.accounts = storedConfig.accounts.map((account: EntropyConfigAccount) => {
-        if (account.address === storedConfig.selectedAccount) {
+      const storedConfig = await config.get()
+      storedConfig.accounts = storedConfig.accounts.map((thisAccount: EntropyConfigAccount) => {
+        if (thisAccount.address === newAccountData.admin.address) {
+          // NOTE: used to be (account.address === storedAccount.selectedAccount), which is brittle and wrong
           return {
-            ...account,
+            ...thisAccount,
             data: newAccountData,
           }
         }
-        return account
+        return thisAccount
       })
 
-      await config.set(storedConfig, configPath)
+      await config.set(storedConfig)
     })
 
     // cache

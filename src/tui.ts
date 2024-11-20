@@ -8,7 +8,7 @@ import { EntropyTuiOptions } from './types'
 import { printLogo } from './common/ascii'
 import { jumpStartNetwork, print, findAccountByAddressOrName } from './common/utils'
 import { accountOption, endpointOption } from './common/utils-cli'
-import { loadEntropy } from "./common/load-entropy"
+import { loadEntropyTui } from "./common/load-entropy"
 import { EntropyLogger } from './common/logger'
 
 import { entropyAccount, entropyRegister } from './account/interaction'
@@ -40,12 +40,12 @@ export async function tuiAction (opts: EntropyTuiOptions) {
   const logger = new EntropyLogger('TUI', opts.endpoint)
   logger.debug(opts)
 
-  // @ts-expect-error Types will align in custom-config PR
-  opts.config = config.CONFIG_PATH // TEMP
+  if (!opts.config) {
+    opts.config = config.CONFIG_PATH // TEMP
+  }
 
   const entropyPromise = opts.account
-    // @ts-expect-error Types will align in custom-config PR
-    ? loadEntropy(opts)
+    ? loadEntropyTui(opts)
     : Promise.resolve(undefined)
 
   console.clear()
@@ -94,17 +94,17 @@ async function setupConfig () {
   return storedConfig
 }
 
-async function main (entropy: Entropy, choices: string[], options: EntropyTuiOptions, logger: EntropyLogger) {
+async function main (entropy: Entropy, choices: string[], opts: EntropyTuiOptions, logger: EntropyLogger) {
   if (loader.isSpinning) loader.stop()
   const storedConfig = await setupConfig()
 
   // Entropy is undefined on initial install, after user creates their first account,
   // entropy should be loaded
   if (storedConfig.selectedAccount && !entropy) {
-    entropy = await loadEntropy({
+    entropy = await loadEntropyTui({
       account: storedConfig.selectedAccount,
-      config: config.CONFIG_PATH,
-      endpoint: options.endpoint
+      config: opts.config,
+      endpoint: opts.endpoint
     })
   }
 
@@ -117,10 +117,10 @@ async function main (entropy: Entropy, choices: string[], options: EntropyTuiOpt
     )
     if (currentAccount && currentAccount.name !== storedConfig.selectedAccount) {
       await entropy.close()
-      entropy = await loadEntropy({
+      entropy = await loadEntropyTui({
         account: storedConfig.selectedAccount,
-        config: config.CONFIG_PATH,
-        endpoint: options.endpoint
+        config: opts.config,
+        endpoint: opts.endpoint
       })
     }
   }
@@ -147,44 +147,44 @@ async function main (entropy: Entropy, choices: string[], options: EntropyTuiOpt
 
     switch (answers.choice) {
     case 'Manage Accounts': {
-      const response = await entropyAccount(options.endpoint, storedConfig)
+      const response = await entropyAccount(opts.endpoint, storedConfig)
       if (response === 'exit') { returnToMain = true }
       break
     }
     case 'Register': {
-      await entropyRegister(entropy, options.endpoint, storedConfig)
+      await entropyRegister(entropy, opts.endpoint, storedConfig)
       break
     }
     case 'Balance': {
-      await entropyBalance(entropy, options.endpoint, storedConfig)
+      await entropyBalance(entropy, opts.endpoint, storedConfig)
         .catch(err => console.error('There was an error retrieving balance', err))
       break
     }
     case 'Transfer': {
-      await entropyTransfer(entropy, options.endpoint)
+      await entropyTransfer(entropy, opts.endpoint)
         .catch(err => console.error('There was an error sending the transfer', err))
       break
     }
     case 'Sign': {
-      await entropySign(entropy, options.endpoint)
+      await entropySign(entropy, opts.endpoint)
         .catch(err => console.error('There was an issue with signing', err))
       break
     }
     case 'Entropy Faucet': {
       try {
-        await entropyFaucet(entropy, options, logger)
+        await entropyFaucet(entropy, opts, logger)
       } catch (error) {
         console.error('There was an issue with running the faucet', error);
       }
       break
     }
     case 'User Programs': {
-      await entropyProgram(entropy, options.endpoint)
+      await entropyProgram(entropy, opts.endpoint)
         .catch(err => console.error('There was an error with programs', err))
       break
     }
     case 'Deploy Program': {
-      await entropyProgramDev(entropy, options.endpoint)
+      await entropyProgramDev(entropy, opts.endpoint)
         .catch(err => console.error('There was an error with program dev', err))
       break
     }
@@ -195,7 +195,7 @@ async function main (entropy: Entropy, choices: string[], options: EntropyTuiOpt
       loader.text = 'Jumpstarting Network...'
       try {
         loader.start()
-        const jumpStartStatus = await jumpStartNetwork(entropy, options.endpoint)
+        const jumpStartStatus = await jumpStartNetwork(entropy, opts.endpoint)
 
         if (jumpStartStatus.isFinalized) {
           loader.clear()
@@ -228,7 +228,7 @@ async function main (entropy: Entropy, choices: string[], options: EntropyTuiOpt
     }]))
   }
 
-  if (returnToMain) main(entropy, choices, options, logger)
+  if (returnToMain) main(entropy, choices, opts, logger)
   else {
     print('Have a nice day')
     process.exit()

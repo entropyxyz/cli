@@ -2,7 +2,7 @@ import { Command, /* Option */ } from 'commander'
 
 import { EntropySign } from './main'
 import { accountOption, endpointOption, cliWrite } from '../common/utils-cli'
-import { loadEntropy } from '../common/load-entropy'
+import { loadEntropyCli } from '../common/load-entropy'
 
 export function entropySignCommand () {
   const signCommand = new Command('sign')
@@ -17,7 +17,7 @@ export function entropySignCommand () {
     //   )
     // )
     .action(async (msg, opts) => {
-      const entropy = await loadEntropy(opts)
+      const entropy = await loadEntropyCli(opts)
       const SigningService = new EntropySign(entropy, opts.endpoint)
       // TO-DO: Add ability for raw signing here, maybe? new raw option can be used for the conditional
       /**
