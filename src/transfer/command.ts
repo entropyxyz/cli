@@ -19,7 +19,12 @@ export function entropyTransferCommand () {
 
       await transferService.transfer(destination, amount)
 
-      cliWrite(`Transaction successful: Sent ${amount} ${symbol} to ${destination}`)
+      cliWrite({
+        source: opts.account,
+        destination,
+        amount,
+        symbol 
+      })
       process.exit(0)
     })
   return transferCommand
