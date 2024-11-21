@@ -1,12 +1,13 @@
 import { Test } from 'tape'
 import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
 // @ts-ignore
+import { randomAsHex } from '@polkadot/util-crypto'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 import { loadEntropyTest } from '../../src/common/load-entropy'
 import * as config from '../../src/config'
-import { makeSeed, promiseRunner } from './'
+import { promiseRunner } from './'
 
 interface SetupTestOpts {
   configPath?: string
@@ -25,7 +26,7 @@ function uniqueConfigPath () {
 export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entropy: Entropy; run: any; endpoint: string }> {
   const {
     configPath = uniqueConfigPath(),
-    seed = makeSeed(),
+    seed = randomAsHex(32),
     endpoint = 'ws://127.0.0.1:9944',
   } = opts || {}
 
