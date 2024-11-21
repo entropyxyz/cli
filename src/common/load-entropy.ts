@@ -72,12 +72,10 @@ export async function loadEntropyTest (opts: LoadEntropyTestOpts) {
   const account = keyring.getAccount()
   config.accounts.push({
     name: 'test-account',
-    address: account.admind.address,
+    address: account.admin.address,
     data: account
   })
   config.selectedAccount = 'test-account'
-
-  print(config)
 
   return loadEntropy({
     ...opts,
