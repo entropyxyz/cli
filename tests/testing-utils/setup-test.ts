@@ -2,9 +2,9 @@ import { Test } from 'tape'
 import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
 // @ts-ignore
 import Keyring from '@entropyxyz/sdk/keys'
+import { randomAsHex } from '@polkadot/util-crypto'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { randomBytes } from 'node:crypto'
 
 import { initializeEntropy } from '../../src/common/initializeEntropy'
 import * as config from '../../src/config'
@@ -27,7 +27,7 @@ function uniqueConfigPath () {
 export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entropy: Entropy; run: any; endpoint: string }> {
   const {
     configPath = uniqueConfigPath(),
-    seed = makeSeed(),
+    seed = randomAsHex(32),
     endpoint = 'ws://127.0.0.1:9944',
   } = opts || {}
 
@@ -53,8 +53,4 @@ export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entro
   })
 
   return { entropy, run, endpoint }
-}
-
-function makeSeed () {
-  return '0x' + randomBytes(32).toString('hex')
 }
