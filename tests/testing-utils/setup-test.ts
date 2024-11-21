@@ -4,10 +4,11 @@ import { Entropy, wasmGlobalsReady } from '@entropyxyz/sdk'
 import Keyring from '@entropyxyz/sdk/keys'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { randomBytes } from 'node:crypto'
 
 import { initializeEntropy } from '../../src/common/initializeEntropy'
 import * as config from '../../src/config'
-import { makeSeed, promiseRunner } from './'
+import { promiseRunner } from './'
 
 interface SetupTestOpts {
   configPath?: string
@@ -52,4 +53,8 @@ export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entro
   })
 
   return { entropy, run, endpoint }
+}
+
+function makeSeed () {
+  return '0x' + randomBytes(32).toString('hex')
 }
