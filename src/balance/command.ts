@@ -18,16 +18,26 @@ export function entropyBalanceCommand () {
       'The address an account address whose balance you want to query.',
       'Can also be the human-readable name of one of your accounts'
     ].join(' '))
+    .option('-a, --all', 'Get balances for all admin accounts in the config')
     .addOption(endpointOption())
-    .option('--all', 'Get balances for all admin accounts in the config')
     .action(async (account, opts) => {
       const { accounts } = await config.get()
-      // when trying to get the balance of all accounts, need to use a temporary address
-      // to initialize entropy in order to use substrate
-      const tempAddress = account || accounts[0].address
-      const entropy: Entropy = await loadEntropy(tempAddress, opts.endpoint)
-      const BalanceService = new EntropyBalance(entropy, opts.endpoint)
+      let entropy: Entropy
+      if (!account && opts.all) {
+        const tempAddress = accounts[0].address
+        entropy = await loadEntropy(tempAddress, opts.endpoint)
+      } else if (account) {
+        entropy = await loadEntropy(account, opts.endpoint)
+      } else {
+        balanceCommand.help()
+      }
 
+      if (!entropy) {
+        console.error('EntropyError: Entropy was not initialized, please try again.')
+        process.exit(1)
+      }
+
+      const BalanceService = new EntropyBalance(entropy, opts.endpoint)
       if (opts.all) {
         // Balances for all admin accounts
         const addresses: string[] = accounts.map((acct: EntropyAccountConfig) => acct.address)
