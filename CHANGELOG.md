@@ -22,10 +22,13 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - TUI
   - animation on tui load (while entropy loads) [#288](https://github.com/entropyxyz/cli/pull/288)
 
-### Changes
+### Changed
 
 - Shared
   - updated return data displayed to user on account creation (create or import) [#311](https://github.com/entropyxyz/cli/pull/311)
+
+- CLI
+  - updated balance command to take in any address, and be able to return the balance for the inputted address [#315](https://github.com/entropyxyz/cli/pull/315)
 
 
 ## [0.1.1] Deadpool - 2024-11-06 (entropy-core compatibility: 0.3.0)
