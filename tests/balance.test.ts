@@ -1,7 +1,8 @@
 import test from 'tape'
 
-import { setupTest, charlieStashAddress as richAddress } from './testing-utils'
+import { setupTest, charlieStashAddress as richAddress, promiseRunner, DEFAULT_ENDPOINT } from './testing-utils'
 import { EntropyBalance } from '../src/balance/main'
+import { EntropyAccount } from '../src/account/main'
 
 test('getBalance + getBalances', async (t) => {
   const { run, entropy, endpoint } = await setupTest(t)
@@ -47,6 +48,20 @@ test('getBalance + getBalances', async (t) => {
 
   // TODO:
   // - test getBalances with 1 good address, 1 bung seed
+
+  t.end()
+})
+
+test('getAnyBalance', async (t) => {
+  const run = promiseRunner(t)
+  // create new account, not saved in config
+  const newAccount = await EntropyAccount.create({ name: 'TestAnyBalance1' })
+
+  const balance = await run(
+    'getAnyBalance (newAccount)',
+    EntropyBalance.getAnyBalance(DEFAULT_ENDPOINT, newAccount.address)
+  )
+  t.equal(balance, 0, 'newSeed balance = 0')
 
   t.end()
 })
