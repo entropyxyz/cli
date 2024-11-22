@@ -1,6 +1,6 @@
 import Entropy from "@entropyxyz/sdk"
 // @ts-expect-error
-import { getSubstrate } from '@entropyxyz/sdk/utils'
+import { createSubstrate } from '@entropyxyz/sdk/utils'
 import { EntropyBase } from "../common/entropy-base"
 import * as BalanceUtils from "./utils"
 import { BalanceInfo } from "./types"
@@ -12,12 +12,12 @@ export class EntropyBalance extends EntropyBase {
   }
 
   static async getAnyBalance (endpoint: string, address: string) {
-    const substrate = getSubstrate(endpoint)
+    const substrate = createSubstrate(endpoint)
     await substrate.isReadyOrError
 
     const accountInfo = (await substrate.query.system.account(address)) as any
     const balance = parseInt(BalanceUtils.hexToBigInt(accountInfo.data.free).toString())
-    
+
     // closing substrate
     await substrate.disconnect()
       .catch(err => console.error('Error closing connection', err.message))
