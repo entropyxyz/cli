@@ -6,7 +6,7 @@ export abstract class EntropyBase {
   protected entropy: Entropy
   protected endpoint: string
 
-  constructor ({ entropy, endpoint, flowContext }: { entropy?: Entropy, endpoint: string, flowContext: string }) {
+  constructor ({ entropy, endpoint, flowContext }: { entropy: Entropy, endpoint: string, flowContext: string }) {
     this.logger = new EntropyLogger(flowContext, endpoint)
     this.entropy = entropy
     this.endpoint = endpoint
