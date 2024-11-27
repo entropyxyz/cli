@@ -1,6 +1,6 @@
 import { Entropy } from '@entropyxyz/sdk'
 import { Buffer } from 'buffer'
-import { EntropyAccountConfig } from "../config/types"
+import { EntropyConfigAccount } from "../config/types"
 import { EntropyLogger } from './logger'
 
 export function stripHexPrefix (str: string): string {
@@ -58,7 +58,7 @@ export function buf2hex (buffer: ArrayBuffer): string {
   return Buffer.from(buffer).toString("hex")
 }
 
-export function generateAccountChoices (accounts: EntropyAccountConfig[]) {
+export function generateAccountChoices (accounts: EntropyConfigAccount[]) {
   return accounts
     .map((account) => ({
       name: `${account.name} (${account.address})`,
@@ -66,12 +66,12 @@ export function generateAccountChoices (accounts: EntropyAccountConfig[]) {
     }))
 }
 
-export function accountChoicesWithOther (accounts: EntropyAccountConfig[]) {
+export function accountChoicesWithOther (accounts: EntropyConfigAccount[]) {
   return generateAccountChoices(accounts)
     .concat([{ name: "Other", value: null }])
 }
 
-export function findAccountByAddressOrName (accounts: EntropyAccountConfig[], aliasOrAddress: string) {
+export function findAccountByAddressOrName (accounts: EntropyConfigAccount[], aliasOrAddress: string) {
   if (!aliasOrAddress || !aliasOrAddress.length) throw Error('account name or address required')
 
   return (
