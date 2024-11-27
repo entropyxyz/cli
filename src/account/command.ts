@@ -1,7 +1,7 @@
 import Entropy from "@entropyxyz/sdk"
 import { Command, Option } from 'commander'
 import { EntropyAccount } from "./main";
-import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect, generateAccountDataForPrint } from "./utils";
+import { selectAndPersistNewAccount, persisVerifyingKeyToAccount, generateAccountDataForPrint } from "./utils";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
 import { accountOption, endpointOption, cliWrite } from "../common/utils-cli";
@@ -111,7 +111,7 @@ function entropyAccountRegister () {
       const accountService = new EntropyAccount(entropy, opts.endpoint)
 
       const verifyingKey = await accountService.register()
-      await addVerifyingKeyToAccountAndSelect(verifyingKey, opts.account)
+      await persisVerifyingKeyToAccount(verifyingKey, opts.account)
 
       cliWrite(verifyingKey)
       process.exit(0)

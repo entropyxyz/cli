@@ -114,13 +114,20 @@ async function loadEntropy (opts: LoadEntropyOpts): Promise<Entropy> {
   const storedConfig = await opts.config.get()
   if (!storedConfig) throw Error('no config!!') // TEMP: want to see if we hit this!
 
-  // Account
   let account = resolveAccount(storedConfig, opts.account)
-  // TODO: remove this later
-  account = await setupRegistrationSubAccount(account, opts.config)
-  assertAccountData(account.data)
+  const endpoint = resolveEndpoint(storedConfig, opts.endpoint)
+  // NOTE: while it would be nice to parse opts --account, --endpoint with Commander
+  // the argParser for these Options does not have access to the --config option,
+  // and we need the config to be able to resolve what these other options mean.
+  // This means we are forces to resolveAccount, resolveEndpoint in this function
 
-  // Selected Account
+  // Account setup
+  account = await setupRegistrationSubAccount(account, opts.config)
+  // TODO: remove the need for setupRegistrationAccount
+  assertAccountData(account.data)
+  // TODO: move into resolveAccount after setupRegistrationSubAccount is removed
+
+  // set selectedAccount
   if (storedConfig.selectedAccount !== account.name) {
     await opts.config.set({
       ...storedConfig,
@@ -128,13 +135,11 @@ async function loadEntropy (opts: LoadEntropyOpts): Promise<Entropy> {
     })
   }
 
-  // Endpoint
-  const endpoint = resolveEndpoint(storedConfig, opts.endpoint)
   const logger = new EntropyLogger('loadEntropy', endpoint)
 
   // Keyring
   await wasmGlobalsReady()
-  const keyring = await loadKeyring(account, opts.config) // NOTE: handles persistence
+  const keyring = await loadKeyring(account)
   logger.debug(keyring)
 
   // Entropy
@@ -200,37 +205,15 @@ async function setupRegistrationSubAccount (account: EntropyConfigAccount, confi
 }
 
 const keyringCache = {}
-async function loadKeyring (account: EntropyConfigAccount, config: ConfigGetterSetter) {
+async function loadKeyring (account: EntropyConfigAccount) {
   const { address } =  account.data.admin || {}
   if (!address) throw new Error('Cannot load keyring, no admin address')
 
-  if (keyringCache[address]) return keyringCache[address]
-  else {
-    const keyring = new Keyring({ ...account.data, debug: true })
-
-    // Set up persistence of changes
-    // NOTE: this is currently vulnerable to concurrent writes => race conditions
-    keyring.accounts.on('account-update', async (newAccountData: EntropyConfigAccountData) => {
-      const storedConfig = await config.get()
-      storedConfig.accounts = storedConfig.accounts.map((thisAccount: EntropyConfigAccount) => {
-        if (thisAccount.address === newAccountData.admin.address) {
-          // NOTE: used to be (account.address === storedAccount.selectedAccount), which is brittle and wrong
-          return {
-            ...thisAccount,
-            data: newAccountData,
-          }
-        }
-        return thisAccount
-      })
-
-      await config.set(storedConfig)
-    })
-
-    // cache
-    keyringCache[address] = keyring
-
-    return keyring
+  if (!keyringCache[address]) {
+    keyringCache[address] = new Keyring({ ...account.data, debug: true })
   }
+
+  return keyringCache[address]
 }
 
 // TODO: replace with JSON schema
