@@ -28,7 +28,7 @@ export async function selectAndPersistNewAccount (newAccount: EntropyConfigAccou
   })
 }
 
-export async function persisVerifyingKeyToAccount (verifyingKey: string, accountNameOrAddress: string) {
+export async function persistVerifyingKeyToAccount (verifyingKey: string, accountNameOrAddress: string) {
   const storedConfig = await config.get()
   const { accounts } = storedConfig
 
