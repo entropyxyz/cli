@@ -119,5 +119,6 @@ function entropyAccountRegister () {
       await persistVerifyingKeyToAccount(opts.config, verifyingKey, opts.account)
 
       cliWrite(verifyingKey)
+      process.exit(0)
     })
 }

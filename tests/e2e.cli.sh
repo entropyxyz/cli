@@ -5,15 +5,8 @@
 # Dependencies
 #   - internet connection
 #   - jq - see https://jqlang.github.io/jq
-#   - an entropy testnet:
-#       ```
-#       git clone git@github.com:entropyxyz/sdk.git
-#       cd sdk
-#       ./dev/bin/spin-up.sh four-nodes
-#       ./dev/bin/spin-down.sh four-nodes  (later)
-#       ````
 #
-# Build + isntall the CLI:
+# Build + install the CLI:
 #   ```
 #   yarn build
 #   npm install -g
@@ -21,7 +14,9 @@
 #
 # Run the tests:
 #   ```
+#   yarn test:network:up
 #   ./tests/e2e.cli.sh
+#   yarn test:network:down
 #   ```
 #
 
