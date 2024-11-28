@@ -70,14 +70,16 @@ export async function loadEntropyTest (opts: LoadEntropyTestOpts) {
 
   const keyring = new Keyring({ seed: opts.seed, debug: true })
   const account = keyring.getAccount()
+  const accountName = 'test-account'
   config.accounts.push({
-    name: 'test-account',
+    name: accountName,
     address: account.admin.address,
     data: account
   })
-  config.selectedAccount = 'test-account'
+  config.selectedAccount = accountName
 
   return loadEntropy({
+    account: accountName,
     ...opts,
     config: {
       async get () {
