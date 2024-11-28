@@ -2,12 +2,11 @@ import Entropy from "@entropyxyz/sdk"
 import { Command, Option } from 'commander'
 
 import { EntropyAccount } from "./main";
-import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from "./utils";
+import { selectAndPersistNewAccount, persistVerifyingKeyToAccount, generateAccountDataForPrint } from "./utils";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
 import { accountOption, configOption, endpointOption, cliWrite } from "../common/utils-cli";
-import { loadEntropy } from '../common/load-entropy'
-import { print } from "../common/utils"
+import { loadEntropyCli } from "../common/load-entropy"
 
 export function entropyAccountCommand () {
   return new Command('account')
@@ -39,11 +38,8 @@ function entropyAccountCreate () {
 
       await selectAndPersistNewAccount(configPath, newAccount)
 
-      cliWrite({
-        name: newAccount.name,
-        address: newAccount.address,
-        verifyingKeys: []
-      })
+      cliWrite(generateAccountDataForPrint(newAccount))
+
       process.exit(0)
     })
 }
@@ -115,22 +111,13 @@ function entropyAccountRegister () {
     //   )
     // )
     .action(async (opts) => {
-      try {
-        // NOTE: loadEntropy throws if it can't find opts.account
-        const entropy: Entropy = await loadEntropy(opts)
-        if (!entropy) throw new Error('AccountError: There are currently no available accounts, please create one before trying to register.')
+      const entropy: Entropy = await loadEntropyCli(opts)
+      const accountService = new EntropyAccount(entropy, opts.endpoint)
 
-        const accountService = new EntropyAccount(entropy, opts.endpoint)
+      const verifyingKey = await accountService.register()
+      // TODO: handle error
+      await persistVerifyingKeyToAccount(opts.config, verifyingKey, opts.account)
 
-        const verifyingKey = await accountService.register()
-        await addVerifyingKeyToAccountAndSelect(opts.config, verifyingKey, opts.account)
-
-        cliWrite(verifyingKey)
-        process.exit(0)
-      } catch (error) {
-        // TODO: this should be cliWriteError
-        print.error(error.message)
-        process.exit(1)
-      }
+      cliWrite(verifyingKey)
     })
 }

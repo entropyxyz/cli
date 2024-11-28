@@ -8,7 +8,7 @@ import { EntropyTuiOptions } from './types'
 import { printLogo } from './common/ascii'
 import { jumpStartNetwork, print, findAccountByAddressOrName } from './common/utils'
 import { accountOption, endpointOption, configOption } from './common/utils-cli'
-import { loadEntropy } from './common/load-entropy'
+import { loadEntropyTui } from "./common/load-entropy"
 import { EntropyLogger } from './common/logger'
 
 import { entropyAccount, entropyRegister } from './account/interaction'
@@ -41,13 +41,9 @@ export async function tuiAction (opts: EntropyTuiOptions) {
   const logger = new EntropyLogger('TUI', opts.endpoint)
   logger.debug(opts)
 
-  const storedConfig = await setupConfig(opts.config)
-
-  const entropyPromise = loadEntropy({
-    account: storedConfig.selectedAccount,
-    config: opts.config,
-    endpoint: opts.endpoint
-  })
+  const entropyPromise = opts.account
+    ? loadEntropyTui(opts)
+    : Promise.resolve(undefined)
 
   console.clear()
   await printLogo()
@@ -97,14 +93,14 @@ async function setupConfig (configPath: string) {
   return storedConfig
 }
 
-async function main (entropy: Entropy, choices, opts: EntropyTuiOptions, logger: EntropyLogger) {
+async function main (entropy: Entropy, choices: string[], opts: EntropyTuiOptions, logger: EntropyLogger) {
   if (loader.isSpinning) loader.stop()
   const storedConfig = await setupConfig(opts.config)
 
   // Entropy is undefined on initial install
   // However, after user creates their first account, entropy can be loaded
   if (storedConfig.selectedAccount && !entropy) {
-    entropy = await loadEntropy({
+    entropy = await loadEntropyTui({
       account: storedConfig.selectedAccount,
       config: opts.config,
       endpoint: opts.endpoint
@@ -120,7 +116,7 @@ async function main (entropy: Entropy, choices, opts: EntropyTuiOptions, logger:
     )
     if (currentAccount && currentAccount.name !== storedConfig.selectedAccount) {
       await entropy.close()
-      entropy = await loadEntropy({
+      entropy = await loadEntropyTui({
         account: storedConfig.selectedAccount,
         config: opts.config,
         endpoint: opts.endpoint
@@ -160,7 +156,6 @@ async function main (entropy: Entropy, choices, opts: EntropyTuiOptions, logger:
     }
     case 'Balance': {
       await entropyBalance(entropy, opts, storedConfig)
-        .catch(err => console.error('There was an error retrieving balance', err))
       break
     }
     case 'Transfer': {

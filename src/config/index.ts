@@ -74,14 +74,6 @@ export async function set (config: EntropyConfig, configPath: string) {
   await writeFile(configPath, serialize(config))
 }
 
-// type ConfigMutation = (config: EntropyConfig) => EntropyConfig
-// export async function mutate (configPath: string, mutation: ConfigMutation): Promise<EntropyConfig> {
-//   const storedConfig = await get(configPath)
-//   const newConfig = mutation(storedConfig)
-//   await set(newConfig, configPath)
-//   return storedConfig
-// }
-
 export async function setSelectedAccount (account: EntropyConfigAccount, configPath: string) {
   const storedConfig = await get(configPath)
 

@@ -3,7 +3,7 @@ import Entropy from "@entropyxyz/sdk";
 
 import { EntropyAccount } from './main'
 import { EntropyTuiOptions } from '../types'
-import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from "./utils";
+import { selectAndPersistNewAccount, persistVerifyingKeyToAccount, generateAccountDataForPrint } from "./utils";
 import { findAccountByAddressOrName, print } from "../common/utils"
 import { EntropyConfig } from "../config/types";
 import * as config from "../config";
@@ -37,6 +37,7 @@ export async function entropyAccount (opts: EntropyTuiOptions, storedConfig: Ent
       : await EntropyAccount.create({ name, path })
 
     await selectAndPersistNewAccount(opts.config, newAccount)
+    print(generateAccountDataForPrint(newAccount))
     return
   }
 
@@ -86,7 +87,7 @@ export async function entropyRegister (entropy: Entropy, opts: EntropyTuiOptions
   print("Attempting to register the address:", account.address)
   try {
     const verifyingKey = await accountService.register()
-    await addVerifyingKeyToAccountAndSelect(opts.config, verifyingKey, account.address)
+    await persistVerifyingKeyToAccount(opts.config, verifyingKey, account.address)
 
     print("Your address", account.address, "has been successfully registered.")
   } catch (error) {

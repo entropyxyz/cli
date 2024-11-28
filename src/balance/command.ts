@@ -4,7 +4,7 @@ import Entropy from "@entropyxyz/sdk";
 import { EntropyBalance } from "./main";
 import { configOption, endpointOption, cliWrite } from "../common/utils-cli";
 import { findAccountByAddressOrName } from "../common/utils";
-import { loadEntropy } from '../common/load-entropy'
+import { loadEntropyCli } from "../common/load-entropy"
 import * as config from "../config";
 
 export function entropyBalanceCommand () {
@@ -18,7 +18,7 @@ export function entropyBalanceCommand () {
     .addOption(configOption())
     .addOption(endpointOption())
     .action(async (account, opts) => {
-      const entropy: Entropy = await loadEntropy({ account, ...opts })
+      const entropy: Entropy = await loadEntropyCli({ account, ...opts })
       const BalanceService = new EntropyBalance(entropy, opts.endpoint)
 
       const { accounts } = await config.get(opts.config)

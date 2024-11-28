@@ -5,10 +5,10 @@ import {
   accountOption, endpointOption, configOption, verifyingKeyOption, programModKeyOption,
   cliWrite, 
 } from '../common/utils-cli'
-import { loadEntropy } from '../common/load-entropy'
+import { loadEntropyCli } from '../common/load-entropy'
 
 async function programService (opts) {
-  const entropy = await loadEntropy(opts)
+  const entropy = await loadEntropyCli(opts)
   return new EntropyProgram(entropy, opts.endpoint)
 }
 

@@ -91,7 +91,6 @@ export function accountChoicesWithOther (accounts: EntropyConfigAccount[]) {
 }
 
 export function findAccountByAddressOrName (accounts: EntropyConfigAccount[], aliasOrAddress: string) {
-  if (!accounts.length) return
   if (!aliasOrAddress || !aliasOrAddress.length) throw Error('account name or address required')
 
   return (
