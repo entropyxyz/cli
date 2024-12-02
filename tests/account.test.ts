@@ -9,13 +9,13 @@ import { randomAsHex } from '@polkadot/util-crypto'
 
 import { EntropyAccount } from '../src/account/main'
 import { EntropyTransfer } from '../src/transfer/main'
-import { EntropyAccountConfig, EntropyConfig } from '../src/config/types'
+import { EntropyConfigAccount, EntropyConfig } from '../src/config/types'
 import * as config from '../src/config'
 import { promiseRunner, setupTest } from './testing-utils'
 import { charlieStashAddress, charlieStashSeed, eveSeed } from './testing-utils/constants.mjs'
 
 test('Account - list', async t => {
-  const account: EntropyAccountConfig = {
+  const account: EntropyConfigAccount = {
     name: 'Test Config',
     address: charlieStashAddress,
     data: {
