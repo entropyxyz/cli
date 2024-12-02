@@ -2,6 +2,7 @@ import inquirer from "inquirer";
 import Entropy from "@entropyxyz/sdk";
 
 import { EntropyAccount } from './main'
+import { EntropyTuiOptions } from '../types'
 import { selectAndPersistNewAccount, persistVerifyingKeyToAccount, generateAccountDataForPrint } from "./utils";
 import { findAccountByAddressOrName, print } from "../common/utils"
 import { EntropyConfig } from "../config/types";
@@ -12,12 +13,11 @@ import {
   accountNewQuestions,
   accountSelectQuestions
 } from "./utils"
-import { ERROR_RED } from "src/common/constants";
 
 /*
  * @returns partialConfigUpdate | "exit" | undefined
  */
-export async function entropyAccount (endpoint: string, storedConfig: EntropyConfig) {
+export async function entropyAccount (opts: EntropyTuiOptions, storedConfig: EntropyConfig) {
   const { accounts } = storedConfig
   const { interactionChoice } = await inquirer.prompt(accountManageQuestions)
 
@@ -36,7 +36,7 @@ export async function entropyAccount (endpoint: string, storedConfig: EntropyCon
       ? await EntropyAccount.import({ seed, name, path })
       : await EntropyAccount.create({ name, path })
 
-    await selectAndPersistNewAccount(newAccount)
+    await selectAndPersistNewAccount(opts.config, newAccount)
     print(generateAccountDataForPrint(newAccount))
     return
   }
@@ -47,8 +47,8 @@ export async function entropyAccount (endpoint: string, storedConfig: EntropyCon
       return
     }
     const { selectedAccount } = await inquirer.prompt(accountSelectQuestions(accounts))
-    
-    await config.setSelectedAccount(selectedAccount)
+
+    await config.setSelectedAccount(selectedAccount, opts.config)
 
     print('Current selected account is:')
     print({ name: selectedAccount.name, address: selectedAccount.address })
@@ -74,8 +74,8 @@ export async function entropyAccount (endpoint: string, storedConfig: EntropyCon
   }
 }
 
-export async function entropyRegister (entropy: Entropy, endpoint: string, storedConfig: EntropyConfig): Promise<Partial<EntropyConfig>> {
-  const accountService = new EntropyAccount(entropy, endpoint)
+export async function entropyRegister (entropy: Entropy, opts: EntropyTuiOptions, storedConfig: EntropyConfig): Promise<Partial<EntropyConfig>> {
+  const accountService = new EntropyAccount(entropy, opts.endpoint)
 
   const { accounts, selectedAccount } = storedConfig
   const account = findAccountByAddressOrName(accounts, selectedAccount)
@@ -87,16 +87,16 @@ export async function entropyRegister (entropy: Entropy, endpoint: string, store
   print("Attempting to register the address:", account.address)
   try {
     const verifyingKey = await accountService.register()
-    await persistVerifyingKeyToAccount(verifyingKey, account.address)
+    await persistVerifyingKeyToAccount(opts.config, verifyingKey, account.address)
 
     print("Your address", account.address, "has been successfully registered.")
   } catch (error) {
     const endpointErrorMessageToMatch = 'Extrinsic registry.register expects 3 arguments, got 2'
     // const insufficientFeesErrorMessageToMatch = ''
     if (error.message.includes(endpointErrorMessageToMatch)) {
-      console.error(ERROR_RED + 'GenericError: Incompatible endpoint, expected core version 0.3.0, got 0.2.0')
+      print.error('GenericError: Incompatible endpoint, expected core version 0.3.0, got 0.2.0')
       return
     }
-    console.error(ERROR_RED + 'Register Error:', error.message);
+    print.error('Register Error:', error.message)
   }
 }

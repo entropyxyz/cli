@@ -44,15 +44,13 @@ cli
 
     // print entropy help and exit
     cli.help()
-
-    // tuiAction(opts)
-    // NOTE: this doesn't quite work, because -a, -e are not defined as options
-    // and if we do put them in here it gets a bit confusing
   })
 
   // set up config file, run migrations
-  .hook('preAction', async () => {
-    return config.init()
+  .hook('preAction', async (thisCommand, actionCommand) => {
+    const { config: configPath } = actionCommand.opts()
+
+    if (configPath) await config.init(configPath)
   })
 
 cli.parseAsync()

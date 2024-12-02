@@ -1,7 +1,7 @@
 import { Command, /* Option */ } from 'commander'
 
 import { EntropySign } from './main'
-import { accountOption, endpointOption, cliWrite } from '../common/utils-cli'
+import { accountOption, configOption, endpointOption, cliWrite } from '../common/utils-cli'
 import { loadEntropyCli } from '../common/load-entropy'
 
 export function entropySignCommand () {
@@ -9,6 +9,7 @@ export function entropySignCommand () {
     .description('Sign a message using the Entropy network. Output is a JSON { verifyingKey, signature }')
     .argument('<msg>', 'Message you would like to sign (string)')
     .addOption(accountOption())
+    .addOption(configOption())
     .addOption(endpointOption())
     // .addOption(
     //   new Option(

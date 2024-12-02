@@ -70,14 +70,16 @@ export async function loadEntropyTest (opts: LoadEntropyTestOpts) {
 
   const keyring = new Keyring({ seed: opts.seed, debug: true })
   const account = keyring.getAccount()
+  const accountName = 'test-account'
   config.accounts.push({
-    name: 'test-account',
+    name: accountName,
     address: account.admin.address,
     data: account
   })
-  config.selectedAccount = 'test-account'
+  config.selectedAccount = accountName
 
   return loadEntropy({
+    account: accountName,
     ...opts,
     config: {
       async get () {
@@ -163,15 +165,18 @@ function resolveEndpoint (config: EntropyConfig, aliasOrEndpoint: string) {
   }
 }
 
-function resolveAccount (config: EntropyConfig, addressOrName?: string): EntropyConfigAccount|null {
+function resolveAccount (config: EntropyConfig, addressOrName: string): EntropyConfigAccount {
   if (!config.accounts) throw Error('no accounts')
 
-  const account = findAccountByAddressOrName(config.accounts, addressOrName || config.selectedAccount)
+  const account = findAccountByAddressOrName(config.accounts, addressOrName)
   if (!account) {
     // there are accounts, but not match found
-    print(`AccountError: No account with name or address "${addressOrName}"`)
+    const msg = `AccountError: No account with name or address "${addressOrName}"`
+    // TODO: move printing out to loadEntropyCli, loadEntropyTui
+    // could bolt hint on to error: error.hint = "Available acounts..."
+    print.error(msg)
     print(bold('!! Available accounts can be found using `entropy account list` !!'))
-    process.exit(1)
+    throw Error(msg)
   }
 
   // there are accounts, we found a match

@@ -9,9 +9,9 @@ import { serialize, deserialize } from './encoding'
 import { EntropyConfig, EntropyConfigAccount } from './types'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
-export const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
 const OLD_CONFIG_PATH = join(process.env.HOME, '.entropy-cli.config')
 
+export const CONFIG_PATH_DEFAULT = join(paths.config, 'entropy-cli.json')
 export const VERSION = 'migration-version'
 
 export function migrateData (migrations, currentConfig = {}) {
@@ -33,7 +33,7 @@ function hasRunMigration (config: any, version: number) {
   return Number(currentVersion) >= Number(version)
 }
 
-export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG_PATH) {
+export async function init (configPath: string, oldConfigPath = OLD_CONFIG_PATH) {
   const currentConfig = await get(configPath)
     .catch(async (err ) => {
       if (isDangerousReadError(err)) throw err
@@ -56,17 +56,17 @@ export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG
   }
 }
 
-export async function get (configPath = CONFIG_PATH) {
+export async function get (configPath) {
   return readFile(configPath, 'utf-8')
     .then(deserialize)
 }
 
-export function getSync (configPath = CONFIG_PATH) {
+export function getSync (configPath) {
   const configStr = readFileSync(configPath, 'utf8')
   return deserialize(configStr)
 }
 
-export async function set (config: EntropyConfig, configPath = CONFIG_PATH) {
+export async function set (config: EntropyConfig, configPath: string) {
   assertConfig(config)
   assertConfigPath(configPath)
 
@@ -74,7 +74,7 @@ export async function set (config: EntropyConfig, configPath = CONFIG_PATH) {
   await writeFile(configPath, serialize(config))
 }
 
-export async function setSelectedAccount (account: EntropyConfigAccount, configPath = CONFIG_PATH) {
+export async function setSelectedAccount (account: EntropyConfigAccount, configPath: string) {
   const storedConfig = await get(configPath)
 
   if (storedConfig.selectedAccount === account.name) return storedConfig

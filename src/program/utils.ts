@@ -1,23 +1,20 @@
 import Entropy from "@entropyxyz/sdk"
 import fs from "node:fs/promises"
-import { isAbsolute, join } from "node:path"
 import { u8aToHex } from "@polkadot/util"
 
-import { print } from "../common/utils"
+import { print, absolutePath } from "../common/utils"
 
-export async function loadFile (path?: string, encoding?: string) {
-  if (path === undefined) return
+export async function loadFile (somePath?: string, encoding?: string) {
+  if (somePath === undefined) return
 
-  const absolutePath = isAbsolute(path)
-    ? path
-    : join(process.cwd(), path)
+  const path = absolutePath(somePath)
 
   switch (encoding) {
   case undefined:
-    return fs.readFile(absolutePath)
+    return fs.readFile(path)
 
   case 'json':
-    return fs.readFile(absolutePath, 'utf-8')
+    return fs.readFile(path, 'utf-8')
       .then(string => JSON.parse(string))
 
   default:
