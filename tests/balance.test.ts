@@ -28,10 +28,10 @@ test('getBalance + getBalances', async (t) => {
   )
   t.deepEqual(
     balances,
-    {
-      [newAddress]: {balance: newAddressBalance},
-      [richAddress]: {balance: richAddressBalance}
-    },
+    [
+      { address: newAddress,  balance: newAddressBalance },
+      { address: richAddress, balance: richAddressBalance }
+    ],
     'getBalances works'
   )
 
