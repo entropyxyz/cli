@@ -2,11 +2,11 @@ import { Command } from "commander";
 import Entropy from "@entropyxyz/sdk";
 
 import { EntropyBalance } from "./main";
+import { BalanceInfo } from "./types";
 import { endpointOption, cliWrite, loadEntropy } from "../common/utils-cli";
-import { findAccountByAddressOrName } from "../common/utils";
+import { findAccountByAddressOrName, getTokenDetails, nanoBitsToBits, round } from "../common/utils";
 import * as config from "../config";
-import { EntropyAccountConfig } from "src/config/types";
-import { formattedBalances } from "./utils";
+import { EntropyConfigAccount } from "src/config/types";
 
 export function entropyBalanceCommand () {
   const balanceCommand = new Command('balance')
@@ -22,6 +22,7 @@ export function entropyBalanceCommand () {
     .addOption(endpointOption())
     .action(async (account, opts) => {
       const { accounts } = await config.get()
+
       let entropy: Entropy
       if (!account && opts.all) {
         const tempAddress = accounts[0].address
@@ -30,24 +31,35 @@ export function entropyBalanceCommand () {
         entropy = await loadEntropy(account, opts.endpoint)
       } else {
         balanceCommand.help()
+        return process.exit(0)
       }
 
-      if (!entropy) {
-        console.error('EntropyError: Entropy was not initialized, please try again.')
-        process.exit(1)
-      }
+      const balanceService = new EntropyBalance(entropy, opts.endpoint)
+      const { decimals, symbol } = await getTokenDetails(entropy)
+      const toBits = (nanoBits) => round(nanoBitsToBits(nanoBits, decimals))
 
-      const BalanceService = new EntropyBalance(entropy, opts.endpoint)
       if (opts.all) {
         // Balances for all admin accounts
-        const addresses: string[] = accounts.map((acct: EntropyAccountConfig) => acct.address)
-        const balances = formattedBalances(await BalanceService.getBalances(addresses))
+        const addresses: string[] = accounts.map((acct: EntropyConfigAccount) => acct.address)
+        const balances = await balanceService.getBalances(addresses)
+          .then((infos: BalanceInfo[]) => {
+            return infos.map(info => {
+              return {
+                account: info.address,
+                balance: info.balance !== undefined
+                  ? toBits(info.balance)
+                  : info.error,
+                symbol
+              }
+            })
+          })
         cliWrite(balances)
       } else {
         // Balance for singular account
         const address = findAccountByAddressOrName(accounts, account)?.address
-        const balance = await BalanceService.getBalance(address)
-        cliWrite(`${balance.toLocaleString('en-US')} BITS`)
+        const balance = await balanceService.getBalance(address)
+          .then(toBits)
+        cliWrite({ balance, symbol })
       }
       process.exit(0)
     })

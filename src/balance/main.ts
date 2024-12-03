@@ -17,18 +17,17 @@ export class EntropyBalance extends EntropyBase {
     return balance
   }
 
-  async getBalances (addresses: string[]): Promise<BalanceInfo> {
-    const balanceInfo: BalanceInfo = {}
-    await Promise.all(addresses.map(async address => {
-      try {
-        const balance = await this.getBalance(address)
-
-        balanceInfo[address] = { balance }
-      } catch (error) {
-        balanceInfo[address] = { error: error.message }
-      }
-    }))
-
-    return balanceInfo
+  async getBalances (addresses: string[]): Promise<BalanceInfo[]> {
+    return Promise.all(
+      addresses.map(async address => {
+        return this.getBalance(address)
+          .then((balance: number) => {
+            return { address, balance }
+          })
+          .catch((error: Error) => {
+            return { address, error }
+          })
+      })
+    )
   }
 }
