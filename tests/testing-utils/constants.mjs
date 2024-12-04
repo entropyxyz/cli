@@ -11,3 +11,4 @@ export const eveSeed =
 export const eveAddress = '5HGjWAeFDfFCWPsjFQdVV2Msvz2XtMktvgocEZcCj68kUMaw'
 
 export const DEFAULT_ENDPOINT = 'ws://127.0.0.1:9944'
+export const DEFAULT_TOKEN_DECIMALS = 10

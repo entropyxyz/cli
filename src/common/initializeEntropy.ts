@@ -3,7 +3,7 @@ import Entropy, { wasmGlobalsReady } from "@entropyxyz/sdk"
 // @ts-ignore
 import Keyring from "@entropyxyz/sdk/keys"
 import * as config from "../config"
-import { EntropyAccountData } from "../config/types"
+import { EntropyConfigAccountData } from "../config/types"
 import { EntropyLogger } from "./logger"
 
 // TODO: unused
@@ -28,7 +28,7 @@ interface InitializeEntropyOpts {
   endpoint: string,
   configPath?: string // for testing
 }
-type MaybeKeyMaterial = EntropyAccountData | string
+type MaybeKeyMaterial = EntropyConfigAccountData | string
 
 // WARNING: in programatic cli mode this function should NEVER prompt users
 
@@ -113,10 +113,10 @@ export const initializeEntropy = async ({ keyMaterial, endpoint, configPath }: I
 
 
 // NOTE: frankie this was prettier before I had to refactor it for merge conflicts, promise
-async function getAccountData (keyMaterial: MaybeKeyMaterial): Promise<{ accountData: EntropyAccountData }> {
+async function getAccountData (keyMaterial: MaybeKeyMaterial): Promise<{ accountData: EntropyConfigAccountData }> {
   if (isEntropyAccountData(keyMaterial)) {
     return { 
-      accountData: keyMaterial as EntropyAccountData
+      accountData: keyMaterial as EntropyConfigAccountData
     }
   }
 
