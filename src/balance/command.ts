@@ -30,8 +30,7 @@ export function entropyBalanceCommand () {
       } else if (account) {
         entropy = await loadEntropy(account, opts.endpoint)
       } else {
-        balanceCommand.help()
-        return process.exit(0)
+        return balanceCommand.help()
       }
 
       const balanceService = new EntropyBalance(entropy, opts.endpoint)
@@ -59,7 +58,7 @@ export function entropyBalanceCommand () {
         const address = findAccountByAddressOrName(accounts, account)?.address
         const balance = await balanceService.getBalance(address)
           .then(toBits)
-        cliWrite({ balance, symbol })
+        cliWrite({ account, balance, symbol })
       }
       process.exit(0)
     })
