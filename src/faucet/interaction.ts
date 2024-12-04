@@ -3,10 +3,10 @@ import yoctoSpinner from 'yocto-spinner';
 import { EntropyLogger } from '../common/logger'
 import { FAUCET_PROGRAM_POINTER } from "./utils"
 import { EntropyFaucet } from "./main"
-import { bitsToNanoBits, getTokenDetails, print } from "src/common/utils"
+import { bitsToLilBits, getTokenDetails, print } from "src/common/utils"
 
 let chosenVerifyingKeys = []
-// Sending only 1e10 nanoBITS does not allow user's to register after receiving funds
+// Sending only 1e10 lilBITS does not allow user's to register after receiving funds
 // there are limits in place to ensure user's are leftover with a certain balance in their accounts
 // increasing amount send here, will allow user's to register right away
 
@@ -25,7 +25,7 @@ export async function entropyFaucet (entropy: Entropy, options, logger: EntropyL
   }
 
   const { decimals } = await getTokenDetails(entropy)
-  const amount = bitsToNanoBits(2, decimals)
+  const amount = bitsToLilBits(2, decimals)
   const faucetService = new EntropyFaucet(entropy, endpoint)
   const verifyingKeys = await faucetService.getAllFaucetVerifyingKeys()
   // @ts-expect-error
