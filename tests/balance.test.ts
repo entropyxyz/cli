@@ -1,8 +1,9 @@
 import test from 'tape'
 
-import { setupTest, charlieStashAddress as richAddress, promiseRunner, DEFAULT_ENDPOINT } from './testing-utils'
+import { setupTest, charlieStashAddress as richAddress, promiseRunner, DEFAULT_ENDPOINT, eveAddress } from './testing-utils'
 import { EntropyBalance } from '../src/balance/main'
 import { EntropyAccount } from '../src/account/main'
+import { createSubstrate } from '@entropyxyz/sdk/utils'
 
 test('getBalance + getBalances', async (t) => {
   const { run, entropy, endpoint } = await setupTest(t)
@@ -52,16 +53,30 @@ test('getBalance + getBalances', async (t) => {
   t.end()
 })
 
-test('getAnyBalance', async (t) => {
+test('getAnyBalance: new account', async (t) => {
   const run = promiseRunner(t)
   // create new account, not saved in config
   const newAccount = await EntropyAccount.create({ name: 'TestAnyBalance1' })
-
+  const substrate = createSubstrate(DEFAULT_ENDPOINT)
+  await run('substrate ready', substrate.isReadyOrError)
   const balance = await run(
     'getAnyBalance (newAccount)',
-    EntropyBalance.getAnyBalance(DEFAULT_ENDPOINT, newAccount.address)
+    EntropyBalance.getAnyBalance(substrate, newAccount.address)
   )
   t.equal(balance, 0, 'newSeed balance = 0')
+  await run('close substrate', substrate.disconnect().catch(err => console.error('Error closing connection', err.message)))
+  t.end()
+})
 
+test('getAnyBalance: test account', async (t) => {
+  const run = promiseRunner(t)
+  const substrate = createSubstrate(DEFAULT_ENDPOINT)
+  await run('substrate ready', substrate.isReadyOrError)
+  const balance = await run(
+    'getAnyBalance (eve account)',
+    EntropyBalance.getAnyBalance(substrate, eveAddress)
+  )
+  t.true(balance > BigInt(10e10), 'richAddress balance >>> 0')
+  await run('close substrate', substrate.disconnect().catch(err => console.error('Error closing connection', err.message)))
   t.end()
 })
