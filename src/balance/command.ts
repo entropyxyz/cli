@@ -27,7 +27,7 @@ export function entropyBalanceCommand () {
       if (!account && opts.all) {
         const tempAddress = accounts[0].address
         entropy = await loadEntropy(tempAddress, opts.endpoint)
-      } else if (account) {
+      } else if (account && !opts.all) {
         entropy = await loadEntropy(account, opts.endpoint)
       } else {
         return balanceCommand.help()
@@ -35,7 +35,7 @@ export function entropyBalanceCommand () {
 
       const balanceService = new EntropyBalance(entropy, opts.endpoint)
       const { decimals, symbol } = await getTokenDetails(entropy)
-      const toBits = (nanoBits) => round(nanoBitsToBits(nanoBits, decimals))
+      const toBits = (nanoBits: number) => round(nanoBitsToBits(nanoBits, decimals))
 
       if (opts.all) {
         // Balances for all admin accounts
