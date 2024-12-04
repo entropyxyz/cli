@@ -3,10 +3,12 @@ import { readFileSync } from 'node:fs'
 import { mkdirp } from 'mkdirp'
 import { join, dirname } from 'path'
 import envPaths from 'env-paths'
+import AJV from 'ajv'
 
 import allMigrations from './migrations'
 import { serialize, deserialize } from './encoding'
 import { EntropyConfig, EntropyConfigAccount } from './types'
+import { schema } from './schema'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
 const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
@@ -125,3 +127,6 @@ export function isDangerousReadError (err: any) {
 
   return true
 }
+
+const ajv = new AJV()
+export const isValidConfig = ajv.compile(schema)

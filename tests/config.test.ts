@@ -1,7 +1,8 @@
 import test from 'tape'
 import { writeFile } from 'node:fs/promises'
+
 import migrations from '../src/config/migrations'
-import { migrateData, init, get, set } from '../src/config'
+import { migrateData, init, get, set, isValidConfig } from '../src/config'
 import * as encoding  from '../src/config/encoding'
 
 // used to ensure unique test ids
@@ -338,8 +339,7 @@ test('config/migrations/04', { objectPrintDepth: 10 }, t => {
       "test-net": "wss://testnet.entropy.xyz",
       "stg": "wss://api.staging.testnet.testnet-2024.infrastructure.entropy.xyz"
     },
-    "migration-version": 3,
-    "setSelectedAccount": "naynay"
+    "migration-version": 3
   }
 
   const migrated = migrations[4].migrate(initial)
@@ -400,9 +400,132 @@ test('config/migrations/04', { objectPrintDepth: 10 }, t => {
         "stg": "wss://api.staging.testnet.testnet-2024.infrastructure.entropy.xyz"
       },
       "migration-version": 3,
-      "setSelectedAccount": "naynay"
     }
   )
+
+  t.end()
+})
+
+test.only('config - isValidConfig', t => {
+  t.false(isValidConfig({}), 'empty object => false')
+  const initialState = migrateData(migrations)
+
+  t.true(isValidConfig(initialState), 'initial state => true')
+
+  function makeConfig (opts: { omit?: string } = {}) {
+    const config = {
+      accounts: [{
+        "name": "naynay",
+        "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+        "data": {
+          "debug": true,
+          "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
+          "admin": {
+            "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+            "type": "registration",
+            "verifyingKeys": [],
+            "userContext": "ADMIN_KEY",
+            "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
+            "path": "",
+            "pair": {
+              "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+              "addressRaw": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+              "isLocked": false,
+              "meta": {},
+              "publicKey": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+              "type": "sr25519",
+              "secretKey": "data:application/UI8A;base64,aCCXH0+nI2+tot94NPegNBCwe1bWgw57xPo9Iss2DmoE5obkxD5JUXujRpsHEoltI0hD9SAUGO9GeV+8rGEkUg=="
+            }
+          },
+          "registration": {
+            "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+            "type": "registration",
+            "verifyingKeys": [
+              "0x02ecbc1c6777e868c8cc50c9784e95d3a4727bdb5a04d7694d2880c980f15e17c3"
+            ],
+            "userContext": "ADMIN_KEY",
+            "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
+            "path": "",
+            "pair": {
+              "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+              "addressRaw": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+              "isLocked": false,
+              "meta": {},
+              "publicKey": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+              "type": "sr25519",
+              "secretKey": "data:application/UI8A;base64,aCCXH0+nI2+tot94NPegNBCwe1bWgw57xPo9Iss2DmoE5obkxD5JUXujRpsHEoltI0hD9SAUGO9GeV+8rGEkUg=="
+            }
+          }
+        }
+      }],
+      "selectedAccount": "naynay",
+      "endpoints": {
+        "dev": "ws://127.0.0.1:9944",
+        "test-net": "wss://testnet.entropy.xyz",
+        "stg": "wss://api.staging.testnet.testnet-2024.infrastructure.entropy.xyz"
+      },
+      "migration-version": 3,
+    }
+
+    if (opts.omit) delete config[opts.omit]
+
+    return config
+  }
+
+  console.log('---')
+
+  /* accounts */
+  {
+    t.false(isValidConfig(makeConfig({ omit: 'accounts' })), "accounts: ommitted => false")
+  }
+
+  console.log('---')
+
+  /* selectedAccount */
+  {
+    const config = makeConfig({ omit: 'selectedAccount' })
+    t.false(isValidConfig(config), "selectedAccount: ommitted => false")
+
+    config.selectedAccount = ""
+    t.true(isValidConfig(config), "selectedAccount: '' => true")
+
+    // @ts-expect-error
+    config.selectedAccount = 4
+    t.false(isValidConfig(config), "selectedAccount: 4 => false")
+  }
+
+  console.log('---')
+
+  /* endpoints */
+  {
+    const config = makeConfig({ omit: 'endpoints' })
+    t.false(isValidConfig(config), "endpoints: ommitted => false")
+
+    // @ts-expect-error
+    config.endpoints = {
+      "something": "wss://testnet.entropy.xyz",
+    }
+    t.false(isValidConfig(config), "endpoints: no test-net => false")
+  }
+
+  console.log('---')
+
+  /* migration-version */
+  {
+    const config = makeConfig({ omit: 'migration-version' })
+    t.false(isValidConfig(config), "migration-version: ommitted => false")
+
+    config['migration-version'] = 99
+    t.false(isValidConfig(config), "migration-version: wrong number => false")
+
+    // @ts-expect-error
+    config['migration-version'] = "4"
+    t.false(isValidConfig(config), "migration-version: string int => false")
+
+    // @ts-expect-error
+    config['migration-version'] = "dog"
+    t.false(isValidConfig(config), "migration-version: string => false")
+  }
 
   t.end()
 })
