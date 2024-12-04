@@ -85,15 +85,12 @@ test('getAnyBalance: bad account', async (t) => {
   const run = promiseRunner(t)
   const substrate = createSubstrate(DEFAULT_ENDPOINT)
   await run('substrate ready', substrate.isReadyOrError)
-  try {
-    await run(
-      'getAnyBalance (bad account)',
-      EntropyBalance.getAnyBalance(substrate, 'not-a-real-account')
-    )
-    t.fail('Getting balance should fail')
-  } catch (error) {
-    t.pass('Getting balance failed due to bad account')
-  }
+  await run(
+    'getAnyBalance (bad account)',
+    EntropyBalance.getAnyBalance(substrate, 'not-a-real-account')
+  )
+    .then(() => t.fail('Getting balance should fail'))
+    .catch(() => t.pass('Getting balance should fail'))
   await run('close substrate', substrate.disconnect().catch(err => console.error('Error closing connection', err.message)))
   t.end()
 })
