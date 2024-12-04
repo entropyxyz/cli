@@ -14,3 +14,8 @@ export interface EntropyLoggerOptions {
   level?: EntropyLoggerLogLevel
   isTesting?: boolean
 }
+
+export type TokenDetails = { 
+  decimals: number
+  symbol: string
+}
