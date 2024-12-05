@@ -9,7 +9,7 @@ import { serialize, deserialize } from './encoding'
 import { EntropyConfig, EntropyConfigAccount } from './types'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
-const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
+export const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
 const OLD_CONFIG_PATH = join(process.env.HOME, '.entropy-cli.config')
 
 export const VERSION = 'migration-version'

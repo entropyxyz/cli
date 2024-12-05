@@ -1,6 +1,8 @@
 import { Command } from "commander"
-import { accountOption, cliWrite, endpointOption, loadEntropy } from "src/common/utils-cli"
+
 import { EntropyTransfer } from "./main"
+import { accountOption, cliWrite, endpointOption } from "src/common/utils-cli"
+import { loadEntropyCli } from "../common/load-entropy"
 import { getTokenDetails } from "src/common/utils"
 
 export function entropyTransferCommand () {
@@ -13,7 +15,7 @@ export function entropyTransferCommand () {
     .addOption(endpointOption())
     .action(async (destination, amount, opts) => {
       // TODO: destination as <name|address> ?
-      const entropy = await loadEntropy(opts.account, opts.endpoint)
+      const entropy = await loadEntropyCli(opts)
       const transferService = new EntropyTransfer(entropy, opts.endpoint)
       const { symbol } = await getTokenDetails(entropy)
 
@@ -23,7 +25,7 @@ export function entropyTransferCommand () {
         source: opts.account,
         destination,
         amount,
-        symbol 
+        symbol
       })
       process.exit(0)
     })

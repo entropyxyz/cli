@@ -2,8 +2,9 @@ import { Command } from "commander";
 import Entropy from "@entropyxyz/sdk";
 
 import { EntropyBalance } from "./main";
-import { endpointOption, cliWrite, loadEntropy } from "../common/utils-cli";
+import { endpointOption, cliWrite } from "../common/utils-cli";
 import { findAccountByAddressOrName, getTokenDetails, nanoBitsToBits, round } from "../common/utils";
+import { loadEntropyCli } from "../common/load-entropy"
 import * as config from "../config";
 
 export function entropyBalanceCommand () {
@@ -16,7 +17,7 @@ export function entropyBalanceCommand () {
     ].join(' '))
     .addOption(endpointOption())
     .action(async (account, opts) => {
-      const entropy: Entropy = await loadEntropy(account, opts.endpoint)
+      const entropy: Entropy = await loadEntropyCli({ account, ...opts })
       const balanceService = new EntropyBalance(entropy, opts.endpoint)
       const { decimals, symbol } = await getTokenDetails(entropy)
 
