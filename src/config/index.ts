@@ -54,7 +54,13 @@ export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG
   const newConfig = migrateData(allMigrations, currentConfig)
 
   if (newConfig[VERSION] !== currentConfig[VERSION]) {
+    // a migration happened, write updated config
+    // "set" checks the format of the config for us
     await set(newConfig, configPath)
+  }
+  else {
+    // make sure the config the app is about to run on is safe
+    assertConfig(newConfig)
   }
 }
 
