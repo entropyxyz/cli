@@ -5,7 +5,7 @@ import yoctoSpinner from 'yocto-spinner'
 
 import * as config from './config'
 import { EntropyTuiOptions } from './types'
-import { logo } from './common/ascii'
+import { printLogo } from './common/ascii'
 import { jumpStartNetwork, print, findAccountByAddressOrName } from './common/utils'
 import { loadEntropy, accountOption, endpointOption } from './common/utils-cli'
 import { EntropyLogger } from './common/logger'
@@ -35,17 +35,20 @@ export function entropyTuiCommand () {
 }
 
 // tui = text user interface
-export async function tuiAction (options: EntropyTuiOptions) {
-  const { account, endpoint } = options
-  const entropy = account
-    ? await loadEntropy(account, endpoint)
-    : undefined
-    // NOTE: on initial startup you have no account
+export async function tuiAction (opts: EntropyTuiOptions) {
+  const logger = new EntropyLogger('TUI', opts.endpoint)
+  logger.debug(opts)
 
-  const logger = new EntropyLogger('TUI', options.endpoint)
+  const entropyPromise = opts.account
+    ? loadEntropy(opts.account, opts.endpoint)
+    : Promise.resolve(undefined)
+
   console.clear()
-  console.log(logo)
-  logger.debug(options)
+  await printLogo()
+
+  loader.start()
+  const entropy = await entropyPromise
+  loader.stop()
 
   let choices = [
     'Manage Accounts',
@@ -64,14 +67,14 @@ export async function tuiAction (options: EntropyTuiOptions) {
     // 'Create and Fund Faucet(s)'
   ]
 
-  if (options.dev) {
+  if (opts.dev) {
     choices = [...choices, ...devChoices]
   }
 
   // assign exit so its last
   choices = [...choices, 'Exit']
 
-  main(entropy, choices, options, logger)
+  main(entropy, choices, opts, logger)
 }
 
 const loader = yoctoSpinner()

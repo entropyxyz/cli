@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 # HACK: normally we could just go:
-#   tape tests/*.test.ts | tap-spec
+#   tape tests/*.test.ts
 #
 # but here we are fighting TS ... this works well enough
 
@@ -12,12 +12,15 @@ if [ $ONLY_FILES ]; then
   # NOTE: `yarn test:only` ensures our CI fails if those are left in
   set -e;
   for t in $ONLY_FILES; do
-    npx tsx $t | tap-spec;
+    npx tsx $t;
   done
 else
   # Otherwise run all tests
   set -e;
   for t in tests/*.test.ts; do
-    npx tsx $t | tap-spec;
+    npx tsx $t;
   done
 fi
+
+echo ''
+echo ''

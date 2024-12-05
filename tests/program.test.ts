@@ -1,16 +1,12 @@
 import test from 'tape'
-// @ts-expect-error
-import { jumpStartNetwork } from '@entropyxyz/sdk/testing'
 
 import { promiseRunner, eveSeed, setupTest } from './testing-utils'
 import { EntropyProgram } from '../src/program/main'
 
-const networkType = 'four-nodes'
 const endpoint = 'ws://127.0.0.1:9944'
 
 test('program', async t => {
-  const { run, entropy } = await setupTest(t, { seed: eveSeed, networkType })
-  await run('jump-start network', jumpStartNetwork(entropy))
+  const { run, entropy } = await setupTest(t, { seed: eveSeed })
   await run('register', entropy.register()) // TODO: consider removing this in favour of just testing add
 
   const program = new EntropyProgram(entropy, endpoint)

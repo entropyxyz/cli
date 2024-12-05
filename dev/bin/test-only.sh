@@ -19,7 +19,7 @@ if [ "$RESULT" ]; then
     --color \
     'test\.only' && \
   echo '' && \
-  echo 'Please remove ♡' && \
+  printf "Please remove ${RED}♡${NC}\n" && \
   echo '' && \
   exit 1
 fi

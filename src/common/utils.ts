@@ -1,7 +1,8 @@
 import { Entropy } from '@entropyxyz/sdk'
 import { Buffer } from 'buffer'
-import { EntropyAccountConfig } from "../config/types"
+import { EntropyConfigAccount } from "../config/types"
 import { EntropyLogger } from './logger'
+import { TokenDetails } from 'src/types'
 
 export function stripHexPrefix (str: string): string {
   if (str.startsWith('0x')) return str.slice(2)
@@ -58,7 +59,7 @@ export function buf2hex (buffer: ArrayBuffer): string {
   return Buffer.from(buffer).toString("hex")
 }
 
-export function generateAccountChoices (accounts: EntropyAccountConfig[]) {
+export function generateAccountChoices (accounts: EntropyConfigAccount[]) {
   return accounts
     .map((account) => ({
       name: `${account.name} (${account.address})`,
@@ -66,12 +67,12 @@ export function generateAccountChoices (accounts: EntropyAccountConfig[]) {
     }))
 }
 
-export function accountChoicesWithOther (accounts: EntropyAccountConfig[]) {
+export function accountChoicesWithOther (accounts: EntropyConfigAccount[]) {
   return generateAccountChoices(accounts)
     .concat([{ name: "Other", value: null }])
 }
 
-export function findAccountByAddressOrName (accounts: EntropyAccountConfig[], aliasOrAddress: string) {
+export function findAccountByAddressOrName (accounts: EntropyConfigAccount[], aliasOrAddress: string) {
   if (!aliasOrAddress || !aliasOrAddress.length) throw Error('account name or address required')
 
   return (
@@ -112,4 +113,37 @@ export async function jumpStartNetwork (entropy, endpoint): Promise<any> {
         if (status.isFinalized) resolve(status)
       })
   })
+}
+
+// caching details to reduce number of calls made to the rpc endpoint
+let tokenDetails: TokenDetails
+export async function getTokenDetails (entropy): Promise<TokenDetails> {
+  if (tokenDetails) return tokenDetails
+  const chainProperties = await entropy.substrate.rpc.system.properties()
+  const decimals = chainProperties.tokenDecimals.toHuman()[0]
+  const symbol = chainProperties.tokenSymbol.toHuman()[0]
+  tokenDetails = { decimals: parseInt(decimals), symbol }
+  return tokenDetails
+}
+
+/* 
+  A "nanoBITS" is the smallest indivisible unit of account value we track.
+  A "BITS" is the human readable unit of value value
+  This constant is then "the number of nanoBITS that make up 1 BITS", or said differently
+  "how many decimal places our BITS has".
+*/
+export const nanoBitsPerBits = (decimals: number): number => {
+  return Math.pow(10, decimals) 
+}
+
+export function nanoBitsToBits (numOfNanoBits: number, decimals: number) {
+  return numOfNanoBits / nanoBitsPerBits(decimals)
+}
+
+export function bitsToNanoBits (numOfBits: number, decimals: number): bigint {
+  return BigInt(numOfBits * nanoBitsPerBits(decimals))
+}
+
+export function round (num: number, decimals: number = 4): number {
+  return parseFloat(num.toFixed(decimals))
 }

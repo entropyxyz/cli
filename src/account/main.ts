@@ -7,20 +7,20 @@ import { FLOW_CONTEXT } from "./constants";
 import { AccountCreateParams, AccountImportParams, AccountRegisterParams } from "./types";
 
 import { EntropyBase } from "../common/entropy-base";
-import { EntropyAccountConfig, EntropyAccountConfigFormatted } from "../config/types";
+import { EntropyConfigAccount, EntropyConfigAccountFormatted } from "../config/types";
 
 export class EntropyAccount extends EntropyBase {
   constructor (entropy: Entropy, endpoint: string) {
     super({ entropy, endpoint, flowContext: FLOW_CONTEXT })
   }
 
-  static async create ({ name, path }: AccountCreateParams): Promise<EntropyAccountConfig> {
+  static async create ({ name, path }: AccountCreateParams): Promise<EntropyConfigAccount> {
     const seed = randomAsHex(32)
     return EntropyAccount.import({ name, seed, path })
   }
 
   // WARNING: #create depends on #import => be careful modifying this function
-  static async import ({ name, seed, path }: AccountImportParams ): Promise<EntropyAccountConfig> {
+  static async import ({ name, seed, path }: AccountImportParams ): Promise<EntropyConfigAccount> {
     await wasmGlobalsReady()
     const keyring = new Keyring({ seed, path, debug: true })
 
@@ -40,13 +40,13 @@ export class EntropyAccount extends EntropyBase {
     }
   }
 
-  static list ({ accounts }: { accounts: EntropyAccountConfig[] }): EntropyAccountConfigFormatted[] {
+  static list ({ accounts }: { accounts: EntropyConfigAccount[] }): EntropyConfigAccountFormatted[] {
     if (!accounts.length)
       throw new Error(
         'AccountsError: There are currently no accounts available, please create or import a new account using the Manage Accounts feature'
       )
 
-    return accounts.map((account: EntropyAccountConfig) => ({
+    return accounts.map((account: EntropyConfigAccount) => ({
       name: account.name,
       address: account.address,
       verifyingKeys: account?.data?.registration?.verifyingKeys || []

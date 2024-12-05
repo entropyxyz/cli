@@ -3,7 +3,7 @@ import Entropy from "@entropyxyz/sdk";
 
 import { EntropyBalance } from "./main";
 import { endpointOption, cliWrite, loadEntropy } from "../common/utils-cli";
-import { findAccountByAddressOrName } from "../common/utils";
+import { findAccountByAddressOrName, getTokenDetails, nanoBitsToBits, round } from "../common/utils";
 import * as config from "../config";
 
 export function entropyBalanceCommand () {
@@ -17,13 +17,15 @@ export function entropyBalanceCommand () {
     .addOption(endpointOption())
     .action(async (account, opts) => {
       const entropy: Entropy = await loadEntropy(account, opts.endpoint)
-      const BalanceService = new EntropyBalance(entropy, opts.endpoint)
+      const balanceService = new EntropyBalance(entropy, opts.endpoint)
+      const { decimals, symbol } = await getTokenDetails(entropy)
 
       const { accounts } = await config.get()
       const address = findAccountByAddressOrName(accounts, account)?.address
 
-      const balance = await BalanceService.getBalance(address)
-      cliWrite(`${balance.toLocaleString('en-US')} BITS`)
+      const nanoBalance = await balanceService.getBalance(address)
+      const balance = round(nanoBitsToBits(nanoBalance, decimals))
+      cliWrite({ balance, symbol })
       process.exit(0)
     })
 
