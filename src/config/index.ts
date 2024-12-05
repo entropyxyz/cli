@@ -110,7 +110,7 @@ export function assertConfig (config: any) {
           ? `config${err.instancePath}: ${err.message}`
           : err.message
       })
-      .join(", ")
+      .join("; ")
   })
 
 }

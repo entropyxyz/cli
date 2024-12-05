@@ -99,21 +99,33 @@ test('config - set', async t => {
     await set(undefined, configPath)
       .then(() => t.fail(message))
       .catch(err => {
-        t.match(err.message, /config must be an object/, message)
+        t.match(err.message, /Invalid config/, message + ' (message)')
+        t.match(err.cause, /must be object/, message + ' (cause)')
       })
   }
 
   {
     const config = {
       accounts: [{
-        name: 'dog'
+        name: 'dog',
+        address: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        data: {
+          admin: {},
+          registration: {}
+        }
       }],
       selectedAccount: 'dog',
-      endpoints: {},
-      'migration-version': 1200
+      endpoints: {
+        "test-net": 'wss://dog.xyz'
+      },
+      'migration-version': 4
     }
     // @ts-expect-error : wrong types
     await set(config, configPath)
+      .catch(err => {
+        t.fail('set worked')
+        console.log(err.cause)
+      })
 
     const actual = await get(configPath)
     t.deepEqual(config, actual, 'set works')
@@ -702,7 +714,7 @@ test('config - assertConfig', t => {
         'config/accounts/0/address: must match pattern "^[a-km-zA-HJ-NP-Z1-9]{48,48}$"',
         // TODO: could pretty this up to say "a Base58 encoded key 48 characters long"
         'config/accounts/0/data: must have required property \'registration\''
-      ].join(', '),
+      ].join('; '),
       'err.cause'
     )
   }
