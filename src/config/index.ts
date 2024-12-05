@@ -8,7 +8,7 @@ import AJV from 'ajv'
 import allMigrations from './migrations'
 import { serialize, deserialize } from './encoding'
 import { EntropyConfig, EntropyConfigAccount } from './types'
-import { schema } from './schema'
+import { configSchema } from './schema'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
 const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
@@ -93,6 +93,7 @@ export async function setSelectedAccount (account: EntropyConfigAccount, configP
 /* util */
 function noop () {}
 function assertConfig (config: any) {
+  // TODO: replace this with isValidConfig + throws
   if (
     !config ||
     typeof config !== 'object'
@@ -128,5 +129,57 @@ export function isDangerousReadError (err: any) {
   return true
 }
 
-const ajv = new AJV()
-export const isValidConfig = ajv.compile(schema)
+const ajv = new AJV({
+  allErrors: true
+})
+
+let validator
+export const isValidConfig: ValidatorFunction = function (input: any) {
+  if (!validator) validator = ajv.compile(configSchema)
+  // lazy compile once, it's slowish (~20ms)
+
+  const generalResult = validator(input)
+  const selectedAccountResult = isValidSelectedAccount(input)
+
+  const isValid = generalResult && selectedAccountResult
+
+  isValidConfig.errors = isValid
+    ? null
+    : [
+      ...(validator.errors || []),
+      ...(isValidSelectedAccount.errors || [])
+    ]
+
+  return isValid
+}
+
+const isValidSelectedAccount: ValidatorFunction = function (input: any) {
+  // TODO: change this behaviour?
+  if (input?.selectedAccount === "") {
+    isValidSelectedAccount.errors = null
+    return true
+  }
+
+  if (!input?.selectedAccount || !Array.isArray(input?.accounts)) {
+    isValidSelectedAccount.errors = [{
+      message: 'unable to check selectedAccount validity'
+    }]
+    return false
+  }
+
+  const isValid = input.accounts.find(acct => acct.name === input.selectedAccount)
+
+  isValidSelectedAccount.errors = isValid
+    ? null
+    : [{ message: `no account had a "name" matching ${input.selectedAccount}` }]
+
+  return isValid
+}
+
+type ValidatorFunction = {
+  errors?: null|ValidatorErrorObject[]
+  (input: any): boolean
+}
+interface ValidatorErrorObject {
+  message: string
+}

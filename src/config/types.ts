@@ -6,7 +6,7 @@ export interface EntropyConfig {
   }
   // selectedAccount is account.name (alias) for the account
   selectedAccount: string
-  'migration-version': string
+  'migration-version': number
 }
 
 export interface EntropyConfigAccount {
