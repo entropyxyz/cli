@@ -92,36 +92,29 @@ export async function setSelectedAccount (account: EntropyConfigAccount, configP
 
 /* util */
 function noop () {}
-function assertConfig (config: any) {
-  // TODO: replace this with isValidConfig + throws
-  if (
-    !config ||
-    typeof config !== 'object'
-  ) {
-    throw Error('Config#set: config must be an object')
-  }
 
-  if (!Array.isArray(config.accounts)) {
-    throw Error('Config#set: config must have "accounts"')
-  }
+export function assertConfig (config: any) {
+  if (isValidConfig(config)) return
 
-  if (!config.endpoints) {
-    throw Error('Config#set: config must have "endpoints"')
-  }
+  // @ts-expect-error this is valid Node...
+  throw new Error('Invalid config', {
+    cause: isValidConfig.errors
+      .map(err => {
+        return err.instancePath
+          ? `config${err.instancePath}: ${err.message}`
+          : err.message
+      })
+      .join(", ")
+  })
 
-  if (typeof config.selectedAccount !== 'string') {
-    throw Error('Config#set: config must have "selectedAccount"')
-  }
-
-  if (typeof config['migration-version'] !== 'number') {
-    throw Error('Config#set: config must have "migration-version"')
-  }
 }
+
 function assertConfigPath (configPath: string) {
   if (!configPath.endsWith('.json')) {
     throw Error(`configPath must be of form *.json, got ${configPath}`)
   }
 }
+
 export function isDangerousReadError (err: any) {
   // file not found:
   if (err.code === 'ENOENT') return false
@@ -130,7 +123,7 @@ export function isDangerousReadError (err: any) {
 }
 
 const ajv = new AJV({
-  allErrors: true
+  allErrors: true,
 })
 
 let validator
@@ -162,7 +155,7 @@ const isValidSelectedAccount: ValidatorFunction = function (input: any) {
 
   if (!input?.selectedAccount || !Array.isArray(input?.accounts)) {
     isValidSelectedAccount.errors = [{
-      message: 'unable to check selectedAccount validity'
+      message: 'unable to check "selectedAccount" validity'
     }]
     return false
   }
@@ -171,7 +164,7 @@ const isValidSelectedAccount: ValidatorFunction = function (input: any) {
 
   isValidSelectedAccount.errors = isValid
     ? null
-    : [{ message: `no account had a "name" matching ${input.selectedAccount}` }]
+    : [{ message: `no account had a "name" matching "selectedAccount": ${input.selectedAccount}` }]
 
   return isValid
 }
@@ -181,5 +174,6 @@ type ValidatorFunction = {
   (input: any): boolean
 }
 interface ValidatorErrorObject {
+  instancePath?: string
   message: string
 }

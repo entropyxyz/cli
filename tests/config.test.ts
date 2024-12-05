@@ -2,7 +2,7 @@ import test from 'tape'
 import { writeFile } from 'node:fs/promises'
 
 import migrations from '../src/config/migrations'
-import { migrateData, init, get, set, isValidConfig } from '../src/config'
+import { migrateData, init, get, set, isValidConfig, assertConfig } from '../src/config'
 import * as encoding  from '../src/config/encoding'
 
 // used to ensure unique test ids
@@ -406,6 +406,80 @@ test('config/migrations/04', { objectPrintDepth: 10 }, t => {
   t.end()
 })
 
+
+function makeConfig (override?: object) {
+  const config = {
+    accounts: [makeConfigAccount()],
+    "selectedAccount": "naynay",
+    "endpoints": {
+      "dev": "ws://127.0.0.1:9944",
+      "test-net": "wss://testnet.entropy.xyz",
+      "stg": "wss://api.staging.testnet.testnet-2024.infrastructure.entropy.xyz"
+    },
+    "migration-version": 4,
+  }
+
+  if (override) {
+    return { ...config, ...override }
+    // NOTE: shallow merge
+  }
+  else return config
+}
+
+function makeConfigAccount (override?: object) {
+  const configAccount = {
+    "name": "naynay",
+    "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+    "data": {
+      "debug": true,
+      "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
+      "admin": {
+        "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+        "type": "registration",
+        "verifyingKeys": [],
+        "userContext": "ADMIN_KEY",
+        "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
+        "path": "",
+        "pair": {
+          "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+          "addressRaw": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+          "isLocked": false,
+          "meta": {},
+          "publicKey": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+          "type": "sr25519",
+          "secretKey": "data:application/UI8A;base64,aCCXH0+nI2+tot94NPegNBCwe1bWgw57xPo9Iss2DmoE5obkxD5JUXujRpsHEoltI0hD9SAUGO9GeV+8rGEkUg=="
+        }
+      },
+      "registration": {
+        "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+        "type": "registration",
+        "verifyingKeys": [
+          "0x02ecbc1c6777e868c8cc50c9784e95d3a4727bdb5a04d7694d2880c980f15e17c3"
+        ],
+        "userContext": "ADMIN_KEY",
+        "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
+        "path": "",
+        "pair": {
+          "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+          "addressRaw": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+          "isLocked": false,
+          "meta": {},
+          "publicKey": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+          "type": "sr25519",
+          "secretKey": "data:application/UI8A;base64,aCCXH0+nI2+tot94NPegNBCwe1bWgw57xPo9Iss2DmoE5obkxD5JUXujRpsHEoltI0hD9SAUGO9GeV+8rGEkUg=="
+        }
+      }
+    }
+  }
+
+  if (override) {
+    return { ...configAccount, ...override }
+    // NOTE: shallow merge
+  }
+  else return configAccount
+}
+
+
 test('config - isValidConfig', t => {
   t.false(isValidConfig({}), 'empty object => false')
   const initialState = migrateData(migrations)
@@ -420,78 +494,6 @@ test('config - isValidConfig', t => {
   }
 
   sweetAs(initialState, 'initial state => true')
-
-  function makeConfig (override?: object) {
-    const config = {
-      accounts: [makeConfigAccount()],
-      "selectedAccount": "naynay",
-      "endpoints": {
-        "dev": "ws://127.0.0.1:9944",
-        "test-net": "wss://testnet.entropy.xyz",
-        "stg": "wss://api.staging.testnet.testnet-2024.infrastructure.entropy.xyz"
-      },
-      "migration-version": 4,
-    }
-
-    if (override) {
-      return { ...config, ...override }
-      // NOTE: shallow merge
-    }
-    else return config
-  }
-
-  function makeConfigAccount (override?: object) {
-    const configAccount = {
-      "name": "naynay",
-      "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
-      "data": {
-        "debug": true,
-        "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
-        "admin": {
-          "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
-          "type": "registration",
-          "verifyingKeys": [],
-          "userContext": "ADMIN_KEY",
-          "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
-          "path": "",
-          "pair": {
-            "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
-            "addressRaw": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
-            "isLocked": false,
-            "meta": {},
-            "publicKey": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
-            "type": "sr25519",
-            "secretKey": "data:application/UI8A;base64,aCCXH0+nI2+tot94NPegNBCwe1bWgw57xPo9Iss2DmoE5obkxD5JUXujRpsHEoltI0hD9SAUGO9GeV+8rGEkUg=="
-          }
-        },
-        "registration": {
-          "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
-          "type": "registration",
-          "verifyingKeys": [
-            "0x02ecbc1c6777e868c8cc50c9784e95d3a4727bdb5a04d7694d2880c980f15e17c3"
-          ],
-          "userContext": "ADMIN_KEY",
-          "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
-          "path": "",
-          "pair": {
-            "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
-            "addressRaw": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
-            "isLocked": false,
-            "meta": {},
-            "publicKey": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
-            "type": "sr25519",
-            "secretKey": "data:application/UI8A;base64,aCCXH0+nI2+tot94NPegNBCwe1bWgw57xPo9Iss2DmoE5obkxD5JUXujRpsHEoltI0hD9SAUGO9GeV+8rGEkUg=="
-          }
-        }
-      }
-    }
-
-    if (override) {
-      return { ...configAccount, ...override }
-      // NOTE: shallow merge
-    }
-    else return configAccount
-  }
 
   console.log('---')
 
@@ -672,6 +674,36 @@ test('config - isValidConfig', t => {
         }
       ],
       'isValidCOnfig.errors'
+    )
+  }
+
+  t.end()
+})
+
+
+test('config - assertConfig', t => {
+  const config = migrateData(migrations)
+  config.accounts.push({
+    name: "miscy",
+    address: "woopswoopswoopswoopswoopswoopswoops",
+    data:{
+      admin: {}
+    }
+  })
+
+  try {
+    assertConfig(config)
+    t.fail('should not be printing this, should have thrown')
+  } catch (err) {
+    t.equal(err.message, 'Invalid config', 'err.message')
+    t.equal(
+      err.cause,
+      [
+        'config/accounts/0/address: must match pattern "^[a-km-zA-HJ-NP-Z1-9]{48,48}$"',
+        // TODO: could pretty this up to say "a Base58 encoded key 48 characters long"
+        'config/accounts/0/data: must have required property \'registration\''
+      ].join(', '),
+      'err.cause'
     )
   }
 
