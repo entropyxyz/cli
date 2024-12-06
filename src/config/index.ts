@@ -3,10 +3,12 @@ import { readFileSync } from 'node:fs'
 import { mkdirp } from 'mkdirp'
 import { join, dirname } from 'path'
 import envPaths from 'env-paths'
+import AJV from 'ajv'
 
 import allMigrations from './migrations'
 import { serialize, deserialize } from './encoding'
 import { EntropyConfig, EntropyConfigAccount } from './types'
+import { configSchema } from './schema'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
 const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
@@ -52,7 +54,13 @@ export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG
   const newConfig = migrateData(allMigrations, currentConfig)
 
   if (newConfig[VERSION] !== currentConfig[VERSION]) {
+    // a migration happened, write updated config
+    // "set" checks the format of the config for us
     await set(newConfig, configPath)
+  }
+  else {
+    // make sure the config the app is about to run on is safe
+    assertConfig(newConfig)
   }
 }
 
@@ -90,38 +98,88 @@ export async function setSelectedAccount (account: EntropyConfigAccount, configP
 
 /* util */
 function noop () {}
-function assertConfig (config: any) {
-  if (
-    !config ||
-    typeof config !== 'object'
-  ) {
-    throw Error('Config#set: config must be an object')
-  }
 
-  if (!Array.isArray(config.accounts)) {
-    throw Error('Config#set: config must have "accounts"')
-  }
+export function assertConfig (config: any) {
+  if (isValidConfig(config)) return
 
-  if (!config.endpoints) {
-    throw Error('Config#set: config must have "endpoints"')
-  }
+  // @ts-expect-error this is valid Node...
+  throw new Error('Invalid config', {
+    cause: isValidConfig.errors
+      .map(err => {
+        return err.instancePath
+          ? `config${err.instancePath}: ${err.message}`
+          : err.message
+      })
+      .join("; ")
+  })
 
-  if (typeof config.selectedAccount !== 'string') {
-    throw Error('Config#set: config must have "selectedAccount"')
-  }
-
-  if (typeof config['migration-version'] !== 'number') {
-    throw Error('Config#set: config must have "migration-version"')
-  }
 }
+
 function assertConfigPath (configPath: string) {
   if (!configPath.endsWith('.json')) {
     throw Error(`configPath must be of form *.json, got ${configPath}`)
   }
 }
+
 export function isDangerousReadError (err: any) {
   // file not found:
   if (err.code === 'ENOENT') return false
 
   return true
+}
+
+const ajv = new AJV({
+  allErrors: true,
+})
+
+let validator
+export const isValidConfig: ValidatorFunction = function (input: any) {
+  if (!validator) validator = ajv.compile(configSchema)
+  // lazy compile once, it's slowish (~20ms)
+
+  const generalResult = validator(input)
+  const selectedAccountResult = isValidSelectedAccount(input)
+
+  const isValid = generalResult && selectedAccountResult
+
+  isValidConfig.errors = isValid
+    ? null
+    : [
+      ...(validator.errors || []),
+      ...(isValidSelectedAccount.errors || [])
+    ]
+
+  return isValid
+}
+
+const isValidSelectedAccount: ValidatorFunction = function (input: any) {
+  // TODO: change this behaviour?
+  if (input?.selectedAccount === "") {
+    isValidSelectedAccount.errors = null
+    return true
+  }
+
+  if (!input?.selectedAccount || !Array.isArray(input?.accounts)) {
+    isValidSelectedAccount.errors = [{
+      message: 'unable to check "selectedAccount" validity'
+    }]
+    return false
+  }
+
+  const isValid = input.accounts.find(acct => acct.name === input.selectedAccount)
+
+  isValidSelectedAccount.errors = isValid
+    ? null
+    : [{ message: `no account had a "name" matching "selectedAccount": ${input.selectedAccount}` }]
+
+  return isValid
+}
+
+type ValidatorFunction = {
+  errors?: null|ValidatorErrorObject[]
+  (input: any): boolean
+}
+interface ValidatorErrorObject {
+  instancePath?: string
+  message: string
 }
