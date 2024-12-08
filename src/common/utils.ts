@@ -117,9 +117,9 @@ export async function jumpStartNetwork (entropy, endpoint): Promise<any> {
 
 // caching details to reduce number of calls made to the rpc endpoint
 let tokenDetails: TokenDetails
-export async function getTokenDetails (entropy): Promise<TokenDetails> {
+export async function getTokenDetails (substrate): Promise<TokenDetails> {
   if (tokenDetails) return tokenDetails
-  const chainProperties = await entropy.substrate.rpc.system.properties()
+  const chainProperties = await substrate.rpc.system.properties()
   const decimals = chainProperties.tokenDecimals.toHuman()[0]
   const symbol = chainProperties.tokenSymbol.toHuman()[0]
   tokenDetails = { decimals: parseInt(decimals), symbol }

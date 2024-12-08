@@ -8,7 +8,7 @@ import { join } from 'node:path'
 
 import { initializeEntropy } from '../../src/common/initializeEntropy'
 import * as config from '../../src/config'
-import { promiseRunner } from './'
+import { DEFAULT_ENDPOINT, promiseRunner } from './'
 
 interface SetupTestOpts {
   configPath?: string
@@ -28,7 +28,7 @@ export async function setupTest (t: Test, opts?: SetupTestOpts): Promise<{ entro
   const {
     configPath = uniqueConfigPath(),
     seed = randomAsHex(32),
-    endpoint = 'ws://127.0.0.1:9944',
+    endpoint = DEFAULT_ENDPOINT,
   } = opts || {}
 
   const run = promiseRunner(t)

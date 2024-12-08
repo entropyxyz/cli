@@ -17,7 +17,7 @@ export class EntropyTransfer extends EntropyBase {
   // - progress callbacks (optional)
 
   async transfer (toAddress: string, amountInBits: string, progress?: { start: ()=>void, stop: ()=>void }) {
-    const { decimals } = await getTokenDetails(this.entropy)
+    const { decimals } = await getTokenDetails(this.entropy.substrate)
     const nanoBits = bitsToNanoBits(Number(amountInBits), decimals)
 
     if (progress) progress.start()

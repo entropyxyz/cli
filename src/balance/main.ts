@@ -9,6 +9,13 @@ export class EntropyBalance extends EntropyBase {
     super({ entropy, endpoint, flowContext: FLOW_CONTEXT })
   }
 
+  static async getAnyBalance (substrate, address: string) {
+    const accountInfo = (await substrate.query.system.account(address)) as any
+    const balance = parseInt(BalanceUtils.hexToBigInt(accountInfo.data.free).toString())
+
+    return balance
+  }
+
   async getBalance (address: string): Promise<number> {
     const accountInfo = (await this.entropy.substrate.query.system.account(address)) as any
     const balance = parseInt(BalanceUtils.hexToBigInt(accountInfo.data.free).toString())
