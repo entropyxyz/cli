@@ -3,7 +3,7 @@ import yoctoSpinner from 'yocto-spinner';
 import { EntropyLogger } from '../common/logger'
 import { FAUCET_PROGRAM_POINTER } from "./utils"
 import { EntropyFaucet } from "./main"
-import { bitsToNanoBits, getTokenDetails, print } from "src/common/utils"
+import { bitsToNanoBits, getTokenDetails, nanoBitsToBits, print, round } from "src/common/utils"
 
 let chosenVerifyingKeys = []
 // Sending only 1e10 nanoBITS does not allow user's to register after receiving funds
@@ -39,6 +39,7 @@ async function sendMoneyFromRandomFaucet (entropy: Entropy, endpoint: string, ve
     faucetSpinner.start()
   }
   const faucetService = new EntropyFaucet(entropy, endpoint)
+  const { decimals, symbol } = await getTokenDetails(entropy)
   const selectedAccountAddress = entropy.keyring.accounts.registration.address
   let chosenVerifyingKey: string
   try {
@@ -49,7 +50,7 @@ async function sendMoneyFromRandomFaucet (entropy: Entropy, endpoint: string, ve
     // reset chosen keys after successful transfer
     if (faucetSpinner.isSpinning) faucetSpinner.stop()
     chosenVerifyingKeys = []
-    print(`Account: ${selectedAccountAddress} has been successfully funded with ${parseInt(amount).toLocaleString('en-US')} BITS`)
+    print(`Account: ${selectedAccountAddress} has been successfully funded with ${round(nanoBitsToBits(parseInt(amount), decimals))} ${symbol}`)
   } catch (error) {
     logger.error('Error issuing funds through faucet', error, FLOW_CONTEXT)
     chosenVerifyingKeys.push(chosenVerifyingKey)
