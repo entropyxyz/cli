@@ -1,7 +1,9 @@
 import inquirer from "inquirer";
 import Entropy from "@entropyxyz/sdk";
+import yoctoSpinner from "yocto-spinner";
 
 import { EntropyAccount } from './main'
+import { EntropyTuiOptions } from '../types'
 import { selectAndPersistNewAccount, persistVerifyingKeyToAccount, generateAccountDataForPrint } from "./utils";
 import { findAccountByAddressOrName, print } from "../common/utils"
 import { EntropyConfig } from "../config/types";
@@ -12,13 +14,11 @@ import {
   accountNewQuestions,
   accountSelectQuestions
 } from "./utils"
-import { ERROR_RED } from "src/common/constants";
-import yoctoSpinner from "yocto-spinner";
 
 /*
  * @returns partialConfigUpdate | "exit" | undefined
  */
-export async function entropyAccount (endpoint: string, storedConfig: EntropyConfig) {
+export async function entropyAccount (opts: EntropyTuiOptions, storedConfig: EntropyConfig) {
   const { accounts } = storedConfig
   const { interactionChoice } = await inquirer.prompt(accountManageQuestions)
 
@@ -37,7 +37,7 @@ export async function entropyAccount (endpoint: string, storedConfig: EntropyCon
       ? await EntropyAccount.import({ seed, name, path })
       : await EntropyAccount.create({ name, path })
 
-    await selectAndPersistNewAccount(newAccount)
+    await selectAndPersistNewAccount(opts.config, newAccount)
     print(generateAccountDataForPrint(newAccount))
     return
   }
@@ -48,8 +48,8 @@ export async function entropyAccount (endpoint: string, storedConfig: EntropyCon
       return
     }
     const { selectedAccount } = await inquirer.prompt(accountSelectQuestions(accounts))
-    
-    await config.setSelectedAccount(selectedAccount)
+
+    await config.setSelectedAccount(opts.config, selectedAccount)
 
     print('Current selected account is:')
     print({ name: selectedAccount.name, address: selectedAccount.address })
@@ -77,8 +77,9 @@ export async function entropyAccount (endpoint: string, storedConfig: EntropyCon
 
 const registrationSpinner = yoctoSpinner()
 const SPINNER_TEXT =  'Registering account…'
-export async function entropyRegister (entropy: Entropy, endpoint: string, storedConfig: EntropyConfig): Promise<Partial<EntropyConfig>> {
-  const accountService = new EntropyAccount(entropy, endpoint)
+
+export async function entropyRegister (entropy: Entropy, opts: EntropyTuiOptions, storedConfig: EntropyConfig): Promise<Partial<EntropyConfig>> {
+  const accountService = new EntropyAccount(entropy, opts.endpoint)
 
   const { accounts, selectedAccount } = storedConfig
   const account = findAccountByAddressOrName(accounts, selectedAccount)
@@ -94,7 +95,8 @@ export async function entropyRegister (entropy: Entropy, endpoint: string, store
   try {
     if (!registrationSpinner.isSpinning) registrationSpinner.start()
     const verifyingKey = await accountService.register()
-    await persistVerifyingKeyToAccount(verifyingKey, account.address)
+    await persistVerifyingKeyToAccount(opts.config, verifyingKey, account.address)
+
     if (registrationSpinner.isSpinning) registrationSpinner.stop()
     print("Your address", account.address, "has been successfully registered.")
   } catch (error) {
@@ -102,9 +104,9 @@ export async function entropyRegister (entropy: Entropy, endpoint: string, store
     registrationSpinner.text = 'Registration has failed...'
     if (registrationSpinner.isSpinning) registrationSpinner.stop()
     if (error.message.includes(endpointErrorMessageToMatch)) {
-      console.error(ERROR_RED + 'GenericError: Incompatible endpoint, expected core version 0.3.0, got 0.2.0')
+      print.error('GenericError: Incompatible endpoint, expected core version 0.3.0, got 0.2.0')
       return
     }
-    console.error(ERROR_RED + 'RegisterError:', error.message);
+    print.error('RegisterError:', error.message)
   }
 }

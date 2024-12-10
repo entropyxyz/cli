@@ -1,9 +1,11 @@
 import Entropy from "@entropyxyz/sdk"
 import yoctoSpinner from 'yocto-spinner';
+
 import { EntropyLogger } from '../common/logger'
 import { FAUCET_PROGRAM_POINTER } from "./utils"
 import { EntropyFaucet } from "./main"
-import { bitsToNanoBits, getTokenDetails, nanoBitsToBits, print, round } from "src/common/utils"
+import { EntropyTuiOptions } from '../types'
+import { bitsToNanoBits, getTokenDetails, nanoBitsToBits, print, round } from "../common/utils"
 
 let chosenVerifyingKeys = []
 // Sending only 1e10 nanoBITS does not allow user's to register after receiving funds
@@ -14,19 +16,19 @@ let chosenVerifyingKeys = []
 const FLOW_CONTEXT = 'ENTROPY_FAUCET_INTERACTION'
 const SPINNER_TEXT =  'Funding account…'
 const faucetSpinner = yoctoSpinner()
-export async function entropyFaucet (entropy: Entropy, options, logger: EntropyLogger) {
+
+export async function entropyFaucet (entropy: Entropy, opts: EntropyTuiOptions, logger: EntropyLogger) {
   faucetSpinner.text = SPINNER_TEXT
   if (faucetSpinner.isSpinning) {
     faucetSpinner.stop()
   }
-  const { endpoint } = options
   if (!entropy.registrationManager.signer.pair) {
     throw new Error("Keys are undefined")
   }
 
   const { decimals } = await getTokenDetails(entropy)
   const amount = bitsToNanoBits(2, decimals)
-  const faucetService = new EntropyFaucet(entropy, endpoint)
+  const faucetService = new EntropyFaucet(entropy, opts.endpoint)
   const verifyingKeys = await faucetService.getAllFaucetVerifyingKeys()
   // @ts-expect-error
   return sendMoneyFromRandomFaucet(entropy, options.endpoint, verifyingKeys, amount.toString(), logger)

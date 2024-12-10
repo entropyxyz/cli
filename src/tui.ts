@@ -7,7 +7,7 @@ import * as config from './config'
 import { EntropyTuiOptions } from './types'
 import { printLogo } from './common/ascii'
 import { jumpStartNetwork, print, findAccountByAddressOrName } from './common/utils'
-import { accountOption, endpointOption } from './common/utils-cli'
+import { accountOption, endpointOption, configOption } from './common/utils-cli'
 import { loadEntropyTui } from "./common/load-entropy"
 import { EntropyLogger } from './common/logger'
 
@@ -24,6 +24,7 @@ export function entropyTuiCommand () {
 
     .addOption(accountOption())
     .addOption(endpointOption())
+    .addOption(configOption())
     .addOption(
       new Option(
         '-d, --dev',
@@ -39,10 +40,6 @@ export function entropyTuiCommand () {
 export async function tuiAction (opts: EntropyTuiOptions) {
   const logger = new EntropyLogger('TUI', opts.endpoint)
   logger.debug(opts)
-
-  if (!opts.config) {
-    opts.config = config.CONFIG_PATH // TEMP
-  }
 
   const entropyPromise = opts.account
     ? loadEntropyTui(opts)
@@ -83,12 +80,14 @@ export async function tuiAction (opts: EntropyTuiOptions) {
 }
 
 const loader = yoctoSpinner()
-async function setupConfig () {
-  let storedConfig = await config.get()
+// Loads the config, AND tries to ensure a selectedAccount is set
+// NOTE: this should disappear with TUI Redesign
+async function setupConfig (configPath: string) {
+  let storedConfig = await config.get(configPath)
 
   // set selectedAccount if we can
   if (!storedConfig.selectedAccount && storedConfig.accounts.length) {
-    storedConfig = await config.setSelectedAccount(storedConfig.accounts[0])
+    storedConfig = await config.setSelectedAccount(configPath, storedConfig.accounts[0])
   }
 
   return storedConfig
@@ -96,10 +95,10 @@ async function setupConfig () {
 
 async function main (entropy: Entropy, choices: string[], opts: EntropyTuiOptions, logger: EntropyLogger) {
   if (loader.isSpinning) loader.stop()
-  const storedConfig = await setupConfig()
+  const storedConfig = await setupConfig(opts.config)
 
-  // Entropy is undefined on initial install, after user creates their first account,
-  // entropy should be loaded
+  // Entropy is undefined on initial install
+  // However, after user creates their first account, entropy can be loaded
   if (storedConfig.selectedAccount && !entropy) {
     entropy = await loadEntropyTui({
       account: storedConfig.selectedAccount,
@@ -147,26 +146,26 @@ async function main (entropy: Entropy, choices: string[], opts: EntropyTuiOption
 
     switch (answers.choice) {
     case 'Manage Accounts': {
-      const response = await entropyAccount(opts.endpoint, storedConfig)
+      const response = await entropyAccount(opts, storedConfig)
       if (response === 'exit') { returnToMain = true }
       break
     }
     case 'Register': {
-      await entropyRegister(entropy, opts.endpoint, storedConfig)
+      await entropyRegister(entropy, opts, storedConfig)
       break
     }
     case 'Balance': {
-      await entropyBalance(entropy, opts.endpoint, storedConfig)
+      await entropyBalance(entropy, opts, storedConfig)
         .catch(err => console.error('There was an error retrieving balance', err))
       break
     }
     case 'Transfer': {
-      await entropyTransfer(entropy, opts.endpoint)
+      await entropyTransfer(entropy, opts)
         .catch(err => console.error('There was an error sending the transfer', err))
       break
     }
     case 'Sign': {
-      await entropySign(entropy, opts.endpoint)
+      await entropySign(entropy, opts)
         .catch(err => console.error('There was an issue with signing', err))
       break
     }
@@ -179,12 +178,12 @@ async function main (entropy: Entropy, choices: string[], opts: EntropyTuiOption
       break
     }
     case 'User Programs': {
-      await entropyProgram(entropy, opts.endpoint)
+      await entropyProgram(entropy, opts)
         .catch(err => console.error('There was an error with programs', err))
       break
     }
     case 'Deploy Program': {
-      await entropyProgramDev(entropy, opts.endpoint)
+      await entropyProgramDev(entropy, opts)
         .catch(err => console.error('There was an error with program dev', err))
       break
     }
