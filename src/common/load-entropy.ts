@@ -23,7 +23,7 @@ export async function loadEntropyCli (opts: LoadEntropyCliOpts) {
         return fsConfig.get(opts.config)
       },
       async set (config: EntropyConfig) {
-        return fsConfig.set(config, opts.config)
+        return fsConfig.set(opts.config, config)
       }
     }
   })
@@ -47,7 +47,7 @@ export async function loadEntropyTui (opts: LoadEntropyTuiOpts) {
         return fsConfig.get(opts.config)
       },
       async set (config: EntropyConfig) {
-        return fsConfig.set(config, opts.config)
+        return fsConfig.set(opts.config, config)
       }
     }
   })

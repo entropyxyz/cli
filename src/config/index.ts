@@ -1,5 +1,4 @@
 import { readFile, writeFile, rm } from 'node:fs/promises'
-import { readFileSync } from 'node:fs'
 import { mkdirp } from 'mkdirp'
 import { join, dirname } from 'path'
 import envPaths from 'env-paths'
@@ -42,7 +41,7 @@ export async function init (configPath: string, oldConfigPath = OLD_CONFIG_PATH)
       const oldConfig = await get(oldConfigPath).catch(noop) // drop errors
       if (oldConfig) {
         // move the config
-        await set(oldConfig, configPath)
+        await set(configPath, oldConfig)
         await rm(oldConfigPath)
         return oldConfig
       }
@@ -52,7 +51,7 @@ export async function init (configPath: string, oldConfigPath = OLD_CONFIG_PATH)
   const newConfig = migrateData(allMigrations, currentConfig)
 
   if (newConfig[VERSION] !== currentConfig[VERSION]) {
-    await set(newConfig, configPath)
+    await set(configPath, newConfig)
   }
 }
 
@@ -61,12 +60,7 @@ export async function get (configPath) {
     .then(deserialize)
 }
 
-export function getSync (configPath) {
-  const configStr = readFileSync(configPath, 'utf8')
-  return deserialize(configStr)
-}
-
-export async function set (config: EntropyConfig, configPath: string) {
+export async function set (configPath: string, config: EntropyConfig) {
   assertConfig(config)
   assertConfigPath(configPath)
 
@@ -74,7 +68,7 @@ export async function set (config: EntropyConfig, configPath: string) {
   await writeFile(configPath, serialize(config))
 }
 
-export async function setSelectedAccount (account: EntropyConfigAccount, configPath: string) {
+export async function setSelectedAccount (configPath: string, account: EntropyConfigAccount) {
   const storedConfig = await get(configPath)
 
   if (storedConfig.selectedAccount === account.name) return storedConfig
@@ -84,7 +78,7 @@ export async function setSelectedAccount (account: EntropyConfigAccount, configP
     ...storedConfig,
     selectedAccount: account.name
   }
-  await set(newConfig, configPath)
+  await set(configPath, newConfig)
   return newConfig
 }
 

@@ -22,13 +22,10 @@ export async function selectAndPersistNewAccount (configPath: string, newAccount
 
   // persist to config, set selectedAccount
   accounts.push(newAccount)
-  await config.set(
-    {
-      ...storedConfig,
-      selectedAccount: newAccount.address
-    },
-    configPath
-  )
+  await config.set(configPath, {
+    ...storedConfig,
+    selectedAccount: newAccount.address
+  })
 }
 
 export async function persistVerifyingKeyToAccount (configPath: string, verifyingKey: string, accountNameOrAddress: string) {
@@ -40,13 +37,10 @@ export async function persistVerifyingKeyToAccount (configPath: string, verifyin
 
   // persist to config, set selectedAccount
   account.data.registration.verifyingKeys.push(verifyingKey)
-  await config.set(
-    {
-      ...storedConfig,
-      selectedAccount: account.name
-    },
-    configPath
-  )
+  await config.set(configPath, {
+    ...storedConfig,
+    selectedAccount: account.name
+  })
 }
 
 function validateSeedInput (seed) {
