@@ -75,7 +75,7 @@ async function testNetworkUp () {
       break
 
     default:
-      throw Error(`Unknown jumpStartStatus: ${jumpStartStatus}`)
+      throw Error(`Unknown jumpStartStatus ${JSON.stringify(status)}`)
   }
 }
 
