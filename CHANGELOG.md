@@ -40,6 +40,10 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
   - updated return data displayed to user on account creation (create or import) [#311](https://github.com/entropyxyz/cli/pull/311)
   - Balance now displays the number of BITS to the nearest 4 decimal places [#306](https://github.com/entropyxyz/cli/pull/306)
 
+- TUI
+  - updated display amount for Faucet process [#323](https://github.com/entropyxyz/cli/pull/323)
+
+
 ## [0.1.1] Deadpool - 2024-11-06 (entropy-core compatibility: 0.3.0)
 
 ### Fixed
