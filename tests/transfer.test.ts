@@ -1,10 +1,10 @@
 import test from 'tape'
 
-import { BITS_PER_TOKEN } from "../src/common/constants";
+import { nanoBitsPerBits } from "../src/common/utils";
 import { EntropyTransfer } from '../src/transfer/main'
 import { EntropyBalance } from '../src/balance/main'
 import { promiseRunner, setupTest } from './testing-utils'
-import { charlieStashAddress, charlieStashSeed } from './testing-utils/constants.mjs'
+import { charlieStashAddress, charlieStashSeed, DEFAULT_TOKEN_DECIMALS } from './testing-utils/constants.mjs'
 
 const endpoint = 'ws://127.0.0.1:9944'
 
@@ -44,8 +44,8 @@ test('Transfer', async (t) => {
     'getBalance (naynay)',
     balanceService.getBalance(naynayAddress)
   )
-  const expected = Number(inputAmount) * BITS_PER_TOKEN
-  t.equal(naynayBalance, expected,'naynay is rolling in it!')
+  const expected = Number(inputAmount) * nanoBitsPerBits(DEFAULT_TOKEN_DECIMALS)
+  t.equal(naynayBalance, expected, 'naynay is rolling in it!')
 
   t.end()
 })

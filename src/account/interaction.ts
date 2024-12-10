@@ -1,5 +1,6 @@
 import inquirer from "inquirer";
 import Entropy from "@entropyxyz/sdk";
+import yoctoSpinner from "yocto-spinner";
 
 import { EntropyAccount } from './main'
 import { EntropyTuiOptions } from '../types'
@@ -74,6 +75,9 @@ export async function entropyAccount (opts: EntropyTuiOptions, storedConfig: Ent
   }
 }
 
+const registrationSpinner = yoctoSpinner()
+const SPINNER_TEXT =  'Registering account…'
+
 export async function entropyRegister (entropy: Entropy, opts: EntropyTuiOptions, storedConfig: EntropyConfig): Promise<Partial<EntropyConfig>> {
   const accountService = new EntropyAccount(entropy, opts.endpoint)
 
@@ -85,18 +89,24 @@ export async function entropyRegister (entropy: Entropy, opts: EntropyTuiOptions
   }
 
   print("Attempting to register the address:", account.address)
+  print('')
+  registrationSpinner.text = SPINNER_TEXT
+  if (registrationSpinner.isSpinning) registrationSpinner.stop()
   try {
+    if (!registrationSpinner.isSpinning) registrationSpinner.start()
     const verifyingKey = await accountService.register()
     await persistVerifyingKeyToAccount(opts.config, verifyingKey, account.address)
 
+    if (registrationSpinner.isSpinning) registrationSpinner.stop()
     print("Your address", account.address, "has been successfully registered.")
   } catch (error) {
     const endpointErrorMessageToMatch = 'Extrinsic registry.register expects 3 arguments, got 2'
-    // const insufficientFeesErrorMessageToMatch = ''
+    registrationSpinner.text = 'Registration has failed...'
+    if (registrationSpinner.isSpinning) registrationSpinner.stop()
     if (error.message.includes(endpointErrorMessageToMatch)) {
       print.error('GenericError: Incompatible endpoint, expected core version 0.3.0, got 0.2.0')
       return
     }
-    print.error('Register Error:', error.message)
+    print.error('RegisterError:', error.message)
   }
 }

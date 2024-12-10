@@ -82,6 +82,7 @@ test('Faucet Tests: Successfully send funds and register', async t => {
   let naynayBalance = await balance.getBalance(naynayAddress)
   t.equal(naynayBalance, 0, 'Naynay is broke af')
 
+  // 2 BITS
   const amount = 20000000000
   const transferStatus = await run(
     'Sending faucet funds to account',
@@ -109,7 +110,7 @@ test('Faucet Tests: Successfully send funds and register', async t => {
   t.end()
 })
 
-// TODO: @naynay fix below test for register failing when only sending 1e10 bits
+// TODO: @naynay fix below test for register failing when only sending 1e10 tokens
 // test('Faucet Tests: Successfully send funds but cannot register', async t => {
 //   const { run, endpoint, entropy: naynayEntropy } = await setupTest(t)
 

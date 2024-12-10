@@ -1,6 +1,6 @@
 import { Option } from 'commander'
 
-import { absolutePath, stringify } from './utils'
+import { stringify, absolutePath } from './utils'
 import * as config from '../config'
 import { ENTROPY_ENDPOINT_DEFAULT } from '../common/constants'
 
