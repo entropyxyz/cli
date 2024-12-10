@@ -1,5 +1,4 @@
 import { readFile, writeFile, rm } from 'node:fs/promises'
-import { readFileSync } from 'node:fs'
 import { mkdirp } from 'mkdirp'
 import { join, dirname } from 'path'
 import envPaths from 'env-paths'
@@ -9,9 +8,9 @@ import { serialize, deserialize } from './encoding'
 import { EntropyConfig, EntropyConfigAccount } from './types'
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
-const CONFIG_PATH = join(paths.config, 'entropy-cli.json')
 const OLD_CONFIG_PATH = join(process.env.HOME, '.entropy-cli.config')
 
+export const CONFIG_PATH_DEFAULT = join(paths.config, 'entropy-cli.json')
 export const VERSION = 'migration-version'
 
 export function migrateData (migrations, currentConfig = {}) {
@@ -33,7 +32,7 @@ function hasRunMigration (config: any, version: number) {
   return Number(currentVersion) >= Number(version)
 }
 
-export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG_PATH) {
+export async function init (configPath: string, oldConfigPath = OLD_CONFIG_PATH) {
   const currentConfig = await get(configPath)
     .catch(async (err ) => {
       if (isDangerousReadError(err)) throw err
@@ -42,7 +41,7 @@ export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG
       const oldConfig = await get(oldConfigPath).catch(noop) // drop errors
       if (oldConfig) {
         // move the config
-        await set(oldConfig, configPath)
+        await set(configPath, oldConfig)
         await rm(oldConfigPath)
         return oldConfig
       }
@@ -52,21 +51,16 @@ export async function init (configPath = CONFIG_PATH, oldConfigPath = OLD_CONFIG
   const newConfig = migrateData(allMigrations, currentConfig)
 
   if (newConfig[VERSION] !== currentConfig[VERSION]) {
-    await set(newConfig, configPath)
+    await set(configPath, newConfig)
   }
 }
 
-export async function get (configPath = CONFIG_PATH) {
+export async function get (configPath) {
   return readFile(configPath, 'utf-8')
     .then(deserialize)
 }
 
-export function getSync (configPath = CONFIG_PATH) {
-  const configStr = readFileSync(configPath, 'utf8')
-  return deserialize(configStr)
-}
-
-export async function set (config: EntropyConfig, configPath = CONFIG_PATH) {
+export async function set (configPath: string, config: EntropyConfig) {
   assertConfig(config)
   assertConfigPath(configPath)
 
@@ -74,7 +68,7 @@ export async function set (config: EntropyConfig, configPath = CONFIG_PATH) {
   await writeFile(configPath, serialize(config))
 }
 
-export async function setSelectedAccount (account: EntropyConfigAccount, configPath = CONFIG_PATH) {
+export async function setSelectedAccount (configPath: string, account: EntropyConfigAccount) {
   const storedConfig = await get(configPath)
 
   if (storedConfig.selectedAccount === account.name) return storedConfig
@@ -84,7 +78,7 @@ export async function setSelectedAccount (account: EntropyConfigAccount, configP
     ...storedConfig,
     selectedAccount: account.name
   }
-  await set(newConfig, configPath)
+  await set(configPath, newConfig)
   return newConfig
 }
 

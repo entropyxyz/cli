@@ -3,8 +3,9 @@ import Entropy from "@entropyxyz/sdk";
 
 import { EntropyBalance } from "./main";
 import { BalanceInfo } from "./types";
-import { endpointOption, cliWrite, loadEntropy } from "../common/utils-cli";
+import { configOption, endpointOption, cliWrite } from "../common/utils-cli";
 import { findAccountByAddressOrName, getTokenDetails, nanoBitsToBits, round } from "../common/utils";
+import { loadEntropyCli } from "../common/load-entropy"
 import * as config from "../config";
 import { EntropyConfigAccount } from "src/config/types";
 
@@ -20,15 +21,16 @@ export function entropyBalanceCommand () {
     ].join(' '))
     .option('-a, --all', 'Get balances for all admin accounts in the config')
     .addOption(endpointOption())
+    .addOption(configOption())
     .action(async (account, opts) => {
-      const { accounts } = await config.get()
+      const { accounts } = await config.get(opts.config)
 
       let entropy: Entropy
       if (!account && opts.all) {
         const tempAddress = accounts[0].address
-        entropy = await loadEntropy(tempAddress, opts.endpoint)
+        entropy = await loadEntropyCli({ account: tempAddress, ...opts })
       } else if (account && !opts.all) {
-        entropy = await loadEntropy(account, opts.endpoint)
+        entropy = await loadEntropyCli({ account, ...opts })
       } else {
         return balanceCommand.help()
       }
