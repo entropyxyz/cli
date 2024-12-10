@@ -1,11 +1,13 @@
-import { print } from "src/common/utils"
-import { getMsgFromUser, /* interactionChoiceQuestions */ } from "./utils"
 import inquirer from "inquirer"
 import Entropy from "@entropyxyz/sdk"
-import { EntropySign } from "./main"
 
-export async function entropySign (entropy: Entropy, endpoint: string) {
-  const signingService = new EntropySign(entropy, endpoint)
+import { EntropySign } from "./main"
+import { print } from "../common/utils"
+import { getMsgFromUser, /* interactionChoiceQuestions */ } from "./utils"
+import { EntropyTuiOptions } from '../types'
+
+export async function entropySign (entropy: Entropy, opts: EntropyTuiOptions) {
+  const signingService = new EntropySign(entropy, opts.endpoint)
   // const { interactionChoice } = await inquirer.prompt(interactionChoiceQuestions)
   // switch (interactionChoice) {
   // case 'Raw Sign': {

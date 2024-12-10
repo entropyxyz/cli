@@ -42,6 +42,11 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 
 - CLI
   - updated balance command to take in any address, and be able to return the balance for the inputted address [#315](https://github.com/entropyxyz/cli/pull/315)
+  
+- TUI
+  - updated regsitration and transfer flow to use progress loader to provide a signal to the user something is happening [#324](https://github.com/entropyxyz/cli/pull/324)
+  - removed use of progress bar throughout TUI [#324](https://github.com/entropyxyz/cli/pull/324)
+  - updated display amount for Faucet process [#323](https://github.com/entropyxyz/cli/pull/323)
 
 ## [0.1.1] Deadpool - 2024-11-06 (entropy-core compatibility: 0.3.0)
 

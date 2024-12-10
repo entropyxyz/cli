@@ -16,22 +16,15 @@ export class EntropyTransfer extends EntropyBase {
   // - converting `amount` (string => BigInt)
   // - progress callbacks (optional)
 
-  async transfer (toAddress: string, amountInBits: string, progress?: { start: ()=>void, stop: ()=>void }) {
+  async transfer (toAddress: string, amountInBits: string) {
     const { decimals } = await getTokenDetails(this.entropy.substrate)
     const nanoBits = bitsToNanoBits(Number(amountInBits), decimals)
 
-    if (progress) progress.start()
-    try {
-      await this.rawTransfer({
-        from: this.entropy.keyring.accounts.registration.pair,
-        to: toAddress,
-        nanoBits
-      })
-      if (progress) return progress.stop()
-    } catch (error) {
-      if (progress) return progress.stop()
-      throw error
-    }
+    return this.rawTransfer({
+      from: this.entropy.keyring.accounts.registration.pair,
+      to: toAddress,
+      nanoBits
+    })
   }
 
   private async rawTransfer (payload: TransferOptions): Promise<any> {

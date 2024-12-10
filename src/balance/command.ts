@@ -2,7 +2,7 @@ import { Command } from "commander";
 // @ts-expect-error
 import { createSubstrate, isValidSubstrateAddress } from '@entropyxyz/sdk/utils'
 import { EntropyBalance } from "./main";
-import { endpointOption, cliWrite } from "../common/utils-cli";
+import { configOption, endpointOption, cliWrite } from "../common/utils-cli";
 import { findAccountByAddressOrName, getTokenDetails, nanoBitsToBits, round } from "../common/utils";
 import * as config from "../config";
 
@@ -12,12 +12,13 @@ export function entropyBalanceCommand () {
     .description('Command to retrieive the balance of an account on the Entropy Network')
     .argument('<account>', 'Get the balance of your accounts (by alias or address) or any SS58 address')
     .addOption(endpointOption())
+    .addOption(configOption())
     .action(async (account, opts) => {
       const substrate = createSubstrate(opts.endpoint)
       await substrate.isReadyOrError
       const { decimals, symbol } = await getTokenDetails(substrate)
 
-      const { accounts } = await config.get()
+      const { accounts } = await config.get(opts.config)
       let address = findAccountByAddressOrName(accounts, account)?.address
       if (!address && isValidSubstrateAddress(account)) {
         // provided account does not exist in the users config

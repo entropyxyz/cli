@@ -1,10 +1,12 @@
 import Entropy from "@entropyxyz/sdk"
 import { Command, Option } from 'commander'
+
 import { EntropyAccount } from "./main";
-import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect, generateAccountDataForPrint } from "./utils";
+import { selectAndPersistNewAccount, persistVerifyingKeyToAccount, generateAccountDataForPrint } from "./utils";
 import { ACCOUNTS_CONTENT } from './constants'
 import * as config from '../config'
-import { accountOption, endpointOption, cliWrite, loadEntropy } from "../common/utils-cli";
+import { accountOption, configOption, endpointOption, cliWrite } from "../common/utils-cli";
+import { loadEntropyCli } from "../common/load-entropy"
 
 export function entropyAccountCommand () {
   return new Command('account')
@@ -23,6 +25,7 @@ function entropyAccountCreate () {
     .alias('new')
     .description('Create a new entropy account from scratch. Output is JSON of form {name, address}')
     .argument('<name>', 'A user friendly name for your new account.')
+    .addOption(configOption())
     .addOption(
       new Option(
         '--path',
@@ -30,10 +33,10 @@ function entropyAccountCreate () {
       ).default(ACCOUNTS_CONTENT.path.default)
     )
     .action(async (name, opts) => {
-      const { path } = opts
+      const { config: configPath, path } = opts
       const newAccount = await EntropyAccount.create({ name, path })
 
-      await selectAndPersistNewAccount(newAccount)
+      await selectAndPersistNewAccount(configPath, newAccount)
 
       cliWrite(generateAccountDataForPrint(newAccount))
 
@@ -46,6 +49,7 @@ function entropyAccountImport () {
     .description('Import an existing entropy account from seed. Output is JSON of form {name, address}')
     .argument('<name>', 'A user friendly name for your new account.')
     .argument('<seed>', 'The seed for the account you are importing')
+    .addOption(configOption())
     .addOption(
       new Option(
         '--path',
@@ -53,10 +57,10 @@ function entropyAccountImport () {
       ).default(ACCOUNTS_CONTENT.path.default)
     )
     .action(async (name, seed, opts) => {
-      const { path } = opts
+      const { config: configPath, path } = opts
       const newAccount = await EntropyAccount.import({ name, seed, path })
 
-      await selectAndPersistNewAccount(newAccount)
+      await selectAndPersistNewAccount(configPath, newAccount)
 
       cliWrite({
         name: newAccount.name,
@@ -71,9 +75,9 @@ function entropyAccountList () {
   return new Command('list')
     .alias('ls')
     .description('List all accounts. Output is JSON of form [{ name, address, verifyingKeys }]')
-    .action(async () => {
-      // TODO: test if it's an encrypted account, if no password provided, throw because later on there's no protection from a prompt coming up
-      const accounts = await config.get()
+    .addOption(configOption())
+    .action(async (opts) => {
+      const accounts = await config.get(opts.config)
         .then(storedConfig => EntropyAccount.list(storedConfig))
         .catch((err) => {
           if (err.message.includes('currently no accounts')) return []
@@ -91,6 +95,7 @@ function entropyAccountRegister () {
   return new Command('register')
     .description('Register an entropy account with a program')
     .addOption(accountOption())
+    .addOption(configOption())
     .addOption(endpointOption())
     // Removing these options for now until we update the design to accept program configs
     // .addOption(
@@ -106,12 +111,12 @@ function entropyAccountRegister () {
     //   )
     // )
     .action(async (opts) => {
-      // NOTE: loadEntropy throws if it can't find opts.account
-      const entropy: Entropy = await loadEntropy(opts.account, opts.endpoint)
+      const entropy: Entropy = await loadEntropyCli(opts)
       const accountService = new EntropyAccount(entropy, opts.endpoint)
 
       const verifyingKey = await accountService.register()
-      await addVerifyingKeyToAccountAndSelect(verifyingKey, opts.account)
+      // TODO: handle error
+      await persistVerifyingKeyToAccount(opts.config, verifyingKey, opts.account)
 
       cliWrite(verifyingKey)
       process.exit(0)
