@@ -1,9 +1,7 @@
 import test from 'tape'
 
-import {
-  promiseRunner,
-  execPromise
-} from './testing-utils'
+import { promiseRunner } from './testing-utils/promise-runner.mjs'
+import { execPromise } from './testing-utils/exec-promise.mjs'
 
 test('Global: entropy --help', async (t) => {
   /* Setup */

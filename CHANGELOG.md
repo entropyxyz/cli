@@ -10,6 +10,39 @@ The format extends [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Version header format: `[version] Name - year-month-day (entropy-core compatibility: version [range])`
 
+## [0.m.p] Echo - YYYY-MM-DD (entropy-core compatibility: 0.3.0)
+
+### Fixed
+
+- Shared
+  - amount units are now correct! [#306](https://github.com/entropyxyz/cli/pull/306)
+    - 1 nanoBITS = 0.00000000001 BITS
+    - 1 BITS = 10000000000 nanoBITS
+- Programmatic CLI
+  - `entropy program list` now prints output! [#298](https://github.com/entropyxyz/cli/pull/298)
+
+### Added
+
+- Shared
+  - new methods for conversion and other math operations [#306](https://github.com/entropyxyz/cli/pull/306)
+    - BITS => nanoBITS
+    - nanoBITS => BITS
+    - rounding to a specific number of decimal places
+    - nanoBITS per bits calculation
+  - new method to pull entropy token details from chain, and cache the results [#306](https://github.com/entropyxyz/cli/pull/306)
+  
+- TUI
+  - animation on tui load (while entropy loads) [#288](https://github.com/entropyxyz/cli/pull/288)
+
+### Changed
+
+- Shared
+  - updated return data displayed to user on account creation (create or import) [#311](https://github.com/entropyxyz/cli/pull/311)
+  - Balance now displays the number of BITS to the nearest 4 decimal places [#306](https://github.com/entropyxyz/cli/pull/306)
+
+- TUI
+  - updated display amount for Faucet process [#323](https://github.com/entropyxyz/cli/pull/323)
+
 
 ## [0.1.1] Deadpool - 2024-11-06 (entropy-core compatibility: 0.3.0)
 

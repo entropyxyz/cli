@@ -3,13 +3,13 @@ import yoctoSpinner from 'yocto-spinner';
 import { EntropyLogger } from '../common/logger'
 import { FAUCET_PROGRAM_POINTER } from "./utils"
 import { EntropyFaucet } from "./main"
-import { print } from "src/common/utils"
+import { bitsToNanoBits, getTokenDetails, nanoBitsToBits, print, round } from "src/common/utils"
 
 let chosenVerifyingKeys = []
-// Sending only 1e10 BITS does not allow user's to register after receiving funds
+// Sending only 1e10 nanoBITS does not allow user's to register after receiving funds
 // there are limits in place to ensure user's are leftover with a certain balance in their accounts
 // increasing amount send here, will allow user's to register right away
-const amount = "20000000000"
+
 // context for logging file
 const FLOW_CONTEXT = 'ENTROPY_FAUCET_INTERACTION'
 const SPINNER_TEXT =  'Funding account…'
@@ -23,19 +23,23 @@ export async function entropyFaucet (entropy: Entropy, options, logger: EntropyL
   if (!entropy.registrationManager.signer.pair) {
     throw new Error("Keys are undefined")
   }
+
+  const { decimals } = await getTokenDetails(entropy)
+  const amount = bitsToNanoBits(2, decimals)
   const faucetService = new EntropyFaucet(entropy, endpoint)
   const verifyingKeys = await faucetService.getAllFaucetVerifyingKeys()
   // @ts-expect-error
-  return sendMoneyFromRandomFaucet(entropy, options.endpoint, verifyingKeys, logger)
+  return sendMoneyFromRandomFaucet(entropy, options.endpoint, verifyingKeys, amount.toString(), logger)
 }
 
 // Method that takes in the initial list of verifying keys (to avoid multiple calls to the rpc) and recursively retries each faucet until
 // a successful transfer is made
-async function sendMoneyFromRandomFaucet (entropy: Entropy, endpoint: string, verifyingKeys: string[], logger: EntropyLogger) {
+async function sendMoneyFromRandomFaucet (entropy: Entropy, endpoint: string, verifyingKeys: string[], amount: string, logger: EntropyLogger) {
   if (!faucetSpinner.isSpinning) {
     faucetSpinner.start()
   }
   const faucetService = new EntropyFaucet(entropy, endpoint)
+  const { decimals, symbol } = await getTokenDetails(entropy)
   const selectedAccountAddress = entropy.keyring.accounts.registration.address
   let chosenVerifyingKey: string
   try {
@@ -46,7 +50,7 @@ async function sendMoneyFromRandomFaucet (entropy: Entropy, endpoint: string, ve
     // reset chosen keys after successful transfer
     if (faucetSpinner.isSpinning) faucetSpinner.stop()
     chosenVerifyingKeys = []
-    print(`Account: ${selectedAccountAddress} has been successfully funded with ${parseInt(amount).toLocaleString('en-US')} BITS`)
+    print(`Account: ${selectedAccountAddress} has been successfully funded with ${round(nanoBitsToBits(parseInt(amount), decimals))} ${symbol}`)
   } catch (error) {
     logger.error('Error issuing funds through faucet', error, FLOW_CONTEXT)
     chosenVerifyingKeys.push(chosenVerifyingKey)
@@ -59,7 +63,7 @@ async function sendMoneyFromRandomFaucet (entropy: Entropy, endpoint: string, ve
       return
     } else {
       // Check for non faucet errors (FaucetError) and retry faucet
-      await sendMoneyFromRandomFaucet(entropy, endpoint, verifyingKeys, logger)
+      await sendMoneyFromRandomFaucet(entropy, endpoint, verifyingKeys, amount, logger)
     }
   }
 }

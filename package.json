@@ -9,18 +9,22 @@
     "build": "./dev/bin/build.sh",
     "build:global": "yarn build && npm install -g",
     "lint": "eslint . --ext .ts --fix",
-    "test": "yarn test:types && yarn build:global && yarn test:hosts && yarn test:ts && yarn test:only",
+    "test": "yarn test:types && yarn test:global && yarn test:ts:full && yarn test:only",
+    "test:global": "yarn build:global && node tests/global.test.mjs | tap-spec",
     "test:hosts": "./dev/bin/test-hosts.sh",
     "test:only": "./dev/bin/test-only.sh",
-    "test:ts": "yarn removedb && ./dev/bin/test-ts.sh",
+    "test:ts": "./dev/bin/test-ts.sh | tap-spec",
+    "test:ts:full": "yarn test:hosts && yarn test:network:reset && yarn test:ts && yarn test:network:down",
     "test:types": "tsc --project tsconfig.json",
+    "test:network:up": "node tests/testing-utils/test-network.mjs up",
+    "test:network:down": "node tests/testing-utils/test-network.mjs down",
+    "test:network:reset": "yarn test:network:down && yarn test:network:up",
     "prepare": "husky",
     "prepack": "pinst --disable",
     "postpack": "pinst --enable",
-    "link:sdk": "yarn link @entropyxyz/sdk",
-    "unlink:sdk": "yarn unlink @entropyxyz/sdk",
-    "re-link:sdk": "yarn unlink:sdk && yarn link:sdk",
-    "removedb": "rm -rf .entropy && docker compose --file node_modules/@entropyxyz/sdk/dev/docker-scripts/four-nodes.yaml down 2> /dev/null"
+    "sdk:link": "yarn link @entropyxyz/sdk",
+    "sdk:unlink": "yarn unlink @entropyxyz/sdk",
+    "sdk:relink": "yarn sdk:unlink && yarn sdk:link"
   },
   "files": [
     "dist"

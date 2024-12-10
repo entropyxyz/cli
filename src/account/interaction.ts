@@ -2,7 +2,7 @@ import inquirer from "inquirer";
 import Entropy from "@entropyxyz/sdk";
 
 import { EntropyAccount } from './main'
-import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect } from "./utils";
+import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect, generateAccountDataForPrint } from "./utils";
 import { findAccountByAddressOrName, print } from "../common/utils"
 import { EntropyConfig } from "../config/types";
 import * as config from "../config";
@@ -37,6 +37,7 @@ export async function entropyAccount (endpoint: string, storedConfig: EntropyCon
       : await EntropyAccount.create({ name, path })
 
     await selectAndPersistNewAccount(newAccount)
+    print(generateAccountDataForPrint(newAccount))
     return
   }
 
