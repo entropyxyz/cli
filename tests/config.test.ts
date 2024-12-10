@@ -95,7 +95,7 @@ test('config - set', async t => {
   {
     const message = 'set does not allow empty config'
     // @ts-expect-error : wrong types
-    await set(undefined, configPath)
+    await set(configPath)
       .then(() => t.fail(message))
       .catch(err => {
         t.match(err.message, /config must be an object/, message)
@@ -112,7 +112,7 @@ test('config - set', async t => {
       'migration-version': 1200
     }
     // @ts-expect-error : wrong types
-    await set(config, configPath)
+    await set(configPath, config)
 
     const actual = await get(configPath)
     t.deepEqual(config, actual, 'set works')
@@ -138,7 +138,7 @@ test('config - init', async t => {
       ...config,
       manualAddition: 'boop'
     }
-    await set(newConfig, configPath)
+    await set(configPath, newConfig)
     await init(configPath, fakeOldConfigPath)
     config = await get(configPath)
     t.deepEqual(config, newConfig, 'init does not over-write manual changes')
@@ -162,7 +162,7 @@ test('config - init (migration)', async t => {
     ...config,
     manualAddition: 'boop'
   }
-  await set(newConfig, oldConfigPath)
+  await set(oldConfigPath, newConfig)
 
 
   // init with new path
