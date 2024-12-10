@@ -43,6 +43,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - TUI
   - updated regsitration and transfer flow to use proress loader to provide a signal to the user something is happening [#324](https://github.com/entropyxyz/cli/pull/324)
   - removed use of progress bar throughout TUI [#324](https://github.com/entropyxyz/cli/pull/324)
+  - updated display amount for Faucet process [#323](https://github.com/entropyxyz/cli/pull/323)
 
 ## [0.1.1] Deadpool - 2024-11-06 (entropy-core compatibility: 0.3.0)
 
