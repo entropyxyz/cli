@@ -4,7 +4,7 @@ import * as migration02 from './02'
 import * as migration03 from './03'
 import * as migration04 from './04'
 
-const migrations = [
+export const migrations = [
   migration00,
   migration01,
   migration02,
