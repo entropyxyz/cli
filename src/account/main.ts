@@ -53,6 +53,8 @@ export class EntropyAccount extends EntropyBase {
     }))
   }
 
+  // NOTE: this does not persist the verifyingKey!
+  // config manipulation is out-of-scope of main.ts, see command.ts, interaction.ts
   async register (params?: AccountRegisterParams): Promise<string> {
     let programModAddress: string
     let programData: any

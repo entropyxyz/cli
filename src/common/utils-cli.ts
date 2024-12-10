@@ -1,8 +1,7 @@
-import Entropy from '@entropyxyz/sdk'
 import { Option } from 'commander'
+
 import { bold, findAccountByAddressOrName, print, stringify } from './utils'
 import * as config from '../config'
-import { initializeEntropy } from './initializeEntropy'
 
 export function cliWrite (result) {
   const prettyResult = stringify(result, 0)
@@ -96,18 +95,4 @@ export function programModKeyOption () {
       'The programModKey to perform this function with.'
     ].join(' ')
   )
-}
-
-export async function loadEntropy (addressOrName: string, endpoint: string): Promise<Entropy> {
-  const accounts = getConfigOrNull()?.accounts || []
-  const selectedAccount = findAccountByAddressOrName(accounts, addressOrName)
-  if (!selectedAccount) throw new Error(`No account with name or address: "${addressOrName}"`)
-
-  const entropy = await initializeEntropy({ keyMaterial: selectedAccount.data, endpoint })
-
-  if (!entropy?.keyring?.accounts?.registration?.pair) {
-    throw new Error("Signer keypair is undefined or not properly initialized.")
-  }
-
-  return entropy
 }

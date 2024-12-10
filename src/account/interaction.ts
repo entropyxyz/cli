@@ -2,7 +2,7 @@ import inquirer from "inquirer";
 import Entropy from "@entropyxyz/sdk";
 
 import { EntropyAccount } from './main'
-import { selectAndPersistNewAccount, addVerifyingKeyToAccountAndSelect, generateAccountDataForPrint } from "./utils";
+import { selectAndPersistNewAccount, persistVerifyingKeyToAccount, generateAccountDataForPrint } from "./utils";
 import { findAccountByAddressOrName, print } from "../common/utils"
 import { EntropyConfig } from "../config/types";
 import * as config from "../config";
@@ -94,7 +94,7 @@ export async function entropyRegister (entropy: Entropy, endpoint: string, store
   try {
     if (!registrationSpinner.isSpinning) registrationSpinner.start()
     const verifyingKey = await accountService.register()
-    await addVerifyingKeyToAccountAndSelect(verifyingKey, account.address)
+    await persistVerifyingKeyToAccount(verifyingKey, account.address)
     if (registrationSpinner.isSpinning) registrationSpinner.stop()
     print("Your address", account.address, "has been successfully registered.")
   } catch (error) {

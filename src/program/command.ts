@@ -3,11 +3,12 @@ import { Command } from 'commander'
 import { EntropyProgram } from './main'
 import {
   accountOption, endpointOption, verifyingKeyOption, programModKeyOption,
-  cliWrite, loadEntropy
+  cliWrite 
 } from '../common/utils-cli'
+import { loadEntropyCli } from '../common/load-entropy'
 
 async function programService (opts) {
-  const entropy = await loadEntropy(opts.account, opts.endpoint)
+  const entropy = await loadEntropyCli(opts)
   return new EntropyProgram(entropy, opts.endpoint)
 }
 
