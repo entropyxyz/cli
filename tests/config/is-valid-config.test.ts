@@ -3,7 +3,7 @@ import test from 'tape'
 import migrations from '../../src/config/migrations'
 import { migrateData, isValidConfig } from '../../src/config'
 
-test.only('config - isValidConfig', t => {
+test('config - isValidConfig', t => {
   t.false(isValidConfig({}), 'empty object => false')
   const initialState = migrateData(migrations)
 
