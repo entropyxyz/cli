@@ -166,8 +166,8 @@ export const lilBitsPerBits = (decimals: number): number => {
   return Math.pow(10, decimals) 
 }
 
-export function lilBitsToBits (numOfNanoBits: number, decimals: number) {
-  return numOfNanoBits / lilBitsPerBits(decimals)
+export function lilBitsToBits (numOfLilBits: number, decimals: number) {
+  return numOfLilBits / lilBitsPerBits(decimals)
 }
 
 export function bitsToLilBits (numOfBits: number, decimals: number): bigint {
