@@ -164,7 +164,7 @@ const isValidSelectedAccount: ValidatorFunction = function (input: any) {
 
   isValidSelectedAccount.errors = isValid
     ? null
-    : [{ message: `no account had a "name" matching "selectedAccount": ${input.selectedAccount}` }]
+    : [{ message: `config/selectedAccount: "${input.selectedAccount}" "no account had a "name" matching "selectedAccount": ` }]
 
   return isValid
 }
