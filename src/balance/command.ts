@@ -22,13 +22,14 @@ export function entropyBalanceCommand () {
     .option('-a, --all', 'Get balances for all admin accounts in the config')
     .addOption(configOption())
     .addOption(endpointOption())
+    .addOption(configOption())
     .action(async (account, opts) => {
       const { accounts } = await config.get(opts.config)
 
       let entropy: Entropy
       if (!account && opts.all) {
         const tempAddress = accounts[0].address
-        entropy = await loadEntropyCli({ acount: tempAddress, ...opts })
+        entropy = await loadEntropyCli({ account: tempAddress, ...opts })
       } else if (account && !opts.all) {
         entropy = await loadEntropyCli({ account, ...opts })
       } else {
