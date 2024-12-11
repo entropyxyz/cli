@@ -22,7 +22,6 @@ export function entropyBalanceCommand () {
     .option('-a, --all', 'Get balances for all admin accounts in the config')
     .addOption(configOption())
     .addOption(endpointOption())
-    .addOption(configOption())
     .action(async (account, opts) => {
       const { accounts } = await config.get(opts.config)
 
