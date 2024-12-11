@@ -1,9 +1,11 @@
 import Entropy from "@entropyxyz/sdk"
 import yoctoSpinner from 'yocto-spinner';
+
 import { EntropyLogger } from '../common/logger'
 import { FAUCET_PROGRAM_POINTER } from "./utils"
 import { EntropyFaucet } from "./main"
-import { bitsToLilBits, getTokenDetails, print } from "src/common/utils"
+import { EntropyTuiOptions } from '../types'
+import { bitsToLilBits, lilBitsToBits, getTokenDetails, print, round } from "../common/utils"
 
 let chosenVerifyingKeys = []
 // Sending only 1e10 lilBITS does not allow user's to register after receiving funds
@@ -14,19 +16,19 @@ let chosenVerifyingKeys = []
 const FLOW_CONTEXT = 'ENTROPY_FAUCET_INTERACTION'
 const SPINNER_TEXT =  'Funding account…'
 const faucetSpinner = yoctoSpinner()
-export async function entropyFaucet (entropy: Entropy, options, logger: EntropyLogger) {
+
+export async function entropyFaucet (entropy: Entropy, opts: EntropyTuiOptions, logger: EntropyLogger) {
   faucetSpinner.text = SPINNER_TEXT
   if (faucetSpinner.isSpinning) {
     faucetSpinner.stop()
   }
-  const { endpoint } = options
   if (!entropy.registrationManager.signer.pair) {
     throw new Error("Keys are undefined")
   }
 
   const { decimals } = await getTokenDetails(entropy)
   const amount = bitsToLilBits(2, decimals)
-  const faucetService = new EntropyFaucet(entropy, endpoint)
+  const faucetService = new EntropyFaucet(entropy, opts.endpoint)
   const verifyingKeys = await faucetService.getAllFaucetVerifyingKeys()
   // @ts-expect-error
   return sendMoneyFromRandomFaucet(entropy, options.endpoint, verifyingKeys, amount.toString(), logger)
@@ -39,17 +41,25 @@ async function sendMoneyFromRandomFaucet (entropy: Entropy, endpoint: string, ve
     faucetSpinner.start()
   }
   const faucetService = new EntropyFaucet(entropy, endpoint)
+  const { decimals, symbol } = await getTokenDetails(entropy)
   const selectedAccountAddress = entropy.keyring.accounts.registration.address
   let chosenVerifyingKey: string
   try {
     const randomFaucet = faucetService.getRandomFaucet(chosenVerifyingKeys, verifyingKeys)
     chosenVerifyingKey = randomFaucet.chosenVerifyingKey
     const { faucetAddress } = randomFaucet
-    await faucetService.sendMoney({ amount, addressToSendTo: selectedAccountAddress, faucetAddress, chosenVerifyingKey, faucetProgramPointer: FAUCET_PROGRAM_POINTER })
+    await faucetService.sendMoney({
+      amount,
+      addressToSendTo: selectedAccountAddress,
+      faucetAddress,
+      chosenVerifyingKey,
+      faucetProgramPointer: FAUCET_PROGRAM_POINTER
+    })
     // reset chosen keys after successful transfer
     if (faucetSpinner.isSpinning) faucetSpinner.stop()
     chosenVerifyingKeys = []
-    print(`Account: ${selectedAccountAddress} has been successfully funded with ${parseInt(amount).toLocaleString('en-US')} BITS`)
+    const roundedBits = round(lilBitsToBits(parseInt(amount), decimals))
+    print(`Account: ${selectedAccountAddress} has been successfully funded with ${roundedBits} ${symbol}`)
   } catch (error) {
     logger.error('Error issuing funds through faucet', error, FLOW_CONTEXT)
     chosenVerifyingKeys.push(chosenVerifyingKey)

@@ -2,12 +2,13 @@ import { Command } from 'commander'
 
 import { EntropyProgram } from './main'
 import {
-  accountOption, endpointOption, verifyingKeyOption, programModKeyOption,
-  cliWrite, loadEntropy
+  accountOption, endpointOption, configOption, verifyingKeyOption, programModKeyOption,
+  cliWrite, 
 } from '../common/utils-cli'
+import { loadEntropyCli } from '../common/load-entropy'
 
 async function programService (opts) {
-  const entropy = await loadEntropy(opts.account, opts.endpoint)
+  const entropy = await loadEntropyCli(opts)
   return new EntropyProgram(entropy, opts.endpoint)
 }
 
@@ -50,6 +51,7 @@ function entropyProgramDeploy () {
       ].join(' ')
     )
     .addOption(accountOption())
+    .addOption(configOption())
     .addOption(endpointOption())
 
     .action(async (bytecodePath, configurationSchemaPath, auxillaryDataSchemaPath, opts) => { // eslint-disable-line
