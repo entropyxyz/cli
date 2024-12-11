@@ -16,14 +16,6 @@ export class EntropyBalance extends EntropyBase {
     return balance
   }
 
-  async getBalance (address: string): Promise<number> {
-    const accountInfo = (await this.entropy.substrate.query.system.account(address)) as any
-    const balance = parseInt(BalanceUtils.hexToBigInt(accountInfo.data.free).toString())
-
-    this.logger.log(`Current balance of ${address}: ${balance}`, EntropyBalance.name)
-    return balance
-  }
-
   static async getBalances (substrate, addresses: string[]): Promise<BalanceInfo[]> {
     return Promise.all(
       addresses.map(async address => {
@@ -36,5 +28,13 @@ export class EntropyBalance extends EntropyBase {
           })
       })
     )
+  }
+
+  async getBalance (address: string): Promise<number> {
+    const accountInfo = (await this.entropy.substrate.query.system.account(address)) as any
+    const balance = parseInt(BalanceUtils.hexToBigInt(accountInfo.data.free).toString())
+
+    this.logger.log(`Current balance of ${address}: ${balance}`, EntropyBalance.name)
+    return balance
   }
 }

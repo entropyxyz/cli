@@ -3,12 +3,15 @@ import test from 'tape'
 import { setupTest, charlieStashAddress as richAddress, promiseRunner, DEFAULT_ENDPOINT, eveAddress } from './testing-utils'
 import { EntropyBalance } from '../src/balance/main'
 import { EntropyAccount } from '../src/account/main'
+// @ts-expect-error
 import { createSubstrate } from '@entropyxyz/sdk/utils'
 
 test('getBalance + getBalances', async (t) => {
   const { run, entropy, endpoint } = await setupTest(t)
   const balanceService = new EntropyBalance(entropy, endpoint)
   const newAddress = entropy.keyring.accounts.registration.address
+  const substrate = createSubstrate(endpoint)
+  await run('substrate ready', substrate.isReadyOrError)
 
   /* getBalance */
   const newAddressBalance = await run(
@@ -26,7 +29,7 @@ test('getBalance + getBalances', async (t) => {
   /* getBalances */
   const balances = await run(
     'getBalances',
-    balanceService.getBalances([newAddress, richAddress])
+    EntropyBalance.getBalances(substrate, [newAddress, richAddress])
   )
   t.deepEqual(
     balances,
@@ -40,13 +43,14 @@ test('getBalance + getBalances', async (t) => {
   const badAddresses = ['5Cz6BfUaxxXCA3jninzxdan4JdmC1NVpgkiRPYhXbhr', '5Cz6BfUaxxXCA3jninzxdan4JdmC1NVpgkiRPYhXbhrfnD']
   const balancesWithNoGoodAddress = await run(
     'getBalances::one good address',
-    balanceService.getBalances(badAddresses)
+    EntropyBalance.getBalances(substrate, badAddresses)
   )
 
   badAddresses.forEach((addr) => {
     const match = balancesWithNoGoodAddress.find(info => info.address === addr)
     t.true(!!match.error, `error field is populated for ${addr}`)
   })
+  await run('close substrate', substrate.disconnect().catch(err => console.error('Error closing connection', err.message)))
 
   // TODO:
   // - test getBalances with 1 good address, 1 bung seed
