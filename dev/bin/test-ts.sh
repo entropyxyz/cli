@@ -5,6 +5,9 @@
 #
 # but here we are fighting TS ... this works well enough
 
+shopt -s globstar
+# required for "globalstar" (**)in bash
+
 ONLY_FILES=`grep 'test.only' tests/**/*.test.ts -l`
 
 if [ $ONLY_FILES ]; then
