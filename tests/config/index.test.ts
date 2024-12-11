@@ -62,7 +62,7 @@ test('config - set', async t => {
       endpoints: {
         "test-net": 'wss://dog.xyz'
       },
-      'migration-version': 4
+      'migration-version': migrations.at(-1)?.version
     }
     // @ts-expect-error : wrong types
     await set(configPath, config)
