@@ -25,7 +25,7 @@ export function entropyBalanceCommand () {
       const substrate = createSubstrate(opts.endpoint)
       await substrate.isReadyOrError
       const { decimals, symbol } = await getTokenDetails(substrate)
-      const toBits = (nanoBits: number) => round(lilBitsToBits(nanoBits, decimals))
+      const toBits = (lilBits: number) => round(lilBitsToBits(lilBits, decimals))
       const { accounts } = await config.get(opts.config)
       if (opts.all) {
         // Balances for all admin accounts
