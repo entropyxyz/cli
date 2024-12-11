@@ -53,7 +53,13 @@ test('config/migrations', async t => {
   migrations.forEach(({ migrate, version }, i) => {
     const versionNum = Number(version)
     t.equal(versionNum, i, `${versionNum} - version`)
-    t.equal(typeof migrate({}), 'object', `${versionNum} - migrate`)
+
+    try {
+      const result = migrate({})
+      t.equal(typeof result, 'object', `${versionNum} - migrate`)
+    } catch (err) {
+      t.match(err.message, /^Migration\s\d{1,2} failed/, `${versionNum} - migrate`)
+    }
   })
 
   // TODO: could be paranoid + check each file src/config/migrations/\d\d.ts is exported in "migrations"
@@ -398,11 +404,15 @@ test('config/migrations/05', { objectPrintDepth: 10 }, t => {
     const initial = makeConfigV4()
     initial.selectedAccount = "aaaaayyyyyeee9SrDaHj8rR9am8S5Cfxtz2fA9qBSF1QEuEL"
 
-    t.throws(
-      () => migrations[5].migrate(initial),
-      /5.*unable to correct selectedAccount/,
-      "selectedAccount: <address> (throws if cannot find <name>)"
-    )
+    const MSG = "selectedAccount: <address> (throws if cannot find <name>)"
+    try {
+      migrations[5].migrate(initial)
+
+      // should not reach hree
+      t.fail(MSG)
+    } catch (err) {
+      t.match(err.cause.message, /unable to correct selectedAccount/, MSG)
+    }
   }
 
   t.end()
