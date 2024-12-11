@@ -1,7 +1,7 @@
 import Entropy from "@entropyxyz/sdk";
 
 import { EntropyBase } from "../common/entropy-base";
-import { bitsToNanoBits, formatDispatchError, getTokenDetails } from "../common/utils";
+import { bitsToLilBits, formatDispatchError, getTokenDetails } from "../common/utils";
 import { TransferOptions } from "./types";
 
 const FLOW_CONTEXT = 'ENTROPY_TRANSFER'
@@ -18,23 +18,23 @@ export class EntropyTransfer extends EntropyBase {
 
   async transfer (toAddress: string, amountInBits: string) {
     const { decimals } = await getTokenDetails(this.entropy.substrate)
-    const nanoBits = bitsToNanoBits(Number(amountInBits), decimals)
+    const lilBits = bitsToLilBits(Number(amountInBits), decimals)
 
     return this.rawTransfer({
       from: this.entropy.keyring.accounts.registration.pair,
       to: toAddress,
-      nanoBits
+      lilBits
     })
   }
 
   private async rawTransfer (payload: TransferOptions): Promise<any> {
-    const { from, to, nanoBits } = payload
+    const { from, to, lilBits } = payload
 
     return new Promise((resolve, reject) => {
       // WARN: await signAndSend is dangerous as it does not resolve
       // after transaction is complete :melt:
       this.entropy.substrate.tx.balances
-        .transferAllowDeath(to, nanoBits)
+        .transferAllowDeath(to, lilBits)
         // @ts-ignore
         .signAndSend(from, ({ status, dispatchError }) => {
           if (dispatchError) {

@@ -1,8 +1,5 @@
-export type BalanceInfoWithError = {
+export interface BalanceInfo {
+  address: string
   balance?: number
   error?: Error
-}
-
-export interface BalanceInfo {
-  [address: string]: BalanceInfoWithError
 }

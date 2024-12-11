@@ -157,21 +157,21 @@ export async function getTokenDetails (substrate): Promise<TokenDetails> {
 }
 
 /* 
-  A "nanoBITS" is the smallest indivisible unit of account value we track.
+  A "lilBITS" is the smallest indivisible unit of account value we track.
   A "BITS" is the human readable unit of value value
-  This constant is then "the number of nanoBITS that make up 1 BITS", or said differently
+  This constant is then "the number of lilBITS that make up 1 BITS", or said differently
   "how many decimal places our BITS has".
 */
-export const nanoBitsPerBits = (decimals: number): number => {
+export const lilBitsPerBits = (decimals: number): number => {
   return Math.pow(10, decimals) 
 }
 
-export function nanoBitsToBits (numOfNanoBits: number, decimals: number) {
-  return numOfNanoBits / nanoBitsPerBits(decimals)
+export function lilBitsToBits (numOfLilBits: number, decimals: number) {
+  return numOfLilBits / lilBitsPerBits(decimals)
 }
 
-export function bitsToNanoBits (numOfBits: number, decimals: number): bigint {
-  return BigInt(numOfBits * nanoBitsPerBits(decimals))
+export function bitsToLilBits (numOfBits: number, decimals: number): bigint {
+  return BigInt(numOfBits * lilBitsPerBits(decimals))
 }
 
 export function round (num: number, decimals: number = 4): number {

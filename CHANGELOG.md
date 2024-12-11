@@ -16,8 +16,8 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 
 - Shared
   - amount units are now correct! [#306](https://github.com/entropyxyz/cli/pull/306)
-    - 1 nanoBITS = 0.00000000001 BITS
-    - 1 BITS = 10000000000 nanoBITS
+    - 1 lilBITS = 0.00000000001 BITS
+    - 1 BITS = 10000000000 lilBITS
 - Programmatic CLI
   - `entropy program list` now prints output! [#298](https://github.com/entropyxyz/cli/pull/298)
 
@@ -25,14 +25,17 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 
 - Shared
   - new methods for conversion and other math operations [#306](https://github.com/entropyxyz/cli/pull/306)
-    - BITS => nanoBITS
-    - nanoBITS => BITS
+    - BITS => lilBITS
+    - lilBITS => BITS
     - rounding to a specific number of decimal places
-    - nanoBITS per bits calculation
+    - lilBITS per bits calculation
   - new method to pull entropy token details from chain, and cache the results [#306](https://github.com/entropyxyz/cli/pull/306)
   
 - TUI
   - animation on tui load (while entropy loads) [#288](https://github.com/entropyxyz/cli/pull/288)
+
+- Programmatic CLI
+  - added option for users to view all balances of admin accounts in the config [#310](https://github.com/entropyxyz/cli/pull/310)
 
 ### Changed
 

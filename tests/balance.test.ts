@@ -30,10 +30,10 @@ test('getBalance + getBalances', async (t) => {
   )
   t.deepEqual(
     balances,
-    {
-      [newAddress]: {balance: newAddressBalance},
-      [richAddress]: {balance: richAddressBalance}
-    },
+    [
+      { address: newAddress,  balance: newAddressBalance },
+      { address: richAddress, balance: richAddressBalance }
+    ],
     'getBalances works'
   )
 
@@ -43,8 +43,9 @@ test('getBalance + getBalances', async (t) => {
     balanceService.getBalances(badAddresses)
   )
 
-  badAddresses.forEach(addr => {
-    t.true(!!balancesWithNoGoodAddress[addr].error, `error field is populated for ${addr}`)
+  badAddresses.forEach((addr) => {
+    const match = balancesWithNoGoodAddress.find(info => info.address === addr)
+    t.true(!!match.error, `error field is populated for ${addr}`)
   })
 
   // TODO:
