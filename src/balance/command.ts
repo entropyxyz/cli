@@ -3,7 +3,8 @@ import { Command } from "commander";
 import { createSubstrate, isValidSubstrateAddress } from '@entropyxyz/sdk/utils'
 import { EntropyBalance } from "./main";
 import { configOption, endpointOption, cliWrite } from "../common/utils-cli";
-import { findAccountByAddressOrName, getTokenDetails, nanoBitsToBits, round } from "../common/utils";
+import { findAccountByAddressOrName, getTokenDetails, lilBitsToBits, round } from "../common/utils";
+import { loadEntropyCli } from "../common/load-entropy"
 import * as config from "../config";
 
 export function entropyBalanceCommand () {
@@ -28,8 +29,8 @@ export function entropyBalanceCommand () {
         console.error(`Provided [account=${account}] is not a valid substrate address`)
         process.exit(1)
       }
-      const nanoBalance = await EntropyBalance.getAnyBalance(substrate, address)
-      const balance = round(nanoBitsToBits(nanoBalance, decimals))
+      const lilBalance = await EntropyBalance.getAnyBalance(substrate, address)
+      const balance = round(lilBitsToBits(lilBalance, decimals))
       cliWrite({ account, balance, symbol })
       // closing substrate
       await substrate.disconnect()

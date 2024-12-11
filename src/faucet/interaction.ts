@@ -5,10 +5,10 @@ import { EntropyLogger } from '../common/logger'
 import { FAUCET_PROGRAM_POINTER } from "./utils"
 import { EntropyFaucet } from "./main"
 import { EntropyTuiOptions } from '../types'
-import { bitsToNanoBits, getTokenDetails, nanoBitsToBits, print, round } from "../common/utils"
+import { bitsToLilBits, lilBitsToBits, getTokenDetails, print, round } from "../common/utils"
 
 let chosenVerifyingKeys = []
-// Sending only 1e10 nanoBITS does not allow user's to register after receiving funds
+// Sending only 1e10 lilBITS does not allow user's to register after receiving funds
 // there are limits in place to ensure user's are leftover with a certain balance in their accounts
 // increasing amount send here, will allow user's to register right away
 
@@ -27,7 +27,7 @@ export async function entropyFaucet (entropy: Entropy, opts: EntropyTuiOptions, 
   }
 
   const { decimals } = await getTokenDetails(entropy)
-  const amount = bitsToNanoBits(2, decimals)
+  const amount = bitsToLilBits(2, decimals)
   const faucetService = new EntropyFaucet(entropy, opts.endpoint)
   const verifyingKeys = await faucetService.getAllFaucetVerifyingKeys()
   // @ts-expect-error
@@ -48,11 +48,18 @@ async function sendMoneyFromRandomFaucet (entropy: Entropy, endpoint: string, ve
     const randomFaucet = faucetService.getRandomFaucet(chosenVerifyingKeys, verifyingKeys)
     chosenVerifyingKey = randomFaucet.chosenVerifyingKey
     const { faucetAddress } = randomFaucet
-    await faucetService.sendMoney({ amount, addressToSendTo: selectedAccountAddress, faucetAddress, chosenVerifyingKey, faucetProgramPointer: FAUCET_PROGRAM_POINTER })
+    await faucetService.sendMoney({
+      amount,
+      addressToSendTo: selectedAccountAddress,
+      faucetAddress,
+      chosenVerifyingKey,
+      faucetProgramPointer: FAUCET_PROGRAM_POINTER
+    })
     // reset chosen keys after successful transfer
     if (faucetSpinner.isSpinning) faucetSpinner.stop()
     chosenVerifyingKeys = []
-    print(`Account: ${selectedAccountAddress} has been successfully funded with ${round(nanoBitsToBits(parseInt(amount), decimals))} ${symbol}`)
+    const roundedBits = round(lilBitsToBits(parseInt(amount), decimals))
+    print(`Account: ${selectedAccountAddress} has been successfully funded with ${roundedBits} ${symbol}`)
   } catch (error) {
     logger.error('Error issuing funds through faucet', error, FLOW_CONTEXT)
     chosenVerifyingKeys.push(chosenVerifyingKey)
