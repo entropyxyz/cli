@@ -3,8 +3,9 @@ import Entropy from "@entropyxyz/sdk";
 
 import { EntropyBalance } from "./main";
 import { BalanceInfo } from "./types";
-import { endpointOption, cliWrite, loadEntropy } from "../common/utils-cli";
-import { findAccountByAddressOrName, getTokenDetails, nanoBitsToBits, round } from "../common/utils";
+import { configOption, endpointOption, cliWrite } from "../common/utils-cli";
+import { findAccountByAddressOrName, getTokenDetails, lilBitsToBits, round } from "../common/utils";
+import { loadEntropyCli } from "../common/load-entropy"
 import * as config from "../config";
 import { EntropyConfigAccount } from "src/config/types";
 
@@ -14,28 +15,29 @@ export function entropyBalanceCommand () {
   // view the balances of all accounts
   balanceCommand
     .description('Command to retrieive the balance of an account on the Entropy Network')
-    .argument('[account]', [
+    .argument('[account] <address|name>', [
       'The address an account address whose balance you want to query.',
       'Can also be the human-readable name of one of your accounts'
     ].join(' '))
     .option('-a, --all', 'Get balances for all admin accounts in the config')
+    .addOption(configOption())
     .addOption(endpointOption())
     .action(async (account, opts) => {
-      const { accounts } = await config.get()
+      const { accounts } = await config.get(opts.config)
 
       let entropy: Entropy
       if (!account && opts.all) {
         const tempAddress = accounts[0].address
-        entropy = await loadEntropy(tempAddress, opts.endpoint)
+        entropy = await loadEntropyCli({ acount: tempAddress, ...opts })
       } else if (account && !opts.all) {
-        entropy = await loadEntropy(account, opts.endpoint)
+        entropy = await loadEntropyCli({ account, ...opts })
       } else {
         return balanceCommand.help()
       }
 
       const balanceService = new EntropyBalance(entropy, opts.endpoint)
       const { decimals, symbol } = await getTokenDetails(entropy)
-      const toBits = (nanoBits: number) => round(nanoBitsToBits(nanoBits, decimals))
+      const toBits = (nanoBits: number) => round(lilBitsToBits(nanoBits, decimals))
 
       if (opts.all) {
         // Balances for all admin accounts
@@ -60,6 +62,7 @@ export function entropyBalanceCommand () {
           .then(toBits)
         cliWrite({ account, balance, symbol })
       }
+
       process.exit(0)
     })
 

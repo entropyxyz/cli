@@ -1,8 +1,11 @@
 import { Entropy } from '@entropyxyz/sdk'
-import { Buffer } from 'buffer'
-import { EntropyConfigAccount } from "../config/types"
+import { Buffer } from 'node:buffer'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
+
 import { EntropyLogger } from './logger'
-import { TokenDetails } from 'src/types'
+import { EntropyConfigAccount } from '../config/types'
+import { TokenDetails } from '../types'
 
 export function stripHexPrefix (str: string): string {
   if (str.startsWith('0x')) return str.slice(2)
@@ -22,8 +25,24 @@ export function replacer (key, value) {
   else return value
 }
 
+
 export function print (...args) {
   console.log(...args.map(arg => stringify(arg)))
+}
+
+// ASCII color codes
+const GREEN = '\u001b[32m'
+const RED = '\u001b[31m'
+const BLUE = '\u001b[34m'
+const RESET = '\u001b[0m'
+print.success = function printSuccess (...args) {
+  return print(GREEN, ...args, RESET)
+}
+print.error = function printError (...args) {
+  return print(RED, ...args, RESET)
+}
+print.info = function printInfo (...args) {
+  return print(BLUE, ...args, RESET)
 }
 
 export function bold (text) {
@@ -81,6 +100,17 @@ export function findAccountByAddressOrName (accounts: EntropyConfigAccount[], al
   )
 }
 
+export function absolutePath (somePath: string) {
+  switch (somePath.charAt(0)) {
+  case '.':
+    return join(process.cwd(), somePath)
+  case '~':
+    return join(homedir(), somePath.slice(1))
+  default:
+    return somePath
+  }
+}
+
 export function formatDispatchError (entropy: Entropy, dispatchError) {
   let msg: string
   if (dispatchError.isModule) {
@@ -127,21 +157,21 @@ export async function getTokenDetails (entropy): Promise<TokenDetails> {
 }
 
 /* 
-  A "nanoBITS" is the smallest indivisible unit of account value we track.
+  A "lilBITS" is the smallest indivisible unit of account value we track.
   A "BITS" is the human readable unit of value value
-  This constant is then "the number of nanoBITS that make up 1 BITS", or said differently
+  This constant is then "the number of lilBITS that make up 1 BITS", or said differently
   "how many decimal places our BITS has".
 */
-export const nanoBitsPerBits = (decimals: number): number => {
+export const lilBitsPerBits = (decimals: number): number => {
   return Math.pow(10, decimals) 
 }
 
-export function nanoBitsToBits (numOfNanoBits: number, decimals: number) {
-  return numOfNanoBits / nanoBitsPerBits(decimals)
+export function lilBitsToBits (numOfLilBits: number, decimals: number) {
+  return numOfLilBits / lilBitsPerBits(decimals)
 }
 
-export function bitsToNanoBits (numOfBits: number, decimals: number): bigint {
-  return BigInt(numOfBits * nanoBitsPerBits(decimals))
+export function bitsToLilBits (numOfBits: number, decimals: number): bigint {
+  return BigInt(numOfBits * lilBitsPerBits(decimals))
 }
 
 export function round (num: number, decimals: number = 4): number {

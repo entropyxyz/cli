@@ -8,12 +8,13 @@ import { writeFile } from "node:fs/promises"
 import { displayPrograms, addQuestions, getProgramPointerInput, verifyingKeyQuestion } from "./utils";
 import { EntropyProgram } from "./main";
 import { print } from "../common/utils"
+import { EntropyTuiOptions } from '../types'
 
 let verifyingKey: string;
 
 const paths = envPaths('entropy-cryptography', { suffix: '' })
 
-export async function entropyProgram (entropy: Entropy, endpoint: string) {
+export async function entropyProgram (entropy: Entropy, opts: EntropyTuiOptions) {
   const actionChoice = await inquirer.prompt([
     {
       type: "list",
@@ -33,7 +34,7 @@ export async function entropyProgram (entropy: Entropy, endpoint: string) {
     throw new Error("Keys are undefined")
   }
 
-  const program = new EntropyProgram(entropy, endpoint)
+  const program = new EntropyProgram(entropy, opts.endpoint)
 
   switch (actionChoice.action) {
   case "View My Programs": {

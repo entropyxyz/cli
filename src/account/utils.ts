@@ -7,8 +7,8 @@ import { EntropyConfigAccount } from "../config/types";
 import * as config from "../config";
 import { generateAccountChoices, findAccountByAddressOrName } from '../common/utils';
 
-export async function selectAndPersistNewAccount (newAccount: EntropyConfigAccount) {
-  const storedConfig = await config.get()
+export async function selectAndPersistNewAccount (configPath: string, newAccount: EntropyConfigAccount) {
+  const storedConfig = await config.get(configPath)
   const { accounts } = storedConfig
 
   const isExistingName = accounts.find(account => account.name === newAccount.name)
@@ -22,14 +22,14 @@ export async function selectAndPersistNewAccount (newAccount: EntropyConfigAccou
 
   // persist to config, set selectedAccount
   accounts.push(newAccount)
-  await config.set({
+  await config.set(configPath, {
     ...storedConfig,
-    selectedAccount: newAccount.name
+    selectedAccount: newAccount.address
   })
 }
 
-export async function addVerifyingKeyToAccountAndSelect (verifyingKey: string, accountNameOrAddress: string) {
-  const storedConfig = await config.get()
+export async function persistVerifyingKeyToAccount (configPath: string, verifyingKey: string, accountNameOrAddress: string) {
+  const storedConfig = await config.get(configPath)
   const { accounts } = storedConfig
 
   const account = findAccountByAddressOrName(accounts, accountNameOrAddress)
@@ -37,7 +37,7 @@ export async function addVerifyingKeyToAccountAndSelect (verifyingKey: string, a
 
   // persist to config, set selectedAccount
   account.data.registration.verifyingKeys.push(verifyingKey)
-  await config.set({
+  await config.set(configPath, {
     ...storedConfig,
     selectedAccount: account.name
   })
