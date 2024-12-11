@@ -43,7 +43,10 @@ export const configSchema = {
       uniqueItems: true
     },
     selectedAccount: {
-      type: "string"
+      oneOf: [
+        { type: "null" },
+        { type: "string" }
+      ]
     },
     endpoints: {
       type: "object",

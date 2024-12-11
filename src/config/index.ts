@@ -147,8 +147,7 @@ export const isValidConfig: ValidatorFunction = function (input: any) {
 }
 
 const isValidSelectedAccount: ValidatorFunction = function (input: any) {
-  // TODO: change this behaviour?
-  if (input?.selectedAccount === "") {
+  if (input?.selectedAccount === null) {
     isValidSelectedAccount.errors = null
     return true
   }

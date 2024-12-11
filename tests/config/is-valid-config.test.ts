@@ -3,80 +3,7 @@ import test from 'tape'
 import migrations from '../../src/config/migrations'
 import { migrateData, isValidConfig } from '../../src/config'
 
-function makeConfig (override?: object) {
-  const config = {
-    accounts: [makeConfigAccount()],
-    "selectedAccount": "naynay",
-    "endpoints": {
-      "dev": "ws://127.0.0.1:9944",
-      "test-net": "wss://testnet.entropy.xyz",
-      "stg": "wss://api.staging.testnet.testnet-2024.infrastructure.entropy.xyz"
-    },
-    "migration-version": 4,
-  }
-
-  if (override) {
-    return { ...config, ...override }
-    // NOTE: shallow merge
-  }
-  else return config
-}
-
-function makeConfigAccount (override?: object) {
-  const configAccount = {
-    "name": "naynay",
-    "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
-    "data": {
-      "debug": true,
-      "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
-      "admin": {
-        "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
-        "type": "registration",
-        "verifyingKeys": [],
-        "userContext": "ADMIN_KEY",
-        "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
-        "path": "",
-        "pair": {
-          "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
-          "addressRaw": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
-          "isLocked": false,
-          "meta": {},
-          "publicKey": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
-          "type": "sr25519",
-          "secretKey": "data:application/UI8A;base64,aCCXH0+nI2+tot94NPegNBCwe1bWgw57xPo9Iss2DmoE5obkxD5JUXujRpsHEoltI0hD9SAUGO9GeV+8rGEkUg=="
-        }
-      },
-      "registration": {
-        "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
-        "type": "registration",
-        "verifyingKeys": [
-          "0x02ecbc1c6777e868c8cc50c9784e95d3a4727bdb5a04d7694d2880c980f15e17c3"
-        ],
-        "userContext": "ADMIN_KEY",
-        "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
-        "path": "",
-        "pair": {
-          "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
-          "addressRaw": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
-          "isLocked": false,
-          "meta": {},
-          "publicKey": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
-          "type": "sr25519",
-          "secretKey": "data:application/UI8A;base64,aCCXH0+nI2+tot94NPegNBCwe1bWgw57xPo9Iss2DmoE5obkxD5JUXujRpsHEoltI0hD9SAUGO9GeV+8rGEkUg=="
-        }
-      }
-    }
-  }
-
-  if (override) {
-    return { ...configAccount, ...override }
-    // NOTE: shallow merge
-  }
-  else return configAccount
-}
-
-
-test('config - isValidConfig', t => {
+test.only('config - isValidConfig', t => {
   t.false(isValidConfig({}), 'empty object => false')
   const initialState = migrateData(migrations)
 
@@ -164,13 +91,12 @@ test('config - isValidConfig', t => {
     const config = makeConfig()
 
     // @ts-expect-error
-    config.selectedAccount = undefined
-    // TODO: this should be valid?!
-    t.false(isValidConfig(config), "selectedAccount: ommitted => false")
+    config.selectedAccount = null
+    sweetAs(config, "selectedAccount: ommitted => true")
 
     config.selectedAccount = ""
     // TODO: change this, it seems crazy to me!
-    sweetAs(config, "selectedAccount: '' => true")
+    t.false(isValidConfig(config), "selectedAccount: '' => false")
 
     // @ts-expect-error
     config.selectedAccount = 100
@@ -275,4 +201,80 @@ test('config - isValidConfig', t => {
 
   t.end()
 })
+
+// NOTE: this represents the current expected state of the config
+// If you add a migration you should expect to have to update this
+
+function makeConfig (override?: object) {
+  const config = {
+    accounts: [makeConfigAccount()],
+    "selectedAccount": "naynay",
+    "endpoints": {
+      "dev": "ws://127.0.0.1:9944",
+      "test-net": "wss://testnet.entropy.xyz",
+      "stg": "wss://api.staging.testnet.testnet-2024.infrastructure.entropy.xyz"
+    },
+    "migration-version": 5,
+  }
+
+  if (override) {
+    return { ...config, ...override }
+    // NOTE: shallow merge
+  }
+  else return config
+}
+
+function makeConfigAccount (override?: object) {
+  const configAccount = {
+    "name": "naynay",
+    "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+    "data": {
+      "debug": true,
+      "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
+      "admin": {
+        "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+        "type": "registration",
+        "verifyingKeys": [],
+        "userContext": "ADMIN_KEY",
+        "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
+        "path": "",
+        "pair": {
+          "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+          "addressRaw": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+          "isLocked": false,
+          "meta": {},
+          "publicKey": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+          "type": "sr25519",
+          "secretKey": "data:application/UI8A;base64,aCCXH0+nI2+tot94NPegNBCwe1bWgw57xPo9Iss2DmoE5obkxD5JUXujRpsHEoltI0hD9SAUGO9GeV+8rGEkUg=="
+        }
+      },
+      "registration": {
+        "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+        "type": "registration",
+        "verifyingKeys": [
+          "0x02ecbc1c6777e868c8cc50c9784e95d3a4727bdb5a04d7694d2880c980f15e17c3"
+        ],
+        "userContext": "ADMIN_KEY",
+        "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
+        "path": "",
+        "pair": {
+          "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+          "addressRaw": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+          "isLocked": false,
+          "meta": {},
+          "publicKey": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+          "type": "sr25519",
+          "secretKey": "data:application/UI8A;base64,aCCXH0+nI2+tot94NPegNBCwe1bWgw57xPo9Iss2DmoE5obkxD5JUXujRpsHEoltI0hD9SAUGO9GeV+8rGEkUg=="
+        }
+      }
+    }
+  }
+
+  if (override) {
+    return { ...configAccount, ...override }
+    // NOTE: shallow merge
+  }
+  else return configAccount
+}
+
 

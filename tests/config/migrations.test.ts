@@ -281,10 +281,129 @@ test('config/migrations/04', { objectPrintDepth: 10 }, t => {
         "stg": "wss://api.staging.testnet.testnet-2024.infrastructure.entropy.xyz"
       },
       "migration-version": 3,
-    }
+    },
+    'wiped verifyingKeys'
   )
 
   t.end()
 })
 
+test('config/migrations/05', { objectPrintDepth: 10 }, t => {
+  // empty initialState
+  {
+    const initial = {
+      "accounts": [],
+      "selectedAccount": null,
+      "endpoints": {
+        "dev": "ws://127.0.0.1:9944",
+        "test-net": "wss://testnet.entropy.xyz",
+        "stg": "wss://api.staging.testnet.testnet-2024.infrastructure.entropy.xyz"
+      },
+      "migration-version": 4,
+    }
 
+    const migrated = migrations[5].migrate(initial)
+    const expected = {
+      "accounts": [],
+      "selectedAccount": null,
+      "endpoints": {
+        "dev": "ws://127.0.0.1:9944",
+        "test-net": "wss://testnet.entropy.xyz",
+        "stg": "wss://api.staging.testnet.testnet-2024.infrastructure.entropy.xyz"
+      },
+      "migration-version": 4,
+    }
+
+    t.deepEqual(migrated, expected, 'changed selectedAccount: "" => null')
+  }
+
+  const makeConfigV4 = () => ({
+    "accounts": [
+      {
+        "name": "naynay",
+        "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+        "data": {
+          "debug": true,
+          "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
+          "admin": {
+            "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+            "type": "registration",
+            "verifyingKeys": [],
+            "userContext": "ADMIN_KEY",
+            "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
+            "path": "",
+            "pair": {
+              "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+              "addressRaw": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+              "isLocked": false,
+              "meta": {},
+              "publicKey": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+              "type": "sr25519",
+              "secretKey": "data:application/UI8A;base64,aCCXH0+nI2+tot94NPegNBCwe1bWgw57xPo9Iss2DmoE5obkxD5JUXujRpsHEoltI0hD9SAUGO9GeV+8rGEkUg=="
+            }
+          },
+          "registration": {
+            "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+            "type": "registration",
+            "verifyingKeys": [
+              "0x02ecbc1c6777e868c8cc50c9784e95d3a4727bdb5a04d7694d2880c980f15e17c3"
+            ],
+            "userContext": "ADMIN_KEY",
+            "seed": "0x89bf4bc476c0173237ec856cdf864dfcaff0e80d87fb3419d40100c59088eb92",
+            "path": "",
+            "pair": {
+              "address": "5Cfxtz2fA9qBSF1QEuELbyy41JNwai1mp9SrDaHj8rR9am8S",
+              "addressRaw": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+              "isLocked": false,
+              "meta": {},
+              "publicKey": "data:application/UI8A;base64,GuQ30RLMK/WEPz+g1qoliXGcRH7lk20/xHY0qvjdz08=",
+              "type": "sr25519",
+              "secretKey": "data:application/UI8A;base64,aCCXH0+nI2+tot94NPegNBCwe1bWgw57xPo9Iss2DmoE5obkxD5JUXujRpsHEoltI0hD9SAUGO9GeV+8rGEkUg=="
+            }
+          }
+        }
+      },
+    ],
+    "selectedAccount": "naynay",
+    "endpoints": {
+      "dev": "ws://127.0.0.1:9944",
+      "test-net": "wss://testnet.entropy.xyz",
+      "stg": "wss://api.staging.testnet.testnet-2024.infrastructure.entropy.xyz"
+    },
+    "migration-version": 4,
+  })
+
+  /* selectedAccount: <name> */
+  {
+    const initial = makeConfigV4()
+    const migrated = migrations[5].migrate(initial)
+    const expected = makeConfigV4()
+
+    t.deepEqual(migrated, expected, "selectedAccount: <name> (no change)")
+  }
+
+  /* selectedAccount: <address> */
+  {
+    const initial = makeConfigV4()
+    initial.selectedAccount = initial.accounts[0].address
+    const migrated = migrations[5].migrate(initial)
+
+    const expected = makeConfigV4()
+
+    t.deepEqual(migrated, expected, "selectedAccount: <address> (changes to <name>)")
+  }
+
+  /* selectedAccount: <address> (unhappy path) */
+  {
+    const initial = makeConfigV4()
+    initial.selectedAccount = "aaaaayyyyyeee9SrDaHj8rR9am8S5Cfxtz2fA9qBSF1QEuEL"
+
+    t.throws(
+      () => migrations[5].migrate(initial),
+      /5.*unable to correct selectedAccount/,
+      "selectedAccount: <address> (throws if cannot find <name>)"
+    )
+  }
+
+  t.end()
+})
