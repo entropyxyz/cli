@@ -45,13 +45,14 @@ export function entropyBalanceCommand () {
         cliWrite(balances)
       } else {
         let address = findAccountByAddressOrName(accounts, account)?.address
-        if (!address && isValidSubstrateAddress(account)) {
+        if (!address) {
           // provided account does not exist in the users config
-          address = account
-        } else {
-          // account is either null or not a valid substrate address
-          console.error(`Provided [account=${account}] is not a valid substrate address`)
-          process.exit(1)
+          if (isValidSubstrateAddress(account)) address = account
+          else {
+            // account is either null or not a valid substrate address
+            console.error(`Provided [account=${account}] is not a valid substrate address`)
+            process.exit(1)
+          }
         }
         // Balance for singular account
         const balance = await EntropyBalance.getAnyBalance(substrate, address)
