@@ -24,7 +24,7 @@ export async function selectAndPersistNewAccount (configPath: string, newAccount
   accounts.push(newAccount)
   await config.set(configPath, {
     ...storedConfig,
-    selectedAccount: newAccount.address
+    selectedAccount: newAccount.name
   })
 }
 
