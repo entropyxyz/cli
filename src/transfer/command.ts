@@ -18,7 +18,7 @@ export function entropyTransferCommand () {
       // TODO: destination as <name|address> ?
       const entropy = await loadEntropyCli(opts)
       const transferService = new EntropyTransfer(entropy, opts.endpoint)
-      const { symbol } = await getTokenDetails(entropy)
+      const { symbol } = await getTokenDetails(entropy.substrate)
 
       await transferService.transfer(destination, amount)
 

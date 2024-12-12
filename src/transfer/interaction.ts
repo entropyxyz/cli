@@ -14,7 +14,7 @@ export async function entropyTransfer (entropy, opts: EntropyTuiOptions) {
   transferSpinner.text = SPINNER_TEXT
   if (transferSpinner.isSpinning) transferSpinner.stop()
   try {
-    const { symbol } = await getTokenDetails(entropy)
+    const { symbol } = await getTokenDetails(entropy.substrate)
     const transferService = new EntropyTransfer(entropy, opts.endpoint)
     const { amount, recipientAddress } = await inquirer.prompt(transferInputQuestions)
     if (!transferSpinner.isSpinning) transferSpinner.start()

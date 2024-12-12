@@ -14,9 +14,9 @@ export function entropyBalanceCommand () {
   // view the balances of all accounts
   balanceCommand
     .description('Command to retrieive the balance of an account on the Entropy Network')
-    .argument('[account] <address|name>', [
+    .argument('[account]', [
       'The address an account address whose balance you want to query.',
-      'Can also be the human-readable name of one of your accounts'
+      'Can also be the human-readable name of one of your accounts.'
     ].join(' '))
     .option('-a, --all', 'Get balances for all admin accounts in the config')
     .addOption(configOption())
