@@ -23,7 +23,7 @@ export function entropyTransferCommand () {
       await transferService.transfer(destination, amount)
 
       cliWrite({
-        source: opts.account,
+        source: entropy.keyring.accounts.registration.address,
         destination,
         amount,
         symbol
