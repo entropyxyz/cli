@@ -1,11 +1,14 @@
 #! /usr/bin/env bash
 
 # HACK: normally we could just go:
-#   tape tests/*.test.ts
+#   tape tests/**/*.test.ts
 #
 # but here we are fighting TS ... this works well enough
 
-ONLY_FILES=`grep 'test.only' tests/*.test.ts -l`
+shopt -s globstar
+# required for "globalstar" (**)in bash
+
+ONLY_FILES=`grep 'test.only' tests/**/*.test.ts -l`
 
 if [ $ONLY_FILES ]; then
   # If there are files with test.only, run only those files
@@ -17,7 +20,7 @@ if [ $ONLY_FILES ]; then
 else
   # Otherwise run all tests
   set -e;
-  for t in tests/*.test.ts; do
+  for t in tests/**/*.test.ts; do
     npx tsx $t;
   done
 fi
