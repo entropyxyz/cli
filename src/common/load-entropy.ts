@@ -117,7 +117,7 @@ async function loadEntropy (opts: LoadEntropyOpts): Promise<Entropy> {
   const storedConfig = await opts.config.get()
   if (!storedConfig) throw Error('no config!!') // TEMP: want to see if we hit this!
 
-  let account = resolveAccount(storedConfig, opts.account)
+  let account = resolveAccount(storedConfig, opts.account || storedConfig.selectedAccount)
   const endpoint = resolveEndpoint(storedConfig, opts.endpoint)
   // NOTE: while it would be nice to parse opts --account, --endpoint with Commander
   // the argParser for these Options does not have access to the --config option,

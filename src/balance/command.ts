@@ -14,9 +14,9 @@ export function entropyBalanceCommand () {
   // view the balances of all accounts
   balanceCommand
     .description('Command to retrieive the balance of an account on the Entropy Network')
-    .argument('[account] <address|name>', [
+    .argument('[account]', [
       'The address an account address whose balance you want to query.',
-      'Can also be the human-readable name of one of your accounts'
+      'Can also be the human-readable name of one of your accounts.'
     ].join(' '))
     .option('-a, --all', 'Get balances for all admin accounts in the config')
     .addOption(configOption())
@@ -45,13 +45,14 @@ export function entropyBalanceCommand () {
         cliWrite(balances)
       } else {
         let address = findAccountByAddressOrName(accounts, account)?.address
-        if (!address && isValidSubstrateAddress(account)) {
+        if (!address) {
           // provided account does not exist in the users config
-          address = account
-        } else {
-          // account is either null or not a valid substrate address
-          console.error(`Provided [account=${account}] is not a valid substrate address`)
-          process.exit(1)
+          if (isValidSubstrateAddress(account)) address = account
+          else {
+            // account is either null or not a valid substrate address
+            console.error(`Provided [account=${account}] is not a valid substrate address`)
+            process.exit(1)
+          }
         }
         // Balance for singular account
         const balance = await EntropyBalance.getAnyBalance(substrate, address)

@@ -18,12 +18,12 @@ export function entropyTransferCommand () {
       // TODO: destination as <name|address> ?
       const entropy = await loadEntropyCli(opts)
       const transferService = new EntropyTransfer(entropy, opts.endpoint)
-      const { symbol } = await getTokenDetails(entropy)
+      const { symbol } = await getTokenDetails(entropy.substrate)
 
       await transferService.transfer(destination, amount)
 
       cliWrite({
-        source: opts.account,
+        source: entropy.keyring.accounts.registration.address,
         destination,
         amount,
         symbol
