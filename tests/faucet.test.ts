@@ -13,7 +13,7 @@ async function setupAndFundFaucet (t) {
   const { run, entropy, endpoint } = await setupTest(t, { seed: eveSeed })
 
   const account = new EntropyAccount(entropy, endpoint)
-  const transfer = new EntropyTransfer(entropy, endpoint)
+  const transfer = new EntropyTransfer(endpoint)
   const faucet = new EntropyFaucet(entropy, endpoint)
 
   // Deploy faucet program
@@ -65,7 +65,7 @@ async function setupAndFundFaucet (t) {
   const verifyingKeys = await faucet.getAllFaucetVerifyingKeys(eveAddress)
   // @ts-expect-error
   const { chosenVerifyingKey, faucetAddress } = faucet.getRandomFaucet([], verifyingKeys)
-  await run('Transfer funds to faucet address', transfer.transfer(faucetAddress, "1000"))
+  await run('Transfer funds to faucet address', transfer.transfer(entropy.keyring.accounts.registration.pair, faucetAddress, "1000"))
 
   return { faucetProgramPointer, chosenVerifyingKey, faucetAddress }
 }

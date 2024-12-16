@@ -29,11 +29,11 @@ test('Transfer', async (t) => {
   t.true(charlieBalance > 9e16, 'charlie got bank')
 
   // Do transer
-  const transferService = new EntropyTransfer(charlie, endpoint)
+  const transferService = new EntropyTransfer(endpoint)
   const inputAmount = "1.5"
   await run(
     'transfer',
-    transferService.transfer(naynayAddress, inputAmount)
+    transferService.transfer(charlie.keyring.accounts.registration.pair, naynayAddress, inputAmount)
   )
 
   // Re-Check balance

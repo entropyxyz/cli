@@ -15,10 +15,10 @@ export async function entropyTransfer (entropy, opts: EntropyTuiOptions) {
   if (transferSpinner.isSpinning) transferSpinner.stop()
   try {
     const { symbol } = await getTokenDetails(entropy.substrate)
-    const transferService = new EntropyTransfer(entropy, opts.endpoint)
+    const transferService = new EntropyTransfer(opts.endpoint)
     const { amount, recipientAddress } = await inquirer.prompt(transferInputQuestions)
     if (!transferSpinner.isSpinning) transferSpinner.start()
-    await transferService.transfer(recipientAddress, amount)
+    await transferService.transfer(entropy.keyring.accounts.registration.pair, recipientAddress, amount)
     if (transferSpinner.isSpinning) transferSpinner.stop()
     print('')
     print(`Transaction successful: Sent ${amount} ${symbol} to ${recipientAddress}`)

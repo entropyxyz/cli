@@ -35,7 +35,7 @@ test('Account - list', async t => {
       'test-net': 'wss://testnet.entropy.xyz',
     },
     selectedAccount: account.name,
-    'migration-version': '0'
+    'migration-version': 0
   }
 
   const accountsArray = EntropyAccount.list(config)
@@ -84,9 +84,9 @@ const endpoint = 'ws://127.0.0.1:9944'
 
 async function fundAccount (t, entropy: Entropy) {
   const { entropy: charlie } = await setupTest(t, { seed: charlieStashSeed })
-  const transfer = new EntropyTransfer(charlie, endpoint)
+  const transfer = new EntropyTransfer(endpoint)
 
-  await transfer.transfer(entropy.keyring.accounts.registration.address, "1000")
+  await transfer.transfer(charlie.keyring.accounts.registration.pair, entropy.keyring.accounts.registration.address, "1000")
 }
 
 
