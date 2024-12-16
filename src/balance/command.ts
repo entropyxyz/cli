@@ -1,12 +1,13 @@
 import { Command } from "commander";
 // @ts-expect-error
-import { createSubstrate, isValidSubstrateAddress } from '@entropyxyz/sdk/utils'
+import { isValidSubstrateAddress } from '@entropyxyz/sdk/utils'
 import { EntropyBalance } from "./main";
 import { BalanceInfo } from "./types";
 import { configOption, endpointOption, cliWrite } from "../common/utils-cli";
 import { findAccountByAddressOrName, getTokenDetails, lilBitsToBits, round } from "../common/utils";
 import * as config from "../config";
 import { EntropyConfigAccount } from "src/config/types";
+import { closeSubstrate, getLoadedSubstrate } from "src/common/substrate-utils";
 
 export function entropyBalanceCommand () {
   const balanceCommand = new Command('balance')
@@ -22,8 +23,7 @@ export function entropyBalanceCommand () {
     .addOption(configOption())
     .addOption(endpointOption())
     .action(async (account, opts) => {
-      const substrate = createSubstrate(opts.endpoint)
-      await substrate.isReadyOrError
+      const substrate = await getLoadedSubstrate(opts.endpoint)
       const { decimals, symbol } = await getTokenDetails(substrate)
       const toBits = (lilBits: number) => round(lilBitsToBits(lilBits, decimals))
       const { accounts } = await config.get(opts.config)
@@ -60,8 +60,7 @@ export function entropyBalanceCommand () {
         cliWrite({ account, balance, symbol })
       }
       // closing substrate
-      await substrate.disconnect()
-        .catch(err => console.error('Error closing connection', err.message))
+      await closeSubstrate(substrate)
       process.exit(0)
     })
 

@@ -1,28 +1,27 @@
 import test from 'tape'
-
-import { setupTest, charlieStashAddress as richAddress, promiseRunner, DEFAULT_ENDPOINT, eveAddress } from './testing-utils'
-import { EntropyBalance } from '../src/balance/main'
-import { EntropyAccount } from '../src/account/main'
-// @ts-expect-error
 import { createSubstrate } from '@entropyxyz/sdk/utils'
 
-test('getBalance + getBalances', async (t) => {
-  const { run, entropy, endpoint } = await setupTest(t)
-  const balanceService = new EntropyBalance(entropy, endpoint)
-  const newAddress = entropy.keyring.accounts.registration.address
-  const substrate = createSubstrate(endpoint)
-  await run('substrate ready', substrate.isReadyOrError)
+import { EntropyBalance } from '../src/balance/main'
+import { EntropyAccount } from '../src/account/main'
+import { closeSubstrate } from '../src/common/substrate-utils'
 
-  /* getBalance */
+import { charlieStashAddress as richAddress, promiseRunner, DEFAULT_ENDPOINT, eveAddress } from './testing-utils'
+
+test('getAnyBalance + getBalances', async (t) => {
+  const run = promiseRunner(t)
+  // create new account, not saved in config
+  const { address: newAddress } = await EntropyAccount.create({ name: 'TestAnyBalance1' })
+  const substrate = createSubstrate(DEFAULT_ENDPOINT)
+  await run('substrate ready', substrate.isReadyOrError)
   const newAddressBalance = await run(
-    'getBalance (newSeed)',
-    balanceService.getBalance(newAddress)
+    'getAnyBalance (newAccount)',
+    EntropyBalance.getAnyBalance(substrate, newAddress)
   )
   t.equal(newAddressBalance, 0, 'newSeed balance = 0')
 
   const richAddressBalance = await run(
     'getBalance (richAddress)',
-    balanceService.getBalance(richAddress)
+    EntropyBalance.getAnyBalance(substrate, richAddress)
   )
   t.true(richAddressBalance > BigInt(10e10), 'richAddress balance >>> 0')
 
@@ -50,39 +49,11 @@ test('getBalance + getBalances', async (t) => {
     const match = balancesWithNoGoodAddress.find(info => info.address === addr)
     t.true(!!match.error, `error field is populated for ${addr}`)
   })
-  await run('close substrate', substrate.disconnect().catch(err => console.error('Error closing connection', err.message)))
+  await run('close substrate', closeSubstrate(substrate))
 
   // TODO:
   // - test getBalances with 1 good address, 1 bung seed
 
-  t.end()
-})
-
-test('getAnyBalance: new account', async (t) => {
-  const run = promiseRunner(t)
-  // create new account, not saved in config
-  const newAccount = await EntropyAccount.create({ name: 'TestAnyBalance1' })
-  const substrate = createSubstrate(DEFAULT_ENDPOINT)
-  await run('substrate ready', substrate.isReadyOrError)
-  const balance = await run(
-    'getAnyBalance (newAccount)',
-    EntropyBalance.getAnyBalance(substrate, newAccount.address)
-  )
-  t.equal(balance, 0, 'newSeed balance = 0')
-  await run('close substrate', substrate.disconnect().catch(err => console.error('Error closing connection', err.message)))
-  t.end()
-})
-
-test('getAnyBalance: test account', async (t) => {
-  const run = promiseRunner(t)
-  const substrate = createSubstrate(DEFAULT_ENDPOINT)
-  await run('substrate ready', substrate.isReadyOrError)
-  const balance = await run(
-    'getAnyBalance (eve account)',
-    EntropyBalance.getAnyBalance(substrate, eveAddress)
-  )
-  t.true(balance > BigInt(10e10), 'richAddress balance >>> 0')
-  await run('close substrate', substrate.disconnect().catch(err => console.error('Error closing connection', err.message)))
   t.end()
 })
 
