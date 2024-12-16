@@ -42,6 +42,7 @@ Version header format: `[version] Name - year-month-day (entropy-core compatibil
 - Shared
   - updated return data displayed to user on account creation (create or import) [#311](https://github.com/entropyxyz/cli/pull/311)
   - Balance now displays the number of BITS to the nearest 4 decimal places [#306](https://github.com/entropyxyz/cli/pull/306)
+  - removed use of entropy instance from transfer flow [#329](https://github.com/entropyxyz/cli/pull/329)
 
 - CLI
   - updated balance command to take in any address, and be able to return the balance for the inputted address [#315](https://github.com/entropyxyz/cli/pull/315)
