@@ -24,13 +24,14 @@ export function entropyBalanceCommand () {
     .addOption(endpointOption())
     .action(async (account, opts) => {
       const substrate = await getLoadedSubstrate(opts.endpoint)
+      const BalanceService = new EntropyBalance(substrate, opts.endpoint)
       const { decimals, symbol } = await getTokenDetails(substrate)
       const toBits = (lilBits: number) => round(lilBitsToBits(lilBits, decimals))
       const { accounts } = await config.get(opts.config)
       if (opts.all) {
         // Balances for all admin accounts
         const addresses: string[] = accounts.map((acct: EntropyConfigAccount) => acct.address)
-        const balances = await EntropyBalance.getBalances(substrate, addresses)
+        const balances = await BalanceService.getBalances(addresses)
           .then((infos: BalanceInfo[]) => {
             return infos.map(info => {
               return {
@@ -55,7 +56,7 @@ export function entropyBalanceCommand () {
           }
         }
         // Balance for singular account
-        const balance = await EntropyBalance.getAnyBalance(substrate, address)
+        const balance = await BalanceService.getAnyBalance(address)
           .then(toBits)
         cliWrite({ account, balance, symbol })
       }

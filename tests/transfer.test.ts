@@ -20,24 +20,25 @@ test('Transfer', async (t) => {
   // setuptest still needed to run here to start up wasm and get the config ready
   const { run, endpoint }= await setupTest(t, { seed: charlieStashSeed })
   const substrate = await run('load substrate', getLoadedSubstrate(endpoint))
+  const transferService = new EntropyTransfer(endpoint)
+  const BalanceService = new EntropyBalance(substrate, endpoint)
   
   const naynayAddress = naynay.address
   const charlieKeyring = new Keyring({ seed: charlieStashSeed, path: '', debug: true })
   // Check initial balances
   let naynayBalance = await run(
     'getBalance (naynay)',
-    EntropyBalance.getAnyBalance(substrate, naynayAddress)
+    BalanceService.getAnyBalance(naynayAddress)
   )
   t.equal(naynayBalance, 0, 'naynay is broke')
 
   let charlieBalance = await run(
     'getBalance (charlieStash)',
-    EntropyBalance.getAnyBalance(substrate, charlieStashAddress)
+    BalanceService.getAnyBalance(charlieStashAddress)
   )
   t.true(charlieBalance > 9e16, 'charlie got bank')
 
   // Do transer
-  const transferService = new EntropyTransfer(endpoint)
   const inputAmount = "1.5"
   await run(
     'transfer',
@@ -47,7 +48,7 @@ test('Transfer', async (t) => {
   // Re-Check balance
   naynayBalance = await run(
     'getBalance (naynay)',
-    EntropyBalance.getAnyBalance(substrate, naynayAddress)
+    BalanceService.getAnyBalance(naynayAddress)
   )
   const expected = Number(inputAmount) * lilBitsPerBits(DEFAULT_TOKEN_DECIMALS)
   t.equal(naynayBalance, expected, 'naynay is rolling in it!')

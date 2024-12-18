@@ -72,9 +72,10 @@ export class EntropyFaucet extends EntropyBase {
     }: SendMoneyParams
   ): Promise<any> {
     const programService = new EntropyProgram(this.entropy, this.endpoint)
+    const BalanceService = new EntropyBalance(this.entropy.substrate, this.endpoint)
 
     // check balance of faucet address
-    const balance = await EntropyBalance.getAnyBalance(this.entropy.substrate, faucetAddress)
+    const balance = await BalanceService.getAnyBalance(faucetAddress)
     if (balance <= 0) throw new Error('FundsError: Faucet Account does not have funds')
 
     // check verifying key has ONLY the exact program installed
