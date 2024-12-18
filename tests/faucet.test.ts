@@ -77,8 +77,9 @@ test('Faucet Tests: Successfully send funds and register', async t => {
   const naynayAddress = naynay.keyring.accounts.registration.address
 
   const faucet = new EntropyFaucet(naynay, endpoint)
+  const BalanceService = new EntropyBalance(naynay.substrate, endpoint)
 
-  let naynayBalance = await EntropyBalance.getAnyBalance(naynay.substrate, naynayAddress)
+  let naynayBalance = await BalanceService.getAnyBalance(naynayAddress)
   t.equal(naynayBalance, 0, 'Naynay is broke af')
 
   // 2 BITS
@@ -95,7 +96,7 @@ test('Faucet Tests: Successfully send funds and register', async t => {
   )
   t.ok(transferStatus.isFinalized, 'Transfer is good')
 
-  naynayBalance = await EntropyBalance.getAnyBalance(naynay.substrate, naynayAddress)
+  naynayBalance = await BalanceService.getAnyBalance(naynayAddress)
   t.equal(naynayBalance, amount, 'Naynay is drippin in faucet tokens')
 
   // Test if user can register after receiving funds

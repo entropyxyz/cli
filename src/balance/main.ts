@@ -1,20 +1,24 @@
 import * as BalanceUtils from "./utils"
 import { BalanceInfo } from "./types"
+import { EntropySubstrateBase } from "src/common/entropy-substrate-base"
 
-export class EntropyBalance {
-  constructor () {}
+const FLOW_CONTEXT = 'ENTROPY-BALANCE'
+export class EntropyBalance extends EntropySubstrateBase {
+  constructor (substrate, endpoint) {
+    super({ substrate, endpoint, flowContext: FLOW_CONTEXT })
+  }
 
-  static async getAnyBalance (substrate, address: string) {
-    const accountInfo = (await substrate.query.system.account(address)) as any
+  async getAnyBalance (address: string) {
+    const accountInfo = (await this.substrate.query.system.account(address)) as any
     const balance = parseInt(BalanceUtils.hexToBigInt(accountInfo.data.free).toString())
 
     return balance
   }
 
-  static async getBalances (substrate, addresses: string[]): Promise<BalanceInfo[]> {
+  async getBalances (addresses: string[]): Promise<BalanceInfo[]> {
     return Promise.all(
       addresses.map(async address => {
-        return EntropyBalance.getAnyBalance(substrate, address)
+        return this.getAnyBalance(address)
           .then((balance: number) => {
             return { address, balance }
           })
