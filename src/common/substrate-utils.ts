@@ -8,7 +8,11 @@ export async function getLoadedSubstrate (endpoint: string) {
 }
 
 export async function closeSubstrate (substrate: any) {
-  // closing substrate
-  return await substrate.disconnect()
-    .catch(err => console.error('Error closing connection', err.message))
+  try {
+    // closing substrate
+    await substrate.disconnect()
+  } catch (error) {
+    console.error('SubstrateError: Error closing connection', error)
+    throw error
+  }
 }

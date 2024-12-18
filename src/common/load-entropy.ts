@@ -211,7 +211,7 @@ async function setupRegistrationSubAccount (account: EntropyConfigAccount, confi
 }
 
 const keyringCache = {}
-async function loadKeyring (account: EntropyConfigAccount) {
+export async function loadKeyring (account: EntropyConfigAccount) {
   const { address } =  account.data.admin || {}
   if (!address) throw new Error('Cannot load keyring, no admin address')
 

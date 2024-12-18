@@ -32,7 +32,7 @@ export async function persistVerifyingKeyToAccount (configPath: string, verifyin
   const storedConfig = await config.get(configPath)
   const { accounts } = storedConfig
 
-  const account = findAccountByAddressOrName(accounts, accountNameOrAddress || storedConfig.selectedAccount)
+  const account = findAccountByAddressOrName(accounts, accountNameOrAddress)
   if (!account) throw Error(`Unable to persist verifyingKey "${verifyingKey}" to unknown account "${accountNameOrAddress}"`)
 
   // persist to config, set selectedAccount

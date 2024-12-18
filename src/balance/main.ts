@@ -4,7 +4,7 @@ import { EntropySubstrateBase } from "src/common/entropy-substrate-base"
 
 const FLOW_CONTEXT = 'ENTROPY-BALANCE'
 export class EntropyBalance extends EntropySubstrateBase {
-  constructor (substrate, endpoint) {
+  constructor (substrate: any, endpoint: string) {
     super({ substrate, endpoint, flowContext: FLOW_CONTEXT })
   }
 
