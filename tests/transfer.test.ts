@@ -20,7 +20,7 @@ test('Transfer', async (t) => {
   // setuptest still needed to run here to start up wasm and get the config ready
   const { run, endpoint }= await setupTest(t, { seed: charlieStashSeed })
   const substrate = await run('load substrate', getLoadedSubstrate(endpoint))
-  const transferService = new EntropyTransfer(endpoint)
+  const transferService = new EntropyTransfer(substrate, endpoint)
   const BalanceService = new EntropyBalance(substrate, endpoint)
   
   const naynayAddress = naynay.address

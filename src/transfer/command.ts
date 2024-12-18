@@ -22,7 +22,7 @@ export function entropyTransferCommand () {
       const substrate = await getLoadedSubstrate(opts.endpoint)
       const account = findAccountByAddressOrName(accounts, opts.account || selectedAccount)
       const loadedKeyring = await loadKeyring(account)
-      const transferService = new EntropyTransfer(opts.endpoint)
+      const transferService = new EntropyTransfer(substrate, opts.endpoint)
       const { symbol } = await getTokenDetails(substrate)
 
       await transferService.transfer(loadedKeyring.accounts.registration.pair, destination, amount)

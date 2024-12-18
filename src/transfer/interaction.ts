@@ -21,7 +21,7 @@ export async function entropyTransfer (opts: EntropyTuiOptions, storedConfig: En
     const currentAccount = findAccountByAddressOrName(storedConfig.accounts, opts.account || storedConfig.selectedAccount)
     const loadedKeyring = await loadKeyring(currentAccount)
     const { symbol } = await getTokenDetails(substrate)
-    const transferService = new EntropyTransfer(opts.endpoint)
+    const transferService = new EntropyTransfer(substrate, opts.endpoint)
     const { amount, recipientAddress } = await inquirer.prompt(transferInputQuestions)
     if (!transferSpinner.isSpinning) transferSpinner.start()
     await transferService.transfer(loadedKeyring.accounts.registration.pair, recipientAddress, amount)

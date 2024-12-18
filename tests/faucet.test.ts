@@ -13,7 +13,7 @@ async function setupAndFundFaucet (t) {
   const { run, entropy, endpoint } = await setupTest(t, { seed: eveSeed })
 
   const account = new EntropyAccount(entropy, endpoint)
-  const transfer = new EntropyTransfer(endpoint)
+  const transfer = new EntropyTransfer(entropy.substrate, endpoint)
   const faucet = new EntropyFaucet(entropy, endpoint)
 
   // Deploy faucet program
