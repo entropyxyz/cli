@@ -6,33 +6,30 @@ import { EntropyBalance } from '../src/balance/main'
 import { promiseRunner, setupTest } from './testing-utils'
 import { charlieStashAddress, charlieStashSeed, DEFAULT_TOKEN_DECIMALS } from './testing-utils/constants.mjs'
 
-const endpoint = 'ws://127.0.0.1:9944'
-
 test('Transfer', async (t) => {
   /* Setup */
-  const run = promiseRunner(t)
-
-  const { entropy: charlie }= await setupTest(t, { seed: charlieStashSeed })
+  const { run, entropy: charlie, endpoint }= await setupTest(t, { seed: charlieStashSeed })
   const { entropy: naynay } = await setupTest(t)
+
+  const transferService = new EntropyTransfer(charlie, endpoint)
+  const BalanceService = new EntropyBalance(charlie.substrate, endpoint)
 
   const naynayAddress = naynay.keyring.accounts.registration.address
 
   // Check initial balances
-  const balanceService = new EntropyBalance(naynay, endpoint)
   let naynayBalance = await run(
     'getBalance (naynay)',
-    balanceService.getBalance(naynayAddress)
+    BalanceService.getAnyBalance(naynayAddress)
   )
   t.equal(naynayBalance, 0, 'naynay is broke')
 
   let charlieBalance = await run(
     'getBalance (charlieStash)',
-    balanceService.getBalance(charlieStashAddress)
+    BalanceService.getAnyBalance(charlieStashAddress)
   )
   t.true(charlieBalance > 9e16, 'charlie got bank')
 
   // Do transer
-  const transferService = new EntropyTransfer(charlie, endpoint)
   const inputAmount = "1.5"
   await run(
     'transfer',
@@ -42,7 +39,7 @@ test('Transfer', async (t) => {
   // Re-Check balance
   naynayBalance = await run(
     'getBalance (naynay)',
-    balanceService.getBalance(naynayAddress)
+    BalanceService.getAnyBalance(naynayAddress)
   )
   const expected = Number(inputAmount) * lilBitsPerBits(DEFAULT_TOKEN_DECIMALS)
   t.equal(naynayBalance, expected, 'naynay is rolling in it!')

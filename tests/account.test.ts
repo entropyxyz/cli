@@ -35,7 +35,7 @@ test('Account - list', async t => {
       'test-net': 'wss://testnet.entropy.xyz',
     },
     selectedAccount: account.name,
-    'migration-version': '0'
+    'migration-version': 0
   }
 
   const accountsArray = EntropyAccount.list(config)

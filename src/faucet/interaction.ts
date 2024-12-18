@@ -26,12 +26,12 @@ export async function entropyFaucet (entropy: Entropy, opts: EntropyTuiOptions, 
     throw new Error("Keys are undefined")
   }
 
-  const { decimals } = await getTokenDetails(entropy)
+  const { decimals } = await getTokenDetails(entropy.substrate)
   const amount = bitsToLilBits(2, decimals)
   const faucetService = new EntropyFaucet(entropy, opts.endpoint)
   const verifyingKeys = await faucetService.getAllFaucetVerifyingKeys()
-  // @ts-expect-error
-  return sendMoneyFromRandomFaucet(entropy, options.endpoint, verifyingKeys, amount.toString(), logger)
+  // @ts-expect-error verifyingKeys
+  return sendMoneyFromRandomFaucet(entropy, opts.endpoint, verifyingKeys, amount.toString(), logger)
 }
 
 // Method that takes in the initial list of verifying keys (to avoid multiple calls to the rpc) and recursively retries each faucet until
@@ -41,7 +41,7 @@ async function sendMoneyFromRandomFaucet (entropy: Entropy, endpoint: string, ve
     faucetSpinner.start()
   }
   const faucetService = new EntropyFaucet(entropy, endpoint)
-  const { decimals, symbol } = await getTokenDetails(entropy)
+  const { decimals, symbol } = await getTokenDetails(entropy.substrate)
   const selectedAccountAddress = entropy.keyring.accounts.registration.address
   let chosenVerifyingKey: string
   try {
