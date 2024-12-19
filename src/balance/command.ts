@@ -1,13 +1,13 @@
 import { Command } from "commander";
-import Entropy from "@entropyxyz/sdk";
-
+// @ts-expect-error
+import { isValidSubstrateAddress } from '@entropyxyz/sdk/utils'
 import { EntropyBalance } from "./main";
 import { BalanceInfo } from "./types";
 import { configOption, endpointOption, cliWrite } from "../common/utils-cli";
 import { findAccountByAddressOrName, getTokenDetails, lilBitsToBits, round } from "../common/utils";
-import { loadEntropyCli } from "../common/load-entropy"
 import * as config from "../config";
 import { EntropyConfigAccount } from "src/config/types";
+import { closeSubstrate, getLoadedSubstrate } from "src/common/substrate-utils";
 
 export function entropyBalanceCommand () {
   const balanceCommand = new Command('balance')
@@ -15,34 +15,23 @@ export function entropyBalanceCommand () {
   // view the balances of all accounts
   balanceCommand
     .description('Command to retrieive the balance of an account on the Entropy Network')
-    .argument('[account] <address|name>', [
+    .argument('[account]', [
       'The address an account address whose balance you want to query.',
-      'Can also be the human-readable name of one of your accounts'
+      'Can also be the human-readable name of one of your accounts.'
     ].join(' '))
     .option('-a, --all', 'Get balances for all admin accounts in the config')
     .addOption(configOption())
     .addOption(endpointOption())
     .action(async (account, opts) => {
+      const substrate = await getLoadedSubstrate(opts.endpoint)
+      const BalanceService = new EntropyBalance(substrate, opts.endpoint)
+      const { decimals, symbol } = await getTokenDetails(substrate)
+      const toBits = (lilBits: number) => round(lilBitsToBits(lilBits, decimals))
       const { accounts } = await config.get(opts.config)
-
-      let entropy: Entropy
-      if (!account && opts.all) {
-        const tempAddress = accounts[0].address
-        entropy = await loadEntropyCli({ account: tempAddress, ...opts })
-      } else if (account && !opts.all) {
-        entropy = await loadEntropyCli({ account, ...opts })
-      } else {
-        return balanceCommand.help()
-      }
-
-      const balanceService = new EntropyBalance(entropy, opts.endpoint)
-      const { decimals, symbol } = await getTokenDetails(entropy)
-      const toBits = (nanoBits: number) => round(lilBitsToBits(nanoBits, decimals))
-
       if (opts.all) {
         // Balances for all admin accounts
         const addresses: string[] = accounts.map((acct: EntropyConfigAccount) => acct.address)
-        const balances = await balanceService.getBalances(addresses)
+        const balances = await BalanceService.getBalances(addresses)
           .then((infos: BalanceInfo[]) => {
             return infos.map(info => {
               return {
@@ -56,13 +45,23 @@ export function entropyBalanceCommand () {
           })
         cliWrite(balances)
       } else {
+        let address = findAccountByAddressOrName(accounts, account)?.address
+        if (!address) {
+          // provided account does not exist in the users config
+          if (isValidSubstrateAddress(account)) address = account
+          else {
+            // account is either null or not a valid substrate address
+            console.error(`Provided [account=${account}] is not a valid substrate address`)
+            process.exit(1)
+          }
+        }
         // Balance for singular account
-        const address = findAccountByAddressOrName(accounts, account)?.address
-        const balance = await balanceService.getBalance(address)
+        const balance = await BalanceService.getAnyBalance(address)
           .then(toBits)
         cliWrite({ account, balance, symbol })
       }
-
+      // closing substrate
+      await closeSubstrate(substrate)
       process.exit(0)
     })
 

@@ -155,12 +155,12 @@ async function main (entropy: Entropy, choices: string[], opts: EntropyTuiOption
       break
     }
     case 'Balance': {
-      await entropyBalance(entropy, opts, storedConfig)
+      await entropyBalance(opts, storedConfig)
         .catch(err => console.error('There was an error retrieving balance', err))
       break
     }
     case 'Transfer': {
-      await entropyTransfer(entropy, opts)
+      await entropyTransfer(opts, storedConfig)
         .catch(err => console.error('There was an error sending the transfer', err))
       break
     }

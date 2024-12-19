@@ -34,7 +34,7 @@ export class EntropyFaucet extends EntropyBase {
         // status would still be set, but in the case of error we can shortcut
         // to just check it (so an error would indicate InBlock or Finalized)
         if (dispatchError) {
-          const error = formatDispatchError(this.entropy, dispatchError)
+          const error = formatDispatchError(this.entropy.substrate, dispatchError)
           return reject(error)
         }
         if (status.isFinalized) resolve(status)
@@ -71,11 +71,11 @@ export class EntropyFaucet extends EntropyBase {
       faucetProgramPointer = FAUCET_PROGRAM_POINTER
     }: SendMoneyParams
   ): Promise<any> {
-    const balanceService = new EntropyBalance(this.entropy, this.endpoint)
     const programService = new EntropyProgram(this.entropy, this.endpoint)
+    const BalanceService = new EntropyBalance(this.entropy.substrate, this.endpoint)
 
     // check balance of faucet address
-    const balance = await balanceService.getBalance(faucetAddress)
+    const balance = await BalanceService.getAnyBalance(faucetAddress)
     if (balance <= 0) throw new Error('FundsError: Faucet Account does not have funds')
 
     // check verifying key has ONLY the exact program installed

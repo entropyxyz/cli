@@ -28,7 +28,7 @@ export async function selectAndPersistNewAccount (configPath: string, newAccount
   })
 }
 
-export async function persistVerifyingKeyToAccount (configPath: string, verifyingKey: string, accountNameOrAddress: string) {
+export async function persistVerifyingKeyToAccount (configPath: string, verifyingKey: string, accountNameOrAddress?: string) {
   const storedConfig = await config.get(configPath)
   const { accounts } = storedConfig
 

@@ -1,4 +1,3 @@
-import { Entropy } from '@entropyxyz/sdk'
 import { Buffer } from 'node:buffer'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
@@ -111,11 +110,11 @@ export function absolutePath (somePath: string) {
   }
 }
 
-export function formatDispatchError (entropy: Entropy, dispatchError) {
+export function formatDispatchError (substrate: any, dispatchError) {
   let msg: string
   if (dispatchError.isModule) {
     // for module errors, we have the section indexed, lookup
-    const decoded = entropy.substrate.registry.findMetaError(
+    const decoded = substrate.registry.findMetaError(
       dispatchError.asModule
     )
     const { docs, name, section } = decoded
@@ -147,9 +146,9 @@ export async function jumpStartNetwork (entropy, endpoint): Promise<any> {
 
 // caching details to reduce number of calls made to the rpc endpoint
 let tokenDetails: TokenDetails
-export async function getTokenDetails (entropy): Promise<TokenDetails> {
+export async function getTokenDetails (substrate): Promise<TokenDetails> {
   if (tokenDetails) return tokenDetails
-  const chainProperties = await entropy.substrate.rpc.system.properties()
+  const chainProperties = await substrate.rpc.system.properties()
   const decimals = chainProperties.tokenDecimals.toHuman()[0]
   const symbol = chainProperties.tokenSymbol.toHuman()[0]
   tokenDetails = { decimals: parseInt(decimals), symbol }

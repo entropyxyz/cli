@@ -2,8 +2,10 @@ import { Command } from "commander"
 
 import { EntropyTransfer } from "./main"
 import { accountOption, configOption, endpointOption, cliWrite } from "../common/utils-cli"
-import { loadEntropyCli } from "../common/load-entropy"
-import { getTokenDetails } from "../common/utils"
+import { loadKeyring } from "../common/load-entropy"
+import { findAccountByAddressOrName, getTokenDetails } from "../common/utils"
+import * as config from "../config";
+import { closeSubstrate, getLoadedSubstrate } from "src/common/substrate-utils"
 
 export function entropyTransferCommand () {
   const transferCommand = new Command('transfer')
@@ -16,18 +18,22 @@ export function entropyTransferCommand () {
     .addOption(endpointOption())
     .action(async (destination, amount, opts) => {
       // TODO: destination as <name|address> ?
-      const entropy = await loadEntropyCli(opts)
-      const transferService = new EntropyTransfer(entropy, opts.endpoint)
-      const { symbol } = await getTokenDetails(entropy)
+      const { accounts, selectedAccount } = await config.get(opts.config)
+      const substrate = await getLoadedSubstrate(opts.endpoint)
+      const account = findAccountByAddressOrName(accounts, opts.account || selectedAccount)
+      const loadedKeyring = await loadKeyring(account)
+      const transferService = new EntropyTransfer(substrate, opts.endpoint)
+      const { symbol } = await getTokenDetails(substrate)
 
-      await transferService.transfer(destination, amount)
+      await transferService.transfer(loadedKeyring.accounts.registration.pair, destination, amount)
 
       cliWrite({
-        source: opts.account,
+        source: loadedKeyring.accounts.registration.address,
         destination,
         amount,
         symbol
       })
+      await closeSubstrate(substrate)
       process.exit(0)
     })
   return transferCommand

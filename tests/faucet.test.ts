@@ -13,7 +13,7 @@ async function setupAndFundFaucet (t) {
   const { run, entropy, endpoint } = await setupTest(t, { seed: eveSeed })
 
   const account = new EntropyAccount(entropy, endpoint)
-  const transfer = new EntropyTransfer(entropy, endpoint)
+  const transfer = new EntropyTransfer(entropy.substrate, endpoint)
   const faucet = new EntropyFaucet(entropy, endpoint)
 
   // Deploy faucet program
@@ -65,7 +65,7 @@ async function setupAndFundFaucet (t) {
   const verifyingKeys = await faucet.getAllFaucetVerifyingKeys(eveAddress)
   // @ts-expect-error
   const { chosenVerifyingKey, faucetAddress } = faucet.getRandomFaucet([], verifyingKeys)
-  await run('Transfer funds to faucet address', transfer.transfer(faucetAddress, "1000"))
+  await run('Transfer funds to faucet address', transfer.transfer(entropy.keyring.accounts.registration.pair, faucetAddress, "1000"))
 
   return { faucetProgramPointer, chosenVerifyingKey, faucetAddress }
 }
@@ -77,9 +77,9 @@ test('Faucet Tests: Successfully send funds and register', async t => {
   const naynayAddress = naynay.keyring.accounts.registration.address
 
   const faucet = new EntropyFaucet(naynay, endpoint)
-  const balance = new EntropyBalance(naynay, endpoint)
+  const BalanceService = new EntropyBalance(naynay.substrate, endpoint)
 
-  let naynayBalance = await balance.getBalance(naynayAddress)
+  let naynayBalance = await BalanceService.getAnyBalance(naynayAddress)
   t.equal(naynayBalance, 0, 'Naynay is broke af')
 
   // 2 BITS
@@ -96,7 +96,7 @@ test('Faucet Tests: Successfully send funds and register', async t => {
   )
   t.ok(transferStatus.isFinalized, 'Transfer is good')
 
-  naynayBalance = await balance.getBalance(naynayAddress)
+  naynayBalance = await BalanceService.getAnyBalance(naynayAddress)
   t.equal(naynayBalance, amount, 'Naynay is drippin in faucet tokens')
 
   // Test if user can register after receiving funds
@@ -106,7 +106,6 @@ test('Faucet Tests: Successfully send funds and register', async t => {
 
   const fullAccount = naynay.keyring.getAccount()
   t.equal(verifyingKey, fullAccount?.registration?.verifyingKeys?.[0], 'verifying key matches key added to registration account')
-
   t.end()
 })
 
