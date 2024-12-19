@@ -1,21 +1,30 @@
 import test from 'tape'
+import { randomAsHex } from '@polkadot/util-crypto'
+import Keyring from '@entropyxyz/sdk/keys';
 
-import { lilBitsPerBits } from "../src/common/utils";
-import { EntropyTransfer } from '../src/transfer/main'
+import { EntropyAccount } from '../src/account/main'
 import { EntropyBalance } from '../src/balance/main'
-import { promiseRunner, setupTest } from './testing-utils'
+import { closeSubstrate, getLoadedSubstrate } from '../src/common/substrate-utils'
+import { lilBitsPerBits } from "../src/common/utils"
+import { EntropyTransfer } from '../src/transfer/main'
+
+import { setupTest } from './testing-utils'
 import { charlieStashAddress, charlieStashSeed, DEFAULT_TOKEN_DECIMALS } from './testing-utils/constants.mjs'
 
 test('Transfer', async (t) => {
   /* Setup */
-  const { run, entropy: charlie, endpoint }= await setupTest(t, { seed: charlieStashSeed })
-  const { entropy: naynay } = await setupTest(t)
+  const testAccountSeed = randomAsHex(32)
+  const testAccountName = 'Test Account'
+  const naynay = await EntropyAccount.import({ name: testAccountName, seed: testAccountSeed })
 
-  const transferService = new EntropyTransfer(charlie, endpoint)
-  const BalanceService = new EntropyBalance(charlie.substrate, endpoint)
-
-  const naynayAddress = naynay.keyring.accounts.registration.address
-
+  // setuptest still needed to run here to start up wasm and get the config ready
+  const { run, endpoint }= await setupTest(t, { seed: charlieStashSeed })
+  const substrate = await run('load substrate', getLoadedSubstrate(endpoint))
+  const transferService = new EntropyTransfer(substrate, endpoint)
+  const BalanceService = new EntropyBalance(substrate, endpoint)
+  
+  const naynayAddress = naynay.address
+  const charlieKeyring = new Keyring({ seed: charlieStashSeed, path: '', debug: true })
   // Check initial balances
   let naynayBalance = await run(
     'getBalance (naynay)',
@@ -33,7 +42,7 @@ test('Transfer', async (t) => {
   const inputAmount = "1.5"
   await run(
     'transfer',
-    transferService.transfer(naynayAddress, inputAmount)
+    transferService.transfer(charlieKeyring.accounts.registration.pair, naynayAddress, inputAmount)
   )
 
   // Re-Check balance
@@ -43,6 +52,6 @@ test('Transfer', async (t) => {
   )
   const expected = Number(inputAmount) * lilBitsPerBits(DEFAULT_TOKEN_DECIMALS)
   t.equal(naynayBalance, expected, 'naynay is rolling in it!')
-
+  await run('closeSubstrate', closeSubstrate(substrate))
   t.end()
 })

@@ -1,4 +1,3 @@
-import { Entropy } from '@entropyxyz/sdk'
 import { Buffer } from 'node:buffer'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
@@ -111,11 +110,11 @@ export function absolutePath (somePath: string) {
   }
 }
 
-export function formatDispatchError (entropy: Entropy, dispatchError) {
+export function formatDispatchError (substrate: any, dispatchError) {
   let msg: string
   if (dispatchError.isModule) {
     // for module errors, we have the section indexed, lookup
-    const decoded = entropy.substrate.registry.findMetaError(
+    const decoded = substrate.registry.findMetaError(
       dispatchError.asModule
     )
     const { docs, name, section } = decoded
